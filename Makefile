@@ -158,5 +158,9 @@ c++11-sure: clean
 	if which mpicxx; then	cd mpi-examples && $(MAKE); fi
 	$(MAKE) CPLUSPLUS="g++ --std=c++11" sure
 
-
-
+# don't bother with MPI or Java tests on Travis
+travis-test: build 
+	cd examples && $(MAKE) NOGUI=1
+	cd test && $(MAKE)
+	cd test/c++11 && $(MAKE)
+	sh runtests g++ `ls test/00/*.sh|grep -v t0002a|grep -v t0003a|grep -v t0041a|grep -v t0051a`
