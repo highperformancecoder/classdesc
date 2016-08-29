@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2008 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Graph serialisation</TITLE>
+<META NAME="description" CONTENT="Graph serialisation">
+<META NAME="keywords" CONTENT="classdesc">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2008">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="classdesc.css">
+
+<LINK REL="next" HREF="node13.html">
+<LINK REL="previous" HREF="node11.html">
+<LINK REL="up" HREF="node10.html">
+<LINK REL="next" HREF="node13.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html290"
+  HREF="node13.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html284"
+  HREF="node10.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html278"
+  HREF="node11.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html286"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/share/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html288"
+  HREF="node49.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/share/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html291"
+  HREF="node13.html">Ref</A>
+<B> Up:</B> <A NAME="tex2html285"
+  HREF="node10.html">pack/unpack</A>
+<B> Previous:</B> <A NAME="tex2html279"
+  HREF="node11.html">Pointers</A>
+ &nbsp; <B>  <A NAME="tex2html287"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html289"
+  HREF="node49.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00032000000000000000">
+Graph serialisation</A>
+</H2>
+
+<P>
+Dynamic references can be serialised, provided a few properties are
+known about the data structure they make up. There is no way of
+knowing whether standard pointer actually points to a real object, nor
+how many. However, since collections of objects are more conveniently
+handled by standard containers, and since no object can pointed to by
+the value 0 (or NULL), we can determine these things if the programmer
+follows a protocol whereby a pointer either references at a single
+object, or is NULL. Using a smart pointer additionally enforces this
+protocol. We call this the treenode or graphnode protocol, depending
+on whether the referenced data structure has cycles or not.
+
+<P>
+By default, packing a pointer raises an exception. However, this
+behavior is changed either by specifying a given type obeys the
+treenode or graphnode protocol using the <TT>treenode</TT>
+pragma<A NAME="221"></A> or <TT>graphnode</TT> pragma<A NAME="223"></A>
+respectively. Alternatively, the <code>pack_t::ptr_flag</code> can be set to
+the values <code>TREE</code> or <code>GRAPH</code> respectively.
+
+<P>
+What happens in this case, is that special graph serialisation
+algorithms defined in <code>pack_graph.h</code> are called that ensure graph
+objects are serialised or deserialised correctly. For deserialisation,
+new objects must be created to store the node contents. References to
+these objects are placed in the <code>alloced</code><A NAME="224"></A> member
+of the <code>pack_t</code> buffer object. These newly created objects are
+destroyed when the buffer object is destroyed, unless a copy of the
+<code>alloced</code> vector is made first. Conversely, the objects can be
+destroyed without destroying the buffer by clearing the alloced
+vector. Individual objects can be destroyed by simply erasing them
+(assuming you know which ones!).
+
+<P>
+The <code>pack_graph</code> algorithm can also be applied to smart pointers
+or other reference types. An example is the <code>ref</code> smart pointer
+provided with Classdesc. For your smart pointer class T, you will need to provide an <code>Alloc&lt;T&gt;</code>
+class with an <code>operator()(pack_t* buf, T&amp; x)</code> that returns a
+newly allocated object referenced by x. The <code>buf</code> object is there
+if you wish to use the alloced mechanism.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html290"
+  HREF="node13.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html284"
+  HREF="node10.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html278"
+  HREF="node11.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html286"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/share/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html288"
+  HREF="node49.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/share/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html291"
+  HREF="node13.html">Ref</A>
+<B> Up:</B> <A NAME="tex2html285"
+  HREF="node10.html">pack/unpack</A>
+<B> Previous:</B> <A NAME="tex2html279"
+  HREF="node11.html">Pointers</A>
+ &nbsp; <B>  <A NAME="tex2html287"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html289"
+  HREF="node49.html">Index</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+Russell Standish
+2013-06-18
+</ADDRESS>
+</BODY>
+</HTML>

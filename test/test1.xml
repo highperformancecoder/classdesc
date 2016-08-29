@@ -1,0 +1,11 @@
+<?xml version="1.1"?>
+<foo>
+  <bar>1</bar>
+  <doo attr="3"/>
+  <dar attr = '1'>foo&amp;&lt; &gt;&quot;&apos;</dar>
+  <array>
+    <elem>1</elem>
+    <elem>2</elem>
+    <elem>3</elem>
+  </array>
+</foo>

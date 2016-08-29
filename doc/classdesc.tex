@@ -1,0 +1,1392 @@
+\documentclass{article}
+\usepackage{pstricks,pst-node,html,epsf,makeidx}
+%\documentstyle[pstricks,pst-node,epsf,makeidx]{article}
+
+%\newcommand{\htmladdnormallink}[2]{#1}
+%\newcommand{\htmladdnormallinkfoot}[2]{#1\footnote{#2}}
+\providecommand{\hyperref}[4]{#1#2\ref{#4}#3}
+
+\title{Classdesc Documentation}
+\author{Russell K. Standish}
+
+\newcommand{\EcoLab}{{\sffamily\slshape
+    \mbox{\raisebox{.5ex}{Eco}\hspace{-.4em}{\makebox[.5em]{L}ab}}}}
+
+\newcommand{\psection}[1]{\section{#1}}
+\newcommand{\psubsection}[1]{\subsection{#1}}
+
+\usepackage{makeidx}
+\makeindex
+
+\begin{document}
+\maketitle
+\tableofcontents
+\input{classdesc-common}
+
+\psection{Objective-C $\leftrightarrow$ C++ interface}
+
+{\em This section is left in for historical interest, but is no longer
+  supported.} 
+
+\psubsection{Introduction}
+
+Swarm is one of the better-known agent based modelling systems. Swarm
+consists of a simulation engine built in Objective-C
+\cite{johnson:_swarm_user_guide,larkin93:_objec_orien_progr_objec_c,
+98:_objec_c_languag_rhaps_devel_docum,92:_gcc,02:_insid_mac_os_x} that
+takes a set of objects called a {\em Swarm}, and a schedule of actions to
+perform on them. Swarm defines interfaces that the objects need to
+adhere to (called {\em protocols} in Objective-C) in order for the
+simulation engine to interface to the Swarms. Finally, it provides a
+suite of visualisation tools or instruments that can be attached to
+running swarms to observe their behaviours. Swarm programs are
+hierarchical and the codes are object-oriented. The first beta version of
+Swarm was released in 1995 and was written in Objective-C. In 1999, a
+Java layer was introduced (release 2.0 onwards). A {\em COM} interface was
+proposed \cite{daniels00:_swarm_com} which would allow objects written
+in arbitrary OO languages to be interfaced to swarm, but only
+partially implemented before funding ran out.
+
+We take the view here that users may have implemented a model in C++,
+either because they like the features of that language, or for
+performance reasons, but desire to transplant the model into Swarm to
+take advantage of tools provided on  that platform. The GNU CC
+compiler supports linking of C++, Obj C and plain C code into the same
+binary, however objects created in C++ and Objective cannot be shared
+between the two environments because of incompatible conventions about
+how objects are laid out in memory. 
+
+The strategy described here is for users to declare C++ a class,
+derived from a an object class that handles the implicit isa pointer
+in Objective C objects. Classdesc is used to create a program
+generator, that outputs an Objective C definition of the C++ object,
+and then we let Objective C's runtime system instantiate the
+object. The Objective C definition also includes wrapper methods that
+call the real C++ implemented methods of the object. Instance
+variables are available in both OO environments, although C++'s
+privacy declarations are ignored.
+
+\psubsection{C++ model $\leftrightarrow$ Objective-C design strategies}
+
+\subsubsection{Objective-C basics}
+
+\begin{figure}
+\epsfbox{fig1.eps}
+\caption{Objective-C object structure}
+\label{fig1}
+\end{figure}
+
+In Objective-C, objects are identified by a distinct data type id
+which is a pointer to the object. Every object carries an \verb+isa+
+instance variable which points to the object's {\em class} --- what
+kind of object it is. The \verb+objc_class+ structure stores the
+object's type description. Most objects are derived from the root
+class object called \verb+Object+ --- it makes objects behave as
+Objective-C objects and enable them to cooperate with the run-time
+system. A {\em message} is sent to an object to get it to perform useful
+work (to apply a method). In Objective-C, {\em message expressions} are
+enclosed in square brackets (see Figure \ref{fig2}). The receiver is an object,
+and the message tells it what to do. In source code, the message is
+simply the name of a method and any arguments that are passed to it.
+
+In Objective-C, messages are not bound to method implementations until
+run-time. The message function does everything necessary for dynamic
+binding. It first finds the procedure from the given message of
+particular receiver, then calls its procedure, passing it the
+receiving object and the arguments, and finally, returns a value.
+
+\begin{figure}
+\begin{center}
+{\em compiler converts to\\
+function call}\\
+$\underbrace[\mathit{a message}]{\mathtt{[receiver select arg1
+      \ldots]}} \rightarrow \mathtt{objc msgSend(receiver,selector,arg1,\ldots)}$\end{center}
+\caption{Typical Objective-C message}
+\label{fig2}
+\end{figure}
+
+\subsubsection{File conventions used}
+
+For an object to be used in both the C++ and the Objective-C
+environment: 
+\begin{itemize}
+\item The .h file extension is reserved for the C++ header file
+and .mh file extension is used for the Objective-C header file.  
+\item The
+.o file extension is reserved for the compiled C++ object file and the
+.mo file is used for the compiled Objective-C object file.  
+\item The .cd
+file is the Classdesc output Class Description file from the given
+object .h file. This file is used for the compilation of Objective-C
+translator (see Section \ref{sec2.6}).
+\end{itemize}
+
+\begin{figure}
+\begin{tabular}{|l|l|l|}
+\hline
+File name \& extension & Purpose & Remarks\\\hline
+myobj.h & C++ header file & User model\\
+myobj.cc & C++ object implementation file & User model\\
+myobj.mh & ObjC object header & Interface file 1\\
+myobj.m & ObjC object implementation & Interface file 2\\
+myobjExportCpp.cc & ObjC program calls C++ objects& Interface file 3\\
+myObjExportObjc.m & C++ program calls ObjC/Swarm objects & Interface file 4\\
+myobj.mo & Compiled ObjC object & ObjC object file\\
+myobj.o & Compiled C++ object & C++ object file\\
+myobj.cd & Classdesc description file & Classdesc output \\\hline
+\end{tabular}
+\caption{File conventions used}\label{fig3}
+\end{figure}
+
+\subsubsection{Objects creation in the C++ and Objective-C environments}
+
+Figure \ref{fig4} shows an example of a C++ model and Figure
+\ref{fig5} shows the equivalent Objective-C object template. Since
+Objective-C and C++ programs are both run in the same memory space,
+only one copy of the object is created and shared between both
+environments.
+
+In our implementation, shared Objective-C/C++ objects are instantiated
+in the Objective-C environment (since all the objects in Objective-C
+environment must be inherited from the Objective-C base class for them
+to behave as Objective-C objects) and are accessed in the C++
+environment using the objects' C++ class templates (the Objective-C
+objects' pointers are passed to the C++ environment for typecasting).
+
+\begin{figure}
+\begin{verbatim}
+#include <stdarg.h>
+#include "ObjCsupport.h"            // ObjC supports
+#include "vector"
+
+class myCounter: public objc_obj {  // need to be derived from ObjC class
+   public:
+      char   sName[20];
+      int    iaX[2][4];
+      . . .
+
+   public:
+      int    sum3_x1(int x1, double x2, double x3); // std parameter passing
+      double sumN_x1(double x1, objc_t& buf);       // using va_list
+      int prtVec(vector<int> v);  // c++ only method - no ObjC translation
+      int cpp_prtVec();           // C++ only method due to "cpp_" sub-string
+};
+\end{verbatim}
+\caption{An example of a user C++ model (myCounter.h)}\label{fig4}
+\end{figure}
+
+\begin{figure}
+\begin{verbatim}
+#import <objc/Object.h>
+
+@interface myCounter : Object
+{  @public
+      char sName[20];
+      int iaX[2][4];
+      . . .
+}
+- init;
+- (double) sum3_x1: (double) x1 x2: (double) x2 x3: (double) x3;
+- (double) sumN_x1: (double) x1, ...;
+@end
+\end{verbatim}
+\caption{An equivalent Objective-C object template (myCounter.mh)}
+\label{fig5}
+\end{figure}
+
+\subsubsection{Parameter passing between C++ and Objective-C methods}
+
+Two methods of parameter passing are supported: the standard method
+and parameter passing using the Standard-C {\em stdarg} mechanism
+\cite{kernighan88:_c}. The second method supports an arbitrary number
+of arguments to be passed to C++ method. Figure \ref{fig6} shows the two
+supported parameter-passing methods and examples. Figure \ref{fig7} shows the
+implementation details of the required interfacing functions to
+support these two types of parameter passing.
+
+To aid users in extracting arbitrary number of arguments from the
+\verb+va_list+ structure (through the use of Standard-C
+\verb+va_start+, \verb+va_arg+ and \verb+va_end+ macros), a supporting
+C++ class called \verb+objc_t+ and its corresponding ``\verb+>>+''
+overloaded output stream operator have been implemented and stored in
+the in the supporting file \verb+ObjCsupport.h+. An example of the
+usage is shown in Figure \ref{fig6} in the user C++ implementation of
+the \verb+sumN_x1+ member method (in this case, to sum a list of three
+real numbers).
+
+\begin{figure}
+\begin{description}
+\item[Standard parameter passing method:]\mbox{}\\
+\begin{description}
+\item[C++ method :]     \verb+double sum2_x1(double x1, double x2);+
+\item[Objective-C:]     \verb+- (double) sum3_x1: (double) x1 x2: (double) x2;+
+\end{description}
+
+\item[Parameter passing using {\tt va\_list}:]\mbox{}\\
+\begin{description}
+\item[C++ method :]     \verb+double sumN_x1(double x1, objc_t& buf);+
+\item[Objective-C:]     \verb+- (double) sumN_x1: (double) x1, ...;+
+\end{description}
+
+\item[Example of Objective-C calls in user main program (main.m):]\mbox{}\\
+\begin{verbatim}
+   double dx = [myObj sumN_x1: 1.1, 2.2, 3.3];
+\end{verbatim}
+
+\item[Example of user method implementation in C++ (myCounter.cc):]\mbox{}\\
+\begin{verbatim}
+   double sumN_x1(double x1, objc_t& buf)
+   { double x2, x3 ; buf >> x2 >> x3, return x1 + x2 + x3; }
+\end{verbatim}
+\end{description}
+\caption{Supported parameter passing methods and examples.}
+\label{fig6}
+\end{figure}
+
+\begin{figure}
+\begin{description}
+\item[Objective-C interface functions generated (stored in .m file) :]\mbox{}\\
+\begin{verbatim}
+double cpp_myCounter_sum2_x1(myCounter * obj, double x1 , double x2);
+- (double) sum2_x1: (double) x1 x2: (double) x2 
+{ return cpp_myCounter_sum2_x1(self, x1, x2); }
+
+double cpp_myCounter_sumN_x1(myCounter * obj, double x1, va_list * ap);
+- (double) sumN_x1: (double) x1, ...
+{ double rtnvalue;  va_list ap;  va_start(ap, x1);
+  rtnvalue = cpp_myCounter_sumN_x1(self, x1, &ap);
+  va_end(ap);
+  return rtnvalue; }
+\end{verbatim}
+
+\item[C++ interface functions generated (stored in ExportCpp.cc
+  file):]\mbox{}\\
+\begin{verbatim}
+extern "C"
+double cpp_myCounter_sum2_x1(myCounter * obj, double x1 , double x2)
+{ return obj->sum2_x1(x1, x2); }
+
+extern "C"
+double cpp_myCounter_sumN_x1(myCounter * obj, double x1, va_list * ap)
+{ objc_t buffer;  buffer.ap = ap;  return obj->sumN_x1(x1, buffer); }
+\end{verbatim}
+\end{description}
+\caption{Supporting interfacing functions needed.}
+\label{fig7}
+\end{figure}
+
+
+Figure \ref{fig8} shows the algorithm used to translate a C++ function
+prototype to its Objective-C equivalent. The translation of the C++
+function argument string to Objective-C equivalent is defined in the
+\verb+writeobjc+ action in the Classdesc's Objective-C base action definition
+file \verb+writeobjc_base.h+.
+
+\begin{figure}
+\begin{verbatim}
+Given C++ function prototype :
+       Cpp-return-type   function-name   Cpp-argument-list
+Output Objective-C equivalent:
+       ObjC-return-type  function-name   ObjC-argument-list
+
+construct ObjC-return-type + function name
+IF C++-only function
+   no-function-translation
+ELSE IF (#arg==2 & arg2-type==objc_t&)
+   construct va_list-type-ObjC-argument-list
+ELSE
+   FOR arg1 to argn
+      construct standard ObjC-type-argument-list
+\end{verbatim}
+\caption{C++ $\leftrightarrow$ Objective-C function prototype
+translation algorithm}\label{fig8}
+\end{figure}
+
+To support the use of C++ only member-methods in the user model,
+following member functions will not be translated to its
+Objective-C equivalent: argument-list contains any C++ objects (such
+as vector) or function-name that contain ``\verb+cpp_+'' prefix.
+
+\subsubsection{Classdesc modification to parse a user supplied C++ model}
+
+Classdesc is used to generate an action definition \verb+write_objc+
+that is a program generator outputting the
+Objective C definitions representing the C++ object. Classdesc takes a
+flag \verb+-objc+ to enable the right sort of output. The An
+example of the Classdesc output is shown in Figure \ref{fig9}.
+
+\begin{figure}
+\small
+\begin{verbatim}
+#include "writeobjc_base.h"
+inline void writeobjc(writeobjc_t* targ, string desc,class myCounter& arg)
+{
+writeobjc(targ,desc+"",(objc_obj&)arg);
+writeobjc(targ,desc+".sName",is_array(),arg.sName[0],"[20]");
+. . .
+writeobjc(targ,desc+".sum2_x1",arg,&myCounter::sum2_x1, "double", "double x1, double x2");
+writeobjc(targ,desc+".sumN_x1",arg,&myCounter::sumN_x1, "double", "double x1 , objc_t & buf");
+}
+\end{verbatim}
+\caption{An example of Classdesc output}
+\label{fig9}
+\end{figure}
+
+The output from the Classdesc is stored in the \verb+.cd+ file, which
+consists mostly of \verb+writeobjc+ statements (or actions). These overloaded
+writeobjc statements will recursive descend the class definition
+performing the {\em ``translation"} operation on each primitive data type
+making-up the class. The definitions of \verb+writeobjc+ actions on all
+primitive data type, including member function type, are defined in
+the \verb+writeobjc_base.h+ file (Classdesc base action definition file).
+
+\subsubsection{The construction of an Objective-C translator}
+\label{sec2.6}
+
+Given the output of a Classdesc class definition file (\verb+.cd+
+file), the purpose of a translator is to auto-generate an equivalent
+Objective-C object template and all the necessary Objective-C to C++
+interfacing functions. To construct a translator, we need the following
+files: the output file from the Classdesc (eg. \verb+myCounter.cd+
+file), translator main program file (Figure \ref{fig10}), a user C++
+model (eg. \verb+myCounter.h+ and \verb+myCounter.cc+ files), and the
+Classdesc base-action definition file (\verb+writeobjc_base.h+).
+
+During the compilation of an Objective-C translator, the class name
+is passed to the translator by a preprocessor macro, set on the
+compiler command line (eg: \verb+-DCNAME=myCounter+) to enable the
+translator to include appropriate \verb+.h+ and \verb+.cd+ files. When the
+compilation completed, a translator called \verb+write_objc+ is created. When
+this translator is executed, it will create an equivalent Objective-C
+object template and all the necessary interfacing functions.
+
+\begin{figure}
+\begin{verbatim}
+#define WRITE_OBJC(classname) \
+writeobjc_headers(&targ, (string) STRING(classname)); \
+writeobjc(&targ, (string) STRING(classname), arg);\
+writeobjc_tail(&targ)
+
+#include "writeobjc_base.h"
+#include FILE_NAME(CNAME,.h)
+#include FILE_NAME(CNAME,.cd)
+int main()
+{  writeobjc_t targ;
+   CNAME arg;
+   WRITE_OBJC(CNAME);
+   return 0;
+}
+\end{verbatim}
+\caption{Translator main program ({\tt write\_objc.cc})}
+\label{fig10}
+\end{figure}
+
+During the execution of the translator, it creates an instance of the
+user model (or object) and recursively calls the writeobjc action on
+all its member variables and functions for Objective-C
+translation. When the translator finishes its execution, three
+interface files are created: the Objective-C object definition file
+(eg. \verb+myCounter.mh+), the Objective-C object implementation file
+(eg. \verb+myCounter.m+) and the Objective-C calls to C++ methods
+interface file (\verb+myCounterExportCpp.cc+ file). Since
+\verb+writeobjc+ is recursive, it is only necessary to perform this
+process once, on a top level C++ class.
+
+\subsubsection{Four steps for C++ model $\leftrightarrow$ Objective-C
+  application generation} 
+
+Given a C++ model, we need to go through the four steps of
+transformation (as shown in Figure \ref{fig11}) in order to generate a final
+application that will run under both the C++ and Objective-C
+environments. Figure \ref{fig12} shows the details of the steps involved for
+final user application generation. Since this can be managed
+automatically via the make process, this complexity is not visible to
+the programmer.
+
+\begin{figure}
+\begin{enumerate}
+\item Parse C++ model using Classdesc
+\item Create a translator
+\item Auto-generate interface files
+\item Generate final application
+\end{enumerate}
+\caption{Four step for C++ $\leftrightarrow$ Objective-C application generation}
+\label{fig11}
+\end{figure}
+
+\begin{figure}
+\epsfbox{fig12.eps}
+\caption{C++ $\leftrightarrow$ Objective-C application generation flow diagram}
+\label{fig12}
+\end{figure}
+
+\subsubsection{Modification to the Swarm run-time environment}
+
+The Swarm run-time environment (see Figure \ref{fig13}) needs to be
+changed (stored in \verb+~/$(SWARMHOME)/etc/swarm/+
+%$ 
+sub-directory) to support both the C++ and Objective-C environments.
+
+\begin{figure}
+\begin{description}
+\item[Specify a C++ compiler to use in {\tt
+    \~{}/\$(SWARMHOME)/etc/swarm/Makefile.common} file]\mbox{}\\[-5ex] 
+\begin{verbatim}
+CPP=/usr/local/gcc2/bin/g++
+\end{verbatim}
+\item[Add .m.mo and .cc.o rules in
+  {\tt\~{}/\$(SWARMHOME)/etc/swarm/Makefile.rule} file:]\mbox{}\\[-5ex]
+\begin{verbatim}
+.SUFFIXES: .o .m .mo .mh .cd .cc .xm
+.m.mo:   $(OBJC) -c -o $@ $(OBJCFLAGS) $(CPPFLAGS) $(DLLCPPFLAGS) \
+     $(EXTRACPPFLAGS)  $(SWARMINCLUDES) $<
+.cc.o:     $(CPP) -g -c $(OPTFLAGS)  $<
+\end{verbatim}
+%$
+
+\item[Specify the use of C++ for linking in Makefile.appl]\mbox{}\\[-5ex]
+\begin{verbatim}
+$(APPEXE): $(OBJECTS)
+       $(SHELL) $(bindir)/libtool-swarm --mode link $(CPP) $(CFLAGS) $(LDFLAGS) -
+\end{verbatim}
+\end{description}
+\caption{Swarm environment modification}
+\label{fig13}
+\end{figure}
+
+\subsubsection{C++ $\leftrightarrow$ Objective-C execution results:
+  myCounter example} 
+
+Figure \ref{fig14} shows the \verb+Makefile+ of the {\em myCounter} example and
+Figure \ref{fig15} shows the execution trace of this Makefile and the execution
+results of the {\em myCounter} example.
+
+\begin{figure}
+\begin{verbatim}
+.h.cd: classdesc -objc writeobjc < $< > $@
+.h.mh: $(CPP) -g -c myCounter.cc
+       $(CPP) -g -DCNAME=myCounter -o write_objc $(CPPOBJ) $(OBJC_TRANSLATOR)
+       write_objc
+.m.mo: $(CC) -c -o $@ -Wno-import $(CFLAGS) $<
+.m.o:  $(CC) -c -Wno-import $(CFLAGS) $<
+.cc.o: $(CPP) -g -c $(OPTFLAGS)  $<
+LIBS = -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/2.95/ \
+       -L/usr/local/lib/libstdc++.so -lgcc -lobjc
+
+OBJC_cd=myCounter.cd
+OBJC_mh=myCounter.mh
+CPPOBJ=myCounter.o
+INTERFACE_OBJ= myCounterExportCpp.o
+OBJC_TRANSLATOR=write_objc.cc
+OBJCOBJ=main.o myCounter.mo
+OBJ=$(OBJCOBJ) $(CPPOBJ) $(INTERFACE_OBJ)
+appl: $(OBJC_cd) $(OBJC_mh) $(OBJ)
+      $(CPP) $(CFLAGS) -o main $(OBJ) $(LIBS)
+
+main.o: main.m
+myCounter.cd: myCounter.h
+myCounter.mo: myCounter.mh myCounter.m
+myCounter.o: myCounter.h myCounter.cc
+myCounterExportCpp.o: myCounter.h myCounterExportCpp.cc
+myCounter.mh: myCounter.h myCounter.cc
+
+clean:
+        rm -f *.o *.mo *.*~ *~ main *.cd *,D
+        rm myCounterExportCpp.cc write_objc myCounter.mh myCounter.m
+...
+\end{verbatim}
+%$
+\caption{Makefile for {\em myCounter} example}
+\label{fig14}
+\end{figure}
+
+\begin{figure}
+\begin{verbatim}
+$ make clean
+$ make                                                                  ? Step 1
+classdesc -objc writeobjc < myCounter.h > myCounter.cd
+/usr/local/gcc2/bin/g++ -g -c myCounter.cc                      ? Step 2
+/usr/local/gcc2/bin/g++ -g -DCNAME=myCounter -o write_objc myCounter.o write_objc.cc
+write_objc
+
+C++ to ObjC parsing ...                                         ? Step 3
+Starts parsing C++ class to ObjC ...
+Translating array: "sName[20]" - Translating simple data type: "sName" of-type "char"
+. . .
+Translating function: double  sumN_x1(double x1 , objc_t & buf )
+. . .
+End translation.
+
+gcc -c -Wno-import -g main.m                                            ? Step 4
+gcc -c -o myCounter.mo -Wno-import -g myCounter.m
+g++ -g -c myCounterExportCpp.cc
+g++ -g -o main main.o myCounter.mo myCounter.o myCounterExportCpp.o 
+    -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/2.95/
+    -L/usr/local/lib/libstdc++.so -lgcc -lobjc
+
+$ main                                                                  ? myCounter example
+C++ -> ObjC interface testing:
+MyCounter C++ Object: byte=<68> ObjName=<c1> dVal=<5.5> iInc=<3>
+                      iaX[2][4]=<10 11 12 13 20 21 22 23 >
+MyCounter C++ Object: byte=<68> ObjName=<c1> dVal=<8.5> iInc=<3>
+                      iaX[2][4]=<10 11 12 13 20 21 22 23 >
+Parameter passing using va_list:   Sum = 16.500000
+Normal ObjC parameter passing:     Sum = 16.500000
+End testing.
+$
+\end{verbatim}
+\caption{{\em myCounter} sample execution trace}
+\label{fig15}
+\end{figure}
+
+%%4.0   Objective-C ? C++ approach: Heatbugs example
+%%
+%%The goal is to make the agent-part of the Heatbugs (the Heatbug's step method) run under C++ and leaving the rest to run under the Swarm environment. Currently, Classdesc will not parse the Objective-C code; therefore, we need to manually create an equivalent C++ class template for the Heatbug object (see Figure 16).
+%%
+%%Heatbug Objective-C definition
+%%Heatbug C++ class template
+%%@interface Heatbug: SwarmObject
+%%{ @public
+%%
+%%     double     unhappiness;
+%%     int        x, y;
+%%     HeatValue  idealTemperature;     
+%%     HeatValue  outputHeat;
+%%     float      randomMoveProbability;
+%%     id <Grid2d> world;
+%%     int        worldXSize, worldYSize;
+%%     HeatSpace  *heat;
+%%     Color      bugColor;
+%%}
+%%- step;
+%%. . .
+%%@end
+%%class Heatbug
+%%{ public: public objc_obj
+%%    unsigned   zbits;  // fr Swarmobj
+%%    double     unhappiness;
+%%    int        x, y;
+%%    HeatValue  idealTemperature;
+%%    HeatValue  outputHeat;
+%%    float      randomMoveProbability;
+%%    id         world;
+%%    int        worldXSize, worldYSize;
+%%    id         heat;
+%%    Color      bugColor;
+%%
+%%  public:
+%%    void step();
+%%};
+%%Figure 16    Heatbug objective-C definition and its equivalent C++ template
+%%
+%%Our approach is to use the techniques that we have developed in previous section for the modification. Firstly, we need to create a C++ Heatbug class template and its implementation file (Heatbug.h and Heatbug.cc). The C++ Heatbug class will contain one member method called step (which contain most of modified Objective-C Heatbug step source code). Also noted that the Objective-C Heatbug object definition uses four user define types: HeatValue, Color, HeatExtremeType, and maxHeat. Therefore, we also need to type-define them in our C++ class template (Figure 17). The other needed classes are id and objc_obj, which have already been defined in the ObjCsupport.h file. The additional member variable that we needed to include in the Heatbug C++ class template is zbits. This zbits member variable is used by the Swarm environment for memory zone allocation (the Objective-C Heatbug object inherited it from the SwarmObject object and the SwarmObject inherited it form the Object_s object).
+%%
+%%typedef int             HeatValue;
+%%typedef unsigned char   Color;
+%%typedef enum {cold,hot} HeatExtremeType;
+%%extern  const HeatValue maxHeat;
+%%Figure 17   Heatbug related user define type for C++
+%%
+%%Next, the C++ Heatbug class needs to export the C++ step method for the Objective-C step method to call. The exported C++ step method is stored in HeatbugExportCpp.cc interface file as shown in Figure 18.
+%%
+%%Since the Objective-C Heatbug step method uses additional Swarm objects (a total of 11 member methods from four different Swarm objects as shown in Figure 19). We also need to export these Objective-C methods to C++ environment (these Objective-C exported functions are stored in HeatbugExportObjC.m interfacing file). An example of a C++ calls to the Swarm's member method is shown in Figure 20 (in this case, a C++ objc_getHeat interface function calls to the getHeat member-method of Swarm's HeatSpace object).
+%%
+%%Objective-C step method (Heatbug.m) :
+%%   void cpp_Heatbug_step(Heatbug * obj);
+%%   - step
+%%   { cpp_Heatbug_step(self);  return self; }
+%%
+%%C++ export function (HeatbugExportCpp.cc) :
+%%   extern "C" void cpp_Heatbug_step(Heatbug * obj)
+%%   { obj->step(); }
+%%Figure 18   Heatbug Objective-C step method modification and interfacing function.
+%%
+%%Swarm Object       Calls C++ calls Swarm methods (7 methods)
+%%------------------ ----- ----------------------------------------
+%%SwarmObject              Heatbug object derived from this object
+%%Raster                   GUI part of Heatbug - not modified
+%%Pixmap                   GUI part of Heatbug - not modified
+%%
+%%UniformIntegerDist   3   [uniformIntRand getIntWithMin: withMax:]
+%%UniformDoubleDist    1   [uniformDblRand getIntWithMin: withMax:]
+%%Grid2d               1   [world getObjectAtX: Y:]
+%%                     2   [world putObject: atX: Y:]
+%%Diffuse2d            1   [heat getValueAtX: Y:]
+%%                     1   [heat findExtremeType: X: Y:]
+%%                     2   [heat addHeat: X: Y:]
+%%Figure 19   Heatbug step method uses four swarm objects that needed to be translated to C++.
+%%
+%%Original Objective-C call:
+%%   int heatHere = [heat getValueAtX: x Y: y]
+%%
+%%C++ modification:
+%%   int heatHere = objc_getHeat(heat,x,y);
+%%
+%%Example of Objective-C export function (HeatbugExportObjC.m):
+%%   extern int objc_getHeat(void * heatobj, int px, int py)
+%%   { return [(HeatSpace *) heatobj getValueAtX: px Y: py]; }
+%%Figure 20   C++ calls to Swarm-objec member method interfacing.
+%%
+%%Finally, we need to modify the Heatbugs Makefile (Figure 21) to make it compiles both the C++ and Objective-C source codes. Figure 22 shows the execution trace of this Makefile and the execution results of the modified Heatbugs sample.
+%%
+%%...
+%%CPPOBJ= Heatbug.o
+%%OBJCOBJ=Heatbug.mo HeatSpace.o main.o \
+%%    HeatbugModelSwarm.o HeatbugObserverSwarm.o \
+%%    HeatbugBatchSwarm.o HeatbugExportObjc.o
+%%OBJECTS=$(OBJCOBJ) $(CPPOBJ)
+%%...
+%%main.o: main.m Heatbug.mh HeatSpace.h \
+%%    HeatbugObserverSwarm.h HeatbugBatchSwarm.h
+%%Heatbug.mo: Heatbug.m Heatbug.mh
+%%Heatbug.o: Heatbug.cc Heatbug.h
+%%...
+%%HeatbugExportObjc.o: HeatbugExportObjc.m
+%%Figure 21   Heatbug Makefile modification.
+%%
+%%$ make                   ? Heatbugs Makfile execution trace
+%%-c -o Heatbug.mo -g -O2 -Wall ....
+%%gcc -c -g -O2 -Wall -Wno-import ....
+%%...
+%%g++ -g -c Heatbug.cc
+%%~swarm-2.1.1/bin/libtool-swarm --mode link ....
+%%g++ -g -O2 -o heatbugs Heatbug.mo ....
+%%...
+%%creating heatbugs
+%%$
+%%
+%%$ heatbugs               ? run both in C++ and Objective-C/Swarm environments
+%%T=1 Hb1 at (60,65) feels cold moves to (60,66)
+%%T=1 Hb2 at (39,40) feels cold moves to (40,40)
+%%T=1 Hb3 at (30,7) feels cold moves to (30,6)
+%%...
+%%$
+%%Figure 22   Modified Heatbugs run in both C++ and Objective-C environments.
+%%
+%%5.0   Summary
+%%
+%%In this document, we have demonstrated the use of Classdesc class description technology to parse a user written C++ model and output a class description definitions (save in a .cd file). We then use  this .cd file to construct an Objective-C translator. When this translator is executed, it will auto-generate an equivalent Objective-C template and all the necessary interface functions so that the user C++ model can both be run under the C++ and Objective-C/Swarm environments. In addition, we also developped a methodology of modifying an existing Swarm application to make part of it run under the C++ environment. This will provide the users the capability of coding their models using C++ language while still able to utilise all the software tools available in the Swarm environment. To facilitate the Swarm and C++ integration, we still need to create a C++ layer (C++ Swarm-object class templates and member methods interfacing) for all the existing Swarm objects.
+%%
+%%Classdesc is currently an open source project, and latest version is available from the UNSW HPC1 web site. You can also register as a developer by emailing R.Standish@unsw.edu.au. This will allow you to access the code as it is being developed, and submit your own code for changes. The project is managed by Peter Miller's Aegis2 code management system, which allows multiple developers to work independently on the code.
+%%
+%%
+%%Reference:
+%%
+%%Swarm User Guide, by Swarm Development Group, by Paul Johnson and Alex Lancaster, Published 10 April 2000.
+%%Objective-Oriented Programming and the Objective-C Language, Next Developer's Library, by Don Larkin and Greg Wilson, 1993-1995 Next Software, Inc.
+%%The Objective-C Language, Rhapsody Developer Documentation, Chapter 2, Feb 1998, Apple Computer, Inc.
+%%GCC 3.1 Objective-C source-codes and Objective-C 4.0 Language Implementation module source codes, GCC 3.1, (C) 1992-2002 Free Software Foundation, Inc.
+%%Inside Mac OS X: The Objective-C Programming Language, May 2002, Apple Computer, Inc.
+%%A system for reflection in C++, Madina, D. and Standish, R.K., in Proceedings AUUG 2001: Always on and everywhere, 207. ISBN 0957753225.
+%%Ecolab 4, Standish, R.K., in Applied Complexity: From Neural Networks to Managed Landscapes, Halloy, S. and Williams, T. (eds), (New Zealand Institute for Crop and Food Research, Christchurch), 156-163, 2000.
+%%Diversity Evolution, Standish, R.K., in Artificial Life VIII (2002), Standish, RK, Bedau, MA and Abbass, HA (eds) (Cambridge, MA: MIT Press), 131-137.
+%%The C programming language, Brian W. Kernighan and Dennis M. Ritchie, Second Edition, Pg 155, © 1988 by Bell laboratories, Incorporated, Prentice Hall Software.
+%%Swarm and COM, Marcus Daniels, Integration workshop at the GIS/EM4 Conference on September 02, 2000.
+%%
+%%1.0   Quick Start
+%%
+%%
+%%1.1   Required software
+%%
+%%Classdesc v1. D7
+%%- download from the [http://parallel.hpc.unsw.edu.au/getaegisdist.cgi/getdeltas/classdesc.1] web site.
+%%
+%%Swarm-2.1.1
+%%- download from the [http://www.swarm.org/release.html] web site.
+%%- You may also download the Swarm application package for testing.
+%%
+%%GNU compiler package v2.95
+%%- download from the [http://gcc.gnu.org/releases.html] web site.
+%%
+%%
+%%1.2   GNU GCC v2.95 installation
+%%
+%%GNU software packages:
+%%- gcc-2.95.3.tar.gz and libstdc++-2.90.8.tar.gz.
+%%- to be installed in ~/usr/gcc2/ user directory 
+%%$ cd
+%%$ gunzip -c gcc-2.95.3.tar.gz | tar xvf -
+%%
+%%$ cd gcc-2.95.3
+%%$ gunzip -c ../libstdc++-2.90.8.tar.gz | tar xvf -
+%%$ ./config --prefix=$HOME/usr/gcc2            ? install in new directory
+%%$ make bootstrap
+%%$ make install
+%%
+%%
+%%1.3   Swarm 2.1.1 installation
+%%
+%%Follows the Swarm's installation guide to install the Swarm simulation system onto your Linux system. Basic steps to compile Swarm system software are as follows:
+%%
+%%$ tar -zxvf swarm-2.1.1.tar.gz
+%%$ cd  swarm-2.1.1
+%%$ ./configure --with-defaultdir=/usr/local --prefix ~/swarm-2.1.1
+%%$ make
+%%$ make install
+%%
+%%1.4   Swarm 2.1.1 environment modification
+%%
+%%Specify a C++ compiler to use in ~/$(SWARMHOME)/etc/swarm/Makefile.common
+%%
+%%CPP=/usr/local/gcc2/bin/g++
+%%
+%%Add .m.mo and .cc.o rules to ~/$(SWARMHOME)/etc/swarm/Makefile.rule
+%%
+%%.SUFFIXES: .o .m .mo .mh .cd .cc .xm
+%%.m.mo:   $(OBJC) -c -o $@ $(OBJCFLAGS) $(CPPFLAGS) $(DLLCPPFLAGS)
+%%                          $(EXTRACPPFLAGS) $(SWARMINCLUDES) $<
+%%.cc.o:     $(CPP) -g -c $(OPTFLAGS)  $<
+%%
+%%Specify using the C++ for final linking in ~/$(SWARMHOME)/etc/swarm/Makefile.appl
+%%
+%%$(APPEXE): $(OBJECTS)
+%%   $(SHELL) $(bindir)/libtool-swarm --mode link $(CPP) $(CFLAGS)
+%%            $(LDFLAGS) -o $@ $(OBJECTS) $(APPLIBS) $(SWARMLIBS)
+%%            $(OBJCLIBS) $(EXTRALIBS)
+%%
+%%1.5   Classdesc software installation
+%%
+%%Download the latest Classdesc software package at UNSW HPCSU web-site:
+%%http://parallel.hpc.unsw.edu.au/getaegisdist.cgi/getdeltas/classdesc.1
+%%Then, unpack the tar-ball file (eg. classdesc.1.D7.tar.gz) to your Linux working directory.
+%%$ tar -zxvf classdesc.1.D7.tar.gz
+%%
+%%Then, change your current directory to the Classdesc sub-directory and do a clean compile on the Classdesc program and install it on your system.
+%%$ cd ~/classdesc.1.D7
+%%$ make clean
+%%$ make
+%%$ make install
+%%
+%%To run the C++?objective-C example (myCounter), change directory to the objc-examples sub-directory, and make a clean compilation on the myCounter example. After a successful compilation, an executable file called "main" is created.
+%%
+%%$ cd ~/ classdesc.1.D7/objc-examples
+%%$ make clean
+%%$ make
+%%$ main                                ? run the myCounter example
+%%
+%%C++ -> ObjC interface testing:
+%%MyCounter C++ Object: byte=<68> ObjName=<c1> dVal=<5.5> iInc=<3>
+%%                      iaX[2][4]=<10 11 12 13 20 21 22 23 >
+%%MyCounter C++ Object: byte=<68> ObjName=<c1> dVal=<8.5> iInc=<3>
+%%                      iaX[2][4]=<10 11 12 13 20 21 22 23 >
+%%Parameter passing using va_list:   Sum = 16.500000
+%%Normal ObjC parameter passing:     Sum = 16.500000
+%%End testing.
+%%
+%%$
+%%
+%%To run the Objective-C?C++ example (Heatbugs), change directory to the heatbugs sub-directory, and make a clean compilation on the modified heatbugs example. After a successful compilation, an executable file called "heatbugs" is created.
+%%
+%%$ cd ~/ classdesc.1.D7/heatbugs
+%%$ make clean
+%%$ make
+%%$ heatbugs                            ? run the modified heatbugs example
+%%
+%%
+%%Figure 1   Heatbugs runs in Objective-C and C++ environments.
+%%
+%%
+%%2.0   C++?Objective-C (myCounter example)
+%%
+%%Following are steps involved to convert a user written C++ model and make it run under both the C++ and Objective-C environments.
+%%
+%%
+%%2.1   User written C++ model
+%%
+%%An example of a user written C++ class is shown below (the file name is called myCounter.h and a copy is stored in objc_examples sub-directory)
+%%
+%%#include <stdarg.h>
+%%#include "ObjCsupport.h"           // ObjC supports
+%%#include "vector"
+%%
+%%class myCounter: public objc_obj {
+%%
+%%  public:
+%%     char   sName[20];
+%%     int    iaX[2][4];
+%%     int    iInc;
+%%     double dVal;
+%%
+%%  public:
+%%
+%%     // std parameter passing
+%%     void next(int x);
+%%     double sum5_x1(double x1, double x2, double x3, double x4
+%%                    double x5);
+%%     int prtvars();
+%%     unsigned short int fn2arg(unsigned short int x1, double x2);
+%%     int fn3arg(int x1, double x2, unsigned short int x3);
+%%
+%%     // parameter passing using va_list - 1st arg must be known
+%%     double sumN_x1(double x1, objc_t& buf);
+%%
+%%     int prtVec(vector<int> v);   // for c++ only method
+%%     int cpp_prtVec();            // for C++ only method
+%%
+%%};
+%%
+%%The supplied ObjCsupport.h supporting file defined two useful C++ classes: objc_obj and objc_t.
+%%The user C++ model must derived from the objc_obj. The objc_t class is used to support an arbitrary number of parameter passing between the Objective-C and C++ methods. An overloading ">>" operator has also been defined for the objc_t class for extracting arguments.
+%%Member method that use any C++ STL classes (eg. Vector) or method name that contains the embedded "cpp" string will not be translated to Objective-C equivalent.
+%%An example of the C++ implementation of the above model (a copy of the implementation myCounter.cc file is stored in objc_examples sub-directory)
+%%
+%%#include <iostream>
+%%#include "myCounter.h"
+%%#include <stdio.h>
+%%using namespace std;
+%%
+%%int myCounter::prtvars()
+%%{  cout << "MyCounter C++ Object: byte=<" << sizeof(myCounter)
+%%        << ">";
+%%   cout << " ObjName=<" << sName << "> dVal=<" << dVal
+%%        << "> iInc=<" << iInc << ">\n";
+%%   cout << "                      iaX[2][4]=<";
+%%   for(int i=0; i<2; i++)
+%%   {  for (int j=0; j<4; j++)
+%%         cout << iaX[i][j] << " ";
+%%   }
+%%   cout << ">\n\n";
+%%   return 22;
+%%}
+%%
+%%int myCounter::prtVec(vector<int> v)
+%%{   return (int) 1; }
+%%
+%%int myCounter::cpp_prtVec()
+%%{   return (int) 1; }
+%%
+%%void myCounter::next(int x)
+%%{  dVal += (double) iInc;
+%%}
+%%
+%%double myCounter::sumN_x1(double x1, objc_t& buf)
+%%{  double x2, x3, x4, x5;
+%%   buf >> x2 >> x3 >> x4 >> x5;
+%%   return x1 + x2 + x3 + x4 + x5;
+%%}
+%%
+%%double myCounter::sum5_x1(double x1, double x2, double x3,
+%%                          double x4, double x5)
+%%{  return x1 + x2 + x3 + x4 + x5;
+%%}
+%%
+%%unsigned short int myCounter::fn2arg(unsigned short int x1,
+%%                                     double x2)
+%%{  return (unsigned short int) 1;
+%%}
+%%
+%%int myCounter::fn3arg(int x1, double x2, unsigned short int x3)
+%%{   return (int) 1;
+%%}
+%%
+%%
+%%A small Objective-C main program that uses the C++ model (a copy of the program main.m file is stored in objc_examples sub-directory).
+%%
+%%#import <objc/Object.h>
+%%#import "myCounter.mh"
+%%
+%%main()
+%%{  myCounter * c1 = [[myCounter alloc] init];
+%%   int i, j;
+%%
+%%   printf("\nC++ -> ObjC interface testing:\n\n");
+%%
+%%   c1->dVal = 5.5;
+%%   c1->iInc = 3;
+%%   strcpy(c1->sName, "c1");
+%%   for(i=0; i<2; i++)                 // ix[2][4] = [10 11 12 13
+%%   {  for (j=0; j<4; j++)             //             20 21 22 23]
+%%         c1->iaX[i][j] = 10*(i+1) + j;
+%%   }
+%%   [c1 prtvars]; [c1 next: 5]; [c1 prtvars];
+%%   printf("Parameter passing using va_list:   Sum = %f\n",
+%%          [c1 sumN_x1: 1.1, 2.2, 3.3, 4.4, 5.5]);
+%%   printf("Normal ObjC parameter passing:     Sum = %f\n",
+%%          [c1 sum5_x1:1.1 x2:2.2 x3:3.3 x4:4.4 x5:5.5]);
+%%   printf("\nEnd testing.\n\n");
+%%}
+%%
+%%
+%%2.2   C++ to Objective-C interface generation
+%%
+%%Required files
+%%
+%%File name          Remarks                                From
+%%-----------------  -------------------------------------  --------
+%%main.m             a small Objective-C main program       User
+%%myCounter.h        User C++ model                         User
+%%myCounter.cc       User implementation                    User
+%%write_objc.cc      small Objective-C translator source    Supplied
+%%writeobjc_base.cc  Classdesc base action definition file  Supplied
+%%
+%%
+%%Objective-C translator generation
+%%
+%%Using Classdesc to produce the model class definition file from a given C++ model
+%%
+%%$ classdesc -objc writeobjc < myCounter.h > myCounter.cd      
+%%
+%%Create the Objective-C translator (write_objc executable). The name of the model is passed to the compiler through a macro called CNAME.
+%%
+%%$ g++ -g -c myCounter.cc
+%%$ g++ -g -DCNAME=myCounter -o write_objc myCounter.o write_objc.cc
+%%
+%%C++?Objective-C interface generation by executing the translator.
+%%
+%%When the Objective-C translator is executed, three interfacing files will be created (myCounter.mm, myCounter.m, and myCounterExportCpp.cc).
+%%
+%%$ write_objc
+%%
+%%C++ to ObjC parsing ...
+%%Starts parsing C++ class to ObjC ...
+%%Translating array: "sName[20]" - Translating simple data type: "sName" of-type "char"
+%%Translating array: "iaX[2][4]" - Translating simple data type: "iaX" of-type "int"
+%%Translating simple data type: "iInc" of-type "int"
+%%Translating simple data type: "dVal" of-type "double"
+%%Translating function: void  next(int x )
+%%Translating function: double  sum5_x1(double x1 , double x2 , double x3 , double x4 , double x5 )
+%%Translating function: int  prtvars()
+%%Translating function: unsigned short int  fn2arg(unsigned short int x1 , double x2 )
+%%Translating function: int  fn3arg(int x1 , double x2 , unsigned short int x3 )
+%%Translating function: double  sumN_x1(double x1 , objc_t & buf )
+%%Translating function: int  prtVec(vector < int > v )
+%%** warning: C++ function detected, no ObjC translation.
+%%
+%%Translating function: int  cpp_prtVec()
+%%** warning: C++ function detected, no ObjC translation.
+%%
+%%End translation.
+%%
+%%$
+%%
+%%2.3   Final user program generation.
+%%
+%%Compile the small objective-C main program first.
+%%Then, compile the three auto-generated interfacing files (myCounter.mm, myCounter.m, and myCounterExportCpp.cc) to its two object-code file equivalent (myCounter.mo and myCounterExportCpp.o).
+%%Finally, using the C++ to link all the object-code files into an executable file (in this case, the final executable is called "main").
+%%
+%%$ gcc -c -Wno-import -g main.m
+%%$ gcc -c -o myCounter.mo -Wno-import -g myCounter.m
+%%$ g++ -g -c -DOBJC   myCounterExportCpp.cc
+%%$ g++ -g -o main main.o myCounter.mo myCounterExportCpp.o
+%%      myCounter.o -lgcc -lobjc -L/usr/local/lib/libstdc++.so
+%%      -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/2.95/
+%%$
+%%
+%%
+%%2.4   Running the user C++ model runs under both the C++ and Objective-C environments.
+%%
+%%When the main program is executed, it will create a user model under the Objective-C environment. This model can be accessed under both the Objective-C and C++ environments through the use of the model template (myCounter.mh and myCounter.h header files).
+%%This demo program also shows how to call the user written C++ member methods from within the Objective-C environment using the two supported parameter-passing methods (normal parameter passing method and the Standard-C stdarg mechanism).
+%%
+%%$ main
+%%
+%%C++ -> ObjC interface testing:
+%%MyCounter C++ Object: byte=<68> ObjName=<c1> dVal=<5.5> iInc=<3>
+%%                      iaX[2][4]=<10 11 12 13 20 21 22 23 >
+%%MyCounter C++ Object: byte=<68> ObjName=<c1> dVal=<8.5> iInc=<3>
+%%                      iaX[2][4]=<10 11 12 13 20 21 22 23 >
+%%Parameter passing using va_list:   Sum = 16.500000
+%%Normal ObjC parameter passing:     Sum = 16.500000
+%%End testing.
+%%
+%%$
+%%
+%%
+%%2.5   Using Make to automate above steps.
+%%
+%%Example of a make file that will automate above steps as shown in Section 2.2 and 2.3.
+%%
+%%.SUFFIXES: .o .m .mo .mh .cd .cc
+%%
+%%.h.cd:
+%%      ../classdesc -objc writeobjc < $< > $@
+%%
+%%.h.mh:
+%%      $(CPP) -g -c $(CLASSNAME).cc
+%%      $(CPP) -g -DCNAME=$(CLASSNAME) -o $(TRANSLATOR)
+%%                $(CPPOBJ) $(TRANSLATOR).cc
+%%      $(TRANSLATOR)
+%%
+%%.m.mo:
+%%      $(CC) -c -o $@ -Wno-import $(CFLAGS) $<
+%%
+%%.m.o:
+%%      $(CC) -c -Wno-import $(CFLAGS) $<
+%%
+%%CC = /usr/local/gcc2/bin/gcc
+%%CPP = /usr/local/gcc2/bin/g++
+%%CFLAGS = -g
+%%LIBS = -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/2.95/
+%%       -L/usr/local/lib/libstdc++.so -lgcc -lobjc
+%%
+%%CLASSNAME=myCounter
+%%TRANSLATOR=write_objc
+%%SRC=main.m
+%%CPPOBJ=$(CLASSNAME).o
+%%INTERFACE_OBJ= $(CLASSNAME)ExportCpp.o
+%%OBJCOBJ=$(CLASSNAME).mo main.o
+%%OBJ=$(CPPOBJ) $(INTERFACE_OBJ) $(OBJCOBJ)
+%%
+%%EXECUTABLE: $(CLASSNAME).cd $(CLASSNAME).mh $(OBJ)
+%%      $(CPP) $(CFLAGS) -o main $(OBJ) $(LIBS)
+%%
+%%.cc.o:
+%%      /usr/local/gcc2/bin/g++ -g -c -DOBJC $(OPTFLAGS)  $<
+%%
+%%main.o:                  main.m
+%%$(CLASSNAME).cd:         $(CLASSNAME).h
+%%$(CLASSNAME).mo:         $(CLASSNAME).mh $(CLASSNAME).m
+%%$(CLASSNAME).o:          $(CLASSNAME).h $(CLASSNAME).cc
+%%$(CLASSNAME).mh:         $(CLASSNAME).h $(CLASSNAME).cc
+%%$(CLASSNAME)ExportCpp.o: $(CLASSNAME).h $(CLASSNAME)ExportCpp.cc
+%%
+%%clean:
+%%      rm -f *.o *.mo *.*~ *~ main *.cd *,D
+%%      rm -f $(CLASSNAME)ExportCpp.cc write_objc
+%%            $(CLASSNAME).mh $(CLASSNAME).m
+%%
+%%3.0   Objective-C ? C++ (modified Heatbugs example)
+%%
+%%Following are steps involved to convert an Objective-C/Swarm program to run under both the C++ and Objective-C environments. This is case; we are modifying the agent-part of the Heatbugs (the Heatbug object - especially the step member method) run under both environments.
+%%
+%%At present, we only provide techniques on how to modify an existing Swarm application to make it run under both the C++ and Objective-C environments (using the knowledge that we have gained from Section 2.0). Currently, Classdesc will not be able to parse the Objective-C header file and no automatic tools are available yet to ease the translation (but the translation should be pretty straight forward).
+%%
+%%3.1   Heatbug Original Objective-C model
+%%
+%%Below is the original Heatbug Objective-C object (which we will rename it to Heatbug.mh in accordance with my file name conventions).
+%%
+%%#import <space.h>
+%%#import <gui.h>
+%%#import "HeatSpace.h"
+%%
+%%@interface Heatbug: SwarmObject
+%%{  @public
+%%      int         hbID;                // Heatbug Identity
+%%      int         time;
+%%      double      unhappiness;
+%%      int         x, y;
+%%      HeatValue   idealTemperature;
+%%      HeatValue   outputHeat;
+%%      float       randomMoveProbability;
+%%  
+%%      id <Grid2d> world;
+%%      int         worldXSize, worldYSize;
+%%      HeatSpace   *heat;
+%%      Color       bugColor;
+%%}
+%%
+%%- init;
+%%- setWorld: (id <Grid2d>)w Heat: (HeatSpace *)h;
+%%- createEnd;
+%%- (double)getUnhappiness;
+%%- setIdealTemperature: (HeatValue)i;
+%%- setOutputHeat: (HeatValue)o;
+%%- setRandomMoveProbability: (float)p;
+%%- setX: (int)x Y: (int)y;
+%%- setBugColor: (Color)c;
+%%- step;                      // calls the C++ step method
+%%- drawSelfOn: (id <Raster>)r;
+%%
+%%@end
+%%
+%%
+%%
+%%
+%%3.2   Heatbug C++ model template
+%%
+%%Below is the equivalent C++ class template (Heatbug.h). The extra member variable zbits was inherited from the SwarmObject (which in turn, inherited from the Object_s object from the Swarm environment).
+%%Only the step member method header is include here because we want to port the Objective-C step method to run in C++ environment and leaves the rest of the member methods run in Objective-C environment.
+%%
+%%// C++ Heatbug class
+%%//
+%%#include <stdarg.h>
+%%#include "ObjCsupport.h"    // ObjC-C++ support file
+%%
+%%// Heatbugs related type definitions
+%%typedef int HeatValue;
+%%typedef unsigned char Color;
+%%typedef enum {cold,hot} HeatExtremeType;
+%%extern const HeatValue maxHeat;
+%%
+%%class Heatbug: public objc_obj
+%%{
+%%   public:
+%%      unsigned    zbits;    //from SwarmObject - obj allocated zone
+%%      int         hbID;
+%%      int         time;
+%%      double      unhappiness;
+%%      int         x;
+%%      int         y;
+%%      HeatValue   idealTemperature;
+%%      HeatValue   outputHeat;
+%%      float       randomMoveProbability;
+%%      id          world;
+%%      int         worldXSize;
+%%      int         worldYSize;
+%%      id          heat;
+%%      Color       bugColor;
+%%
+%%   public:
+%%      void step();          // method will be implemented in C++
+%%
+%%};
+%%
+%%
+%%3.3   Heatbug C++ step member method
+%%
+%%
+%%C++ calls to the Swarm objects interfacing.
+%%
+%%The original Objective-C step method implementation uses seven different member methods from four different Swarm objects (for a total of 11 calls). All these calls needed to be translated to C++ equivalent.
+%%
+%%   Swarm Object       Call    member method
+%%   ------------------ ---- ----------------------------------------
+%%   SwarmObject             Heatbug object derived from this object
+%%   Raster                  GUI part of Heatbug - not modified
+%%   Pixmap                  GUI part of Heatbug - not modified
+%%
+%%   UniformIntegerDist   3  [uniformIntRand getIntWithMin: withMax:]
+%%   UniformDoubleDist    1  [uniformDblRand getIntWithMin: withMax:]
+%%   Grid2d               1  [world getObjectAtX: Y:]
+%%                        2  [world putObject: atX: Y:]
+%%   Diffuse2d            1  [heat getValueAtX: Y:]
+%%                        1  [heat findExtremeType: X: Y:]
+%%                        2  [heat addHeat: X: Y:]
+%%
+%%
+%%Example of the HeatbugExportObjc.m interface file (interfacing file # 4) that enables the C++ program to call various Swarm's objects.
+%%
+%%#include <stdarg.h>
+%%#import <random.h>
+%%#import "Heatbug.mh"
+%%
+%%extern long int objc_uniformIntRand(long int min, long int max)
+%%{ return [uniformIntRand getIntegerWithMin: min withMax: max]; }
+%%
+%%extern double objc_uniformDblRand(double min, double max)
+%%{ return [uniformDblRand getDoubleWithMin: min withMax: max]; }
+%%
+%%extern int objc_getHeat(void * heatobj, int px, int py)
+%%{ return [(HeatSpace *)heatobj getValueAtX: px Y: py]; }
+%%
+%%extern void objc_addHeat(void * heatobj, int hval, int px, int py)
+%%{ [(HeatSpace *)heatobj addHeat: hval X: px Y: py]; }
+%%
+%%extern void objc_findExtremeType(void * heatobj, HeatExtremeType ht, int * px, int * py)
+%%{ [(HeatSpace *)heatobj findExtremeType: ht X: px Y: py]; }
+%%
+%%extern id objc_worldGetObject(void * worldobj, int px, int py)
+%%{ return [ (id <Grid2d>)worldobj getObjectAtX: px Y: py]; }
+%%
+%%extern void objc_worldPutObject(void * worldobj, void * obj, int px, int py)
+%%{ [ (id <Grid2d>)worldobj putObject: (id)obj atX: px Y: py]; }
+%%
+%%// move the heatbug object from (oldx,oldy) to new location (newx,newy)
+%%extern void objc_worldMoveObject(void * worldobj, int oldx, int oldy, int newx, int newy)
+%%{  Heatbug * hb;
+%%   hb = (Heatbug *) [ (id <Grid2d>) worldobj getObjectAtX: oldx Y: oldy];
+%%   [(id <Grid2d>)worldobj putObject: nil atX: oldx Y: oldy];
+%%   [(id <Grid2d>)worldobj putObject: hb  atX: newx Y: newy];
+%%   hb->x = newx;
+%%   hb->y = newy;
+%%   //printf("t=%d hb%d moves (%d,%d) to (%d,%d)\n",hb->time,hb->hbID,oldx,oldy,hb->x,hb->y);
+%%}
+%%
+%%
+%%C++ step member method (the translated C++ statements are in blue coloured italic-bold font)
+%%
+%%void Heatbug::step()
+%%{  HeatValue        heatHere;
+%%   int              newX;
+%%   int              newY;
+%%   int              tries;
+%%   HeatExtremeType  ht;
+%%
+%%   heatHere = objc_getHeat(heat,x,y);
+%%   time += 1;                          // simulation time
+%%   if (heatHere < idealTemperature)
+%%     unhappiness = (double)(idealTemperature - heatHere) / maxHeat;
+%%   else
+%%     unhappiness = (double)(heatHere - idealTemperature) / maxHeat;
+%%
+%%   newX = x; newY = y;
+%%   ht = (heatHere < idealTemperature) ? hot : cold;
+%%   objc_findExtremeType(heat, ht, &newX, &newY);
+%%
+%%   if ( ((float) objc_uniformDblRand(0.0, 1.0)) <
+%%        randomMoveProbability )
+%%   {  newX = (x + objc_uniformIntRand(-1L, 1L));
+%%      newY = (y + objc_uniformIntRand(-1L, 1L));
+%%      newX = (newX + worldXSize) % worldXSize;
+%%      newY = (newY + worldYSize) % worldYSize;
+%%   }
+%%   cout << "T=" << time << " Hb" << hbID << " at (" << x
+%%        << "," << y << ") feels ";
+%%   if (unhappiness == 0)
+%%   {  cout << "happy\n";
+%%      objc_addHeat(heat,outputHeat,x,y);
+%%   }
+%%   else
+%%   {  tries = 0;
+%%      if (ht==cold) cout << "hot"; else cout << "cold";
+%%      if ( (newX != x || newY != y) )
+%%      {  while ( (objc_worldGetObject(world,newX,newY) != NULL) &&
+%%                 (tries < 10) )
+%%         {  int location, xm1, xp1, ym1, yp1;
+%%            location = objc_uniformIntRand(1L, 8L);
+%%            xm1 = (x + worldXSize - 1) % worldXSize;
+%%            xp1 = (x + 1) % worldXSize;
+%%            ym1 = (y + worldYSize - 1) % worldYSize;
+%%            yp1 = (y + 1) % worldYSize;
+%%            switch (location)
+%%            {  case 1:  newX = xm1; newY = ym1; break;  // NW
+%%               case 2:  newX = x  ; newY = ym1; break;  // N
+%%               case 3:  newX = xp1; newY = ym1; break;  // NE
+%%               case 4:  newX = xm1; newY = y;   break;  // W
+%%               case 5:  newX = xp1; newY = y;   break;  // E
+%%               case 6:  newX = xm1; newY = yp1; break;  // SW
+%%               case 7:  newX = x  ; newY = yp1; break;  // S
+%%               case 8:  newX = xp1; newY = yp1;         // SE
+%%               default: break;
+%%            }
+%%            tries++;
+%%         }
+%%         if (tries == 10)
+%%         {  newX = x; newY = y;
+%%         }
+%%      }
+%%      objc_addHeat(heat, outputHeat, x, y);
+%%      if   ((x==newX) && (y==newY)) cout << " no move\n";
+%%      else cout << " moves to (" << newX << "," << newY << ")\n";
+%%      objc_worldMoveObject(world, x, y, newX, newY);
+%%   }
+%%
+%%
+%%3.4   Modified Heatbug Makefile
+%%
+%%Following Heatbug Makefile needed to be modified to enable it to compile bath the C++ and Objective-C source files.
+%%After successful compilation, an executable called "heatbugs" will be produced. This executable will run both the C++ and Objective-C environments (results as shown in Figure 1).
+%%
+%%ifeq ($(SWARMHOME),)
+%%SWARMHOME=/home/richardl/swarm-2.1.1
+%%endif
+%%
+%%APPLICATION=heatbugs
+%%BUGADDRESS=bug-swarm@swarm.org
+%%APPVERSION=2.1.1
+%%
+%%CPPOBJ= Heatbug.o
+%%OBJCOBJ=Heatbug.mo HeatSpace.o main.o HeatbugModelSwarm.o \
+%%      HeatbugObserverSwarm.o HeatbugBatchSwarm.o HeatbugExportObjc.o
+%%OBJECTS=$(OBJCOBJ) $(CPPOBJ)
+%%DATAFILES = ant.png heatbugs.scm
+%%
+%%include $(SWARMHOME)/etc/swarm/Makefile.appl
+%%
+%%main.o: main.m Heatbug.mh HeatSpace.h HeatbugObserverSwarm.h
+%%        HeatbugBatchSwarm.h
+%%Heatbug.mo: Heatbug.m Heatbug.mh
+%%Heatbug.o: Heatbug.cc Heatbug.h
+%%HeatSpace.o: HeatSpace.m HeatSpace.h
+%%HeatbugObserverSwarm.o: HeatbugObserverSwarm.m
+%%                        HeatbugObserverSwarm.h HeatbugModelSwarm.h
+%%HeatbugModelSwarm.o: HeatbugModelSwarm.m HeatbugModelSwarm.h
+%%HeatbugBatchSwarm.o: HeatbugBatchSwarm.m HeatbugBatchSwarm.h
+%%                     HeatbugModelSwarm.h
+%%HeatbugExportObjc.o: HeatbugExportObjc.m
+%%
+%%
+%%
+%%
+%%
+%%
+%%
+%%
+%%
+%%Objective-C ? C++
+%%interfacing
+%%
+%%
+%%
+%%
+%%
+%%Technical reference
+%%manual
+%%
+%%
+%%
+%%
+%%
+%%
+%%
+%%
+%%
+%%
+%%
+%%
+%%
+%%
+%%
+%%
+%%Richard Leow
+%%richardl@hpc.unsw.edu.au
+%%
+%%
+%%
+%%
+%%
+%%High Performance Computing Supporting Unit
+%%University of New South Wales
+%%Sydney, Australia.
+%%
+%%
+
+
+
+
+\psection{Note on namespaces}
+
+I hereby revoke my previous comments on namespaces. As of classdesc.2,
+all identifiers introduced by classdesc live in the classdesc
+namespace, except for the descriptors pack, unpack and isa, which
+becuase they have arguments that depend on classdesc namespaced types
+do not clutter global namespace.
+
+\psubsection{Preprocessor macros}
+
+The following is a list of preprocessor symbols used in
+Classdesc. These, obviously, cannot be placed within a namespace. Not
+mentioned here are symbols of the form {\tt XXX\_H} which are defined
+in the header file {\tt xxx.h}. Only some of these symbols are
+documented here.
+
+\begin{verbatim}
+CLASSDESC_ACCESS
+CLASSDESC_ACCESS_TEMPLATE
+CLASSDESC_FDEF
+CLASSDESC_TDEC
+CONS_BODY
+HETERO
+IS_NODE
+IS_ARRAY
+IS_STATIC
+MPI_DEBUG
+tempargs1..5
+typeargs1..5
+PACK_BASIC
+PACK_CONTAINER
+RECUR_MAX
+THROW_PTR_EXCEPTION
+TRAD_STL
+UNPACK_CONTAINER
+UNPACK_MAP
+UNPACK_SET
+XDR_PACK
+XDR_filter
+\end{verbatim}
+
+\bibliographystyle{plain}
+\bibliography{classdesc}
+\printindex
+\end{document}

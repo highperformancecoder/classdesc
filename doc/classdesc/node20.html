@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2008 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>BinStream -- binary streaming to a pack_t</TITLE>
+<META NAME="description" CONTENT="BinStream -- binary streaming to a pack_t">
+<META NAME="keywords" CONTENT="classdesc">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2008">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="classdesc.css">
+
+<LINK REL="previous" HREF="node19.html">
+<LINK REL="up" HREF="node10.html">
+<LINK REL="next" HREF="node21.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html400"
+  HREF="node21.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html394"
+  HREF="node10.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html390"
+  HREF="node19.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html396"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/share/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html398"
+  HREF="node49.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/share/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html401"
+  HREF="node21.html">isa</A>
+<B> Up:</B> <A NAME="tex2html395"
+  HREF="node10.html">pack/unpack</A>
+<B> Previous:</B> <A NAME="tex2html391"
+  HREF="node19.html">Packing to a file</A>
+ &nbsp; <B>  <A NAME="tex2html397"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html399"
+  HREF="node49.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION000310000000000000000">
+BinStream -- binary streaming to a pack_t</A>
+</H2>
+
+<P>
+BinStream is an adaptor class that allows streaming of POD (plain
+ordinary data) types to/from a pack_t type for efficiency reasons. POD
+types can be basic data types like ints/floats, structs of such,
+arrays of such and standard containers of such.
+
+<P>
+You can either use a BinStream class, which takes a pack_t reference
+(can be an xdr_pack object as well) in its constructor. Alternatively,
+you can construct the pack_t object directly with the BinStream using
+the template BinStreamT. The template argument refers to the pack_t type.
+
+<P>
+Examples:
+<PRE>
+struct foo {a,b};
+vector x(10,2);
+pack_t p;
+foo a; 
+int i;
+BinStream bs(p);
+bs &lt;&lt; 1 &lt;&lt; a &lt;&lt; x;
+bs &gt;&gt; i &gt;&gt; a &gt;&gt; x;
+BinStreamT&lt;xdr_pack&gt; bst("foo.dat","w");
+bst &lt;&lt; 1 &lt;&lt; a &lt;&lt; x;
+</PRE>
+<BR><HR>
+<ADDRESS>
+Russell Standish
+2013-06-18
+</ADDRESS>
+</BODY>
+</HTML>

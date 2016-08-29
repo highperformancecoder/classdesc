@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2008 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Objective-C basics</TITLE>
+<META NAME="description" CONTENT="Objective-C basics">
+<META NAME="keywords" CONTENT="classdesc">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2008">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="classdesc.css">
+
+<LINK REL="next" HREF="node38.html">
+<LINK REL="previous" HREF="node36.html">
+<LINK REL="up" HREF="node36.html">
+<LINK REL="next" HREF="node38.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html658"
+  HREF="node38.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html652"
+  HREF="node36.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html646"
+  HREF="node36.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html654"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/share/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html656"
+  HREF="node49.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/share/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html659"
+  HREF="node38.html">File conventions used</A>
+<B> Up:</B> <A NAME="tex2html653"
+  HREF="node36.html">C++ model Objective-C design</A>
+<B> Previous:</B> <A NAME="tex2html647"
+  HREF="node36.html">C++ model Objective-C design</A>
+ &nbsp; <B>  <A NAME="tex2html655"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html657"
+  HREF="node49.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H3><A NAME="SECTION000112100000000000000">
+Objective-C basics</A>
+</H3>
+
+<P>
+
+<DIV ALIGN="CENTER"><A NAME="fig1"></A><A NAME="473"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>Figure 2:</STRONG>
+Objective-C object structure</CAPTION>
+<TR><TD><IMG
+ WIDTH="421" HEIGHT="103" BORDER="0"
+ SRC="img4.png"
+ ALT="\begin{figure}\epsfbox{fig1.eps}\end{figure}"></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+In Objective-C, objects are identified by a distinct data type id
+which is a pointer to the object. Every object carries an <code>isa</code>
+instance variable which points to the object's <EM>class</EM> -- what
+kind of object it is. The <code>objc_class</code> structure stores the
+object's type description. Most objects are derived from the root
+class object called <code>Object</code> -- it makes objects behave as
+Objective-C objects and enable them to cooperate with the run-time
+system. A <EM>message</EM> is sent to an object to get it to perform useful
+work (to apply a method). In Objective-C, <EM>message expressions</EM> are
+enclosed in square brackets (see Figure <A HREF="#fig2">3</A>). The receiver is an object,
+and the message tells it what to do. In source code, the message is
+simply the name of a method and any arguments that are passed to it.
+
+<P>
+In Objective-C, messages are not bound to method implementations until
+run-time. The message function does everything necessary for dynamic
+binding. It first finds the procedure from the given message of
+particular receiver, then calls its procedure, passing it the
+receiving object and the arguments, and finally, returns a value.
+
+<P>
+
+<DIV ALIGN="CENTER"><A NAME="fig2"></A><A NAME="487"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>Figure 3:</STRONG>
+Typical Objective-C message</CAPTION>
+<TR><TD><IMG
+ WIDTH="309" HEIGHT="82" BORDER="0"
+ SRC="img5.png"
+ ALT="\begin{figure}\begin{center}
+{\em compiler converts to\\
+function call}\\
+$\un...
+...w \mathtt{objc msgSend(receiver,selector,arg1,\ldots)}$\end{center}
+\end{figure}"></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html658"
+  HREF="node38.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html652"
+  HREF="node36.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html646"
+  HREF="node36.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html654"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/share/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html656"
+  HREF="node49.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/share/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html659"
+  HREF="node38.html">File conventions used</A>
+<B> Up:</B> <A NAME="tex2html653"
+  HREF="node36.html">C++ model Objective-C design</A>
+<B> Previous:</B> <A NAME="tex2html647"
+  HREF="node36.html">C++ model Objective-C design</A>
+ &nbsp; <B>  <A NAME="tex2html655"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html657"
+  HREF="node49.html">Index</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+Russell Standish
+2013-06-18
+</ADDRESS>
+</BODY>
+</HTML>

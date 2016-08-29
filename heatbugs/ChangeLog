@@ -1,0 +1,496 @@
+2000-04-04    <mgd@nest.swarm.org>
+
+	* Makefile (SWARMHOME, APPVERSION): Bump.
+
+	* HeatbugModelSwarm.m ([HeatbugModelSwarm -buildActions]): 
+	Use +createBegin:/-setSelector:/-createEnd instead of 
+	+create:setSelector:setJavaFlag:.
+
+2000-03-29    <mgd@nest.swarm.org>
+
+	* HeatbugModelSwarm.h (HeatbugModelSwarm): Make actionForEach
+	a generic id.
+
+	* HeatbugModelSwarm.m ([HeatbugModelSwarm -buildActions]): 
+	Compare and contrast the use of createFActionForEachHomogenous
+	and createActionForEach.
+
+2000-02-27    <mgd@nest.swarm.org>
+
+	* Makefile (SWARMHOME, APPVERSION): Update for 2.1.
+	(BUGADDRESS): Update to SDG.
+
+2000-01-24    <mgd@nest.swarm.org>
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm -buildObjects]): Cast
+	color 64 to id, not void *.  Thanks to Ralf Stephan.
+
+2000-01-20    <mgd@HELEN>
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm -_update_]): 
+	Add example code for full screen snapshot.
+
+2000-01-13  Marcus G. Daniels  <mgd@pojoaque.santafe.edu>
+
+	* main.m (main): Use getWithZone:key:, not getWithZone:object:.
+
+	* HeatbugBatchSwarm.m ([HeatbugBatchSwarm -buildObjects]): 
+	Likewise.
+
+1999-12-22    <mgd@nest.swarm.org>
+
+	* heatbugs.scm (experimentDuration): Increment from 200 to 250.
+
+	* HeatbugModelSwarm.m ([HeatbugModelSwarm -_syncUpdateOrder_]):
+	New method.
+	([HeatbugModelSwarm -toggleRandomizedOrder],
+	[HeatbugModelSwarm -buildActions]): Call it.
+	([HeatbugModelSwarm -buildActions]): Use an
+	FActionForEachHomogeneous instead of createActionTo.
+
+	* HeatbugModelSwarm.h (HeatbugModelSwarm): Add actionForEach.  Add
+	protocol qualifiers to modelSchedule, modelActions, and
+	heatbugList.
+
+1999-09-18  Marcus G. Daniels  <mgd@pojoaque.santafe.edu>
+
+	* Makefile (APPVERSION): Bump.
+
+1999-09-12  Marcus G. Daniels  <mgd@pojoaque.santafe.edu>
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm -buildObjects]):
+	Add setWindowGeometryRecordName: argument to EZGraph creation.
+
+1999-08-25  Marcus G. Daniels  <mgd@pojoaque.santafe.edu>
+
+	* main.m (main): Use booleans for swarmGUIMmode.
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm -_update_]): Use %ld
+	instead of %d for stamping snapshot filenames with time.
+
+1999-08-02  Alex Lancaster  <alex@santafe.edu>
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm +createBegin:]):
+	Likewise use CustomProbeMap convenience methods for probeMap
+	creation.
+	([HeatbugObserverSwarm -buildObjects]): Use convenience factory
+	methods for creation of Value2dDisplay, Object2dDisplay and
+	EZGraph instances.
+	([HeatbugObserverSwarm -buildActions]): Likewise for Schedule
+	instance.
+
+	* HeatbugModelSwarm.m ([HeatbugModelSwarm +createBegin:]): Use
+	CustomProbeMap rather than EmptyProbeMap and use succinct
+	identifier list probe creation rather than the verbose
+	probe-by-probe method.
+	([HeatbugModelSwarm -buildObjects]): Use convenience factory
+	methods for all object creation: HeatSpace, Grid2d.
+	([HeatbugModelSwarm -buildActions]): Likewise for Schedule
+	instance.
+
+1999-06-18  Marcus G. Daniels  <mgd@pojoaque.santafe.edu>
+
+	* HeatSpace.m ([HeatSpace -findExtremeType:type:px:py]): Remove
+	unused variables bestX, bestY, and buf.
+
+1999-06-09  Alex Lancaster  <alex@santafe.edu>
+
+	* main.m (main): Make initSwarmApp -> initSwarm, the additional
+	BUGADDRESS and APPVERSION is now set from the Makefile.
+
+	* Makefile (BUGADDRESS): Define to be bug-swarm@santafe.edu.
+	(APPVERSION): Define to `2.0'.
+
+1999-06-05  Alex Lancaster  <alex@santafe.edu>
+
+	* Makefile (DATAFILES): Add heatbugs.scm, remove
+	{experiment,batch}.setup
+
+	* heatbugs.scm: Replace .setup files with single .scm file,
+	contains contents of old .setup files.
+
+	* batch.setup, experiment.setup: Remove files.
+
+	* HeatbugBatchSwarm.m ([HeatbugBatchSwarm -buildObjects]): Use
+	lispAppArchiver to create HeatbugModelSwarm instance from the
+	`modelSwarm' key, not ObjectLoader.
+
+	* main.m (main): Likewise for the HeatbugBatchSwarm instance using
+	the `batchSwarm' key.
+
+1999-02-17  Alex Lancaster  <alex@santafe.edu>
+
+	* main.m (main): Fixed comment to refer to correct option
+	`--batchmode' and `-b' specifications.
+
+1999-02-05  Marcus G. Daniels  <mgd@pojoaque.santafe.edu>
+
+	* main.m (main): Bump version to 1.4.1.
+
+1999-02-04  Marcus G. Daniels  <mgd@pojoaque.santafe.edu>
+
+	* Heatbug.m ([Heatbug -_getPixmap_:]): Call setRaster: after
+	pixmap's createEnd.
+
+	* HeatbugBatchSwarm.m: Include simtools.h, analysis.h, and misc.h. 
+
+	* HeatbugBatchSwarm.h: Don't include stdio.h, simtools.h, analysis.h,
+	space.h, activity.h, or collections.h.
+
+1999-01-28  Marcus G. Daniels  <mgd@pojoaque.santafe.edu>
+
+	* main.m (main): Update version string (argument to initSwarmApp)
+	to 1.4.
+
+1999-01-16  Alex Lancaster  <alex@santafe.edu>
+
+	* HeatbugBatchSwarm.m ([HeatbugBatchSwarm -go]): Changed printf to
+	refer to the correct invocation of batch mode.
+	Reformatting throughout.
+
+1999-01-14  Alex Lancaster  <alex@santafe.edu>
+
+	* README: Note regarding toggleRandomizedOrder.
+
+	* HeatbugModelSwarm.[hm] ([HeatbugModelSwarm
+	-toggleRandomizedOrder]): New method, toggles the randomizedOrder
+	state for the heatbugList traversal.  Default is Sequential
+	(i.e. `NO').
+	([HeatbugModelSwarm +createBegin:]): Removed VarProbe for
+	randomizeHeatbugUpdateOrder, add MessageProbe for
+	toggleRandomizedOrder.
+
+1999-01-13  Alex Lancaster  <alex@santafe.edu>
+
+	* README: Add notes regarding new randomization feature.
+
+	* HeatbugModelSwarm.h (@interface): Add new BOOL iVar
+	`randomizeHeatbugUpdateOrder' to class.
+
+	* HeatbugModelSwarm.m ([HeatbugModelSwarm -buildActions]): Add a
+	conditional test to set the defaultOrder of the
+	`createActionForEach' action to `Randomize' if the
+	`randomizeHeatbugUpdateOrder' flag is set.  Add comments in the
+	code to explain the purpose and implementation of this feature.
+	([HeatbugModelSwarm +createBegin:]): Set the
+	`randomizeHeatbugUpdateOrder' flag to `NO' by default.
+	Add a probe in the probeMap for this new flag.
+
+1998-11-04  Alex Lancaster  <alex@santafe.edu>
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm -buildObjects:]):
+	In object creation change all calls of `[self getZone]' with
+	`self'.  
+	Don't explicitly create a `Zone' for the modelSwarm - it is
+	created implicitly, when a subclass of `Swarm' is instantiated.
+	Remove appropriate local variables.
+	([HeatbugObserverSwarm -_update_]): In object creation change call
+	of `[self getZone]' with `self'.
+	([HeatbugObserverSwarm -buildActions]): Likewise.
+
+	* HeatbugBatchSwarm.m ([HeatbugBatchSwarm -{buildObjects,
+	buildActions}]): As for respective methods in
+	HeatbugObserverSwarm.m.
+
+	* HeatbugModelSwarm.m ([HeatbugModelSwarm -{buildObjects,
+	buildActions}]): In object creation change all calls of `[self
+	getZone]' with `self'.
+
+	* HeatbugModelSwarm.m ([HeatbugModelSwarm -buildObjects]): Remove
+	old commented-out code cruft pertaining to old random number
+	library.
+
+1998-10-06  Alex Lancaster  <alex@santafe.edu>
+
+	* HeatSpace.[hm]: Add new class `HeatCell' for maintaining a list
+	of points.
+	([HeatSpace -findExtremeType:]): Add logic to maintain a list of
+	sites of equal extreme heat and select randomly to remove bias.
+
+	* Heatbug.m ([Heatbug -step]): When if the ideal (or random
+	selected) position is the current location of the Heatbug - don't
+	search for another cell.  Thanks to Catherine Dibble
+	<cath@econ.ucsb.edu> for pointing this out.  
+	
+1998-09-22  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm +createBegin:]): 
+	Use YES in argument to setHideResult.
+	([HeatbugObserverSwarm -_update_]): Show use of widget snapshots.
+
+1998-09-13  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* main.m (main): Use initSwarmApp instead of initSwarm.  Specify
+	version 1.3 and bug-swarm@santafe.edu.
+
+1998-08-30  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm -_update_]): 
+	Use setWidget: instead of create:widget:.
+
+1998-08-24  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm -_update_]): 
+	Write screenshots if SCREENSHOTS is defined.
+
+	* README: Note SCREENSHOTS compile-time option.
+
+1998-08-20  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* Makefile (DATAFILES): Add {batch,experiment}.setup.
+
+	* HeatbugBatchSwarm.m ([HeatbugBatchSwarm -buildObjects]): 
+	Use ObjectLoader's fromAppDataFileNamed: instead of fromfileNamed:.
+
+	* Makefile (APPLIBS): Remove.
+	(DATAFILES): For ant.png.
+	(SWARMHOME): Bump default to 1998-08-20.
+
+	* Heatbug.m ([Heatbug -_getPixmap_:]): Set directory using
+	application config path.
+	
+1998-08-17  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* Makefile: Include Makefile.appl from $(SWARMHOME)/etc/swarm.
+
+1998-07-21  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* Makefile (SWARMHOME): Bump default to 1.2.
+
+1998-07-11  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* README: Note -DUSE_PIXMAP.  Remove text about replacement files.
+
+1998-06-23  Alex Lancaster <alex@santafe.edu>
+
+	* COPYING, README:  New files, replacements for LICENCE and READ.ME, 
+	respectively.
+
+1998-04-24  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* HeatbugModelSwarm.h (Swarm): 
+
+1998-04-23  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* HeatbugObserverSwarm.h (HeatbugObserverSwarm): Instead of being
+	statically typed, unhappyGraph conform to EZGraph protocol (in
+	analysis), heatDisplay conform to the HeatDisplay protocol
+	and heatbugDisplay conform to the Object2dDisplay protocol (both
+	in space).
+
+	* HeatbugModelSwarm.m: Include space.h.  Make getWorld 
+	return id that conforms to Grid2d protocol.
+
+	* HeatbugModelSwarm.h: Don't include activity.h, collections.h,
+	or objectbase.h.
+	(HeatbugModel): Use id <Grid2d> instead of statically
+	typing world.  Same for get method.
+
+	* Heatbug.h (Heatbug): Make world an object that conforms to
+	the Grid2d protocol, rather than being statically typed.
+
+	* Heatbug.[hm]: ([Heatbug setWorld:Heat:]): Make the world
+	argument (first) be an objec that conforms to the Grid2d protocol,
+	rather than being statically ttyped to Grid2d.
+
+1998-04-19  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* main.m (main): Change comment that says batchmode is
+	indicated by swarmGUIMode being 1; batchmode is indicated
+	by swarmGUIMode being 0.
+
+1998-04-17  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* Heatbug.m (bugPixmap): Static variable included in USE_PIXMAP case.
+	([Heatbug -_getPixmap_:]): New method.
+	([Heatbug -drawSelfOn:]): Call draw:X:Y: if USE_PIXMAP.
+
+1998-03-18  Alex Lancaster  <alex@santafe.edu>
+
+	* Heatbug.m: Removed redundant reference to <simtoolsgui.h>.
+
+	* HeatbugBatchSwarm.m: Removed redundant reference to
+	<collections.h>.
+
+1998-02-26  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* main.m: Include simtoolsgui.h.
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm -buildObjects]): 
+	Do the enable destroy notification after createEnd.
+
+	* HeatbugObserverSwarm.h: Don't include objectbase.h, space.h,
+	activity.h, collections.h, or gui.h.  Include simtoolsgui.h
+	instead of simtools.h.  Include simtoolsgui/GUISwarm.h.
+
+	* HeatbugModelSwarm.m: Include random.h.
+	Reformatting throughout.
+
+	* Heatbug.m: Include simtoolsgui.h instead of simtools.h.
+	Reformatting throughout.
+
+1998-02-06  Alex Lancaster  <alex@santafe.edu>
+
+	* Heatbug.m ([Heatbug -step]): Added if-else conditional to ensure
+	that movement only occurs when unhappiness is non-zero.
+	
+	* HeatbugModelSwarm.m ([HeatbugModelSwarm -buildObjects]): Added
+	call to each heatbug so that the randomMoveProbability set by the
+	user in the ProbeMap is passed to each heatbug before execution of
+	the simulation.  
+
+	* HeatbugModelSwarm.m ([HeatbugModelSwarm -createBegin:]): Added
+	"randomMoveProbability" to the custom ProbeMap to allow user to
+	set before simulation execution.
+
+1998-02-04  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* HeatbugModelSwarm.h: Include objectbase/Swarm.h and objectbase.h
+	instead of from swarmobject.
+
+	* HeatbugModelSwarm.h.pixmap: Likewise.
+
+	* HeatbugBatchSwarm.h: Include objectbase.h instead of swarmobject.h.
+
+	* Heatbug.h.pixmap: Remove (commented-out) include of
+	swarmobject/SwarmObject.h.
+
+	* Heatbug.h: Likewise.
+
+1998-01-27  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* main.m (main): Constify argv.
+
+	* HeatbugObserverSwarm.m: Include objectbase.h instead of
+	swarmobject.h.
+	([HeatbugObserverSwarm -buildObjects]): Use Colormap instead of
+	XColormap.  Change usage from setDisplayWidget:Colormap: to
+	setDisplayWidget:colormap:.  Revert GUI_ButtonRight back to 
+	ButtonRight.
+
+	* Heatbug.h (Heatbug):  Revert GUI_Color usages back to Color.
+	* Heatbug.m: Likewise.
+
+1998-01-24  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* HeatbugObserverSwarm.m: Include gui.h.
+	([HeatbugObserverSwarm -buildObjects]): Use GUI_ButtonRight
+	instead of ButtonRight.
+
+	* HeatbugObserverSwarm.h: Include gui.h instead of tkobjc.h.
+	(HeatbugObserverSwarm): Make colormap conform to the Colormap
+	protocol instead of being statically typed to XColormap.
+	Make worldRaster conform to the ZoomRaster protocol instead
+	of being statically typed to ZoomRaster.
+	Reformatting throughout.
+
+	* HeatbugModelSwarm.m: Reformatting throughout.
+
+	* HeatbugModelSwarm.h: Don't include tkobjc.h. Reformatting throughout.
+
+	* Heatbug.m ([Heatbug -setBugColor:]): Use GUI_Color instead of
+	Color for argument type.
+	([Heatbug -drawSelfOn:]): Use id <Raster> instead of Raster* for
+	argument type.
+	Reformatting throughout.
+
+	* Heatbug.h: Include gui.h instead of tkobjc/Raster.h.
+	(Heatbug): Use GUI_Color instead of Color.
+	Use GUI_Color instead of Color for argument to setBugColor:.
+	Use id <Raster> instead of Raster* for argument to drawSelfOn:.
+	Reformatting throughout.
+
+1998-01-15  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm -buildObjects]): Use
+	SET_WINDOW_GEOMETRY_RECORD_NAME for worldRaster and unhappyGraph.
+
+	* main.m (main): Likewise, but for theTopLevelSwarm.
+
+1998-01-14  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm -graphBug:]): 
+	Don't do anything if unhappyGraph has been destroyed.
+
+1998-01-13  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm -buildObjects]): 
+	Use CREATE_ARCHIVED_PROBE_DISPLAY to create probe displays for
+	heatbugModelSwarm and heatbugObserverSwarm.
+
+	* Makefile (SWARMHOME): Default is swarm-1.0.5.
+
+1998-01-12  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm -buildObjects]):
+	Remove inline configuration of the ActionCache and ControlPanel;
+	GUISwarm's buildObjects is now more intelligent.
+	([HeatbugObserverSwarm -buildObjects]): Add call to
+	enableDestroyNotification to configure handling of widget kills
+	by the window manager.
+	([HeatbugObserverSwarm -_updateDisplay_]): New method (calls
+	display on heatDisplay and heatbugDisplay, and then drawSelf
+	on worldRaster).
+	([HeatbugObserverSwarm -buildActions]): Only create action
+	to _updateDisplay, instead of the three above.
+
+	* main.m (main): Use setWindowGeometryRecordName to set a *base*
+	name for internal derived-names in the GUISwarm.
+
+1998-01-06  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm -buildObjects]):
+	Adjust for renamed setWindowGeometryRecordName (from
+	setControlPanelGeometryRecordName).
+
+1998-01-06  Alex Lancaster  <alex@wijiji.santafe.edu>
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm -buildObjects]):
+	Rename call to setGraphWindowGeometryRecordName to 
+	setWindowGeometry to conform with changes to interface.
+
+1997-12-19  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm -buildObjects]): 
+	Do ControlPanel and ActionCache initialization inline (pending
+	probable API changes).
+
+	* main.m (main): Don't use now-absent feature of GUISwarm
+	to passthru a name for geometry archiving.
+
+1997-12-12  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* Makefile (SWARMHOME): Don't define if already defined.
+
+1997-12-11  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* main.m: Remove import of Archiver.h (not needed).
+
+1997-12-10  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm -buildObjects]):
+	Switch probeMap from being ProbeMap * to id <ProbeMap>.
+
+	* HeatbugModelSwarm.m ([HeatbugModelSwarm +createBegin:aZone]):
+	Likewise.
+
+1997-12-07  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	([HeatbugObserverSwarm -buildActions]): Direct createActionTo call
+	for doTkEvents to actionCache, not controlPanel (API change).
+
+1997-11-29  Marcus G. Daniels  <mgd@wijiji.santafe.edu>
+
+	* main.m (main): Add create-time call to
+	setControlPanelGeometryRecordName for HeatBugOversverSwarm.
+
+	* HeatbugObserverSwarm.m ([HeatbugObserverSwarm -buildObjects]):
+	Use setWindowGeometryRecordName argument of createProbeDisplayFor
+	(set archive key name for heatbugModelSwarm and observerSwarm).
+	([HeatbugObserverSwarm -buildObjects]): Add create-time call to
+	setWindowGeometryRecordName for worldRaster.
+	([HeatbugObserverSwarm -buildObjects]): Add create-time call to
+	setGraphWindowGeometryRecordName to EZGraph.
+
+
+	

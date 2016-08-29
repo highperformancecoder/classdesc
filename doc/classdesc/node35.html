@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2008 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Introduction</TITLE>
+<META NAME="description" CONTENT="Introduction">
+<META NAME="keywords" CONTENT="classdesc">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2008">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="classdesc.css">
+
+<LINK REL="next" HREF="node36.html">
+<LINK REL="previous" HREF="node34.html">
+<LINK REL="up" HREF="node34.html">
+<LINK REL="next" HREF="node36.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html623"
+  HREF="node36.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html617"
+  HREF="node34.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html611"
+  HREF="node34.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html619"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/share/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html621"
+  HREF="node49.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/share/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html624"
+  HREF="node36.html">C++ model Objective-C design</A>
+<B> Up:</B> <A NAME="tex2html618"
+  HREF="node34.html">Objective-C C++ interface</A>
+<B> Previous:</B> <A NAME="tex2html612"
+  HREF="node34.html">Objective-C C++ interface</A>
+ &nbsp; <B>  <A NAME="tex2html620"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html622"
+  HREF="node49.html">Index</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION000111000000000000000">
+Introduction</A>
+</H2>
+
+<P>
+Swarm is one of the better-known agent based modelling systems. Swarm
+consists of a simulation engine built in Objective-C
+[<A
+ HREF="node48.html#johnson:_swarm_user_guide">5</A>,<A
+ HREF="node48.html#larkin93:_objec_orien_progr_objec_c">7</A>,<A
+ HREF="node48.html#98:_objec_c_languag_rhaps_devel_docum">1</A>,<A
+ HREF="node48.html#92:_gcc">4</A>,<A
+ HREF="node48.html#02:_insid_mac_os_x">2</A>] that
+takes a set of objects called a <EM>Swarm</EM>, and a schedule of actions to
+perform on them. Swarm defines interfaces that the objects need to
+adhere to (called <EM>protocols</EM> in Objective-C) in order for the
+simulation engine to interface to the Swarms. Finally, it provides a
+suite of visualisation tools or instruments that can be attached to
+running swarms to observe their behaviours. Swarm programs are
+hierarchical and the codes are object-oriented. The first beta version of
+Swarm was released in 1995 and was written in Objective-C. In 1999, a
+Java layer was introduced (release 2.0 onwards). A <EM>COM</EM> interface was
+proposed [<A
+ HREF="node48.html#daniels00:_swarm_com">3</A>] which would allow objects written
+in arbitrary OO languages to be interfaced to swarm, but only
+partially implemented before funding ran out.
+
+<P>
+We take the view here that users may have implemented a model in C++,
+either because they like the features of that language, or for
+performance reasons, but desire to transplant the model into Swarm to
+take advantage of tools provided on  that platform. The GNU CC
+compiler supports linking of C++, Obj C and plain C code into the same
+binary, however objects created in C++ and Objective cannot be shared
+between the two environments because of incompatible conventions about
+how objects are laid out in memory. 
+
+<P>
+The strategy described here is for users to declare C++ a class,
+derived from a an object class that handles the implicit isa pointer
+in Objective C objects. Classdesc is used to create a program
+generator, that outputs an Objective C definition of the C++ object,
+and then we let Objective C's runtime system instantiate the
+object. The Objective C definition also includes wrapper methods that
+call the real C++ implemented methods of the object. Instance
+variables are available in both OO environments, although C++'s
+privacy declarations are ignored.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html623"
+  HREF="node36.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/share/latex2html/icons/next.png"></A> 
+<A NAME="tex2html617"
+  HREF="node34.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/share/latex2html/icons/up.png"></A> 
+<A NAME="tex2html611"
+  HREF="node34.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
+<A NAME="tex2html619"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
+ SRC="file:/usr/share/latex2html/icons/contents.png"></A> 
+<A NAME="tex2html621"
+  HREF="node49.html">
+<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
+ SRC="file:/usr/share/latex2html/icons/index.png"></A> 
+<BR>
+<B> Next:</B> <A NAME="tex2html624"
+  HREF="node36.html">C++ model Objective-C design</A>
+<B> Up:</B> <A NAME="tex2html618"
+  HREF="node34.html">Objective-C C++ interface</A>
+<B> Previous:</B> <A NAME="tex2html612"
+  HREF="node34.html">Objective-C C++ interface</A>
+ &nbsp; <B>  <A NAME="tex2html620"
+  HREF="node1.html">Contents</A></B> 
+ &nbsp; <B>  <A NAME="tex2html622"
+  HREF="node49.html">Index</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+Russell Standish
+2013-06-18
+</ADDRESS>
+</BODY>
+</HTML>

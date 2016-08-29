@@ -1,0 +1,34 @@
+This is the Heatbug demo app.  The code is very well commented,
+so the only thing that needs to be said here is that if you want
+to see little pictures (pixmap) running around instead of squares,
+then run make like so:
+
+   make CPPFLAGS=-DUSE_PIXMAP
+
+* Also, you can write screenshots for each update to PNG files
+if you build like this:
+
+   make CPPFLAGS=-DSCREENSHOTS
+
+* A new feature is that with the additional
+`randomizeHeatbugUpdateOrder' Boolean flag we can randomize the order
+in which the bugs actually run their step rule.  This has the effect
+of removing any systematic bias in the iteration throught the heatbug
+list from timestep to timestep
+
+The `toggleRandomizedOrder' message probe on the probe display for
+HeatbugModelSwarm can be used to set this feature (note that `YES' =
+randomization is `on' and `NO' = randomization is `off'.  By default,
+this flag is *not* set (to duplicate the behavoir of the previous
+heatbug versions).
+
+* A note relevant to all Swarm application, not just heatbugs:
+
+By default, all `createActionForEach' modelActions have a default
+order of `Sequential', which means that the order of iteration through
+the `heatbugList' will be identical (assuming the list order is not
+changed indirectly by some other process).  
+
+In other words, unless you explicitly set the default order (using the
+-setDefaultOrder method) you will have the `Sequential' behavoir.
+
