@@ -19,6 +19,7 @@
 #include <ctype.h>
 using namespace std;
 #include "tokeninput.h"
+#include "classdescVersion.h"
 
 // for parsing Objective flag
 int objc = 0;
@@ -797,7 +798,7 @@ int main(int argc, char* argv[])
   if (argc<2)
     {
       printf("usage: %s [-workdir dir] [-objc] [-include header] [-nodef] [-respect_private] [-I classdesc_includes] [-typeName] {descriptor name} <input >output\n",argv[0]);
-      exit(0);
+      return 0;
     }
 
   /* see if a work directory option has been supplied - if so, then
@@ -810,7 +811,7 @@ int main(int argc, char* argv[])
     {
       if (strcmp(argv[1],"-workdir")==0)  /* place output files in workdir */
 	{
-          if (argc<3) {puts("option argument missing"); exit(1);} 
+          if (argc<3) {puts("option argument missing"); return 1;} 
 	  workdir=argv[2]; workdir+="/";  /* ensure trailing slash */
 	  argc-=2; argv+=2;
 	}
@@ -820,7 +821,7 @@ int main(int argc, char* argv[])
 	}
       if (argc>1 && strcmp(argv[1],"-include")==0) /* standard header for each output */
 	{
-          if (argc<3) {puts("option argument missing"); exit(1);} 
+          if (argc<3) {puts("option argument missing"); return 1;} 
 	  stdinclude=argv[2];
 	  argc-=2; argv+=2;
 	}
@@ -837,7 +838,7 @@ int main(int argc, char* argv[])
       if (argc>1 && strcmp(argv[1],"-I")==0)  /* use this directory to find */
 				       /*   _base.h files */
 	{
-          if (argc<3) {puts("option argument missing"); exit(1);} 
+          if (argc<3) {puts("option argument missing"); return 1;} 
 	  include_path.push_back(argv[2]);
 	  argc-=2; argv+=2;
 	}
@@ -853,9 +854,15 @@ int main(int argc, char* argv[])
         }
       if (argc>1 && strcmp(argv[1],"-i")==0) 
         { // input file given as argument
-          if (argc<3) {puts("option argument missing"); exit(1);} 
+          if (argc<3) {puts("option argument missing"); return 1;} 
           inputFile=argv[2];
           argc-=2; argv+=2;
+        }
+      if (argc>1 && strcmp(argv[1],"-v")==0) 
+        { 
+          argc---; argv++;
+          cout << "Version: "<<CLASSDESC_VERSION<<endl;
+          return 0;
         }
     }
 
