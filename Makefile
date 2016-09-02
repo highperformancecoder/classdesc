@@ -169,3 +169,12 @@ VERSION=$(shell git describe)
 
 dist:
 	git archive --format=tar.gz --prefix=classdesc-$(VERSION)/ HEAD -o /tmp/classdesc-$(VERSION).tar.gz
+
+# install documentation on SourceForge
+DOCPREFIX=web.sf.net:/home/project-web/classdesc/htdocs/doc
+
+install-doc:
+	doxygen
+	-cd doc; sh Makedoc
+	rsync -e ssh -r -z --progress --delete doc/classdesc $(DOCPREFIX)
+	rsync -e ssh -r -z --progress --delete html/* $(DOCPREFIX)/doxygen

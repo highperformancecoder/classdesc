@@ -1,5 +1,3 @@
-. /usr/local/share/aegis/profile
-aecp classdesc.ps
 rm *~ *.aux *.dvi *.log *.blg *.toc *.lof *.ilg *.idx
 latex classdesc
 makeindex classdesc.idx
@@ -7,18 +5,9 @@ bibtex classdesc
 latex classdesc
 latex classdesc
 dvips classdesc
-TMP=/tmp/eco-doc$$
-mkdir $TMP
-aecp classdesc
-rm -rf classdesc
-latex2html classdesc
-rm -rf $TMP
+git rm -rf classdesc
+latex2html -local_icons classdesc
 rm *~ *.aux *.dvi *.log *.blg *.toc *.lof *.ilg *.idx
-# remove extraneous file from repository
-aegis -list -terse project_files|grep doc/classdesc/|while read nm; do 
-  if [ ! -f ../$nm ]; then 
-    aecpu ../$nm
-    aerm -no_whiteout ../$nm
-    fi
-  done
-aenf classdesc
+
+for i in classdesc/*; do git add $i; done 
+git commit -m "Making doc consistent in git"
