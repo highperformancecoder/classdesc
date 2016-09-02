@@ -33,15 +33,22 @@ namespace classdesc
     virtual const char* what() const throw() {return errstring;}
   };
 
+  struct json_object_not_found: public json_pack_error
+  {
+    json_object_not_found(const string& name): 
+      json_pack_error("json object %s not found", name.c_str()) {}
+  };
+
   // these are classes, not typedefs to avoid adding properties to mValue
   class json_pack_t: public json_spirit::mValue
   {
   public:
     bool throw_on_error; ///< enable exceptions on error conditions
+    bool throw_on_not_found; ///< enable exceptions if element not present in JSON stream
     json_pack_t(): json_spirit::mValue(json_spirit::mObject()), 
                    throw_on_error(false)  {}
-    json_pack_t(const json_spirit::mValue& x): json_spirit::mValue(x), 
-                                               throw_on_error(false) {}
+    json_pack_t(const json_spirit::mValue& x): 
+      json_spirit::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
   };
 
 
@@ -73,7 +80,7 @@ namespace classdesc
         json_spirit::mObject& xo=x.get_obj();
         json_spirit::mObject::iterator i=xo.find(name.substr(0,p));
         if (i==xo.end())
-          throw json_pack_error("json object %s not found", name.substr(0,p).c_str());
+          throw json_object_not_found(name.substr(0,p));
         else if (p==std::string::npos)
           return i->second;
         else
@@ -164,7 +171,12 @@ namespace classdesc
             else
               throw json_pack_error("cannot add to a basic type");
           }
-        catch (json_pack_error&)
+        catch (const json_object_not_found&)
+          {
+            // only throw if this flag is set
+            if (o.throw_on_not_found) throw; 
+          }
+        catch (const json_pack_error&)
           {
             // only throw if this flag is set
             if (o.throw_on_error) throw; 
