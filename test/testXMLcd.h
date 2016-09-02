@@ -7,6 +7,7 @@
 */
 
 #include <classdesc.h>
+#include <stringKeyMap.h>
 using namespace classdesc;
 
 #include <string>
@@ -36,6 +37,7 @@ struct Foo
   Exclude<int> iex;
   std::vector<string> vs;
   classdesc::shared_ptr<EnumFoo> sef;
+  classdesc::StringKeyMap<int> sm;
   Foo() {}
   Foo(int i): ch('M'), a(0.1), af(0.2), b(3), bf(false), bt(true),
               c("\r hello & 123 "), c1(2,"\r"), h(3,2), l(3,2), 
@@ -49,6 +51,9 @@ struct Foo
           d1[i][j]=i+j;
       }
     m[0]=5; m[3]=2;
+
+    sm["hello"]=2;
+    sm["goodbye"]=3;
   }
   bool operator!=(const Foo& x) const {return ch!=x.ch || fabs(a-x.a)>1e-10 || b!=x.b ||bf !=x.bf || bt!=x.bt || c!=x.c ||c1!=x.c1|| memcmp(d,x.d,sizeof(d)) ||
       memcmp(d1,x.d1,sizeof(d1))

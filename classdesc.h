@@ -771,8 +771,5 @@ namespace classdesc
       if (!isalnum(r[i])) r[i]='_';
     return r;
   }
-
-
-
 }
 #endif

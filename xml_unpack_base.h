@@ -267,7 +267,10 @@ namespace classdesc
   */
   class xml_unpack_t
   {
-    std::map<std::string,std::string> contentMap;
+  public:
+    typedef std::map<std::string,std::string> ContentMap;
+  private:
+    ContentMap contentMap;
     std::map<std::string,unsigned> tokenCount;
 
     void checkKey(const std::string& key)
@@ -313,6 +316,14 @@ namespace classdesc
     template <class Stream> void process_attribute(XMLtoken<Stream>& i, const std::string& scope);
     template <class Stream> void parse(Stream& i);
     template <class Stream> void parse(XMLtoken<Stream>& stream, const std::string& scope);
+
+    /// first token starting with \a prefix
+    ContentMap::const_iterator firstToken(const std::string& prefix) const {
+      return contentMap.lower_bound(prefix);
+    }
+    ContentMap::const_iterator endToken(const std::string& prefix) const {
+      return contentMap.upper_bound(prefix);
+    }
 
     ///dump XML contents for debugging 
     void printContentMap() const {
