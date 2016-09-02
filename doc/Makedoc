@@ -5,6 +5,7 @@ bibtex classdesc
 latex classdesc
 latex classdesc
 dvips classdesc
+ps2pdf classdesc.ps
 git rm -rf classdesc
 latex2html -local_icons classdesc
 rm *~ *.aux *.dvi *.log *.blg *.toc *.lof *.ilg *.idx
