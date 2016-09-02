@@ -1,26 +1,26 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 
-<!--Converted with LaTeX2HTML 2008 (1.71)
+<!--Converted with LaTeX2HTML 2012 (1.2)
 original version by:  Nikos Drakos, CBLU, University of Leeds
 * revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
 * with significant contributions from:
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Converting code using traditional pointers to using ref</TITLE>
-<META NAME="description" CONTENT="Converting code using traditional pointers to using ref">
+<TITLE>Ref</TITLE>
+<META NAME="description" CONTENT="Ref">
 <META NAME="keywords" CONTENT="classdesc">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2008">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="classdesc.css">
 
 <LINK REL="next" HREF="node15.html">
 <LINK REL="previous" HREF="node13.html">
-<LINK REL="up" HREF="node10.html">
+<LINK REL="up" HREF="node11.html">
 <LINK REL="next" HREF="node15.html">
 </HEAD>
 
@@ -31,7 +31,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
 <A NAME="tex2html312"
-  HREF="node10.html">
+  HREF="node11.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
 <A NAME="tex2html306"
@@ -48,11 +48,11 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
  SRC="file:/usr/share/latex2html/icons/index.png"></A> 
 <BR>
 <B> Next:</B> <A NAME="tex2html319"
-  HREF="node15.html">STL containers</A>
+  HREF="node15.html">Converting code using traditional</A>
 <B> Up:</B> <A NAME="tex2html313"
-  HREF="node10.html">pack/unpack</A>
+  HREF="node11.html">pack/unpack</A>
 <B> Previous:</B> <A NAME="tex2html307"
-  HREF="node13.html">Ref</A>
+  HREF="node13.html">Graph serialisation</A>
  &nbsp; <B>  <A NAME="tex2html315"
   HREF="node1.html">Contents</A></B> 
  &nbsp; <B>  <A NAME="tex2html317"
@@ -61,109 +61,58 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00034000000000000000">
-Converting code using traditional pointers to using ref</A>
+<H2><A NAME="SECTION00033000000000000000"></A><A NAME="ref"></A>
+<BR>
+Ref
 </H2>
 
 <P>
-Let <TT>p</TT> be a pointer and <TT>r</TT> be the ref it is being changed
-to.
+Ref is a reference counted shared smart pointer implementation. When
+all references to an object are destroyed, the object it references is
+also destroyed. It is somewhat equivalent in functionality to Boosts
+<code>shared_ptr</code> or <code>intrusive_ptr</code>. Boost, however, is a big
+library, so the decision was made to avoid any dependencies of
+Classdesc or <I><I>    Eco Lab</I></I> on Boost.
 
 <P>
-This table details common idioms that need changing to convert the
-pointer to a ref:
+Ref performs entire object life cycle management. Initialising it with
+an object makes a copy, it does not pass control of the object to the
+ref. As such, it requires that its target type has a default
+constructor. Assigning, or copying a ref object duplicates the
+reference to a single object. Dereferencing works as with traditional
+pointers.
 
 <P>
-<BR>
-<BR><TABLE CELLPADDING=3 BORDER="1">
-<TR><TD ALIGN="LEFT"><TT>
-p=NULL; </TT></TD>
-<TD ALIGN="LEFT"><TT> r.nullify();</TT></TD>
-</TR>
-<TR><TD ALIGN="LEFT"><TT> 
-p=new T; </TT></TD>
-<TD ALIGN="LEFT"><TT> r=T();</TT></TD>
-</TR>
-<TR><TD ALIGN="LEFT"><TT> 
-p=new T(x,y,z); </TT></TD>
-<TD ALIGN="LEFT"><TT> r=T(x,y,z);</TT></TD>
-</TR>
-<TR><TD ALIGN="LEFT"><TT> 
-p==NULL, p!=NULL etc </TT></TD>
-<TD ALIGN="LEFT"><TT> r, !r etc</TT></TD>
-</TR>
-<TR><TD ALIGN="LEFT"><TT> 
-delete p; </TT></TD>
-<TD ALIGN="LEFT"><TT> Remove this statement, it is superfluous</TT></TD>
-</TR>
-<TR><TD ALIGN="LEFT"><TT>  
-p-&gt;*m(); </TT></TD>
-<TD ALIGN="LEFT"><TT> (*r).*m() No Member pointer dereference</TT></TD>
-</TR>
-<TR><TD ALIGN="LEFT"><TT> 
-p++, p+1, etc. </TT></TD>
-<TD ALIGN="LEFT"><TT> Illegal. Consider using a container type.</TT></TD>
-</TR>
-</TABLE>
-<BR>
-<BR>
-
-<P>
-Assignment and copying refs are more expensive than the equivalent
-pointer operations due to the reference counting mechanism. Therefore,
-consider using C++ references whereever possible:
-
-<P>
+Synopsis:
 <PRE>
-void foo(const ref&lt;int&gt;&amp; x); instead of void foo(ref&lt;int&gt; x);
-{                                        {
-  const ref&lt;int&gt;&amp; y=...;     instead of    ref&lt;int&gt; y=...;
+template &lt;class T&gt;
+class ref
+{
+public:
+  ref(); // unitialised refs are NULL
+  ref(const ref&amp; x);
+  ref(const T&amp; x);  //copies x
+  ref&amp; operator=(const ref&amp; x);
+  ref&amp; operator=(const T&amp; x);  //copies x
+  T* operator-&gt;();  //dereference operators
+  T&amp; operator*(); 
+  void nullify();  //set reference to NULL
+  bool nullref();  //returns true if invalid
+  operator bool (); //returns true if valid
+  bool operator==(const ref&amp; x);
+  bool operator==(const T* x); //true if x points to this's target
+  bool operator==(const T&amp; x); //true if x==this's target
+};
 </PRE>
 
 <P>
-A certain amount of care must be taken if you need to declare the
-ref as non-const. If it is just the target that needs updating,
-it is fine to use a <code>ref&lt;T&gt;&amp;</code> variable. However, if the ref
-itself needs updating, then use <code>ref&lt;T&gt;</code> instead.
+Packing a ref object automatically invokes the <code>pack_graph</code> algorithm.
 
 <P>
-<HR>
-<!--Navigation Panel-->
-<A NAME="tex2html318"
-  HREF="node15.html">
-<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
- SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<A NAME="tex2html312"
-  HREF="node10.html">
-<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
- SRC="file:/usr/share/latex2html/icons/up.png"></A> 
-<A NAME="tex2html306"
-  HREF="node13.html">
-<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
- SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
-<A NAME="tex2html314"
-  HREF="node1.html">
-<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
- SRC="file:/usr/share/latex2html/icons/contents.png"></A> 
-<A NAME="tex2html316"
-  HREF="node49.html">
-<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
- SRC="file:/usr/share/latex2html/icons/index.png"></A> 
-<BR>
-<B> Next:</B> <A NAME="tex2html319"
-  HREF="node15.html">STL containers</A>
-<B> Up:</B> <A NAME="tex2html313"
-  HREF="node10.html">pack/unpack</A>
-<B> Previous:</B> <A NAME="tex2html307"
-  HREF="node13.html">Ref</A>
- &nbsp; <B>  <A NAME="tex2html315"
-  HREF="node1.html">Contents</A></B> 
- &nbsp; <B>  <A NAME="tex2html317"
-  HREF="node49.html">Index</A></B> 
-<!--End of Navigation Panel-->
+<BR><HR>
 <ADDRESS>
 Russell Standish
-2013-06-18
+2016-09-02
 </ADDRESS>
 </BODY>
 </HTML>

@@ -1,26 +1,26 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 
-<!--Converted with LaTeX2HTML 2008 (1.71)
+<!--Converted with LaTeX2HTML 2012 (1.2)
 original version by:  Nikos Drakos, CBLU, University of Leeds
 * revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
 * with significant contributions from:
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Graph serialisation</TITLE>
-<META NAME="description" CONTENT="Graph serialisation">
+<TITLE>Pointers</TITLE>
+<META NAME="description" CONTENT="Pointers">
 <META NAME="keywords" CONTENT="classdesc">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2008">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="classdesc.css">
 
 <LINK REL="next" HREF="node13.html">
 <LINK REL="previous" HREF="node11.html">
-<LINK REL="up" HREF="node10.html">
+<LINK REL="up" HREF="node11.html">
 <LINK REL="next" HREF="node13.html">
 </HEAD>
 
@@ -31,7 +31,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
 <A NAME="tex2html284"
-  HREF="node10.html">
+  HREF="node11.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
 <A NAME="tex2html278"
@@ -48,11 +48,11 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
  SRC="file:/usr/share/latex2html/icons/index.png"></A> 
 <BR>
 <B> Next:</B> <A NAME="tex2html291"
-  HREF="node13.html">Ref</A>
+  HREF="node13.html">Graph serialisation</A>
 <B> Up:</B> <A NAME="tex2html285"
-  HREF="node10.html">pack/unpack</A>
+  HREF="node11.html">pack/unpack</A>
 <B> Previous:</B> <A NAME="tex2html279"
-  HREF="node11.html">Pointers</A>
+  HREF="node11.html">pack/unpack</A>
  &nbsp; <B>  <A NAME="tex2html287"
   HREF="node1.html">Contents</A></B> 
  &nbsp; <B>  <A NAME="tex2html289"
@@ -61,50 +61,117 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00032000000000000000">
-Graph serialisation</A>
+<H2><A NAME="SECTION00031000000000000000"></A><A NAME="pointers"></A>
+<BR>
+Pointers
 </H2>
 
 <P>
-Dynamic references can be serialised, provided a few properties are
-known about the data structure they make up. There is no way of
-knowing whether standard pointer actually points to a real object, nor
-how many. However, since collections of objects are more conveniently
-handled by standard containers, and since no object can pointed to by
-the value 0 (or NULL), we can determine these things if the programmer
-follows a protocol whereby a pointer either references at a single
-object, or is NULL. Using a smart pointer additionally enforces this
-protocol. We call this the treenode or graphnode protocol, depending
-on whether the referenced data structure has cycles or not.
+<code>&lt;rant&gt;</code>
 
 <P>
-By default, packing a pointer raises an exception. However, this
-behavior is changed either by specifying a given type obeys the
-treenode or graphnode protocol using the <TT>treenode</TT>
-pragma<A NAME="221"></A> or <TT>graphnode</TT> pragma<A NAME="223"></A>
-respectively. Alternatively, the <code>pack_t::ptr_flag</code> can be set to
-the values <code>TREE</code> or <code>GRAPH</code> respectively.
+<BLOCKQUOTE>
+<EM><EM>Pointers are evil!</EM>. Pointers<A NAME="247"></A> are a dangerous
+programming construction, and widely abused in the C++ programming
+world. They often lead to obscure programming errors, and in
+particular to <EM>memory leaks</EM>, which are notoriously hard to
+debug. If there is an alternative method that encapsulates pointers,
+or avoids their use altogether, then that should be
+used. Unfortunately, pointers are vital to programming in C, and many
+of the practices are imported into C++.
+</EM>
+</BLOCKQUOTE>
 
 <P>
-What happens in this case, is that special graph serialisation
-algorithms defined in <code>pack_graph.h</code> are called that ensure graph
-objects are serialised or deserialised correctly. For deserialisation,
-new objects must be created to store the node contents. References to
-these objects are placed in the <code>alloced</code><A NAME="224"></A> member
-of the <code>pack_t</code> buffer object. These newly created objects are
-destroyed when the buffer object is destroyed, unless a copy of the
-<code>alloced</code> vector is made first. Conversely, the objects can be
-destroyed without destroying the buffer by clearing the alloced
-vector. Individual objects can be destroyed by simply erasing them
-(assuming you know which ones!).
+<code>&lt;/rant&gt;</code>
 
 <P>
-The <code>pack_graph</code> algorithm can also be applied to smart pointers
-or other reference types. An example is the <code>ref</code> smart pointer
-provided with Classdesc. For your smart pointer class T, you will need to provide an <code>Alloc&lt;T&gt;</code>
-class with an <code>operator()(pack_t* buf, T&amp; x)</code> that returns a
-newly allocated object referenced by x. The <code>buf</code> object is there
-if you wish to use the alloced mechanism.
+Whilst the above might be considered a little extreme, it is
+worthwhile listing what pointers are used for, and considering what
+alternatives there might be. In Classdesc, objects are usually assumed
+to have the following properties: default constructable, copyable,
+assignable and serialisable. All the simple traditional C data
+types except for pointers satisfy these properties. Compound types
+(structs and classes) whose members satisy these properties also
+satisfy them, with classdesc automagically extending the
+serialisability property.
+
+<P>
+<DL>
+<DT><STRONG>Pass by reference</STRONG></DT>
+<DD>In C++, the reference operator <code>&amp;</code> makes
+  obsolete the use of pointers for returning values from function
+  subroutines, and improves type safety. Of course this use of
+  pointers is of no concern for serialisation.
+</DD>
+<DT><STRONG>Dynamic Memory</STRONG></DT>
+<DD>In C++, we have the <TT>new</TT> operator to return
+  an array of objects from the heap. However, one must be careful to
+  <TT>delete</TT> the array of objects once finished with, otherwise a
+  memory leak may result. In this case, encapsulation can help. If the
+  pointer is encapsulated with a class definition, then the <TT>    delete</TT> can be called automatically when the object's destructor
+  is called, which happens automatically when an object goes out of
+  scope. The simple case of allocating some dynamic memory from the
+  heap can be most readily performed using the standard library
+  container <code>vector&lt;T&gt;</code>.
+</DD>
+<DT><STRONG>Strings</STRONG></DT>
+<DD><TT>char *</TT> variables can be replaced by the standard
+  library <TT>string</TT> type.
+</DD>
+<DT><STRONG>Dynamic references</STRONG></DT>
+<DD>Dynamic references are used a lot to
+  represent graph structures, or to provide access to objects declared
+  outside the current scope. For some purposes, C++'s static reference
+  type (<code>T&amp;</code>) is suitable, but is limited to being initialised
+  only at object construction time. Also, any reference loops will
+  cause serialisation to enter an infinite loop and crash. C++ offers
+  more possibilities in the form of ``smart pointers'', that guarantee
+  destruction of the referenced object once the reference object goes
+  out of scope. The standard C++ library provides <code>auto_ptr</code>, but
+  this is noncopyable, pretty much defeating the purpose of smart
+  pointers. The Boost library (http://www.boost.org) provides several
+  different sharable smart pointers, that can be used. Classdesc
+  provides its own concept, <TT>ref</TT> (see &#167;<A HREF="node14.html#ref">2.3</A>) that
+  is a type of dynamic reference.  It should be noted that linked
+  lists can be handled easily with standard library containers.
+</DD>
+<DT><STRONG>Legacy APIs</STRONG></DT>
+<DD>Many C-based legacy APIs use pointers for pass by
+  reference functionality, strings, or for anonymous references (to
+  avoid publishing the full specification of an object). These APIs
+  can be easily encapsulated to ensure any allocated pointers are
+  appropriately cleaned up.
+</DD>
+<DT><STRONG>Global references</STRONG></DT>
+<DD>An object that needs to be destroyed before
+  main() exits, yet needs to be referred to globally throughout the
+  program cannot be implemented as a global object (which is destroyed
+  after the program exits). Instead, it has to either be a global
+  pointer, which is initialised when the object is created, or the
+  entire program must be implemented as a method of an object which is
+  created in main().
+</DD>
+<DT><STRONG>Runtime polymorphism</STRONG></DT>
+<DD>Since the actual datatype might vary,
+  only references to the object can be handled. Traditional
+  pointer-based polymorphic systems are not copyable, assignable nor
+  serialisable, as copying a point to an allocated object invariably
+  leads to double free() errors (in the case of destructors cleaning
+  up pointers) or to memory leaks (in the case destructors don't do
+  anything). Traditionally, copying is performed by means of a
+  <code>clone()</code> virtual method, which is also how this is done in
+  Java. EcoLab provides an  PolyBase (see
+    &#167;<A HREF="node18.html#polymorphism">2.7</A>) base class in <code>Poly.h</code> which
+  provides an interface for cloning, and interfaces for serialisation
+  can be found in the <code>PolyPack</code>, <code>PolyXML</code> and
+  <code>PolyJson</code> headers and a simple
+  runtime type identification system. To create a reference, the
+  smart, modern way to do this is via the <code>shared_ptr</code> smart
+  pointer class, which is found in the TR1 library of your compiler,
+  or in Boost if your compiler does not do TR1.
+</DD>
+</DL>
 
 <P>
 <HR>
@@ -114,7 +181,7 @@ if you wish to use the alloced mechanism.
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
 <A NAME="tex2html284"
-  HREF="node10.html">
+  HREF="node11.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
 <A NAME="tex2html278"
@@ -131,11 +198,11 @@ if you wish to use the alloced mechanism.
  SRC="file:/usr/share/latex2html/icons/index.png"></A> 
 <BR>
 <B> Next:</B> <A NAME="tex2html291"
-  HREF="node13.html">Ref</A>
+  HREF="node13.html">Graph serialisation</A>
 <B> Up:</B> <A NAME="tex2html285"
-  HREF="node10.html">pack/unpack</A>
+  HREF="node11.html">pack/unpack</A>
 <B> Previous:</B> <A NAME="tex2html279"
-  HREF="node11.html">Pointers</A>
+  HREF="node11.html">pack/unpack</A>
  &nbsp; <B>  <A NAME="tex2html287"
   HREF="node1.html">Contents</A></B> 
  &nbsp; <B>  <A NAME="tex2html289"
@@ -143,7 +210,7 @@ if you wish to use the alloced mechanism.
 <!--End of Navigation Panel-->
 <ADDRESS>
 Russell Standish
-2013-06-18
+2016-09-02
 </ADDRESS>
 </BODY>
 </HTML>

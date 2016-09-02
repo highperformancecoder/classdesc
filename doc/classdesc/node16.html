@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 
-<!--Converted with LaTeX2HTML 2008 (1.71)
+<!--Converted with LaTeX2HTML 2012 (1.2)
 original version by:  Nikos Drakos, CBLU, University of Leeds
 * revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
 * with significant contributions from:
@@ -13,14 +13,14 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2008">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="classdesc.css">
 
 <LINK REL="next" HREF="node17.html">
 <LINK REL="previous" HREF="node15.html">
-<LINK REL="up" HREF="node10.html">
+<LINK REL="up" HREF="node11.html">
 <LINK REL="next" HREF="node17.html">
 </HEAD>
 
@@ -31,7 +31,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
 <A NAME="tex2html340"
-  HREF="node10.html">
+  HREF="node11.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
 <A NAME="tex2html334"
@@ -50,9 +50,9 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <B> Next:</B> <A NAME="tex2html347"
   HREF="node17.html">Synopsis of pack_t</A>
 <B> Up:</B> <A NAME="tex2html341"
-  HREF="node10.html">pack/unpack</A>
+  HREF="node11.html">pack/unpack</A>
 <B> Previous:</B> <A NAME="tex2html335"
-  HREF="node15.html">STL containers</A>
+  HREF="node15.html">Converting code using traditional</A>
  &nbsp; <B>  <A NAME="tex2html343"
   HREF="node1.html">Contents</A></B> 
  &nbsp; <B>  <A NAME="tex2html345"
@@ -61,7 +61,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00036000000000000000">
+<H2><A NAME="SECTION00035000000000000000">
 Roll your own</A>
 </H2>
 
@@ -70,7 +70,7 @@ Sometimes, you need to develop you own dynamic data types, whether a
 smart pointer, or a STL container like type, that requires a pointer
 as part of its implementation. You will need to provide your own hand
 crafted serialisation routines for these, and use the <TT>omit</TT>
-pragma<A NAME="245"></A> to prevent classdesc from emitting an
+pragma<A NAME="289"></A> to prevent classdesc from emitting an
 automatic definition (or simply arrange things so that classdesc is
 not run on the definition file). You are advised to keep the pointer
 encapsulation suitably minimalist, so as to minimise the amount of
@@ -80,7 +80,7 @@ manual code of serialisation routines.
 <BR><HR>
 <ADDRESS>
 Russell Standish
-2013-06-18
+2016-09-02
 </ADDRESS>
 </BODY>
 </HTML>

@@ -1,21 +1,11 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=latex 2012.9.18)  18 JUN 2013 14:35
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/TeX Live for SUSE Linux) (format=latex 2015.12.6)  2 SEP 2016 11:31
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **./images.tex
 (./images.tex
-LaTeX2e <2009/09/24>
-Babel <v3.8l> and hyphenation patterns for english, dumylang, nohyphenation, ge
-rman-x-2009-06-19, ngerman-x-2009-06-19, afrikaans, ancientgreek, ibycus, arabi
-c, armenian, basque, bulgarian, catalan, pinyin, coptic, croatian, czech, danis
-h, dutch, ukenglish, usenglishmax, esperanto, estonian, ethiopic, farsi, finnis
-h, french, galician, german, ngerman, swissgerman, monogreek, greek, hungarian,
- icelandic, assamese, bengali, gujarati, hindi, kannada, malayalam, marathi, or
-iya, panjabi, tamil, telugu, indonesian, interlingua, irish, italian, kurmanji,
- lao, latin, latvian, lithuanian, mongolian, mongolianlmc, bokmal, nynorsk, pol
-ish, portuguese, romanian, russian, sanskrit, serbian, serbianc, slovak, sloven
-ian, spanish, swedish, turkish, turkmen, ukrainian, uppersorbian, welsh, loaded
-.
+LaTeX2e <2011/06/27>
+Babel <3.9f> and hyphenation patterns for 78 languages loaded.
 
 (/usr/share/texmf/tex/latex/base/article.cls
 Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
@@ -36,23 +26,17 @@ File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 ) (/usr/share/texmf/tex/latex/base/ifthen.sty
 Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
 ) (/usr/share/texmf/tex/latex/pstricks/pstricks.sty
-Package: pstricks 2011/04/23 v0.50 LaTeX wrapper for `PSTricks' (RN,HV)
-(/usr/share/texmf/tex/generic/oberdiek/ifpdf.sty
-Package: ifpdf 2011/01/30 v2.3 Provides the ifpdf switch (HO)
-Package ifpdf Info: pdfTeX in PDF mode is not detected.
-) (/usr/share/texmf/tex/generic/oberdiek/ifluatex.sty
-Package: ifluatex 2010/03/01 v1.3 Provides the ifluatex switch (HO)
-Package ifluatex Info: LuaTeX not detected.
-) (/usr/share/texmf/tex/generic/pstricks/pstricks.tex (/usr/share/texmf/tex/gen
-eric/xkeyval/pst-xkey.tex
+Package: pstricks 2013/05/21 v0.56 LaTeX wrapper for `PSTricks' (RN,HV)
+(/usr/share/texmf/tex/generic/pstricks/pstricks.tex (/usr/share/texmf/tex/gener
+ic/xkeyval/pst-xkey.tex
 File: pst-xkey.tex 2005/11/25 v1.6 PSTricks specialization of xkeyval (HA)
 (/usr/share/texmf/tex/latex/xkeyval/xkeyval.sty
-Package: xkeyval 2008/08/13 v2.6a package option processing (HA)
+Package: xkeyval 2012/10/14 v2.6b package option processing (HA)
 (/usr/share/texmf/tex/generic/xkeyval/xkeyval.tex
 \XKV@toks=\toks14
 \XKV@tempa@toks=\toks15
 \XKV@depth=\count87
-File: xkeyval.tex 2008/08/13 v2.6a key=value parser (HA)
+File: xkeyval.tex 2012/10/14 v2.6b key=value parser (HA)
 (/usr/share/texmf/tex/generic/xkeyval/keyval.tex)))) (/usr/share/texmf/tex/gene
 ric/pstricks/pst-fp.tex `pst-fp' v0.05, 2010/01/17 (hv)
 \pstFP@xs=\count88
@@ -64,19 +48,31 @@ ric/pstricks/pst-fp.tex `pst-fp' v0.05, 2010/01/17 (hv)
 \pstFP@regb=\count94
 \pstFP@regs=\count95
 \pstFP@times=\count96
+) (/usr/share/texmf/tex/generic/pgf/utilities/pgfutil-common.tex
+\pgfutil@everybye=\toks16
+) (/usr/share/texmf/tex/generic/pgf/utilities/pgfkeys.code.tex
+\pgfkeys@pathtoks=\toks17
+\pgfkeys@temptoks=\toks18
+(/usr/share/texmf/tex/generic/pgf/utilities/pgfkeysfiltered.code.tex
+\pgfkeys@tmptoks=\toks19
+)) (/usr/share/texmf/tex/generic/pgf/utilities/pgffor.code.tex
+\pgffor@iter=\dimen103
+\pgffor@skip=\dimen104
+\pgffor@stack=\toks20
+\pgffor@toks=\toks21
 )
 \psLoopIndex=\count97
-`PSTricks' v2.20  <2011/04/23> (tvz)
-\pst@dima=\dimen103
-\pst@dimb=\dimen104
-\pst@dimc=\dimen105
-\pst@dimd=\dimen106
-\pst@dimg=\dimen107
-\pst@dimh=\dimen108
-\pst@dimm=\dimen109
-\pst@dimn=\dimen110
-\pst@dimo=\dimen111
-\pst@dimp=\dimen112
+`PSTricks' v2.43  <2013/05/12> (tvz)
+\pst@dima=\dimen105
+\pst@dimb=\dimen106
+\pst@dimc=\dimen107
+\pst@dimd=\dimen108
+\pst@dimg=\dimen109
+\pst@dimh=\dimen110
+\pst@dimm=\dimen111
+\pst@dimn=\dimen112
+\pst@dimo=\dimen113
+\pst@dimp=\dimen114
 \pst@hbox=\box26
 \pst@ibox=\box27
 \pst@boxg=\box28
@@ -91,28 +87,31 @@ ric/pstricks/pst-fp.tex `pst-fp' v0.05, 2010/01/17 (hv)
 \pst@cnto=\count106
 \pst@cntp=\count107
 \@zero=\count108
-\pst@toks=\toks16
+\pst@toks=\toks22
 (/usr/share/texmf/tex/generic/pstricks/pstricks.con)
-\psunit=\dimen113
-\psxunit=\dimen114
-\psyunit=\dimen115
+\psunit=\dimen115
+\psxunit=\dimen116
+\psyunit=\dimen117
 \pst@C@@rType=\count109
-\pslinewidth=\dimen116
-\psk@startLW=\dimen117
-\psk@endLW=\dimen118
-\pst@customdefs=\toks17
-\pslinearc=\dimen119
-\pst@symbolStep=\dimen120
-\pst@symbolWidth=\dimen121
-\everypsbox=\toks18
-\psframesep=\dimen122
-\pslabelsep=\dimen123
-\pst@shift=\dimen124
+\pslinewidth=\dimen118
+\psk@startLW=\dimen119
+\psk@endLW=\dimen120
+\pst@customdefs=\toks23
+\pslinearc=\dimen121
+\pst@symbolStep=\dimen122
+\pst@symbolWidth=\dimen123
+\pst@symbolLinewidth=\dimen124
+\everypsbox=\toks24
+\psframesep=\dimen125
+\pslabelsep=\dimen126
+\sh@wgridXunit=\dimen127
+\sh@wgridYunit=\dimen128
+\pst@shift=\dimen129
 \theoverlaybox=\box29
 )
-File: pstricks.tex 2011/04/23 v2.20 `PSTricks' (tvz,hv)
+File: pstricks.tex 2013/05/12 v2.43 `PSTricks' (tvz,hv)
 (/usr/share/texmf/tex/generic/pstricks/pst-fp.tex)
-File: pst-fp.tex 2011/04/23 v2.20 `PST-fp' (hv)
+File: pst-fp.tex 2013/05/12 v2.43 `PST-fp' (hv)
 (/usr/share/texmf/tex/latex/xcolor/xcolor.sty
 Package: xcolor 2007/01/21 v2.11 LaTeX color extensions (UK)
 (/usr/share/texmf/tex/latex/latexconfig/color.cfg
@@ -131,8 +130,9 @@ Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1358.
 Package xcolor Info: Model `Gray' substituted by `gray' on input line 1359.
 Package xcolor Info: Model `wave' substituted by `hsb' on input line 1360.
 )) (/usr/share/texmf/tex/latex/pst-node/pst-node.sty
+Package: pst-node 2012/09/18 v1.01 LaTeX wrapper for `pst-node' (HV)
 Package: pst-node 2010/04/22 package wrapper for pst-node.tex
-(/usr/share/texmf/tex/generic/pst-node/pst-node.tex  v1.16, 2011/05/05
+(/usr/share/texmf/tex/generic/pst-node/pst-node.tex  v1.27, 2013/04/12
 \psrow=\count110
 \pscol=\count111
 \psmatrixcnt=\count112
@@ -142,88 +142,96 @@ Package: pst-node 2010/04/22 package wrapper for pst-node.tex
 \num@pts=\count114
 \pst@argcnt=\count115
 )
-File: pst-node.tex 2011/05/05 1.16 `pst-node' (tvz)
-) (/usr/lib/texmf/tex/latex/html/html.sty (/usr/share/texmf/tex/latex/hyperref/
-hyperref.sty
-Package: hyperref 2011/04/17 v6.82g Hypertext links for LaTeX
+File: pst-node.tex 2013/04/12 1.27 `pst-node' (tvz,hv)
+) (/usr/share/texmf/tex/latex/html/html.sty (/usr/share/texmf/tex/latex/hyperre
+f/hyperref.sty
+Package: hyperref 2012/11/06 v6.83m Hypertext links for LaTeX
 (/usr/share/texmf/tex/generic/oberdiek/hobsub-hyperref.sty
-Package: hobsub-hyperref 2011/04/23 v1.4 Bundle oberdiek, subset hyperref (HO)
+Package: hobsub-hyperref 2012/05/28 v1.13 Bundle oberdiek, subset hyperref (HO)
+
 (/usr/share/texmf/tex/generic/oberdiek/hobsub-generic.sty
-Package: hobsub-generic 2011/04/23 v1.4 Bundle oberdiek, subset generic (HO)
-Package: hobsub 2011/04/23 v1.4 Subsetting bundle oberdiek (HO)
-Package: infwarerr 2010/04/08 v1.3 Providing info/warning/message (HO)
-Package: ltxcmds 2011/04/18 v1.20 LaTeX kernel commands for general use (HO)
-Package hobsub Info: Skipping package `ifluatex' (already loaded).
-Package: ifvtex 2010/03/01 v1.5 Switches for detecting VTeX and its modes (HO)
+Package: hobsub-generic 2012/05/28 v1.13 Bundle oberdiek, subset generic (HO)
+Package: hobsub 2012/05/28 v1.13 Construct package bundles (HO)
+Package: infwarerr 2010/04/08 v1.3 Providing info/warning/error messages (HO)
+Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
+Package: ifluatex 2010/03/01 v1.3 Provides the ifluatex switch (HO)
+Package ifluatex Info: LuaTeX not detected.
+Package: ifvtex 2010/03/01 v1.5 Detect VTeX and its facilities (HO)
 Package ifvtex Info: VTeX not detected.
-Package: intcalc 2007/09/27 v1.1 Expandable integer calculations (HO)
-Package hobsub Info: Skipping package `ifpdf' (already loaded).
-Package: etexcmds 2011/02/16 v1.5 Prefix for e-TeX command names (HO)
+Package: intcalc 2007/09/27 v1.1 Expandable calculations with integers (HO)
+Package: ifpdf 2011/01/30 v2.3 Provides the ifpdf switch (HO)
+Package ifpdf Info: pdfTeX in PDF mode is not detected.
+Package: etexcmds 2011/02/16 v1.5 Avoid name clashes with e-TeX commands (HO)
 Package etexcmds Info: Could not find \expanded.
 (etexcmds)             That can mean that you are not using pdfTeX 1.50 or
 (etexcmds)             that some package has redefined \expanded.
 (etexcmds)             In the latter case, load this package earlier.
-Package: kvsetkeys 2011/04/07 v1.13 Key value parser (HO)
-Package: kvdefinekeys 2011/04/07 v1.3 Defining keys (HO)
-Package: pdftexcmds 2011/04/22 v0.16 Utilities of pdfTeX for LuaTeX (HO)
+Package: kvsetkeys 2012/04/25 v1.16 Key value parser (HO)
+Package: kvdefinekeys 2011/04/07 v1.3 Define keys (HO)
+Package: pdftexcmds 2011/11/29 v0.20 Utility functions of pdfTeX for LuaTeX (HO
+)
 Package pdftexcmds Info: LuaTeX not detected.
 Package pdftexcmds Info: \pdf@primitive is available.
 Package pdftexcmds Info: \pdf@ifprimitive is available.
 Package pdftexcmds Info: \pdfdraftmode is ignored in DVI mode.
-Package: pdfescape 2011/04/04 v1.12 Provides string conversions (HO)
-Package: bigintcalc 2011/01/30 v1.2 Expandable big integer calculations (HO)
-Package: bitset 2011/01/30 v1.1 Data type bit set (HO)
-Package: uniquecounter 2011/01/30 v1.2 Provides unlimited unique counter (HO)
+Package: pdfescape 2011/11/25 v1.13 Implements pdfTeX's escape features (HO)
+Package: bigintcalc 2012/04/08 v1.3 Expandable calculations on big integers (HO
+)
+Package: bitset 2011/01/30 v1.1 Handle bit-vector datatype (HO)
+Package: uniquecounter 2011/01/30 v1.2 Provide unlimited unique counter (HO)
 )
 Package hobsub Info: Skipping package `hobsub' (already loaded).
 Package: letltxmacro 2010/09/02 v1.4 Let assignment for LaTeX macros (HO)
-Package: hopatch 2011/01/30 v1.0 Wrapper for package hooks (HO)
+Package: hopatch 2012/05/28 v1.2 Wrapper for package hooks (HO)
 Package: xcolor-patch 2011/01/30 xcolor patch
-Package: atveryend 2011/04/23 v1.7 Hooks at very end of document (HO)
-Package atveryend Info: \enddocument detected (standard).
-Package: atbegshi 2011/01/30 v1.15 At begin shipout hook (HO)
-Package: refcount 2010/12/01 v3.2 Data extraction from references (HO)
-Package: hycolor 2011/01/30 v1.7 Color options of hyperref/bookmark (HO)
+Package: atveryend 2011/06/30 v1.8 Hooks at the very end of document (HO)
+Package atveryend Info: \enddocument detected (standard20110627).
+Package: atbegshi 2011/10/05 v1.16 At begin shipout hook (HO)
+Package: refcount 2011/10/16 v3.4 Data extraction from label references (HO)
+Package: hycolor 2011/01/30 v1.7 Color options for hyperref/bookmark (HO)
 ) (/usr/share/texmf/tex/generic/ifxetex/ifxetex.sty
 Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
+) (/usr/share/texmf/tex/latex/oberdiek/auxhook.sty
+Package: auxhook 2011/03/04 v1.3 Hooks for auxiliary files (HO)
 ) (/usr/share/texmf/tex/latex/oberdiek/kvoptions.sty
-Package: kvoptions 2010/12/23 v3.10 Keyval support for LaTeX options (HO)
+Package: kvoptions 2011/06/30 v3.11 Key value format for package options (HO)
 )
-\@linkdim=\dimen125
+\@linkdim=\dimen130
 \Hy@linkcounter=\count116
 \Hy@pagecounter=\count117
 (/usr/share/texmf/tex/latex/hyperref/pd1enc.def
-File: pd1enc.def 2011/04/17 v6.82g Hyperref: PDFDocEncoding definition (HO)
+File: pd1enc.def 2012/11/06 v6.83m Hyperref: PDFDocEncoding definition (HO)
 )
 \Hy@SavedSpaceFactor=\count118
 (/usr/share/texmf/tex/latex/latexconfig/hyperref.cfg
 File: hyperref.cfg 2002/06/06 v1.2 hyperref configuration of TeXLive
 )
-Package hyperref Info: Hyper figures OFF on input line 4026.
-Package hyperref Info: Link nesting OFF on input line 4031.
-Package hyperref Info: Hyper index ON on input line 4034.
-Package hyperref Info: Plain pages OFF on input line 4041.
-Package hyperref Info: Backreferencing OFF on input line 4046.
+Package hyperref Info: Hyper figures OFF on input line 4443.
+Package hyperref Info: Link nesting OFF on input line 4448.
+Package hyperref Info: Hyper index ON on input line 4451.
+Package hyperref Info: Plain pages OFF on input line 4458.
+Package hyperref Info: Backreferencing OFF on input line 4463.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
-Package hyperref Info: Bookmarks ON on input line 4264.
+Package hyperref Info: Bookmarks ON on input line 4688.
 \c@Hy@tempcnt=\count119
 (/usr/share/texmf/tex/latex/url/url.sty
 \Urlmuskip=\muskip10
 Package: url 2006/04/12  ver 3.3  Verb mode for urls, etc.
 )
-LaTeX Info: Redefining \url on input line 4617.
+LaTeX Info: Redefining \url on input line 5041.
+\XeTeXLinkMargin=\dimen131
 \Fld@menulength=\count120
-\Field@Width=\dimen126
-\Fld@charsize=\dimen127
-Package hyperref Info: Hyper figures OFF on input line 5701.
-Package hyperref Info: Link nesting OFF on input line 5706.
-Package hyperref Info: Hyper index ON on input line 5709.
-Package hyperref Info: backreferencing OFF on input line 5716.
-Package hyperref Info: Link coloring OFF on input line 5721.
-Package hyperref Info: Link coloring with OCG OFF on input line 5726.
-Package hyperref Info: PDF/A mode OFF on input line 5731.
-LaTeX Info: Redefining \ref on input line 5771.
-LaTeX Info: Redefining \pageref on input line 5775.
+\Field@Width=\dimen132
+\Fld@charsize=\dimen133
+Package hyperref Info: Hyper figures OFF on input line 6295.
+Package hyperref Info: Link nesting OFF on input line 6300.
+Package hyperref Info: Hyper index ON on input line 6303.
+Package hyperref Info: backreferencing OFF on input line 6310.
+Package hyperref Info: Link coloring OFF on input line 6315.
+Package hyperref Info: Link coloring with OCG OFF on input line 6320.
+Package hyperref Info: PDF/A mode OFF on input line 6325.
+LaTeX Info: Redefining \ref on input line 6365.
+LaTeX Info: Redefining \pageref on input line 6369.
 \Hy@abspage=\count121
 \c@Item=\count122
 \c@Hfootnote=\count123
@@ -232,15 +240,16 @@ LaTeX Info: Redefining \pageref on input line 5775.
 Package hyperref Message: Driver (default): hdvips.
 
 (/usr/share/texmf/tex/latex/hyperref/hdvips.def
-File: hdvips.def 2011/04/17 v6.82g Hyperref driver for dvips
+File: hdvips.def 2012/11/06 v6.83m Hyperref driver for dvips
 (/usr/share/texmf/tex/latex/hyperref/pdfmark.def
-File: pdfmark.def 2011/04/17 v6.82g Hyperref definitions for pdfmark specials
-\pdf@docset=\toks19
+File: pdfmark.def 2012/11/06 v6.83m Hyperref definitions for pdfmark specials
+\pdf@docset=\toks25
 \pdf@box=\box30
-\pdf@toks=\toks20
-\pdf@defaulttoks=\toks21
-\Fld@listcount=\count124
-\c@bookmark@seq@number=\count125
+\pdf@toks=\toks26
+\pdf@defaulttoks=\toks27
+\HyField@AnnotCount=\count124
+\Fld@listcount=\count125
+\c@bookmark@seq@number=\count126
 (/usr/share/texmf/tex/latex/oberdiek/rerunfilecheck.sty
 Package: rerunfilecheck 2011/04/15 v1.7 Rerun checks for auxiliary files (HO)
 Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
@@ -250,27 +259,27 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 ))
 Package: html 1999/07/19 v1.38 hypertext commands for latex2html (nd, hws, rrm)
 
-\c@lpart=\count126
-\c@lchapter=\count127
-\c@chapter=\count128
-\c@lsection=\count129
-\c@lsubsection=\count130
-\c@lsubsubsection=\count131
-\c@lparagraph=\count132
-\c@lsubparagraph=\count133
-\c@lsubsubparagraph=\count134
+\c@lpart=\count127
+\c@lchapter=\count128
+\c@chapter=\count129
+\c@lsection=\count130
+\c@lsubsection=\count131
+\c@lsubsubsection=\count132
+\c@lparagraph=\count133
+\c@lsubparagraph=\count134
+\c@lsubsubparagraph=\count135
 \ptrfile=\write3
 ) (/usr/share/texmf/tex/generic/epsf/epsf.sty
 This is `epsf.tex' v2.7.4 <14 February 2011>
 \epsffilein=\read1
-\epsfframemargin=\dimen128
-\epsfframethickness=\dimen129
-\epsfrsize=\dimen130
-\epsftmp=\dimen131
-\epsftsize=\dimen132
-\epsfxsize=\dimen133
-\epsfysize=\dimen134
-\pspoints=\dimen135
+\epsfframemargin=\dimen134
+\epsfframethickness=\dimen135
+\epsfrsize=\dimen136
+\epsftmp=\dimen137
+\epsftsize=\dimen138
+\epsfxsize=\dimen139
+\epsfysize=\dimen140
+\pspoints=\dimen141
 ) (/usr/share/texmf/tex/latex/base/makeidx.sty
 Package: makeidx 2000/03/29 v1.0m Standard LaTeX package
 )
@@ -289,8 +298,8 @@ Package pstcol Warning: ************************************
 
 ) (/usr/share/texmf/tex/latex/base/inputenc.sty
 Package: inputenc 2008/03/30 v1.1d Input encoding file
-\inpenc@prehook=\toks22
-\inpenc@posthook=\toks23
+\inpenc@prehook=\toks28
+\inpenc@posthook=\toks29
 (/usr/share/texmf/tex/latex/base/latin1.def
 File: latin1.def 2008/03/30 v1.1d Input encoding file
 ))
@@ -316,11 +325,11 @@ LaTeX Font Info:    ... okay on input line 134.
 \AtBeginShipoutBox=\box32
 Package hyperref Info: Link coloring OFF on input line 134.
 (/usr/share/texmf/tex/latex/hyperref/nameref.sty
-Package: nameref 2010/04/30 v2.40 Cross-referencing by name of section
+Package: nameref 2012/10/27 v2.43 Cross-referencing by name of section
 (/usr/share/texmf/tex/generic/oberdiek/gettitlestring.sty
 Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 )
-\c@section@level=\count135
+\c@section@level=\count136
 )
 LaTeX Info: Redefining \ref on input line 134.
 LaTeX Info: Redefining \pageref on input line 134.
@@ -355,7 +364,7 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <7> on input line 158.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <5> on input line 158.
-l2hSize :tex2html_wrap_inline2736:6.45831pt::0.0pt::10.50005pt.
+l2hSize :tex2html_wrap_inline2841:6.45831pt::0.0pt::10.50005pt.
 [1
 
 
@@ -363,24 +372,24 @@ l2hSize :tex2html_wrap_inline2736:6.45831pt::0.0pt::10.50005pt.
 ]
 (polymorph-example.eps
 )
-l2hSize :figure289:243.50159pt::0.0pt::349.0pt.
+l2hSize :figure333:243.50159pt::0.0pt::349.0pt.
 [2
 
 
 ]
-l2hSize :tex2html_wrap_inline726:6.59525pt::0.0pt::3.94516pt.
+l2hSize :tex2html_wrap_inline764:6.59525pt::0.0pt::3.94516pt.
 [3
 
 
 ]
 (fig1.eps
 )
-l2hSize :figure471:67.25047pt::0.0pt::349.0pt.
+l2hSize :figure515:67.25047pt::0.0pt::349.0pt.
 [4
 
 
 ]
-l2hSize :figure480:61.64441pt::0.0pt::349.0pt.
+l2hSize :figure524:61.64441pt::0.0pt::349.0pt.
 [5
 
 
@@ -389,7 +398,7 @@ Overfull \hbox (41.16736pt too wide) in paragraph at lines 238--251
 [][] 
  []
 
-l2hSize :figure494:121.19998pt::0.0pt::349.0pt.
+l2hSize :figure538:121.19998pt::0.0pt::349.0pt.
 [6
 
 
@@ -423,12 +432,12 @@ Overfull \hbox (55.24648pt too wide) in paragraph at lines 275--275
 "cpp_" sub-string[] 
  []
 
-l2hSize :figure504:203.38887pt::0.0pt::349.0pt.
+l2hSize :figure548:203.38887pt::0.0pt::349.0pt.
 [7
 
 
 ]
-l2hSize :figure510:154.0pt::0.0pt::349.0pt.
+l2hSize :figure554:154.0pt::0.0pt::349.0pt.
 [8
 
 
@@ -452,7 +461,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 324--325
 
  []
 
-l2hSize :figure522:288.33331pt::0.0pt::349.0pt.
+l2hSize :figure566:288.33331pt::0.0pt::349.0pt.
 [9
 
 
@@ -496,12 +505,12 @@ Overfull \hbox (38.24687pt too wide) in paragraph at lines 364--364
 buffer); }[] 
  []
 
-l2hSize :figure541:321.72223pt::0.0pt::349.0pt.
+l2hSize :figure585:321.72223pt::0.0pt::349.0pt.
 [10
 
 
 ]
-l2hSize :figure554:168.22223pt::0.0pt::349.0pt.
+l2hSize :figure598:168.22223pt::0.0pt::349.0pt.
 [11
 
 
@@ -523,17 +532,17 @@ Overfull \hbox (95.14484pt too wide) in paragraph at lines 408--408
 le", "double x1 , objc_t & buf");[] 
  []
 
-l2hSize :figure562:109.74998pt::0.0pt::349.0pt.
+l2hSize :figure606:109.74998pt::0.0pt::349.0pt.
 [12
 
 
 ]
-l2hSize :figure572:178.8333pt::0.0pt::349.0pt.
+l2hSize :figure616:178.8333pt::0.0pt::349.0pt.
 [13
 
 
 ]
-l2hSize :figure581:82.88889pt::0.0pt::349.0pt.
+l2hSize :figure625:82.88889pt::0.0pt::349.0pt.
 [14
 
 
@@ -545,7 +554,7 @@ Overfull \hbox (31.41685pt too wide) in paragraph at lines 454--455
 [][] 
  []
 
-l2hSize :figure587:252.94208pt::0.0pt::349.0pt.
+l2hSize :figure631:252.94208pt::0.0pt::349.0pt.
 [15
 
 
@@ -586,7 +595,7 @@ Overfull \hbox (101.24632pt too wide) in paragraph at lines 484--484
 $(CFLAGS) $(LDFLAGS) -[] 
  []
 
-l2hSize :figure594:219.19464pt::0.0pt::349.0pt.
+l2hSize :figure638:219.19464pt::0.0pt::349.0pt.
 [16
 
 
@@ -602,7 +611,7 @@ Overfull \hbox (7.99689pt too wide) in paragraph at lines 527--527
 ounter.m[] 
  []
 
-l2hSize :figure616:382.0pt::0.0pt::349.0pt.
+l2hSize :figure660:382.0pt::0.0pt::349.0pt.
 [17
 
 
@@ -654,7 +663,7 @@ Overfull \hbox (128.74583pt too wide) in paragraph at lines 568--568
             ? myCounter example[] 
  []
 
-l2hSize :figure622:394.83333pt::0.0pt::349.0pt.
+l2hSize :figure666:394.83333pt::0.0pt::349.0pt.
 [18
 
 
@@ -675,12 +684,12 @@ Package rerunfilecheck Info: Checksums for `images.out':
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 577.
  ) 
 Here is how much of TeX's memory you used:
- 7226 strings out of 493634
- 101766 string characters out of 3148354
- 223981 words of memory out of 3500000
- 10477 multiletter control sequences out of 15000+200000
- 5962 words of font info for 23 fonts, out of 3000000 for 9000
- 831 hyphenation exceptions out of 8191
- 38i,12n,38p,543b,358s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 8010 strings out of 493316
+ 118147 string characters out of 6145919
+ 246834 words of memory out of 5000000
+ 11404 multiletter control sequences out of 15000+600000
+ 5962 words of font info for 23 fonts, out of 8000000 for 9000
+ 957 hyphenation exceptions out of 8191
+ 38i,12n,51p,543b,358s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on images.dvi (18 pages, 24504 bytes).
+Output written on images.dvi (18 pages, 23948 bytes).

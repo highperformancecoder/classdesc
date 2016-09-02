@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 
-<!--Converted with LaTeX2HTML 2008 (1.71)
+<!--Converted with LaTeX2HTML 2012 (1.2)
 original version by:  Nikos Drakos, CBLU, University of Leeds
 * revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
 * with significant contributions from:
@@ -13,7 +13,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2008">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="classdesc.css">
@@ -61,7 +61,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <BR>
 <!--End of Navigation Panel-->
 
-<H2><A NAME="SECTION00093000000000000000"></A><A NAME="411"></A>
+<H2><A NAME="SECTION00093000000000000000"></A><A NAME="455"></A>
 <BR>
 MPIslave
 </H2>
@@ -111,13 +111,13 @@ slave &lt;&lt; &amp;S::foo &lt;&lt; x &lt;&lt; send(1);
 without needing to declare additional <TT>MPIbufs</TT>.
 
 <P>
-For managing a list of idle slaves, the <TT>idle</TT><A NAME="424"></A> vector
-is employed, and is manipulated through the <TT>exec</TT><A NAME="426"></A>
+For managing a list of idle slaves, the <TT>idle</TT><A NAME="468"></A> vector
+is employed, and is manipulated through the <TT>exec</TT><A NAME="470"></A>
 method, which dispatches a command to be executed on a slave, and the
-<TT>get_returnv()</TT><A NAME="428"></A> which returns the returned
+<TT>get_returnv()</TT><A NAME="472"></A> which returns the returned
 result as an MPIbuf, and places the processor from which it received a
 value back on the idle list. This technique is only valid for slave
-methods returning a message (even if its a null message). The <TT>wait_all_idle</TT><A NAME="430"></A> method waits for all slaves to
+methods returning a message (even if its a null message). The <TT>wait_all_idle</TT><A NAME="474"></A> method waits for all slaves to
 return.
 
 <P>
@@ -171,7 +171,7 @@ slaves.
 <!--End of Navigation Panel-->
 <ADDRESS>
 Russell Standish
-2013-06-18
+2016-09-02
 </ADDRESS>
 </BODY>
 </HTML>

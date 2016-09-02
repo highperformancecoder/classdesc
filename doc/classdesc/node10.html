@@ -1,206 +1,105 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 
-<!--Converted with LaTeX2HTML 2008 (1.71)
+<!--Converted with LaTeX2HTML 2012 (1.2)
 original version by:  Nikos Drakos, CBLU, University of Leeds
 * revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
 * with significant contributions from:
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>pack/unpack</TITLE>
-<META NAME="description" CONTENT="pack/unpack">
+<TITLE>STL containers</TITLE>
+<META NAME="description" CONTENT="STL containers">
 <META NAME="keywords" CONTENT="classdesc">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 
-<META NAME="Generator" CONTENT="LaTeX2HTML v2008">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="classdesc.css">
 
-<LINK REL="next" HREF="node21.html">
-<LINK REL="previous" HREF="node2.html">
-<LINK REL="up" HREF="classdesc.html">
+<LINK REL="previous" HREF="node9.html">
+<LINK REL="up" HREF="node2.html">
 <LINK REL="next" HREF="node11.html">
 </HEAD>
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html252"
+<A NAME="tex2html253"
   HREF="node11.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
  SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<A NAME="tex2html246"
-  HREF="classdesc.html">
+<A NAME="tex2html247"
+  HREF="node2.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
  SRC="file:/usr/share/latex2html/icons/up.png"></A> 
-<A NAME="tex2html240"
+<A NAME="tex2html243"
   HREF="node9.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
  SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
-<A NAME="tex2html248"
+<A NAME="tex2html249"
   HREF="node1.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
  SRC="file:/usr/share/latex2html/icons/contents.png"></A> 
-<A NAME="tex2html250"
+<A NAME="tex2html251"
   HREF="node49.html">
 <IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
  SRC="file:/usr/share/latex2html/icons/index.png"></A> 
 <BR>
-<B> Next:</B> <A NAME="tex2html253"
-  HREF="node11.html">Pointers</A>
-<B> Up:</B> <A NAME="tex2html247"
-  HREF="classdesc.html">Classdesc Documentation</A>
-<B> Previous:</B> <A NAME="tex2html241"
+<B> Next:</B> <A NAME="tex2html254"
+  HREF="node11.html">pack/unpack</A>
+<B> Up:</B> <A NAME="tex2html248"
+  HREF="node2.html">Object Reflection</A>
+<B> Previous:</B> <A NAME="tex2html244"
   HREF="node9.html">Excluding particular members from</A>
- &nbsp; <B>  <A NAME="tex2html249"
+ &nbsp; <B>  <A NAME="tex2html250"
   HREF="node1.html">Contents</A></B> 
- &nbsp; <B>  <A NAME="tex2html251"
+ &nbsp; <B>  <A NAME="tex2html252"
   HREF="node49.html">Index</A></B> 
 <BR>
 <BR>
 <!--End of Navigation Panel-->
 
-<H1><A NAME="SECTION00030000000000000000">
-pack/unpack</A>
-</H1>
+<H2><A NAME="SECTION00028000000000000000">
+STL containers</A>
+</H2>
 
 <P>
-The pack/unpack<A NAME="175"></A><A NAME="176"></A> function implements
-``serialisation''<A NAME="177"></A>, or the conversion of an object
-into a binary form that can be saved to a file or transmitted over the
-network to a process running in a different memory address space. The
-obvious strategy of simply sending <TT>sizeof(</TT><EM>object</EM><TT>)</TT>
-bytes starting at address &amp;<EM>object</EM> doesn't work, as the object
-may contain members that are implemented using pointers -- eg dynamic
-strings or arrays. The obvious strategy will simply copy the contents
-of the pointer, which will not be valid in the destination's address
-space.
+Container support for standard STL containers is handled automatically
+by the standard descriptors. To extend the support to custom
+containers, it is necessary to inform classdesc that your custom type
+is a container, and that is done via two type traits:
+<code>is_sequence</code><A NAME="210"></A><A NAME="is_sequence"></A> and
+<code>is_associative_container</code><A NAME="212"></A><A NAME="is_associative_container"></A>,
+which handle these two concepts from the standard library. The
+standard sequence containers are vector, deque and list, and the
+standard associative containers are set, map, and the multi_ and
+unordered_ variants of those.
 
 <P>
-Using the recursive approach, simple data types can be serialised in
-the obvious way, or even transformed using into a machine independent
-form such as XDR<A NAME="182"></A>. Data types such as arrays or strings can
-be handled in a type dependent fashion by supplying appropriate specialised
-definitions.
+To enable support for your custom container, eg one that conforms to
+the sequence concept, define a type trait for your custom container
+somewhere prior to <code>classdesc\_epilogue.h</code>(See
+  &#167;<A HREF="node3.html#classdesc_epilogue">1.1</A>) being included. For example:
+<PRE>
+namespace classdesc
+{
+  template &lt;&gt; struct is_sequence&lt;MyContainer&gt;: public true_type {};
+}
+</PRE>
 
 <P>
-In this case, the <TT>pack_t</TT> type implements a buffer into/from
-which the data is packed/unpacked. It has public members <TT>char
-*data; int size</TT> which point to the buffer and its size, that can then
-be used for further functionality such as the
-checkpoint/restart<A NAME="185"></A> functionality of
-<I><I>    Eco Lab</I></I><A NAME="186"></A>.
-
-<P>
-There are 4 methods of using the pack function on an object --
-
-<OL>
-<LI><code>template &lt;class T&gt; pack_t&amp; pack_t::operator&lt;&lt;(T&amp;)</code>
-</LI>
-<LI><code>template &lt;class T&gt; ::pack(pack_t&amp;, string, T&amp;)</code> 
-</LI>
-<LI><code>template &lt;class T&gt; ::pack(pack_t&amp;, string, is_array,  T*, int)</code>
-</LI>
-<LI><code>void pack_t::packraw(char *,int)</code>
-</LI>
-</OL>
-The <code>classdesc::string</code> argument is not used, just pass <code>""</code> to
-it. The third method above is a utility routine for packing arrays of
-objects, <code>is_array</code> is a dummy type, so just pass the object
-returned by the default constructor <code>is_array()</code>, then the final
-two arguments are the array pointer and size respectively. One could
-easily explicitly loop over the array elements using the first two
-methods.  The last method is used to pack arbitrary byte data into the
-buffer. <A NAME="189"></A> It differs from
-<code>::pack(pack_t&amp;, string, is_array, char*, int)</code> in that the
-latter packs a series of characters, which are usually 32 bit
-quantities. It is thus both more efficient than the latter, as well as
-providing a means to unpack data stored in packed char format.
-
-<P>
-<code>xdr_pack</code><A NAME="190"></A> is derived from <code>pack_t</code>.
-Instead of packing to native data representation, it uses XDR data
-representation, which is machine independent. The
-<code>XDR_PACK</code><A NAME="191"></A><A NAME="XDR"></A> macro symbol must be defined to
-enable this functionality, otherwise <code>xdr_pack</code> is synonymous
-with <code>pack_t</code>, allowing the code to be employed on machines that
-do not provide XDR functionality.
-
-<P>
-<TT>unpack_t</TT> is typedef'd to <TT>pack_t</TT>, and <TT>  unpack_base.h</TT> is a link to <TT>pack_base.h</TT>.
-
-<P>
-In order to use the streaming operators <code>&lt;&lt;</code> and <code>&gt;&gt;</code> you
-need to include the file <code>pack_stream.h</code>, after all the
-corresponding <code>pack()</code> definitions. This is automatically done by
-including <code>classdesc_epilogue.h</code>
+If you wish to support containers in your own custom descriptor, you
+should ideally not refer to specific types, but use these type traits
+to write truly generic code. This involves quite advance
+metaprogramming skills, but you can use the file <code>pack_stl.h</code> as
+an exemplar.
 
 <P>
 <BR><HR>
-<!--Table of Child-Links-->
-<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
-
-<UL>
-<LI><A NAME="tex2html254"
-  HREF="node11.html">Pointers</A>
-<LI><A NAME="tex2html255"
-  HREF="node12.html">Graph serialisation</A>
-<LI><A NAME="tex2html256"
-  HREF="node13.html">Ref</A>
-<LI><A NAME="tex2html257"
-  HREF="node14.html">Converting code using traditional pointers to using ref</A>
-<LI><A NAME="tex2html258"
-  HREF="node15.html">STL containers</A>
-<LI><A NAME="tex2html259"
-  HREF="node16.html">Roll your own</A>
-<LI><A NAME="tex2html260"
-  HREF="node17.html">Synopsis of <TT>pack_t</TT></A>
-<LI><A NAME="tex2html261"
-  HREF="node18.html">Polymorphism</A>
-<LI><A NAME="tex2html262"
-  HREF="node19.html">Packing to a file</A>
-<LI><A NAME="tex2html263"
-  HREF="node20.html">BinStream -- binary streaming to a pack_t</A>
-</UL>
-<!--End of Table of Child-Links-->
-<HR>
-<!--Navigation Panel-->
-<A NAME="tex2html252"
-  HREF="node11.html">
-<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
- SRC="file:/usr/share/latex2html/icons/next.png"></A> 
-<A NAME="tex2html246"
-  HREF="classdesc.html">
-<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
- SRC="file:/usr/share/latex2html/icons/up.png"></A> 
-<A NAME="tex2html240"
-  HREF="node9.html">
-<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
- SRC="file:/usr/share/latex2html/icons/prev.png"></A> 
-<A NAME="tex2html248"
-  HREF="node1.html">
-<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents"
- SRC="file:/usr/share/latex2html/icons/contents.png"></A> 
-<A NAME="tex2html250"
-  HREF="node49.html">
-<IMG WIDTH="43" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="index"
- SRC="file:/usr/share/latex2html/icons/index.png"></A> 
-<BR>
-<B> Next:</B> <A NAME="tex2html253"
-  HREF="node11.html">Pointers</A>
-<B> Up:</B> <A NAME="tex2html247"
-  HREF="classdesc.html">Classdesc Documentation</A>
-<B> Previous:</B> <A NAME="tex2html241"
-  HREF="node9.html">Excluding particular members from</A>
- &nbsp; <B>  <A NAME="tex2html249"
-  HREF="node1.html">Contents</A></B> 
- &nbsp; <B>  <A NAME="tex2html251"
-  HREF="node49.html">Index</A></B> 
-<!--End of Navigation Panel-->
 <ADDRESS>
 Russell Standish
-2013-06-18
+2016-09-02
 </ADDRESS>
 </BODY>
 </HTML>
