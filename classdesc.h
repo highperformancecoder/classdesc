@@ -37,26 +37,6 @@ namespace std
 #define NO_FWD_DECLARE_STL
 #endif
 
-#ifndef NO_FWD_DECLARE_STL
-namespace std
-{
-  // forward decls to help with conatiner type_traits, avoiding
-  // unecessary #includes of STL headers
-  template <class T, class A> class vector;
-  template <class T, class A> class deque;
-  template <class T, class A> class list;
-  template <class T, class C, class A> class set;
-  template <class K, class V, class C, class A> class map;
-  template <class T, class C, class A> class multiset;
-  template <class K, class V, class C, class A> class multimap;
-#if defined(__cplusplus) && __cplusplus>=201103L
-  template <class K, class V, class H, class P, class A> class unordered_map;
-  template <class K, class H, class P, class A> class unordered_set;
-  template <class K, class V, class H, class P, class A> class unordered_multimap;
-  template <class K, class H, class P, class A> class unordered_multiset;
-#endif
-}
-#else // for some reason the above decls dont work on MINGW
 #include <vector>
 #include <deque>
 #include <list>
@@ -65,7 +45,6 @@ namespace std
 #if defined(__cplusplus) && __cplusplus>=201103L
 #include <unordered_map>
 #include <unordered_set>
-#endif
 #endif
 
 
