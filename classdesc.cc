@@ -223,7 +223,8 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
         }
       if (input.token=="<")
 	{
-	  for (int ang_count=0; ang_count || input.lasttoken!=">";
+	  for (int ang_count=0; ang_count || 
+                 (input.lasttoken!=">" && input.lasttoken!=">>");
 	       input.nexttok())	
 	    {
 	      baseclass += input.token;
@@ -232,7 +233,15 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 		{
 		  ang_count--; 
 		  if (ang_count) baseclass+=" ";/* handle nested templates */
-		} 
+		}
+              else if (input.token==">>")
+		{
+                  if (ang_count>1)
+                    ang_count-=2;
+                  else
+                    ang_count--; 
+		  if (ang_count) baseclass+=" ";/* handle nested templates */
+		}
 	    }
 	}
       if (strchr(",{", input.token[0]) && baseclass.length())
