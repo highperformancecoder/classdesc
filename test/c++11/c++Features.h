@@ -41,6 +41,8 @@ struct CppFeatures: public Base
 
   std::unordered_map<std::vector<int>,int> umap;
 
+  using Foo=char;
+  template <class T> using VFoo=std::vector<Foo>;
 };
 
   template <typename C> using Elem_type=typename C::value_type;

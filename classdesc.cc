@@ -326,11 +326,6 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
           while (input.token!=";") input.nexttok();
 	  continue;
 	}
-      if (input.token=="using") //ignore using declarations
-        {
-          while (input.token!=";") input.nexttok();       
-          continue;
-        }
       if (input.token=="template")
 	{
 	  is_template=true;
@@ -341,7 +336,13 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 	    {
 	      targs1.erase();  /* not a template class */
 	    }
+          
 	}
+      if (input.token=="using") //ignore using declarations
+        {
+          while (input.token!=";") input.nexttok();       
+          continue;
+        }
       if (input.token=="class" || input.token=="struct")
 	{
 	  /* if boths targs and targs1 are defined, then we must
@@ -968,6 +969,9 @@ int main(int argc, char* argv[])
 	      if ((input.token!="class" && input.token!="struct" )
 		  || targs=="< > ")
 		targs.erase();  /* not a template class */
+              if (input.token=="using")
+                /* skip over templated using statements */
+                while (input.token!=";") input.nexttok();
 	    }
  	  if (input.token=="class" || input.token=="struct")
 	    {
