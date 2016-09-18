@@ -33,10 +33,6 @@ namespace std
 }
 #endif
 
-#ifdef _MSC_VER
-#define NO_FWD_DECLARE_STL
-#endif
-
 #include <vector>
 #include <deque>
 #include <list>
