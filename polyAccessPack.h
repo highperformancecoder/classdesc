@@ -102,6 +102,11 @@ namespace classdesc_access
     {unpack_smart_ptr(x,d,a);}
   };
 
+  
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
   template <class T>
   struct access_pack<std::auto_ptr<T> >
   {
@@ -117,6 +122,9 @@ namespace classdesc_access
     void operator()(cd::unpack_t& x, const cd::string& d, U& a)
     {unpack_smart_ptr(x,d,a);}
   };
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 #if defined(__cplusplus) && __cplusplus >= 201103L
   template <class T, class D>

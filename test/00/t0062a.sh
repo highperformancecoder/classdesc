@@ -47,8 +47,8 @@ cat >input.cc <<EOF
 int main() {}
 EOF
 
+echo "compilation should fail, so if it succeeds, test should fail"
 $CC -I$here -DTR1 input.cc
-# compilation should fail, so if it succeeds, fail out the test
 if test $? -eq 0; then fail; fi
 
 pass

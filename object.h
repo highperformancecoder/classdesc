@@ -137,7 +137,11 @@ unpack(classdesc::unpack_t& b, const classdesc::string& d, const classdesc::shar
   b>>t;
   if (t)
     {
+#if defined(__cplusplus) && __cplusplus>=201103L
+      std::unique_ptr<T> a(classdesc::object::create(t-1));
+#else
       std::auto_ptr<T> a(classdesc::object::create(t-1));
+#endif
       a->unpack(b);
     }
 }

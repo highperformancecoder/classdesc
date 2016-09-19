@@ -343,7 +343,8 @@ namespace classdesc
   public:
     getter_setter(T& m): m(m) {}
     void operator()(RetVal& r, ArgVector& args) {
-      if (args.size()) m=args[0].get<T>(); *r.getRef<T>()=m;
+      if (args.size()) m=args[0].get<T>();
+      *r.getRef<T>()=m;
     }
   };
 }

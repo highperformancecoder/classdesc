@@ -63,6 +63,11 @@ if test $? -ne 0; then fail; fi
 
 cat >testout1 <<EOF
 #include "classdesc.h"
+
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#endif
 #include "p_base.h"
 namespace classdesc_access {
 template <> struct access_p<class ::foo > {
@@ -81,6 +86,9 @@ using namespace bar;
 }
 };
 }
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 EOF
 
 sed -e '/^$/d' testout >testout2

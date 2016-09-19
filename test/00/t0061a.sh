@@ -54,6 +54,11 @@ if test $? -ne 0; then fail; fi
 
 cat >input.cd.tmp <<EOF
 #include "classdesc.h"
+
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#endif
 #include "p_base.h"
 namespace classdesc_access {
 template < class T >  struct access_p<struct ::foo<T> > {
@@ -63,6 +68,9 @@ void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE
 }
 };
 }
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 EOF
 
 diff -q -w input.cd input.cd.tmp

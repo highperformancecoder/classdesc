@@ -33,12 +33,6 @@ namespace classdesc
           throw json_pack_error("attempt to pack an array member into a non-object");
         else
           {
-            json_spirit::mValue* v;
-            if (d.empty())
-              v=&parent;
-            else
-              v=&parent.get_obj()[tail(d)];
-
             typename StringKeyMap<T>::const_iterator i=a.begin();
             for (; i!=a.end(); ++i)
               json_pack(j,d+"."+i->first, i->second);

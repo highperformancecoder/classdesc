@@ -54,6 +54,11 @@ EOF
 
 cat >test.cd <<EOF
 #include "classdesc.h"
+
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#endif
 #include "p_base.h"
 namespace classdesc_access {
 template < class T >  struct access_p<struct ::x<T> > {
@@ -63,6 +68,9 @@ void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE
 }
 };
 }
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 EOF
 
 $here/classdesc p <test.cc >tmp
@@ -85,9 +93,17 @@ EOF
 
 cat >test.cd <<EOF
 #include "classdesc.h"
+
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#endif
 #include "p_base.h"
 namespace classdesc_access {
 }
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 EOF
 
 $here/classdesc p <test.cc >tmp
@@ -111,9 +127,17 @@ EOF
 
 cat >test.cd <<EOF
 #include "classdesc.h"
+
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#endif
 #include "p_base.h"
 namespace classdesc_access {
 }
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 EOF
 
 $here/classdesc p <test.cc >tmp

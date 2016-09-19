@@ -846,7 +846,7 @@ int main(int argc, char* argv[])
 	  argc--; argv++;
 	}
       if (argc>1 && strcmp(argv[1],"-I")==0)  /* use this directory to find */
-				       /*   _base.h files */
+        /*   _base.h files */
 	{
           if (argc<3) {puts("option argument missing"); return 1;} 
 	  include_path.push_back(argv[2]);
@@ -905,10 +905,10 @@ int main(int argc, char* argv[])
 		omit[rm_space(input.token.substr(strlen("#pragma omit ")))]=1;
 	      if (input.token.find("#pragma treenode")==0)
 		treenode[rm_space(input.token.substr(
-				  strlen("#pragma treenode ")))]=1;
+                                                     strlen("#pragma treenode ")))]=1;
 	      if (input.token.find("#pragma graphnode")==0)
 		graphnode[rm_space(input.token.substr(
-				  strlen("#pragma graphnode ")))]=1;
+                                                      strlen("#pragma graphnode ")))]=1;
 	      continue;
 	    }
 
@@ -926,7 +926,7 @@ int main(int argc, char* argv[])
 	      string::size_type p;
 	      if (
 		  (p=namespace_name.rfind("::"))
-		   == string::npos
+                  == string::npos
 		  )
 		p=0;
 	      else
@@ -936,8 +936,8 @@ int main(int argc, char* argv[])
 	    }
 	  if (input.token=="namespace")
 	    /* append the namespace name to namespace, and mark the end of
-	      the namespace region in the input stream
-	      */
+               the namespace region in the input stream
+            */
 	    {
 	      input.nexttok();
               if (input.token!="{") // not anonymous
@@ -996,7 +996,12 @@ int main(int argc, char* argv[])
 
   catch(tokeninput::eof) {}
 
-  printf("#include \"classdesc.h\"\n");
+  puts("#include \"classdesc.h\"\n");
+  // disable certain warning messages that are unnecessary
+  puts("#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)");
+  puts("#pragma GCC diagnostic push");
+  puts("#pragma GCC diagnostic ignored \"-Wunused-function\"");
+  puts("#endif");
 
   /* make kludge definitions for all declared classes that aren't defined */
   if (def)
@@ -1006,7 +1011,7 @@ int main(int argc, char* argv[])
 	printf("class %s {};\n",i->first.c_str());
 
   for (int k=0; k<nactions; k++)
-      printf("#include \"%s_base.h\"\n",action[k]);
+    printf("#include \"%s_base.h\"\n",action[k]);
 
   /* output typeName database on standard output if requested. */
   if (typeName)
@@ -1040,7 +1045,7 @@ int main(int argc, char* argv[])
             PrintNameSpace cd("classdesc");
             if (actions[i].templ.empty())
               printf("template <> inline std::string typeName<%s >()\n  {return \"%s\";}\n",
-                   n.c_str(), n.c_str());
+                     n.c_str(), n.c_str());
             else
               {
                 printf("template %s struct tn<%s >\n{\n",actions[i].templ.c_str(), n.c_str());
@@ -1053,31 +1058,31 @@ int main(int argc, char* argv[])
                 vector<string>& keys=enum_keys[actions[i].type];
                 {
                   PrintNameSpace anon(" ");
-                if (keys.size())
-                  {
-                    printf("template <> EnumKey enum_keysData<%s>::keysData[]=\n {\n",n.c_str());
-                    // enum constant qualifier - set blank if enum is global ns
-                    string k;
-                    if (leadeq(actions[i].type,"enum class"))
-                      k=n; // newer enum class constants are in their own namespace
-                    else // old enum constants are in the external namespace
-                      k=n.find("::")==string::npos? "":
-                      n.substr(0,n.rfind("::"));
+                  if (keys.size())
+                    {
+                      printf("template <> EnumKey enum_keysData<%s>::keysData[]=\n {\n",n.c_str());
+                      // enum constant qualifier - set blank if enum is global ns
+                      string k;
+                      if (leadeq(actions[i].type,"enum class"))
+                        k=n; // newer enum class constants are in their own namespace
+                      else // old enum constants are in the external namespace
+                        k=n.find("::")==string::npos? "":
+                          n.substr(0,n.rfind("::"));
                     
-                    for (size_t i=0; i<keys.size(); i++)
-                      {
-                        printf("  {\"%s\",int(%s::%s)}",keys[i].c_str(),
-                               k.c_str(),keys[i].c_str());
-                        if (i<keys.size()-1)
-                          printf(",\n");
-                      }
-                    printf("\n };\n");
-                    printf("template <> EnumKeys<%s> enum_keysData<%s>::keys"
-                           "(enum_keysData<%s>::keysData,"
-                           "sizeof(enum_keysData<%s>::keysData)/"
-                           "sizeof(enum_keysData<%s>::keysData[0]));\n",
-                       n.c_str(),n.c_str(),n.c_str(),n.c_str(),n.c_str());
-                  }
+                      for (size_t i=0; i<keys.size(); i++)
+                        {
+                          printf("  {\"%s\",int(%s::%s)}",keys[i].c_str(),
+                                 k.c_str(),keys[i].c_str());
+                          if (i<keys.size()-1)
+                            printf(",\n");
+                        }
+                      printf("\n };\n");
+                      printf("template <> EnumKeys<%s> enum_keysData<%s>::keys"
+                             "(enum_keysData<%s>::keysData,"
+                             "sizeof(enum_keysData<%s>::keysData)/"
+                             "sizeof(enum_keysData<%s>::keysData[0]));\n",
+                             n.c_str(),n.c_str(),n.c_str(),n.c_str(),n.c_str());
+                    }
                   printf("template <> int enumKey<%s>(const std::string& x)"
                          "{return int(enum_keysData<%s>::keys(x));}\n",
                          n.c_str(),n.c_str());
@@ -1092,216 +1097,220 @@ int main(int argc, char* argv[])
 
     }
 
-  PrintNameSpace ns("classdesc_access");
-  for (int k=0; k<nactions; k++)
-    {
-      /* parse action_base for types to omit */
-      //      omit.clear();
-		size_t i;
-      for (basef=NULL, i=0; basef==NULL && i<include_path.size(); i++)
+  {
+    PrintNameSpace ns("classdesc_access");
+    for (int k=0; k<nactions; k++)
+      {
+        /* parse action_base for types to omit */
+        //      omit.clear();
+        size_t i;
+        for (basef=NULL, i=0; basef==NULL && i<include_path.size(); i++)
 
-	{
-	  basename=include_path[i]+"/"+action[k]+"_base.h";
-	  basef=fopen(basename.c_str(),"r");
-	}
-      if (basef!=NULL)
-	{
-	  while ((nconv=fscanf(basef,"#pragma omit %1024[^\n]",tname))!=EOF)
-	    {
-	      if (nconv==1)
-		{omit[rm_space(tname)]=1;}
-	      else
-		  {
-			int c;
-			while ((c=fgetc(basef))!='\n' && c!=EOF);
-		  }
-	    }
-	  fclose(basef);
-	}
-
-      for (size_t i=0; i<actions.size(); i++)
-	{	  /* check if type has a #pragma associated */
-	  bool is_treenode, is_graphnode;
-	  {
-	    string n=without_type_qualifier(actions[i].type);
-
-	    /* strip out template arguments, collapse multiple spaces, 
-	       remove trailing space */
-	    string n1;
-            if (actions[i].namespace_name.size()) 
-              n1=actions[i].namespace_name+"::";
-	    unsigned nangle=0;
-	    bool space=false;
-	    for (unsigned j=0; j<n.length(); j++)
-	      {
-		if (n[j]=='<') nangle++;
-		if (nangle==0) 
-		  {
-		    if (n[j]==' ')
-		      space=true;
-		    else
-		      {
-			if (space) n1+=' ';
-			space=false;
-			n1+=n[j];
-		      }
-		  }
-		if (n[j]=='>') nangle--;
-	      }
-
-	    is_treenode=treenode.count(n1)>0;
-	    is_graphnode=graphnode.count(n1)>0;
-	    /* if both treenode and graphnode specified,
-	       this is technically an error */
-	    if (is_treenode&&is_graphnode)
+          {
+            basename=include_path[i]+"/"+action[k]+"_base.h";
+            basef=fopen(basename.c_str(),"r");
+          }
+        if (basef!=NULL)
+          {
+            while ((nconv=fscanf(basef,"#pragma omit %1024[^\n]",tname))!=EOF)
               {
-                cerr <<inputFile<<":"<<"0::error";
-                cerr << "Both treenode and graphnode specified for type " << actions[i].type << endl;
-                errorcode=1;
+                if (nconv==1)
+                  {omit[rm_space(tname)]=1;}
+                else
+		  {
+                    int c;
+                    while ((c=fgetc(basef))!='\n' && c!=EOF);
+		  }
               }
-	    if (omit.count(action[k]+n1))
-	      continue;
-	  }
+            fclose(basef);
+          }
 
-	  /* scalar forward function */
-	  if (workdir.length()==0 || !actions[i].templ.empty())
-	    /* templates must be inline */
-	    {
-	      /* deal with graphnode/treenode possibilities */
-	      if (is_treenode)
-		output_treenode_or_graphnode(action[k],i,"is_treenode()");
-	      if (is_graphnode)
-		output_treenode_or_graphnode(action[k],i,"is_graphnode()");
+        for (size_t i=0; i<actions.size(); i++)
+          {	  /* check if type has a #pragma associated */
+            bool is_treenode, is_graphnode;
+            {
+              string n=without_type_qualifier(actions[i].type);
 
-              // insert the namespace qualifier if needed
-              string type_arg_name;
-              type_arg_name = (type_qualifier(actions[i].type)=="enum class")?
-                "enum": type_qualifier(actions[i].type);
-              type_arg_name+=" ::"+actions[i].namespace_name+
-                (actions[i].namespace_name.size()?"::":"") + 
-                without_type_qualifier(actions[i].type);
-
-              printf("template %s struct access_%s<%s > {\n",
-                     actions[i].templ.empty()? "<>": actions[i].templ.c_str(),
-                     action[k], type_arg_name.c_str()); 
-              printf("template <class _CD_ARG_TYPE>\n");
-              printf("void operator()(classdesc::%s_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)\n{\n",
-		     action[k]);
-
-              if (actions[i].namespace_name.size())
-                printf("using namespace %s;\n",actions[i].namespace_name.c_str());
-              string::size_type p=actions[i].type.rfind("::");
-              if (p!=string::npos)
+              /* strip out template arguments, collapse multiple spaces, 
+                 remove trailing space */
+              string n1;
+              if (actions[i].namespace_name.size()) 
+                n1=actions[i].namespace_name+"::";
+              unsigned nangle=0;
+              bool space=false;
+              for (unsigned j=0; j<n.length(); j++)
                 {
-                  string::size_type s=actions[i].type.rfind(" "); //strip leading words
-                  if (s==string::npos) 
-                    s=0;
-                  else
-                    s++;
-                  string prefix=actions[i].type.substr(s,p+2-s);
-                  for (size_t j=0; j<nested[prefix].size(); j++)
-                    printf("typedef %s %s%s %s;\n",
-                           actions[i].templ.empty()? "": "typename",
-                           prefix.c_str(),
-                           nested[prefix][j].c_str(),nested[prefix][j].c_str());
+                  if (n[j]=='<') nangle++;
+                  if (nangle==0) 
+                    {
+                      if (n[j]==' ')
+                        space=true;
+                      else
+                        {
+                          if (space) n1+=' ';
+                          space=false;
+                          n1+=n[j];
+                        }
+                    }
+                  if (n[j]=='>') nangle--;
                 }
-              for (size_t j=0; j<actions[i].actionlist.size(); j++)
-                {
-                  string a=action[k];
-                  if (actions[i].actionlist[j].base)
-                    a+="_onbase";
-                  printf("::%s(targ,desc+\"%s\",%s);\n",a.c_str(),
-                         actions[i].actionlist[j].name.c_str(),
-                         actions[i].actionlist[j].action.c_str());
-                }
-              printf("}\n};\n");
- 	    }
-	  else
-	    {
-	      string oname=actions[i].type;
-	      /* replace non-alphanumeric characters with underscores */
-	      /* Windoze is intolerant of certain characters in filenames */
-	      for (size_t l=0; l<oname.length(); l++)
-		if (!isalnum(oname[l])) oname[l]='_';
-	      oname=workdir+oname+".cc";
-	      FILE *o=fopen(oname.c_str(),"a");
-	      if (stdinclude.length() && !header_written.count(oname))
-		{
-		  fprintf(o,"#include \"%s\"\n",stdinclude.c_str());
-		  header_written[oname]=1;
-		}
-	      fprintf(o,"#include \"%s_base.h\"\n",action[k]);
-	      /* deal with graphnode/treenode possibilities */
-	      if (is_treenode)
-		output_treenode_or_graphnode(action[k],i,"is_treenode()");
-	      if (is_graphnode)
-		output_treenode_or_graphnode(action[k],i,"is_graphnode()");
 
-              // insert the namespace qualifier if needed
-              string type_arg_name;
-              type_arg_name=type_qualifier(actions[i].type)
-                +" ::"+actions[i].namespace_name+
-                (actions[i].namespace_name.size()?"::":"") + 
-                without_type_qualifier(actions[i].type);
+              is_treenode=treenode.count(n1)>0;
+              is_graphnode=graphnode.count(n1)>0;
+              /* if both treenode and graphnode specified,
+                 this is technically an error */
+              if (is_treenode&&is_graphnode)
+                {
+                  cerr <<inputFile<<":"<<"0::error";
+                  cerr << "Both treenode and graphnode specified for type " << actions[i].type << endl;
+                  errorcode=1;
+                }
+              if (omit.count(action[k]+n1))
+                continue;
+            }
+
+            /* scalar forward function */
+            if (workdir.length()==0 || !actions[i].templ.empty())
+              /* templates must be inline */
+              {
+                /* deal with graphnode/treenode possibilities */
+                if (is_treenode)
+                  output_treenode_or_graphnode(action[k],i,"is_treenode()");
+                if (is_graphnode)
+                  output_treenode_or_graphnode(action[k],i,"is_graphnode()");
+
+                // insert the namespace qualifier if needed
+                string type_arg_name;
+                type_arg_name = (type_qualifier(actions[i].type)=="enum class")?
+                  "enum": type_qualifier(actions[i].type);
+                type_arg_name+=" ::"+actions[i].namespace_name+
+                  (actions[i].namespace_name.size()?"::":"") + 
+                  without_type_qualifier(actions[i].type);
+
+                printf("template %s struct access_%s<%s > {\n",
+                       actions[i].templ.empty()? "<>": actions[i].templ.c_str(),
+                       action[k], type_arg_name.c_str()); 
+                printf("template <class _CD_ARG_TYPE>\n");
+                printf("void operator()(classdesc::%s_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)\n{\n",
+                       action[k]);
+
+                if (actions[i].namespace_name.size())
+                  printf("using namespace %s;\n",actions[i].namespace_name.c_str());
+                string::size_type p=actions[i].type.rfind("::");
+                if (p!=string::npos)
+                  {
+                    string::size_type s=actions[i].type.rfind(" "); //strip leading words
+                    if (s==string::npos) 
+                      s=0;
+                    else
+                      s++;
+                    string prefix=actions[i].type.substr(s,p+2-s);
+                    for (size_t j=0; j<nested[prefix].size(); j++)
+                      printf("typedef %s %s%s %s;\n",
+                             actions[i].templ.empty()? "": "typename",
+                             prefix.c_str(),
+                             nested[prefix][j].c_str(),nested[prefix][j].c_str());
+                  }
+                for (size_t j=0; j<actions[i].actionlist.size(); j++)
+                  {
+                    string a=action[k];
+                    if (actions[i].actionlist[j].base)
+                      a+="_onbase";
+                    printf("::%s(targ,desc+\"%s\",%s);\n",a.c_str(),
+                           actions[i].actionlist[j].name.c_str(),
+                           actions[i].actionlist[j].action.c_str());
+                  }
+                printf("}\n};\n");
+              }
+            else
+              {
+                string oname=actions[i].type;
+                /* replace non-alphanumeric characters with underscores */
+                /* Windoze is intolerant of certain characters in filenames */
+                for (size_t l=0; l<oname.length(); l++)
+                  if (!isalnum(oname[l])) oname[l]='_';
+                oname=workdir+oname+".cc";
+                FILE *o=fopen(oname.c_str(),"a");
+                if (stdinclude.length() && !header_written.count(oname))
+                  {
+                    fprintf(o,"#include \"%s\"\n",stdinclude.c_str());
+                    header_written[oname]=1;
+                  }
+                fprintf(o,"#include \"%s_base.h\"\n",action[k]);
+                /* deal with graphnode/treenode possibilities */
+                if (is_treenode)
+                  output_treenode_or_graphnode(action[k],i,"is_treenode()");
+                if (is_graphnode)
+                  output_treenode_or_graphnode(action[k],i,"is_graphnode()");
+
+                // insert the namespace qualifier if needed
+                string type_arg_name;
+                type_arg_name=type_qualifier(actions[i].type)
+                  +" ::"+actions[i].namespace_name+
+                  (actions[i].namespace_name.size()?"::":"") + 
+                  without_type_qualifier(actions[i].type);
               
-              printf("template %s struct access_%s<%s > {\n",
-                     actions[i].templ.empty()? "<>": actions[i].templ.c_str(),
-                     action[k], type_arg_name.c_str()); 
-              printf("template <class _CD_ARG_TYPE>\n");
-              printf("void operator()(classdesc::%s_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg);\n};",
-		     action[k]);
+                printf("template %s struct access_%s<%s > {\n",
+                       actions[i].templ.empty()? "<>": actions[i].templ.c_str(),
+                       action[k], type_arg_name.c_str()); 
+                printf("template <class _CD_ARG_TYPE>\n");
+                printf("void operator()(classdesc::%s_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg);\n};",
+                       action[k]);
 
-              fprintf(o,"template <class _CD_ARG_TYPE>\n");
-              fprintf(o,"void classdesc_access::access_%s<%s >::",
-                     action[k], type_arg_name.c_str()); 
-              fprintf(o,"operator()(classdesc::%s_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)\n{\n",
-		     action[k]);
+                fprintf(o,"template <class _CD_ARG_TYPE>\n");
+                fprintf(o,"void classdesc_access::access_%s<%s >::",
+                        action[k], type_arg_name.c_str()); 
+                fprintf(o,"operator()(classdesc::%s_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)\n{\n",
+                        action[k]);
 
-              if (actions[i].namespace_name.size())
-                fprintf(o,"using namespace %s;\n",actions[i].namespace_name.c_str());
-              string::size_type p=actions[i].type.rfind("::");
-              if (p!=string::npos)
-                {
-                  string::size_type s=actions[i].type.rfind(" "); //strip leading words
-                  if (s==string::npos) 
-                    s=0;
-                  else
-                    s++;
-                  string prefix=actions[i].type.substr(s,p+2-s);
-                  for (size_t j=0; j<nested[prefix].size(); j++)
-                    fprintf(o,"typedef %s %s%s %s;\n",
-                           actions[i].templ.empty()? "": "typename",
-                           prefix.c_str(),
-                           nested[prefix][j].c_str(),nested[prefix][j].c_str());
-                }
-              for (size_t j=0; j<actions[i].actionlist.size(); j++)
-                {
-                  string a=action[k];
-                  if (actions[i].actionlist[j].base)
-                    a+="_onbase";
-                  fprintf(o,"::%s(targ,desc+\"%s\",%s);\n",a.c_str(),
-                         actions[i].actionlist[j].name.c_str(),
-                         actions[i].actionlist[j].action.c_str());
-                }
-              fprintf(o,"};\n");
-              // explicit instantiation
-              fprintf(o,"template\n");
-              fprintf(o,"void classdesc_access::access_%s<%s >::",
-                     action[k], type_arg_name.c_str()); 
-              fprintf(o,"operator()(classdesc::%s_t& targ, const classdesc::string& desc,%s& arg);\n",
-		     action[k], type_arg_name.c_str());
-              fprintf(o,"template\n");
-              fprintf(o,"void classdesc_access::access_%s<%s >::",
-                     action[k], type_arg_name.c_str()); 
-              fprintf(o,"operator()(classdesc::%s_t& targ, const classdesc::string& desc,const %s& arg);\n",
-		     action[k], type_arg_name.c_str());
-              fprintf(o,"#include <classdesc_epilogue.h>\n");
+                if (actions[i].namespace_name.size())
+                  fprintf(o,"using namespace %s;\n",actions[i].namespace_name.c_str());
+                string::size_type p=actions[i].type.rfind("::");
+                if (p!=string::npos)
+                  {
+                    string::size_type s=actions[i].type.rfind(" "); //strip leading words
+                    if (s==string::npos) 
+                      s=0;
+                    else
+                      s++;
+                    string prefix=actions[i].type.substr(s,p+2-s);
+                    for (size_t j=0; j<nested[prefix].size(); j++)
+                      fprintf(o,"typedef %s %s%s %s;\n",
+                              actions[i].templ.empty()? "": "typename",
+                              prefix.c_str(),
+                              nested[prefix][j].c_str(),nested[prefix][j].c_str());
+                  }
+                for (size_t j=0; j<actions[i].actionlist.size(); j++)
+                  {
+                    string a=action[k];
+                    if (actions[i].actionlist[j].base)
+                      a+="_onbase";
+                    fprintf(o,"::%s(targ,desc+\"%s\",%s);\n",a.c_str(),
+                            actions[i].actionlist[j].name.c_str(),
+                            actions[i].actionlist[j].action.c_str());
+                  }
+                fprintf(o,"};\n");
+                // explicit instantiation
+                fprintf(o,"template\n");
+                fprintf(o,"void classdesc_access::access_%s<%s >::",
+                        action[k], type_arg_name.c_str()); 
+                fprintf(o,"operator()(classdesc::%s_t& targ, const classdesc::string& desc,%s& arg);\n",
+                        action[k], type_arg_name.c_str());
+                fprintf(o,"template\n");
+                fprintf(o,"void classdesc_access::access_%s<%s >::",
+                        action[k], type_arg_name.c_str()); 
+                fprintf(o,"operator()(classdesc::%s_t& targ, const classdesc::string& desc,const %s& arg);\n",
+                        action[k], type_arg_name.c_str());
+                fprintf(o,"#include <classdesc_epilogue.h>\n");
 
-	      fclose(o);
-	    }
-	}
+                fclose(o);
+              }
+          }
 
-    }
-
+      }
+  }
+  puts("#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)");
+  puts("#pragma GCC diagnostic pop");
+  puts("#endif");
   return errorcode;
 }

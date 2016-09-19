@@ -58,7 +58,8 @@ std::vector<std::string> JNI_arglist(const std::string& sig)
             ret.push_back("jstring");
           else
             ret.push_back("jobject"); 
-          while (*c!=';') ++c; break;
+          while (*c!=';') ++c;
+          break;
         case '[': c++;
           switch (*c)
             {
@@ -71,7 +72,8 @@ std::vector<std::string> JNI_arglist(const std::string& sig)
             case 'F':  ret.push_back("jfloatArray"); break;
             case 'D':  ret.push_back("jdoubleArray"); break;
             case 'L':  ret.push_back("jobjectArray");
-              while (*c!=';') ++c; break;
+              while (*c!=';') ++c;
+              break;
             }     
         case ')': case '(': break; 
         default:

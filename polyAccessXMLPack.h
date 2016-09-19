@@ -49,10 +49,17 @@ void xml_pack(classdesc::xml_pack_t& x, const classdesc::string& d,
               classdesc::shared_ptr<T>& a)
 {classdesc::xml_pack_smart_ptr(x,d,a);}
 
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 template<class T>
 void xml_pack(classdesc::xml_pack_t& x, const classdesc::string& d, 
               std::auto_ptr<T>& a)
 {classdesc::xml_pack_smart_ptr(x,d,a);}
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 #if defined(__cplusplus) && __cplusplus >= 201103L
 template<class T, class D>
@@ -115,12 +122,19 @@ namespace classdesc_access
     {xml_unpack_smart_ptr(x,d,a);}
   };
 
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
   template <class T>
   struct access_xml_unpack<std::auto_ptr<T> >
   {
     void operator()(cd::xml_unpack_t& x, const cd::string& d, std::auto_ptr<T>& a)
     {xml_unpack_smart_ptr(x,d,a);}
   };
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 
 #if defined(__cplusplus) && __cplusplus >= 201103L
