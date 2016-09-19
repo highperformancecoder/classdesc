@@ -23,11 +23,16 @@ namespace classdesc
     typedef T Type;
     virtual Type type() const=0;
     virtual PolyBase* clone() const=0;
+#if defined(__cplusplus) && __cplusplus>=201103L
+    typedef std::unique_ptr<PolyBase> AutoPtr;
+#else
+    typedef std::auto_ptr<PolyBase> AutoPtr;
+#endif
     /// cloneT is more user friendly way of getting clone to return the
     /// correct type. Returns NULL if \a U is invalid
     template <class U>
     U* cloneT() const {
-      std::auto_ptr<PolyBase> p(clone());
+      AutoPtr p(clone());
       U* t=dynamic_cast<U*>(p.get());
       if (t)
         p.release();

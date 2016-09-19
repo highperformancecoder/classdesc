@@ -111,17 +111,25 @@ struct heat {
     /* exchange boundary values */
     MPIbuf b;
     int i,j;
-    for (i=0; i<ny; i++)  b << T(0,i);    b.send_recv(left,0,right);
-    for (i=0; i<ny; i++)  b >> T(nx,i);   b.reset();
+    for (i=0; i<ny; i++)  b << T(0,i);
+    b.send_recv(left,0,right);
+    for (i=0; i<ny; i++)  b >> T(nx,i);
+    b.reset();
 
-    for (i=0; i<ny; i++)  b << T(nx-1,i); b.send_recv(right,0,left);
-    for (i=0; i<ny; i++)  b >> T(-1,i);   b.reset();
+    for (i=0; i<ny; i++)  b << T(nx-1,i);
+    b.send_recv(right,0,left);
+    for (i=0; i<ny; i++)  b >> T(-1,i);
+    b.reset();
 
-    for (i=0; i<nx; i++)  b << T(i,0);    b.send_recv(up,0,down);
-    for (i=0; i<nx; i++)  b >> T(i,ny);   b.reset();
+    for (i=0; i<nx; i++)  b << T(i,0);
+    b.send_recv(up,0,down);
+    for (i=0; i<nx; i++)  b >> T(i,ny);
+    b.reset();
 
-    for (i=0; i<nx; i++)  b << T(i,ny-1); b.send_recv(down,0,up);
-    for (i=0; i<nx; i++)  b >> T(i,-1);   b.reset();
+    for (i=0; i<nx; i++)  b << T(i,ny-1);
+    b.send_recv(down,0,up);
+    for (i=0; i<nx; i++)  b >> T(i,-1);
+    b.reset();
 
     /* update grid */
     arr2D<double> nT(nx,ny);
