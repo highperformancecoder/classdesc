@@ -45,19 +45,27 @@ struct CppFeatures: public Base
   template <class T> using VFoo=std::vector<Foo>;
 };
 
-  template <typename C> using Elem_type=typename C::value_type;
+template <typename C> using Elem_type=typename C::value_type;
 
 
-  // test variadic template argument
-  template <class T,class... Args>
-  struct Join: public T, public Join<Args...> {};
+// test variadic template argument
+template <class T,class... Args>
+struct Join: public T, public Join<Args...> {};
 
-  template <class T> struct Join<T>: public T {};
+template <class T> struct Join<T>: public T {};
+
+// example from Stroustrup page 728
+template <typename T, template<typename> class C>
+class Xrefd
+{
+  C<T> mems;
+};
 
 // test support of spaceless close angle brackets
-  template <class T> struct allocator {};
-  template <class T, class A=allocator<T>>
-    struct vect {};
+template <class T> struct allocator {};
+template <class T, class A=allocator<T>>
+  struct vect {};
+
 
 #include "c++Features.cd"
 #endif

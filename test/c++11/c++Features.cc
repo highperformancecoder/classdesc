@@ -33,6 +33,9 @@ struct FooBar {};
 using std::cout;
 using std::endl;
 
+#include <vector>
+template <class T> using MyVect=std::vector<T>;
+
 int main()
 {
   //  Join<Foo,Bar,FooBar> fbfb;
@@ -57,4 +60,5 @@ int main()
   cout << typeName<unsigned const int64_t>() << endl;
   cout << typeName<signed const int64_t>() << endl;
   cout << typeName<char32_t>() << endl;
+  cout << typeName<Xrefd<int,MyVect>>() << endl;
 }

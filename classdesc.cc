@@ -61,44 +61,52 @@ struct action_t
     type=t; actionlist=a; templ=te; namespace_name=ns;
     string::size_type p=namespace_name.rfind("::");
     namespace_name.erase( p==string::npos? 0:p, string::npos);
-    // extract template typename parameters from templ, and replace with typename calls
-    for (size_t i=0; i<templ.size(); )
-      {
-        size_t j=templ.find("class",i);
-        if (j==string::npos)
-          j=templ.find("typename",i);
-        if (j==string::npos) j=templ.size();
-        tnTempl+=te.substr(i,j-i);
-        j=templ.find_first_of(" \t.",j);  // . for handling variadic arguments
-        if (j==string::npos) break; // we're done
-        j=templ.find_first_not_of(" \t",j);
-        bool variadic=templ.substr(j,3)=="...";
-        j=templ.find_first_not_of(" \t.",j);  // . for handling variadic arguments
-        if (j==string::npos) break; // we're done
-        int braces=0;
-        // grab out full type name
-        for (i=j; i<templ.size(); ++i)
-          {
-            switch(templ[i])
-              {
-                  case '<':
-                    ++braces; continue;
-                  case '>':
-                    if (--braces==0) break;
+    // TODO: handle template template parameters properly. For now,
+    // ignore the problem in a syntactically valid way
+    if (templ.find("template")!=string::npos)
+      tnTempl=templ;
+    else
+      // extract template typename parameters from templ, and replace with typename calls
+      for (size_t i=0; i<templ.size(); )
+        {
+          // pick first of class or template
+          size_t j=templ.find("class",i);
+          if (j==string::npos) j=templ.size();
+          size_t jj=templ.find("typename",i);
+          if (jj!=string::npos && jj<j)
+            j=jj;
+          tnTempl+=te.substr(i,j-i);
+        
+          j=templ.find_first_of(" \t.",j);  // . for handling variadic arguments
+          if (j==string::npos) break; // we're done
+          j=templ.find_first_not_of(" \t",j);
+          bool variadic=templ.substr(j,3)=="...";
+          j=templ.find_first_not_of(" \t.",j);  // . for handling variadic arguments
+          if (j==string::npos) break; // we're done
+          int braces=0;
+          // grab out full type name
+          for (i=j; i<templ.size(); ++i)
+            {
+              switch(templ[i])
+                {
+                case '<':
+                  ++braces; continue;
+                case '>':
+                  if (--braces==0) break;
+                  continue;
+                default:
+                  if (isalnum(templ[i]) || braces>0)
                     continue;
-                  default:
-                    if (isalnum(templ[i]) || braces>0)
-                      continue;
-                    else
-                      break;
-                  }
-                break;
-              }
-        if (variadic)
-          tnTempl+="\"+varTn<"+templ.substr(j,i-j)+"...>()+\"";
-        else
-          tnTempl+="\"+typeName<"+templ.substr(j,i-j)+">()+\"";
-      }
+                  else
+                    break;
+                }
+              break;
+            }
+          if (variadic)
+            tnTempl+="\"+varTn<"+templ.substr(j,i-j)+"...>()+\"";
+          else
+            tnTempl+="\"+typeName<"+templ.substr(j,i-j)+">()+\"";
+        }
   }
 };
 
