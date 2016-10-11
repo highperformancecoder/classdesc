@@ -75,18 +75,18 @@ namespace classdesc_access
   
 
   // support for polymorphic types, if loaded
-#ifdef NEW_POLY_H
-  template <class T> struct access_random_init<cd::PolyBase<T> >: 
-    public cd::NullDescriptor<cd::random_init_t> {};
-  template <class T, class B> struct access_random_init<cd::Poly<T,B> >
-  {
-    template <class U>
-    void operator()(cd::random_init_t& t, const cd::string& d, U& a)
-    {
-      random_init(t,d,cd::base_cast<B>::cast(a));
-    }
-  };
-#endif
+//#ifdef NEW_POLY_H
+//  template <class T> struct access_random_init<cd::PolyBase<T> >: 
+//    public cd::NullDescriptor<cd::random_init_t> {};
+//  template <class T, class B> struct access_random_init<cd::Poly<T,B> >
+//  {
+//    template <class U>
+//    void operator()(cd::random_init_t& t, const cd::string& d, U& a)
+//    {
+//      random_init(t,d,cd::base_cast<B>::cast(a));
+//    }
+//  };
+//#endif
 
 #ifdef POLYPACKBASE_H
   template <> struct access_random_init<cd::PolyPackBase>: 

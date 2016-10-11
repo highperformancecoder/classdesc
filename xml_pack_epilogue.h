@@ -127,32 +127,32 @@ namespace classdesc_access
 {
   namespace cd=classdesc;
   // support for polymorphic types, if loaded
-#ifdef NEW_POLY_H
-#ifdef XML_PACK_BASE_H
-  template <class T> struct access_xml_pack<cd::PolyBase<T> >: 
-    public cd::NullDescriptor<cd::xml_pack_t> {};
-  template <class T, class B> struct access_xml_pack<cd::Poly<T,B> >
-  {
-    template <class U>
-    void operator()(cd::xml_pack_t& t, const cd::string& d, U& a)
-    {
-      xml_pack(t,d,cd::base_cast<B>::cast(a));
-    }
-  };
-#endif
-#ifdef XML_UNPACK_BASE_H
-  template <class T> struct access_xml_unpack<cd::PolyBase<T> >: 
-    public cd::NullDescriptor<cd::xml_unpack_t> {};
-  template <class T, class B> struct access_xml_unpack<cd::Poly<T,B> >
-  {
-    template <class U>
-    void operator()(cd::xml_unpack_t& t, const cd::string& d, U& a)
-    {
-      xml_unpack(t,d,cd::base_cast<B>::cast(a));
-    }
-  };
-#endif
-#endif
+//#ifdef NEW_POLY_H
+//#ifdef XML_PACK_BASE_H
+//  template <class T> struct access_xml_pack<cd::PolyBase<T> >: 
+//    public cd::NullDescriptor<cd::xml_pack_t> {};
+//  template <class T, class B> struct access_xml_pack<cd::Poly<T,B> >
+//  {
+//    template <class U>
+//    void operator()(cd::xml_pack_t& t, const cd::string& d, U& a)
+//    {
+//      xml_pack(t,d,cd::base_cast<B>::cast(a));
+//    }
+//  };
+//#endif
+//#ifdef XML_UNPACK_BASE_H
+//  template <class T> struct access_xml_unpack<cd::PolyBase<T> >: 
+//    public cd::NullDescriptor<cd::xml_unpack_t> {};
+//  template <class T, class B> struct access_xml_unpack<cd::Poly<T,B> >
+//  {
+//    template <class U>
+//    void operator()(cd::xml_unpack_t& t, const cd::string& d, U& a)
+//    {
+//      xml_unpack(t,d,cd::base_cast<B>::cast(a));
+//    }
+//  };
+//#endif
+//#endif
 
 #ifdef POLYPACKBASE_H
 #ifdef XML_PACK_BASE_H

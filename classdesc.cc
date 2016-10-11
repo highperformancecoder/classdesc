@@ -54,13 +54,51 @@ typedef vector<act_pair> actionlist_t;
 
 struct action_t
 {
-  string type, templ, namespace_name;
+  string type, templ, tnTempl, namespace_name;
   actionlist_t actionlist;
   action_t(string t, actionlist_t a, string ns, string te="")
   {
     type=t; actionlist=a; templ=te; namespace_name=ns;
     string::size_type p=namespace_name.rfind("::");
-    namespace_name.erase( p==string::npos? 0:p, string::npos);  
+    namespace_name.erase( p==string::npos? 0:p, string::npos);
+    // extract template typename parameters from templ, and replace with typename calls
+    for (size_t i=0; i<templ.size(); )
+      {
+        size_t j=templ.find("class",i);
+        if (j==string::npos)
+          j=templ.find("typename",i);
+        if (j==string::npos) j=templ.size();
+        tnTempl+=te.substr(i,j-i);
+        j=templ.find_first_of(" \t.",j);  // . for handling variadic arguments
+        if (j==string::npos) break; // we're done
+        j=templ.find_first_not_of(" \t",j);
+        bool variadic=templ.substr(j,3)=="...";
+        j=templ.find_first_not_of(" \t.",j);  // . for handling variadic arguments
+        if (j==string::npos) break; // we're done
+        int braces=0;
+        // grab out full type name
+        for (i=j; i<templ.size(); ++i)
+          {
+            switch(templ[i])
+              {
+                  case '<':
+                    ++braces; continue;
+                  case '>':
+                    if (--braces==0) break;
+                    continue;
+                  default:
+                    if (isalnum(templ[i]) || braces>0)
+                      continue;
+                    else
+                      break;
+                  }
+                break;
+              }
+        if (variadic)
+          tnTempl+="\"+varTn<"+templ.substr(j,i-j)+"...>()+\"";
+        else
+          tnTempl+="\"+typeName<"+templ.substr(j,i-j)+">()+\"";
+      }
   }
 };
 
@@ -1049,7 +1087,10 @@ int main(int argc, char* argv[])
             else
               {
                 printf("template %s struct tn<%s >\n{\n",actions[i].templ.c_str(), n.c_str());
-                printf("static std::string name()\n  {return \"%s\";}\n};\n",n.c_str());
+                size_t p=n.find('<');
+                string tnName=p!=string::npos? n.substr(0,p): n;
+                tnName+=actions[i].tnTempl;
+                printf("static std::string name()\n  {return \"%s\";}\n};\n",tnName.c_str());
               }
             
             /* For enums, print out a value name table */

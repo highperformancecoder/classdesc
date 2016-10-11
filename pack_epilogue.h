@@ -72,28 +72,28 @@ namespace classdesc_access
   };
 
   // support for polymorphic types, if loaded
-#ifdef NEW_POLY_H
-  template <class T> struct access_pack<cd::PolyBase<T> >: 
-    public cd::NullDescriptor<cd::pack_t> {};
-  template <class T> struct access_unpack<cd::PolyBase<T> >: 
-    public cd::NullDescriptor<cd::pack_t> {};
-  template <class T, class B> struct access_pack<cd::Poly<T,B> >
-  {
-    template <class U>
-    void operator()(cd::pack_t& t, const cd::string& d, U& a)
-    {
-      pack(t,d,cd::base_cast<B>::cast(a));
-    }
-  };
-  template <class T, class B> struct access_unpack<cd::Poly<T,B> > 
-  {
-    template <class U>
-    void operator()(cd::pack_t& t, const cd::string& d, U& a)
-    {
-      unpack(t,d,cd::base_cast<B>::cast(a));
-    }
-  };
-#endif
+//#ifdef NEW_POLY_H
+//  template <class T> struct access_pack<cd::PolyBase<T> >: 
+//    public cd::NullDescriptor<cd::pack_t> {};
+//  template <class T> struct access_unpack<cd::PolyBase<T> >: 
+//    public cd::NullDescriptor<cd::pack_t> {};
+//  template <class T, class B> struct access_pack<cd::Poly<T,B> >
+//  {
+//    template <class U>
+//    void operator()(cd::pack_t& t, const cd::string& d, U& a)
+//    {
+//      pack(t,d,cd::base_cast<B>::cast(a));
+//    }
+//  };
+//  template <class T, class B> struct access_unpack<cd::Poly<T,B> > 
+//  {
+//    template <class U>
+//    void operator()(cd::pack_t& t, const cd::string& d, U& a)
+//    {
+//      unpack(t,d,cd::base_cast<B>::cast(a));
+//    }
+//  };
+//#endif
 
 #ifdef POLYPACKBASE_H
   template <> struct access_pack<cd::PolyPackBase>: 

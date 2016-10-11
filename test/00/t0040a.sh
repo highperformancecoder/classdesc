@@ -49,8 +49,8 @@ foo
 bar
 nn::dd
 nn::foo
-nn::bar<T>
-foobar<T>
+nn::bar<int>
+foobar<int>
 std::vector<double>
 std::deque<double>
 std::list<double>

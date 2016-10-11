@@ -375,7 +375,13 @@ namespace classdesc
   template <class T> struct tn;  //for partial specialisation support
   template <class T> std::string typeName();
 
-  ///@{ a string representation of the type
+#if defined(__cplusplus) && __cplusplus>=201103L
+  // handle variadic arguments
+  template <class T, class... A> std::string varTn() {return typeName<T>()+","+varTn<A...>();}
+  template <class T> std::string varTn() {return typeName<T>();}
+#endif
+  
+ ///@{ a string representation of the type
   template <> inline std::string typeName<bool>()    {return "bool";}
   template <> inline std::string typeName<char>()    {return "char";}
   template <> inline std::string typeName<short>() {return "short";}

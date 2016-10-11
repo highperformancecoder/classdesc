@@ -68,12 +68,12 @@ namespace classdesc_access
 {
   namespace cd=classdesc;
   // support for polymorphic types, if loaded
-#ifdef NEW_POLY_H
-  template <class T> struct access_dump<cd::PolyBase<T> >: 
-    public cd::NullDescriptor<cd::dump_t> {};
-  template <class T, class B> struct access_dump<cd::Poly<T,B> >: 
-    public cd::NullDescriptor<cd::dump_t> {};
-#endif
+//#ifdef NEW_POLY_H
+//  template <class T> struct access_dump<cd::PolyBase<T> >: 
+//    public cd::NullDescriptor<cd::dump_t> {};
+//  template <class T, class B> struct access_dump<cd::Poly<T,B> >: 
+//    public cd::NullDescriptor<cd::dump_t> {};
+//#endif
 
 #ifdef POLYPACKBASE_H
   template <> struct access_dump<cd::PolyPackBase>: 

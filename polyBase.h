@@ -82,18 +82,19 @@ namespace classdesc
     Poly* clone() const {return new T(*static_cast<const T*>(this));}
   };
 
-  template <class T> struct tn<PolyBase<T> >
-  {
-    static std::string name()
-    {return "classdesc::PolyBase<"+typeName<T>()+">";}
-  };
-  template <class T, class Base> struct tn<Poly<T,Base> >
-  {
-    static std::string name()
-    {return "classdesc::Poly<"+typeName<T>()+","+typeName<Base>()+">";}
-  };
+//  template <class T> struct tn<classdesc::PolyBase<T> >
+//  {
+//    static std::string name()
+//    {return "classdesc::PolyBase<"+typeName<T>()+">";}
+//  };
+//  template <class T, class Base> struct tn<classdesc::Poly<T,Base> >
+//  {
+//    static std::string name()
+//    {return "classdesc::Poly<"+typeName<T>()+","+typeName<Base>()+">";}
+//  };
 
 
 }
 
+#include "polyBase.cd"
 #endif
