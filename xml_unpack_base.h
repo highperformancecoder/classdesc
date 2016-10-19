@@ -539,10 +539,11 @@ namespace classdesc
     while (e!=eName.c_str() && *(e-1)!=' ' && *(e-1)!=':') e--;
 
     arg.clear();
-    for (size_t i=0; i<x.count(d+"."+e); ++i) 
+    string prefix=d.empty()? e: d+"."+e;
+    for (size_t i=0; i<x.count(prefix); ++i) 
       {
         typename NonConstKeyValueType<typename T::value_type>::T v;
-        ::xml_unpack(x,idx(d+"."+e,i),v);
+        ::xml_unpack(x,idx(prefix,i),v);
         arg.insert(v);
       }
   }

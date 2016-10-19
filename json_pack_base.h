@@ -330,6 +330,7 @@ namespace classdesc
         else
           {
             const json_spirit::mArray& arr=val.get_array();
+            a.clear();
             for (size_t i=0; i<arr.size(); ++i)
               {
                 typename T::value_type v;
@@ -405,6 +406,7 @@ namespace classdesc
         else
           {
             const json_spirit::mArray& arr=val.get_array();
+            a.clear();
             for (size_t i=0; i<arr.size(); ++i)
               {
                 typename NonConstKeyValueType<typename T::value_type>::T v;
