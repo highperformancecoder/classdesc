@@ -466,7 +466,7 @@ namespace classdesc
     json_pack(j,"",x);
     return write(j);
   }
-  template <class T> void json(const T& x, const string& s) 
+  template <class T> void json(T& x, const string& s) 
   {
     json_pack_t j;
     read(s, j);
