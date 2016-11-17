@@ -330,6 +330,7 @@ namespace classdesc
         else
           {
             const json_spirit::mArray& arr=val.get_array();
+            a.clear();
             for (size_t i=0; i<arr.size(); ++i)
               {
                 typename T::value_type v;
@@ -405,6 +406,7 @@ namespace classdesc
         else
           {
             const json_spirit::mArray& arr=val.get_array();
+            a.clear();
             for (size_t i=0; i<arr.size(); ++i)
               {
                 typename NonConstKeyValueType<typename T::value_type>::T v;
@@ -464,7 +466,7 @@ namespace classdesc
     json_pack(j,"",x);
     return write(j);
   }
-  template <class T> void json(const T& x, const string& s) 
+  template <class T> void json(T& x, const string& s) 
   {
     json_pack_t j;
     read(s, j);
