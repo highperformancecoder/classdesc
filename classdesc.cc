@@ -203,7 +203,10 @@ void assign_enum_action(tokeninput& input, string prefix)
             if (input.lasttoken!=",") //not sure if this is correct C++, but
               //compilers accept blank enumerator-definitions
               enum_keys[enumname].push_back(input.lasttoken);
-          if (input.token == "=") {input.nexttok(); input.nexttok();} //skip value
+          if (input.token == "=") {
+            for (input.nexttok(); input.token!="," && input.token!="}";
+                 input.nexttok()); //skip value
+          }
         }
       actionlist_t actionlist;
       if (typeName)
