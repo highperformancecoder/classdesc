@@ -426,11 +426,18 @@ namespace classdesc
     {return "classdesc::shared_ptr<"+typeName<T>()+">";}
   };
 
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
   template <class T> struct tn<std::auto_ptr<T> >
   {
     static std::string name()
     {return "auto_ptr<"+typeName<T>()+">";}
   };
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 #if defined(__cplusplus) && __cplusplus>=201103L   
   template <class T> struct tn<std::unique_ptr<T> >
