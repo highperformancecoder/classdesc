@@ -146,11 +146,13 @@ namespace classdesc
 
 
 }
+#endif
 
 namespace classdesc_access
 {
   namespace cd = classdesc;
 
+#ifdef XML_PACK_BASE_H
   template <class T>
   struct access_xml_pack<cd::shared_ptr<T> >
   {
@@ -181,7 +183,9 @@ namespace classdesc_access
     {xml_pack_smart_ptr(x,d,a);}
   };
 #endif
+#endif
   
+#ifdef XML_UNPACK_BASE_H
   template <class T>
   struct access_xml_unpack<cd::shared_ptr<T> >
   {
@@ -215,8 +219,8 @@ namespace classdesc_access
     {xml_unpack_smart_ptr(x,d,a);}
   };
 #endif
+#endif
 }
  
 
-#endif
 #endif
