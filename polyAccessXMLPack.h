@@ -16,7 +16,7 @@ namespace classdesc
   // polymorphic version
   template <class T>
   typename enable_if<is_base_of<PolyXMLBase, typename T::element_type>, void>::T
-  xml_pack_smart_ptr(xml_pack_t& x, const string& d, T& a) 
+  xml_pack_smart_ptr(xml_pack_t& x, const string& d, const T& a) 
   {
     if (a.get())
       {
@@ -35,7 +35,7 @@ namespace classdesc
   template <class T>
   void
 #endif
-  xml_pack_smart_ptr(xml_pack_t& x, const string& d, T& a)
+  xml_pack_smart_ptr(xml_pack_t& x, const string& d, const T& a)
   {
     if (a)
       ::xml_pack(x,d,*a);
@@ -109,6 +109,42 @@ namespace classdesc
     else
       a.reset();
   }
+
+  // const argument versions of above
+#ifdef POLYXMLBASE_H
+    // polymorphic version
+  template <class T>
+  typename enable_if<is_base_of<PolyXMLBase, typename T::element_type>, void>::T
+  xml_unpack_smart_ptr(xml_unpack_t& x, const string& d, const T& a, 
+                        dummy<0> dum=0)
+  {
+    if (x.exists(d+".type"))
+      {
+        typename T::element_type::Type type;
+        ::xml_unpack(x,d+".type",type);
+        T tmp(T::element_type::create(type));
+        tmp->xml_unpack(x,d);
+      }
+  }
+
+    // non polymorphic version
+  template <class T>
+  typename enable_if<Not<is_base_of<PolyXMLBase, typename T::element_type> >, void>::T
+#else
+  template <class T>
+  void
+#endif
+  xml_unpack_smart_ptr(xml_unpack_t& x, const string& d, 
+                        const T& a, dummy<1> dum=0)
+  {
+    if (x.exists(d))
+      {
+        T tmp(new typename T::element_type);
+        ::xml_unpack(x,d,*tmp);
+      }
+  }
+
+
 }
 
 namespace classdesc_access
@@ -116,9 +152,41 @@ namespace classdesc_access
   namespace cd = classdesc;
 
   template <class T>
+  struct access_xml_pack<cd::shared_ptr<T> >
+  {
+    void operator()(cd::xml_pack_t& x, const cd::string& d, const cd::shared_ptr<T>& a)
+    {xml_pack_smart_ptr(x,d,a);}
+  };
+
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+  template <class T>
+  struct access_xml_pack<std::auto_ptr<T> >
+  {
+    void operator()(cd::xml_pack_t& x, const cd::string& d, const std::auto_ptr<T>& a)
+    {xml_pack_smart_ptr(x,d,a);}
+  };
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+
+
+#if defined(__cplusplus) && __cplusplus >= 201103L
+  template <class T>
+  struct access_xml_pack<std::unique_ptr<T> >
+  {
+    void operator()(cd::xml_pack_t& x, const cd::string& d, const std::unique_ptr<T>& a)
+    {xml_pack_smart_ptr(x,d,a);}
+  };
+#endif
+  
+  template <class T>
   struct access_xml_unpack<cd::shared_ptr<T> >
   {
-    void operator()(cd::xml_unpack_t& x, const cd::string& d, cd::shared_ptr<T>& a)
+    template <class U>
+    void operator()(cd::xml_unpack_t& x, const cd::string& d, U& a)
     {xml_unpack_smart_ptr(x,d,a);}
   };
 
@@ -129,7 +197,8 @@ namespace classdesc_access
   template <class T>
   struct access_xml_unpack<std::auto_ptr<T> >
   {
-    void operator()(cd::xml_unpack_t& x, const cd::string& d, std::auto_ptr<T>& a)
+    template <class U>
+    void operator()(cd::xml_unpack_t& x, const cd::string& d, U& a)
     {xml_unpack_smart_ptr(x,d,a);}
   };
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
@@ -141,7 +210,8 @@ namespace classdesc_access
   template <class T>
   struct access_xml_unpack<std::unique_ptr<T> >
   {
-    void operator()(cd::xml_unpack_t& x, const cd::string& d, std::unique_ptr<T>& a)
+    template <class U>
+    void operator()(cd::xml_unpack_t& x, const cd::string& d, U& a)
     {xml_unpack_smart_ptr(x,d,a);}
   };
 #endif

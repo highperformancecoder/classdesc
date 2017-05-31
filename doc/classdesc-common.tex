@@ -1015,6 +1015,7 @@ const EnumKeys<Foo> e(enum_keys<Foo>());
 map<Foo,string> m(e.begin(), e.end());
 vector<string> s(e.sbegin(), e.send());
 vector<Foo> v(e.vbegin(), e.vend());
+for (auto i: enum_keys<Foo>()) cout << i.second <<"="<<i.first<< endl;
 \end{verbatim}
 
 

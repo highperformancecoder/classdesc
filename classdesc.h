@@ -520,6 +520,7 @@ namespace classdesc
       if (i!=v2s.end()) return i->second;
       else return "";
     }
+    std::string operator()(T val) const {return operator()(int(val));}
     // use these to iterate of the enum's keys
     size_t size() const {return v2s.size();}
     typedef VSMap::const_iterator iterator;
@@ -572,6 +573,11 @@ namespace classdesc
   template <class T> const EnumKeys<T>&
   enum_keys() {return enum_keysData<T>::keys;}
 
+  template <class T>
+  typename enable_if<is_enum<T>, std::ostream&>::T
+  operator<<(std::ostream& o, T x)
+  {return o<<enum_keys<T>()(x);}
+  
   /**
      Enum_handle is a wrapper class that performs serialisation
      of enums using symbolic constants

@@ -61,4 +61,7 @@ int main()
   cout << typeName<signed const int64_t>() << endl;
   cout << typeName<char32_t>() << endl;
   cout << typeName<Xrefd<int,MyVect>>() << endl;
+  cout << typeName<Colour>() << endl;
+  for (auto& i: enum_keys<Colour>())
+    cout << i.second << endl;
 }
