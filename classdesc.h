@@ -420,7 +420,27 @@ namespace classdesc
     {return typeName<T>()+"*";}
   };
 
-  template <class T,class A> struct tn<std::vector<T,A> >
+  template <class T> struct tn<shared_ptr<T> >
+  {
+    static std::string name()
+    {return "classdesc::shared_ptr<"+typeName<T>()+">";}
+  };
+
+  template <class T> struct tn<std::auto_ptr<T> >
+  {
+    static std::string name()
+    {return "auto_ptr<"+typeName<T>()+">";}
+  };
+
+#if defined(__cplusplus) && __cplusplus>=201103L   
+  template <class T> struct tn<std::unique_ptr<T> >
+  {
+    static std::string name()
+    {return "std::unique_ptr<"+typeName<T>()+">";}
+  };
+#endif
+  
+ template <class T,class A> struct tn<std::vector<T,A> >
   {
     static std::string name()
     {return "std::vector<"+typeName<T>()+">";}
