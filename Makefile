@@ -150,7 +150,7 @@ sure: aegis-all
 	-cd mpi-examples && $(MAKE) clean && $(MAKE) NOGUI=1
 	-cd examples && $(MAKE) clean && $(MAKE) NOGUI=1
 #	-cd objc-examples && $(MAKE)
-	sh runtests "$(CPLUSPLUS)" test/00/*.sh
+	sh runtests "$(CPLUSPLUS) $(FLAGS)" test/00/*.sh
 
 c++11-sure: clean 
 	$(MAKE) CPLUSPLUS="g++ --std=c++11" classdesc
