@@ -24,6 +24,8 @@ script:
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
   - make GCOV=1 travis-test
-  - lcov -c -d . -o lcov.info
+  - 
+  - mkdir -p coverage
+  - lcov -c -d . -o coverage/lcov.info
 #  - ./cc-test-reporter after-build --exit-code $?
-  - ./cc-test-reporter after-build
+  - ./cc-test-reporter after-build -t lcov
