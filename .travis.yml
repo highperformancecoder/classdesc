@@ -16,6 +16,7 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y json-spirit
   - sudo apt-get install -y libboost-dev
+  - sudo apt-get install -y libxml2-utils
 
 script: 
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
