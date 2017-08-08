@@ -3,6 +3,11 @@ compiler: gcc
 sudo: true
 dist: trusty
 
+env:
+  global:
+    - CC_TEST_REPORTER_ID=2727af6b46213a350cb85449e8d3b538edcd7221168f668c940ef86f07718184
+    - GIT_COMMITTED_AT=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then git log -1 --pretty=format:%ct; else git log -1 --skip 1 --pretty=format:%ct; fi)
+
 before_install:
   - wget http://download.opensuse.org/repositories/home:hpcoder1/xUbuntu_14.04/Release.key
   - sudo apt-key add - < Release.key
@@ -13,4 +18,7 @@ before_install:
   - sudo apt-get install -y libboost-dev
 
 script: 
-  - make travis-test
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - make GCOV=1 travis-test
+  - ./cc-test-reporter after-build --exit-code $?
