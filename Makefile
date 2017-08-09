@@ -179,3 +179,10 @@ install-doc:
 	-cd doc; sh Makedoc
 	rsync -e ssh -r -z --progress --delete doc/classdesc $(DOCPREFIX)
 	rsync -e ssh -r -z --progress --delete html/* $(DOCPREFIX)/doxygen
+
+lcov:
+	$(MAKE) clean
+	$(MAKE) GCOV=1 sure
+	lcov -i -c -d . --no-external -o lcov.info
+	lcov -c -d . --no-external -o lcov.info
+	genhtml -o coverage lcov.info
