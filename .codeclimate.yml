@@ -1,0 +1,10 @@
+engines:
+  csslint:
+    enabled: false
+  fixme:
+    enabled: true
+ratings:
+  paths:
+  - "**.css"
+exclude_paths:
+  - test/

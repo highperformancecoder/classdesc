@@ -5,6 +5,7 @@ CPLUSPLUS=g++
 FLAGS=-g -I.
 
 ifdef GCOV
+GCOV_FLAGS+=-fprofile-arcs -ftest-coverage
 FLAGS+=-fprofile-arcs -ftest-coverage
 endif
 
@@ -150,7 +151,7 @@ sure: aegis-all
 	-cd mpi-examples && $(MAKE) clean && $(MAKE) NOGUI=1
 	-cd examples && $(MAKE) clean && $(MAKE) NOGUI=1
 #	-cd objc-examples && $(MAKE)
-	sh runtests "$(CPLUSPLUS)" test/00/*.sh
+	sh runtests "$(CPLUSPLUS) $(GCOV_FLAGS)" test/00/*.sh
 
 c++11-sure: clean 
 	$(MAKE) CPLUSPLUS="g++ --std=c++11" classdesc
@@ -163,7 +164,7 @@ travis-test: build
 	cd examples && $(MAKE) NOGUI=1
 	cd test && $(MAKE)
 	cd test/c++11 && $(MAKE)
-	sh runtests g++ `ls test/00/*.sh|grep -v t0002a|grep -v t0003a|grep -v t0041a|grep -v t0051a`
+	sh runtests "g++ $(GCOV_FLAGS)" `ls test/00/*.sh|grep -v t0002a|grep -v t0003a|grep -v t0041a|grep -v t0051a`
 
 VERSION=$(shell git describe)
 
@@ -178,3 +179,10 @@ install-doc:
 	-cd doc; sh Makedoc
 	rsync -e ssh -r -z --progress --delete doc/classdesc $(DOCPREFIX)
 	rsync -e ssh -r -z --progress --delete html/* $(DOCPREFIX)/doxygen
+
+lcov:
+	$(MAKE) clean
+	$(MAKE) GCOV=1 sure
+	lcov -i -c -d . --no-external -o lcov.info
+	lcov -c -d . --no-external -o lcov.info
+	genhtml -o coverage lcov.info
