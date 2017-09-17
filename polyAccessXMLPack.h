@@ -49,6 +49,7 @@ void xml_pack(classdesc::xml_pack_t& x, const classdesc::string& d,
               classdesc::shared_ptr<T>& a)
 {classdesc::xml_pack_smart_ptr(x,d,a);}
 
+#if defined(__cplusplus) && __cplusplus<=201402
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -59,6 +60,7 @@ void xml_pack(classdesc::xml_pack_t& x, const classdesc::string& d,
 {classdesc::xml_pack_smart_ptr(x,d,a);}
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
 #endif
 
 #if defined(__cplusplus) && __cplusplus >= 201103L
@@ -160,6 +162,7 @@ namespace classdesc_access
     {xml_pack_smart_ptr(x,d,a);}
   };
 
+#if defined(__cplusplus) && __cplusplus<=201402
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -173,7 +176,7 @@ namespace classdesc_access
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
-
+#endif
 
 #if defined(__cplusplus) && __cplusplus >= 201103L
   template <class T>
@@ -194,6 +197,7 @@ namespace classdesc_access
     {xml_unpack_smart_ptr(x,d,a);}
   };
 
+#if defined(__cplusplus) && __cplusplus<=201402
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -208,7 +212,7 @@ namespace classdesc_access
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
-
+#endif
 
 #if defined(__cplusplus) && __cplusplus >= 201103L
   template <class T>

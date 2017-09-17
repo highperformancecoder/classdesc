@@ -111,6 +111,7 @@ namespace classdesc_access
     {json_unpack_smart_ptr(x,d,a);}
   };
 
+#if defined(__cplusplus) && __cplusplus<=201402
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -132,6 +133,7 @@ namespace classdesc_access
   };
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
 #endif
 
 #if defined(__cplusplus) && __cplusplus >= 201103L
