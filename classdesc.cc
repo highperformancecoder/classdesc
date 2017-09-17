@@ -257,6 +257,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
   string               baseclass;
   string               argList;
   string               rType;
+  set<string> usingNames;
 
   /* handle inheritance */
   for (;; input.nexttok() )
@@ -389,7 +390,14 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 	}
       if (input.token=="using") //ignore using declarations
         {
-          while (input.token!=";") input.nexttok();       
+          string lastToken;
+          while (input.token!=";") 
+            {
+              lastToken=input.token;
+              input.nexttok();     
+            }  
+          usingNames.insert('.'+lastToken);
+
           continue;
         }
       if (input.token=="class" || input.token=="struct")
@@ -599,7 +607,8 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
   for (size_t i=0; i<actionlist.size(); i++)
     {
       name=actionlist[i].name;
-      if (!num_instances.count(name) || num_instances[name]==1)
+      if (!usingNames.count(name) && 
+          (!num_instances.count(name) || num_instances[name]==1))
 	copy_of_alist.push_back(actionlist[i]);
     }
 
