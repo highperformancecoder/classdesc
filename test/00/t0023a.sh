@@ -52,6 +52,7 @@ cat >out2 <<EOF
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #endif
 #include "p_base.h"
 namespace classdesc_access {

@@ -53,6 +53,7 @@ cat >test.cd.expected <<EOF
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #endif
 #ifndef CLASSDESC_TYPENAME_foo
 #define CLASSDESC_TYPENAME_foo

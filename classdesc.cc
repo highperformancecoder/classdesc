@@ -1059,6 +1059,7 @@ int main(int argc, char* argv[])
   puts("#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)");
   puts("#pragma GCC diagnostic push");
   puts("#pragma GCC diagnostic ignored \"-Wunused-function\"");
+  puts("#pragma GCC diagnostic ignored \"-Wunused-local-typedefs\"");
   puts("#endif");
 
   /* make kludge definitions for all declared classes that aren't defined */
