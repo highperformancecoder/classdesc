@@ -4,7 +4,7 @@ project('classdesc', 'c',
     meson_version: '>=0.39.1',
     license: [ 'GPL3+', 'MIT' ],
     default_options: [
-        'c_std=gnu11',
+        'c_std=gnu99',
         'warning_level=2',
     ],
 )
