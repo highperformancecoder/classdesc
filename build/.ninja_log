@@ -1,0 +1,5 @@
+# ninja log v5
+1	20	1511806658	src/insert-friend@exe/insert-friend.cc.o	5398ad580cb87650
+0	29	1511806658	src/classdesc@exe/classdesc.cc.o	b1e3d2a8f3d5baf0
+20	169	1511806658	src/insert-friend	67763c409810040f
+29	217	1511806658	src/classdesc	b58c64c4c7817324
