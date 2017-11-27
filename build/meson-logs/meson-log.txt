@@ -1,0 +1,23 @@
+Build started at 2017-11-27T13:17:31.811656
+Python binary: /usr/bin/python
+Python system: Linux
+The Meson build system
+Version: 0.43.0.dev1
+Source dir: /home/solaraquarion/classdesc
+Build dir: /home/solaraquarion/classdesc/build
+Build type: native build
+Project name: classdesc
+Sanity testing C++ compiler: ccache c++
+Is cross compiler: False.
+Sanity check compiler command line: ccache c++ /home/solaraquarion/classdesc/build/meson-private/sanitycheckcpp.cc -o /home/solaraquarion/classdesc/build/meson-private/sanitycheckcpp.exe
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Running test binary command: /home/solaraquarion/classdesc/build/meson-private/sanitycheckcpp.exe
+Native C++ compiler: ccache c++ (gcc 7.2.0)
+Build machine cpu family: x86_64
+Build machine cpu: x86_64
+Build targets in project: 2
