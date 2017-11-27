@@ -1,0 +1,51 @@
+anonNamespace.o: anonNamespace.cc anonNamespace.h anonNamespace.cd \
+ classdesc_epilogue.h
+cpdoexample.o: cpdoexample.cc cpdoexample.h classdesc_access.h \
+ cpdoexample.cd classdesc_epilogue.h
+enumKeys.o: enumKeys.cc enumKeys.h enumKeys.cd classdesc_epilogue.h
+exclude.o: exclude.cc classdesc.h classdesc_epilogue.h
+miscMemberTypes.o: miscMemberTypes.cc pack_base.h miscMemberTypes.h \
+ miscMemberTypes.cd classdesc_epilogue.h
+nestedClass.o: nestedClass.cc nestedClass.h nestedClass.cd \
+ classdesc_epilogue.h
+privateBase.o: privateBase.cc privateBase.h privateBase.cd
+privateEnum.o: privateEnum.cc privateEnum.h privateEnum.cd \
+ classdesc_epilogue.h
+random_init.o: random_init.cc testXMLcd.h
+stringInheritance.o: stringInheritance.cc stringInheritance.h \
+ stringInheritance.cd
+templateArgs.o: templateArgs.cc templateArgs.h templateArgs.cd \
+ classdesc_epilogue.h
+testBinStream.o: testBinStream.cc pack_base.h pack_stl.h \
+ classdesc_epilogue.h
+testConst.o: testConst.cc testConst.h testConst.cd classdesc_epilogue.h
+test_const_method.o: test_const_method.cc function.h classdesc_epilogue.h
+testContainersClear.o: testContainersClear.cc pack_base.h xml_pack_base.h \
+ xml_unpack_base.h json_pack_base.h classdesc_epilogue.h
+testDump.o: testDump.cc testXMLcd.h testXMLcd.cd classdesc_epilogue.h
+testExclude.o: testExclude.cc testExclude.h testExclude.cd
+testFnPtr.o: testFnPtr.cc testFnPtr.h testFnPtr.cd classdesc_epilogue.h
+testfunctional.o: testfunctional.cc javaClassDescriptor.h function.h \
+ classdesc_epilogue.h
+testJavaClass.o: testJavaClass.cc javaClass.h javaClass_serialisation.h \
+ javaClass.cd classdesc_epilogue.h
+testJsonSharedPtr.o: testJsonSharedPtr.cc pack_base.h xml_pack_base.h \
+ xml_unpack_base.h json_pack_base.h testJsonSharedPtr.h polyBase.h \
+ polyPackBase.h polyXMLBase.h polyJsonBase.h testJsonSharedPtr.cd \
+ classdesc_epilogue.h
+testRef.o: testRef.cc poly.h testRef.h testRef.cd object.cd \
+ classdesc_epilogue.h
+test_stl.o: test_stl.cc
+testTypeName.o: testTypeName.cc classdesc.h testTypeName.h \
+ testTypeName.cd classdesc_epilogue.h
+testXML_base.o: testXML_base.cc xml_unpack_base.h classdesc_epilogue.h
+testXMLcd.o: testXMLcd.cc xml_pack_base.h xml_unpack_base.h \
+ xml_unpack_base.cd testXMLcd.h testXMLcd.cd classdesc_epilogue.h
+testXMLcd_other.o: testXMLcd_other.cc xml_pack_base.h xml_unpack_base.h \
+ xml_unpack_base.cd testXMLcd.h testXMLcd.cd classdesc_epilogue.h
+testXSDgenerate.o: testXSDgenerate.cc xml_pack_base.h xml_unpack_base.h \
+ xml_unpack_base.cd testXMLcd.h testXMLcd.cd classdesc_epilogue.h
+ticket20-example.o: ticket20-example.cc ticket20-example.h classdesc.h \
+ ticket20-example.cd
+ticket43-example.o: ticket43-example.cc ticket43-example.h \
+ ticket43-example.cd classdesc_epilogue.h
