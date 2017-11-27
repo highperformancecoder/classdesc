@@ -14,9 +14,11 @@ sources = ['xdr_pack.cc'
 add_global_arguments('-DXDR_PACK', '-DHAVE_LONGLONG', language : 'cpp')
 includes = []
 extra_libs = []
+srcdir = include_directories('src')
 incdir = include_directories('src/include')
-executable('classdesc', 'classdesc.cc', include_directories : incdir)
-executable('insert-friend', 'insert-friend.cc', include_directories : incdir)
+testdir = include_directories('src/test')
+inctestdir = include_directories('src/test/include')
+
 
 
 
