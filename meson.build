@@ -16,7 +16,8 @@ sources = ['classdesc.cc',
 includes = []
 extra_libs = []
 incdir = include_directories('include')
-executable('classdesc', sources, include_directories : incdir)
+executable('classdesc', 'classdesc.cc', include_directories : incdir)
+executable('insert-friend', 'insert-friend.cc', include_directories : incdir)
 
 
 
