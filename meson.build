@@ -10,8 +10,8 @@ project('classdesc', 'cpp',
     ],
 )
 
-sources = ['xdr_pack.cc'
-           ]
+sources = []
+
 add_global_arguments('-DXDR_PACK', '-DHAVE_LONGLONG', language : 'cpp')
 includes = []
 extra_libs = []
