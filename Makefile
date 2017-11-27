@@ -119,10 +119,6 @@ functiondb.h: functiondb.sh
 latex-docs:
 	if which latex; then cd doc; rm -f *.out *.aux *.dvi *.log *.blg *.toc *.lof; latex -interaction=batchmode classdesc; fi
 
-install: build
-	-mkdir $(PREFIX)
-	-mkdir $(PREFIX)/bin
-	-mkdir $(PREFIX)/include
 ifeq ($(OS),CYGWIN)
 	cp -f $(EXES:%=%.exe)  $(PREFIX)/bin
 else
@@ -133,12 +129,6 @@ endif
 #	-ln -s $(PREFIX)/include/pack_base.h $(PREFIX)/include/unpack_base.h
 #	cp -r $(SYSINCLUDES) $(PREFIX)
 
-sure: aegis-all
-	-ln -s pack_base.h unpack_base.h
-	-cd mpi-examples && $(MAKE) clean && $(MAKE) NOGUI=1
-	-cd examples && $(MAKE) clean && $(MAKE) NOGUI=1
-#	-cd objc-examples && $(MAKE)
-	sh runtests "$(CPLUSPLUS) $(GCOV_FLAGS)" test/00/*.sh
 
 c++11-sure: clean 
 	$(MAKE) CPLUSPLUS="g++ --std=c++11" classdesc
