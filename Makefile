@@ -115,19 +115,6 @@ functiondb.h: functiondb.sh
 	-rm $@
 	bash $< >$@
 
-clean: 
-	rm -f *.o  *~ "\#*\#" core *.exh *.exc *.d *,D *.exe
-	rm -rf $(EXES) include-paths cxx_repository
-	cd mpi-examples && $(MAKE) clean
-	cd examples && $(MAKE) clean
-	cd objc-examples && $(MAKE) clean
-	cd java && $(MAKE) clean
-	cd javaExamples && $(MAKE) clean
-	cd test && $(MAKE) clean
-	cd test/c++11 && $(MAKE) clean
-	cd doc && rm -f *~ *.aux *.dvi *.log *.blg *.toc *.lof
-	rm -rf ii_files */ii_files
-
 # test compile Latex docs, if latex is on system
 latex-docs:
 	if which latex; then cd doc; rm -f *.out *.aux *.dvi *.log *.blg *.toc *.lof; latex -interaction=batchmode classdesc; fi
