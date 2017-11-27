@@ -1,0 +1,4 @@
+dumpClass.o: dumpClass.cc javaClass.h javaClass_base.h \
+ javaClass_serialisation.h javaClass.cd classdesc_epilogue.h
+JNIEx.o: JNIEx.cc javaClass.h javaClass_serialisation.h javaClass.cd \
+ classdesc_epilogue.h JNIEx.h javaClass_base.h
