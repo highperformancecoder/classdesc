@@ -40,4 +40,3 @@ sources = [
  'type_traits_check.cc'
 ]
 add_global_arguments('-DRECUR_MAX=50', '-DTR1', '-DHAVE_LONGLONG', language : 'cpp')
-custom_target(sources, c_args: ['-w', '-MM'],)
