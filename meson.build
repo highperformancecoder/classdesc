@@ -9,10 +9,9 @@ project('classdesc', 'cpp',
     ],
 )
 
-sources = ['classdesc.cc',  
-           'insert-friend.cc',  
-           'xdr_pack.cc'
+sources = ['xdr_pack.cc'
            ]
+add_global_arguments('-DXDR_PACK', '-DHAVE_LONGLONG', language : 'cpp')
 includes = []
 extra_libs = []
 incdir = include_directories('include')
