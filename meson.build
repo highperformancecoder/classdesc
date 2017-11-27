@@ -18,6 +18,8 @@ srcdir = include_directories('src')
 incdir = include_directories('src/include')
 testdir = include_directories('src/test')
 inctestdir = include_directories('src/test/include')
+subdir('src')
+
 
 
 
