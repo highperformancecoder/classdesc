@@ -17,7 +17,7 @@ before_install:
   - sudo apt-get install -y json-spirit
   - sudo apt-get install -y libboost-dev
   - sudo apt-get install -y libxml2-utils
-  - sudo apt-get install -y meson
+  - sudo pip install meson
   - sudo apt-get install -y ninja
 
 script: 
