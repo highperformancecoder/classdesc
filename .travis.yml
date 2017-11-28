@@ -18,6 +18,7 @@ before_install:
   - sudo apt-get install -y libboost-dev
   - sudo apt-get install -y libxml2-utils
   - sudo apt-get install -y python3
+  - sudo apt-get install -y python3-pip
   - sudo pip3 install meson
   - sudo apt-get install -y ninja
 
