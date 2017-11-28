@@ -4,7 +4,7 @@ project('classdesc', 'cpp',
     meson_version: '>=0.39.1',
     license: [ 'GPL3+', 'MIT' ],
     default_options: [
-        'cpp_std=c++14',
+        'cpp_std=c++11',
         'warning_level=1',
         'prefix=/usr',
     ],
