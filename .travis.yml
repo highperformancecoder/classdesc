@@ -23,8 +23,7 @@ before_install:
   - cd ninja
   - ./configure.py --bootstrap
   - sudo install ninja /usr/bin
-script:
-  - 
-  -  meson build
+script: 
+  -  meson -C build
   -  cd build
   -  ninja
