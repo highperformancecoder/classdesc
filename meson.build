@@ -12,7 +12,7 @@ project('classdesc', 'cpp',
 
 sources = []
 
-add_global_arguments('-DXDR_PACK', '-DHAVE_LONGLONG', language : 'cpp')
+add_global_arguments('-DHAVE_LONGLONG', language : 'cpp')
 includes = []
 extra_libs = []
 srcdir = include_directories('src')
