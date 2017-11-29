@@ -22,7 +22,7 @@ before_install:
   - sudo apt-get install -y libxml2-utils
 
 script: 
-  - sudo cd /root && TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir
+  - TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir
   #- ninja -C builddir test
 
   
