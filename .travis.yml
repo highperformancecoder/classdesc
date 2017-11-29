@@ -23,7 +23,7 @@ before_install:
   - sudo apt-get install -y git
 
 script: 
-  - if [[ "$TRAVIS_OS_NAME" == "linux"  ]]; then docker run ubuntu:rolling /bin/sh -c "cd /root && TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir"
+  docker run ubuntu:rolling /bin/sh -c "cd /root && TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir"
   #- ninja -C builddir test
 
   
