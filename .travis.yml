@@ -1,5 +1,5 @@
 language: cpp
-sudo: always
+sudo: required
 os:
     - linux
 
@@ -15,7 +15,7 @@ before_install:
   - sudo apt-key add - < Release.key
   - echo 'deb http://download.opensuse.org/repositories/home:/hpcoder1/xUbuntu_16.04/ /' >/tmp/hpcoders.list 
   - sudo mv /tmp/hpcoders.list /etc/apt/sources.list.d/
-  - docker pull highperformancecoder/classdesc:yakkety
+  - docker pull zesty/Dockerfile:yakkety
   - sudo apt-get install -y json-spirit
   - sudo apt-get install -y libboost-dev
   - sudo apt-get install -y libxml2-utils
