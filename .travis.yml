@@ -18,13 +18,13 @@ before_install:
   - sudo apt-get install -y json-spirit
   - sudo apt-get install -y libboost-dev
   - sudo apt-get install -y libxml2-utils
-  - git clone https://github.com/mesonbuild/meson
-  - sudo python setup.py install --optimize=1
-
+  
 install:
   - export PATH="`pwd`/build:${PATH}"
   - wget https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip && unzip -q ninja-linux.zip -d build
-  - sudo pip3 install meson
+  - git clone https://github.com/mesonbuild/meson
+  - cd meson
+  - sudo python setup.py install --optimize=1
 
 script: 
   - meson builddir
