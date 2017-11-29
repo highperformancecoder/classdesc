@@ -21,11 +21,9 @@ before_install:
   - sudo apt-get install -y libboost-dev
   - sudo apt-get install -y libxml2-utils
   - sudo apt-get install -y git
-  - git clone https://github.com/mesonbuild/meson.git && cd meson
-  - sudo python setup.py install && cd ..
 
 script: 
-  - TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir
+  - if [[ "$TRAVIS_OS_NAME" == "linux"  ]]; then docker run ubuntu:rolling /bin/sh -c "cd /root && TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir"
   #- ninja -C builddir test
 
   
