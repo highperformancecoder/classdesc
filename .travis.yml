@@ -21,6 +21,7 @@ before_install:
   - sudo apt-get install -y libboost-dev
   - sudo apt-get install -y libxml2-utils
   - sudo apt-get install -y git
+  - sudo apt-get install -y meson
 
 script: 
   docker run ubuntu:rolling /bin/sh -c "cd /root && TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir"
