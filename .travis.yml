@@ -12,14 +12,17 @@ env:
 
 before_install:
   - docker pull library/ubuntu:zesty
-  - wget http://download.opensuse.org/repositories/home:hpcoder1/xUbuntu_17.04/Release.key
+  - wget http://download.opensuse.org/repositories/home:hpcoder1/xUbuntu_17.10/Release.key
   - sudo apt-key add - < Release.key
-  - echo 'deb http://download.opensuse.org/repositories/home:/hpcoder1/xUbuntu_17.04/ /' >/tmp/hpcoders.list 
+  - echo 'deb http://download.opensuse.org/repositories/home:/hpcoder1/xUbuntu_17.10/ /' >/tmp/hpcoders.list 
   - sudo mv /tmp/hpcoders.list /etc/apt/sources.list.d/
   - sudo apt-get update -qq
   - sudo apt-get install -y json-spirit
   - sudo apt-get install -y libboost-dev
   - sudo apt-get install -y libxml2-utils
+  - sudo apt-get install -y git
+  - git clone https://github.com/mesonbuild/meson.git && cd meson
+  - sudo python setup.py install && cd ..
 
 script: 
   - TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir
