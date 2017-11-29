@@ -1,5 +1,5 @@
 language: cpp
-sudo: true
+sudo: always
 matrix:
     include:
         os: linux
@@ -18,7 +18,8 @@ before_install:
   - sudo apt-get install -y json-spirit
   - sudo apt-get install -y libboost-dev
   - sudo apt-get install -y libxml2-utils
-  - sudo apt-get install -y python3-pip
+  - git clone https://github.com/mesonbuild/meson
+  - sudo python setup.py install --optimize=1
 
 install:
   - export PATH="`pwd`/build:${PATH}"
