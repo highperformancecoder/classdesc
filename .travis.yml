@@ -11,11 +11,11 @@ env:
     - GIT_COMMITTED_AT=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then git log -1 --pretty=format:%ct; else git log -1 --skip 1 --pretty=format:%ct; fi)
 
 before_install:
-  - wget http://download.opensuse.org/repositories/home:hpcoder1/xUbuntu_16.04/Release.key
+  - wget http://download.opensuse.org/repositories/home:hpcoder1/xUbuntu_17.04/Release.key
   - sudo apt-key add - < Release.key
-  - echo 'deb http://download.opensuse.org/repositories/home:/hpcoder1/xUbuntu_16.04/ /' >/tmp/hpcoders.list 
+  - echo 'deb http://download.opensuse.org/repositories/home:/hpcoder1/xUbuntu_17.04/ /' >/tmp/hpcoders.list 
   - sudo mv /tmp/hpcoders.list /etc/apt/sources.list.d/
-  - docker pull zesty/Dockerfile:yakkety
+  - docker pull library/ubuntu:zesty
   - sudo apt-get install -y json-spirit
   - sudo apt-get install -y libboost-dev
   - sudo apt-get install -y libxml2-utils
