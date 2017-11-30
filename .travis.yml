@@ -11,7 +11,7 @@ env:
     - GIT_COMMITTED_AT=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then git log -1 --pretty=format:%ct; else git log -1 --skip 1 --pretty=format:%ct; fi)
 
 before_install:
-  - docker pull library/ubuntu:zesty
+    - docker pull library/ubuntu:zesty
 
 script:
   -  echo FROM library/ubuntu:zesty > Dockerfile
