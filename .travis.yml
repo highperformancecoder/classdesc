@@ -15,7 +15,6 @@ before_install:
 
 script:
   -  docker build -t withgit .
-   -  docker run withgit /bin/sh -c "cd /root && TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir"
   #- ninja -C builddir test
 
   
