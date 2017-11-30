@@ -26,8 +26,8 @@ before_install:
 script:
   -  echo FROM library/ubuntu:zesty > Dockerfile; fi
   -  echo ADD . /root >> Dockerfile; fi
-  -  docker build -t ubuntu:rolling
-  -  docker run ubuntu:rolling /bin/sh -c "cd /root && TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir"
+  -  docker build -t withgit
+  -  docker run withgit /bin/sh -c "cd /root && TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir"
   #- ninja -C builddir test
 
   
