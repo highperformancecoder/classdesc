@@ -17,14 +17,14 @@ script:
   -  echo FROM jpakkane/mesonci:zesty > Dockerfile
   -  echo ADD . /root >> Dockerfile
   -  docker build -t withgit .
-  -  docker run withgit bash -c "apt update && apt upgrade -qq -y"
-  -  docker run withgit bash -c "curl -O http://download.opensuse.org/repositories/home:hpcoder1/xUbuntu_17.10/Release.key"
-  -  docker run withgit bash -c "echo 'deb http://download.opensuse.org/repositories/home:/hpcoder1/xUbuntu_17.10/ /' >/tmp/hpcoders.list "
-  -  docker run withgit bash -c "mv /tmp/hpcoders.list /etc/apt/sources.list.d/"
-  -  docker run withgit bash -c "apt-get update -qq"
-  -  docker run withgit bash -c "apt-key add - < Release.key" 
-  -  docker run withgit bash -c "apt-get install -y meson libxml2 libboost-dev json-spirit"
-  -  docker run withgit /bin/sh -c "cd /root && TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir"
+  -  docker run -ti withgit /bin/sh
+  -  curl -O http://download.opensuse.org/repositories/home:hpcoder1/xUbuntu_17.10/Release.key
+  -  echo 'deb http://download.opensuse.org/repositories/home:/hpcoder1/xUbuntu_17.10/ /' >/tmp/hpcoders.list 
+  -  mv /tmp/hpcoders.list /etc/apt/sources.list.d/
+  -  apt-get update -qq
+  -  apt-key add - < Release.key 
+  -  apt-get install -y meson libxml2 libboost-dev json-spirit
+  -  cd /root && TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir
   #- ninja -C builddir test
 
   
