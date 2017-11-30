@@ -14,6 +14,7 @@ before_install:
   - docker pull library/ubuntu:zesty
 
 script:
+  -  docker run ubuntu:zesty bash -c "apt update && apt upgrade -qq"
   -  docker run ubuntu:zesty bash -c "apt-get install -y wget"
   -  docker run ubuntu:zesty bash -c "wget http://download.opensuse.org/repositories/home:hpcoder1/xUbuntu_17.10/Release.key"
   -  docker run ubuntu:zesty bash -c "echo 'deb http://download.opensuse.org/repositories/home:/hpcoder1/xUbuntu_17.10/ /' >/tmp/hpcoders.list "
