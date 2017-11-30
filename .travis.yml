@@ -18,7 +18,6 @@ script:
   -  echo ADD . /root >> Dockerfile
   -  docker build -t withgit .
   -  docker run withgit bash -c "apt update && apt upgrade -qq"
-  -  docker run withgit bash -c "apt-get install -y wget"
   -  docker run withgit bash -c "curl -O http://download.opensuse.org/repositories/home:hpcoder1/xUbuntu_17.10/Release.key"
   -  docker run withgit bash -c "echo 'deb http://download.opensuse.org/repositories/home:/hpcoder1/xUbuntu_17.10/ /' >/tmp/hpcoders.list "
   -  docker run withgit bash -c "mv /tmp/hpcoders.list /etc/apt/sources.list.d/"
