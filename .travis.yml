@@ -11,13 +11,13 @@ env:
     - GIT_COMMITTED_AT=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then git log -1 --pretty=format:%ct; else git log -1 --skip 1 --pretty=format:%ct; fi)
 
 before_install:
-    - docker pull library/ubuntu:zesty
+    - docker pull jpakkane/mesonci:zesty
 
 script:
-  -  echo FROM library/ubuntu:zesty > Dockerfile
+  -  echo FROM jpakkane/mesonci:zesty > Dockerfile
   -  echo ADD . /root >> Dockerfile
   -  docker build -t withgit .
-  -  docker run withgit bash -c "apt update && apt upgrade -qq"
+  -  docker run withgit bash -c "apt update && apt upgrade -qq -y"
   -  docker run withgit bash -c "curl -O http://download.opensuse.org/repositories/home:hpcoder1/xUbuntu_17.10/Release.key"
   -  docker run withgit bash -c "echo 'deb http://download.opensuse.org/repositories/home:/hpcoder1/xUbuntu_17.10/ /' >/tmp/hpcoders.list "
   -  docker run withgit bash -c "mv /tmp/hpcoders.list /etc/apt/sources.list.d/"
