@@ -14,15 +14,18 @@ before_install:
   - docker pull library/ubuntu:zesty
 
 script:
-  -  docker run ubuntu:zesty bash -c "apt update && apt upgrade -qq"
-  -  docker run ubuntu:zesty bash -c "apt-get install -y wget"
-  -  docker run ubuntu:zesty bash -c "wget http://download.opensuse.org/repositories/home:hpcoder1/xUbuntu_17.10/Release.key"
-  -  docker run ubuntu:zesty bash -c "echo 'deb http://download.opensuse.org/repositories/home:/hpcoder1/xUbuntu_17.10/ /' >/tmp/hpcoders.list "
-  -  docker run ubuntu:zesty bash -c " sudo mv /tmp/hpcoders.list /etc/apt/sources.list.d/"
-  -  docker run ubuntu:zesty bash -c "apt-get update -qq"
-  -  docker run ubuntu:zesty bash -c "sudo apt-key add - < Release.key" 
-  -  docker run ubuntu:zesty bash -c "apt-get install -y meson libxml2 libboost-dev json-spirit"
-  -  docker run ubuntu:zesty /bin/sh -c "cd /root && TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir"
+  -  echo FROM library/ubuntu:zesty > Dockerfile
+  -  echo ADD . /root >> Dockerfile
+  -  docke build -t withgit .
+  -  docker run withgit bash -c "apt update && apt upgrade -qq"
+  -  docker run withgit bash -c "apt-get install -y wget"
+  -  docker run withgit bash -c "wget http://download.opensuse.org/repositories/home:hpcoder1/xUbuntu_17.10/Release.key"
+  -  docker run withgit bash -c "echo 'deb http://download.opensuse.org/repositories/home:/hpcoder1/xUbuntu_17.10/ /' >/tmp/hpcoders.list "
+  -  docker run withgit bash -c " sudo mv /tmp/hpcoders.list /etc/apt/sources.list.d/"
+  -  docker run withgit bash -c "apt-get update -qq"
+  -  docker run withgit bash -c "sudo apt-key add - < Release.key" 
+  -  docker run withgit bash -c "apt-get install -y meson libxml2 libboost-dev json-spirit"
+  -  docker run withgit /bin/sh -c "cd /root && TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir"
   #- ninja -C builddir test
 
   
