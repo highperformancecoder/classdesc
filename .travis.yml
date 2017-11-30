@@ -20,8 +20,8 @@ script:
   -  docker run ubuntu:zesty bash -c " sudo mv /tmp/hpcoders.list /etc/apt/sources.list.d/"
   -  docker run ubuntu:zesty bash -c "apt-get update -qq"
   -  docker run ubuntu:zesty bash -c "sudo apt-key add - < Release.key" 
-  -  docker run zesty bash -c "apt-get install -y meson libxml2 libboost-dev json-spirit"
-  -  docker run zesty /bin/sh -c "cd /root && TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir"
+  -  docker run ubuntu:zesty bash -c "apt-get install -y meson libxml2 libboost-dev json-spirit"
+  -  docker run ubuntu:zesty /bin/sh -c "cd /root && TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir"
   #- ninja -C builddir test
 
   
