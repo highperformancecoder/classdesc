@@ -7,3 +7,4 @@ RUN mv /tmp/hpcoders.list /etc/apt/sources.list.d/
 RUN apt-get update -qq -y
 RUN apt-key add - < Release.key
 RUN apt-get install -y meson libxml2 libboost-dev json-spirit
+RUN cd /root && TRAVIS=true CC=$CC CXX=$CXX meson builddir && ninja -C builddir
