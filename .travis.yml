@@ -16,7 +16,7 @@ before_install:
 script:
   -  echo FROM library/ubuntu:zesty > Dockerfile
   -  echo ADD . /root >> Dockerfile
-  -  docke build -t withgit .
+  -  docker build -t withgit .
   -  docker run withgit bash -c "apt update && apt upgrade -qq"
   -  docker run withgit bash -c "apt-get install -y wget"
   -  docker run withgit bash -c "wget http://download.opensuse.org/repositories/home:hpcoder1/xUbuntu_17.10/Release.key"
