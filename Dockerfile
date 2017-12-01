@@ -1,4 +1,4 @@
-FROM jpakkane/ubuntu:zesty
+FROM jpakkane/mesonci:zesty
 ADD . /root
 RUN apt-get install -y wget
 RUN curl -O http://download.opensuse.org/repositories/home:hpcoder1/xUbuntu_17.10/Release.key
