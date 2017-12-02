@@ -117,10 +117,5 @@ endif
 polymorph: polymorph.o polymorph.a
 	$(LINK) $(CFLAGS) -o $@ $^ $(LIBS)
 
-clean: 
-	rm -f *.o  *~ "\#*\#" core *.exh *.exc *.d *.cd *,D depend *.exe
-	rm -rf $(EXES) polymorph include-paths cxx_repository
-	rm -rf polymorph.cdir *.a
-
 test:
 	echo $(TCL_LIB)

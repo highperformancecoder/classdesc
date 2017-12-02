@@ -115,27 +115,10 @@ functiondb.h: functiondb.sh
 	-rm $@
 	bash $< >$@
 
-clean: 
-	rm -f *.o  *~ "\#*\#" core *.exh *.exc *.d *,D *.exe
-	rm -rf $(EXES) include-paths cxx_repository
-	cd mpi-examples && $(MAKE) clean
-	cd examples && $(MAKE) clean
-	cd objc-examples && $(MAKE) clean
-	cd java && $(MAKE) clean
-	cd javaExamples && $(MAKE) clean
-	cd test && $(MAKE) clean
-	cd test/c++11 && $(MAKE) clean
-	cd doc && rm -f *~ *.aux *.dvi *.log *.blg *.toc *.lof
-	rm -rf ii_files */ii_files
-
 # test compile Latex docs, if latex is on system
 latex-docs:
 	if which latex; then cd doc; rm -f *.out *.aux *.dvi *.log *.blg *.toc *.lof; latex -interaction=batchmode classdesc; fi
 
-install: build
-	-mkdir $(PREFIX)
-	-mkdir $(PREFIX)/bin
-	-mkdir $(PREFIX)/include
 ifeq ($(OS),CYGWIN)
 	cp -f $(EXES:%=%.exe)  $(PREFIX)/bin
 else
@@ -146,25 +129,12 @@ endif
 #	-ln -s $(PREFIX)/include/pack_base.h $(PREFIX)/include/unpack_base.h
 #	cp -r $(SYSINCLUDES) $(PREFIX)
 
-sure: aegis-all
-	-ln -s pack_base.h unpack_base.h
-	-cd mpi-examples && $(MAKE) clean && $(MAKE) NOGUI=1
-	-cd examples && $(MAKE) clean && $(MAKE) NOGUI=1
-#	-cd objc-examples && $(MAKE)
-	sh runtests "$(CPLUSPLUS) $(GCOV_FLAGS)" test/00/*.sh
 
 c++11-sure: clean 
 	$(MAKE) CPLUSPLUS="g++ --std=c++11" classdesc
 # cannot override CPLUSPLUS with mpi-examples 
 	if which mpicxx; then	cd mpi-examples && $(MAKE); fi
 	$(MAKE) CPLUSPLUS="g++ --std=c++11" sure
-
-# don't bother with MPI or Java tests on Travis
-travis-test: build 
-	cd examples && $(MAKE) NOGUI=1
-	cd test && $(MAKE)
-	cd test/c++11 && $(MAKE)
-	sh runtests "g++ $(GCOV_FLAGS)" `ls test/00/*.sh|grep -v t0002a|grep -v t0003a|grep -v t0041a|grep -v t0051a`
 
 VERSION=$(shell git describe)
 
