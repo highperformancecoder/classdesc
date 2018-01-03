@@ -95,7 +95,7 @@ struct action_t
                   if (--braces==0) break;
                   continue;
                 default:
-                  if (isalnum(templ[i]) || braces>0)
+                  if (isalnum(templ[i]) || templ[i]=='_' || braces>0)
                     continue;
                   else
                     break;

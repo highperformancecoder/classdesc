@@ -8,7 +8,8 @@ testfunctional testRef testJavaClass test_stl anonNamespace		\
 nestedClass testConst testBinStream exclude testJsonSharedPtr		\
 testExclude ticket20-example enumKeys miscMemberTypes templateArgs	\
 test_const_method privateBase random_init stringInheritance		\
-cpdoexample privateEnum testFnPtr testContainersClear ticket43-example
+cpdoexample privateEnum testFnPtr testContainersClear ticket43-example \
+hyphen_in_template_parameter
 
 MPIEXES=mpibuf_array 
 OBJS=testXMLcd_other.o
