@@ -1,20 +1,22 @@
 language: cpp
-sudo: required
-os:
-    - linux
+compiler: gcc
+sudo: true
+dist: trusty
 
-services:
-    - docker
 env:
   global:
     - CC_TEST_REPORTER_ID=2727af6b46213a350cb85449e8d3b538edcd7221168f668c940ef86f07718184
     - GIT_COMMITTED_AT=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then git log -1 --pretty=format:%ct; else git log -1 --skip 1 --pretty=format:%ct; fi)
 
 before_install:
-    - docker pull jpakkane/mesonci:zesty
+  - wget http://download.opensuse.org/repositories/home:hpcoder1/xUbuntu_14.04/Release.key
+  - sudo apt-key add - < Release.key
+  - echo 'deb http://download.opensuse.org/repositories/home:/hpcoder1/xUbuntu_14.04/ /' >/tmp/hpcoders.list 
+  - sudo mv /tmp/hpcoders.list /etc/apt/sources.list.d/
+  - sudo apt-get update -qq
+  - sudo apt-get install -y json-spirit
+  - sudo apt-get install -y libboost-dev
+  - sudo apt-get install -y libxml2-utils
 
-script:
-  -  docker build  .
-  #- ninja -C builddir test
-
-  
+script: 
+  - make travis-test

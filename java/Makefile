@@ -78,3 +78,8 @@ $(JAVACLASSES): $(DLLS)
 	-rm $@
 	javac $<
 
+clean: 
+	rm -f *.o  *~ "\#*\#" core *.exh *.exc *.d *.cd *,D depend *.exe *.class
+	rm -rf $(EXES) include-paths cxx_repository
+	rm -rf *.a
+

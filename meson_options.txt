@@ -1,3 +1,0 @@
-
-option('enable-XDR', type: 'boolean', value: 'true',
-description : 'Enable XDR')

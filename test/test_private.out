@@ -1,0 +1,36 @@
+#include "classdesc.h"
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
+#endif
+#include "p_base.h"
+namespace classdesc_access {
+template <> struct access_p<class ::foo > {
+template <class _CD_ARG_TYPE>
+void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
+{
+::p(targ,desc+".a",arg.a);
+::p(targ,desc+".b",arg.b);
+::p(targ,desc+".c",arg.c);
+}
+};
+template <> struct access_p<struct ::bar > {
+template <class _CD_ARG_TYPE>
+void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
+{
+::p(targ,desc+".d",arg.d);
+}
+};
+template <> struct access_p< ::bamboo > {
+template <class _CD_ARG_TYPE>
+void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
+{
+::p(targ,desc+".e",arg.e);
+::p(targ,desc+".f",arg.f);
+}
+};
+}
+#if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif

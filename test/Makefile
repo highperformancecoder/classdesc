@@ -119,5 +119,10 @@ endif
 xml_unpack_base.cd: xml_unpack_base.h
 	../classdesc -I .. -nodef pack unpack <$< >$@
 
+clean: 
+	rm -f *.o  *~ "\#*\#" core *.exh *.exc *.d *.cd *,D depend *.exe
+	rm -rf $(EXES) include-paths cxx_repository
+	rm -rf *.a *.xmltmp
+
 test1:
 	echo $(JSON_HEADER)
