@@ -100,5 +100,9 @@ include depend
 .h.cd:
 	../classdesc -I .. pack unpack <$< >$@
 
+clean: 
+	rm -f *.o  *~ "\#*\#" core *.exh *.exc *.d *.cd *,D depend *.exe
+	rm -rf $(EXES) include-paths cxx_repository
+
 test:
 	echo $(HAVE_GCC)

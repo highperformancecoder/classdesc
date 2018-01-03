@@ -44,3 +44,7 @@ $(CLASSNAME).o:          $(CLASSNAME).h $(CLASSNAME).cc
 $(CLASSNAME).mh:         $(CLASSNAME).h $(CLASSNAME).cc
 $(CLASSNAME)ExportCpp.o: $(CLASSNAME).h $(CLASSNAME)ExportCpp.cc
 
+clean:
+	rm -f *.o *.mo *.*~ *~ main *.cd *,D
+	rm -f $(CLASSNAME)ExportCpp.cc write_objc $(CLASSNAME).mh $(CLASSNAME).m
+

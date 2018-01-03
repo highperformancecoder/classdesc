@@ -13,5 +13,3 @@ unpack_base.h
 json_unpack_base.h
 classdesc
 insert-friend
-build/
-builddir/
