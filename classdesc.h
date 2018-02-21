@@ -76,7 +76,6 @@ namespace classdesc
 
   using std::is_void;  
   using std::is_integral;
-  using std::make_signed;
   using std::is_floating_point;
   // is_arry conflicts with an already established classdesc concept
   //  using std::is_array; 
@@ -150,7 +149,6 @@ namespace classdesc
 
   using std::tr1::is_void;  
   using std::tr1::is_integral;
-  using std::tr1::make_signed;
   using std::tr1::is_floating_point;
   // conflicts with an already established classdesc concept
   //using std::tr1::is_array;

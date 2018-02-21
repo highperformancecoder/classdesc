@@ -26,11 +26,11 @@ namespace classdesc
 //  {return "const "+integralTypeName<typename std::remove_const<T>::type>();}
 
   template <class T> typename
-  enable_if<And<Not<is_const<T> >,is_integral<make_signed<T> > >,std::string>::T
+  enable_if<And<Not<is_const<T> >,is_integral<T> >,std::string>::T
   typeNamep() {return integralTypeName<T>();}
 
   template <class T> typename
-  enable_if<And<Not<is_const<T> >,Not<is_integral<make_signed<T> > > >,std::string>::T
+  enable_if<And<Not<is_const<T> >,Not<is_integral<T> > >,std::string>::T
   typeNamep() {return tn<T>::name();}
 
   template <class T> typename
