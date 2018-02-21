@@ -369,7 +369,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
               if (input.token=="{") gobble_delimited(input,"{","}");
               input.nexttok();
             }
-          if (isIdentifierStart(input.lasttoken[0])) //ignore any strange function type typedefs
+          if (isIdentifierStart(input.lasttoken[0]) && !is_private) //ignore any strange function type typedefs
             nested[prefix].push_back(input.lasttoken);
           input=mark;
 	  parse_typedef(input,prefix);
@@ -412,7 +412,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 	  else
 	    targs2=targs+targs1;
 	  input.nexttok();
-          nested[prefix].push_back(input.token);
+          if (!is_private) nested[prefix].push_back(input.token);
 	  /* handle new templated typename rules */
 	  if (targs.length()) input.lasttoken="typename";
 	  if (isIdentifierStart(input.token[0]))  /* named class */
