@@ -440,6 +440,8 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 	  if (!is_private && 
               isIdentifierStart(input.token[0]))  /* named enum */
 	    assign_enum_action(input,prefix);
+          else
+            gobble_delimited(input,"{","}");
 	}
 
       /* handle templated types */
@@ -1043,6 +1045,8 @@ int main(int argc, char* argv[])
 	      input.nexttok();
 	      if (isIdentifierStart(input.token[0]))  /* named enum */
 		assign_enum_action(input,"");
+              else
+                gobble_delimited(input,"{","}");
 	    }
 	  /* inline function definitions - must remove actionlist
              entry if there is one */
