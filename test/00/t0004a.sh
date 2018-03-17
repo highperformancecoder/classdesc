@@ -60,7 +60,7 @@ if test $? -ne 0; then fail; fi
 if uname|grep CYGWIN; then pass; fi
 
 # Now test the xdr pack version
-$CC -DXDR_PACK -I. -I$here -I$BL -I$BL1 -I$here/examples -I$BL/examples  -I$BL1/examples $HEAT_C -DTR1 $here/xdr_pack.o -o aout
+$CC -DXDR_PACK -I. -I$here -I$BL -I$BL1 -I$here/examples -I$BL/examples  -I$BL1/examples $HEAT_C -DTR1 $here/xdr_pack.o `pkg-config --libs libtirpc` -o aout
 if test $? -ne 0; then fail; fi
 
 ./aout 20 >norestart

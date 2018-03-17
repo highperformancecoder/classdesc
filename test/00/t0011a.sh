@@ -70,7 +70,7 @@ EOF
 
 # Neither CYGWIN nor MacOS correctly implement XDR !
 if [ `uname|cut -f1 -d_` != CYGWIN -a `uname` != Darwin ]; then XDRPACK=-DXDR_PACK; fi
-$CC -I$here -I$BL -I$BL1 $XDRPACK -DTR1 test.cc $here/xdr_pack.o -o aout
+$CC -I$here -I$BL -I$BL1 $XDRPACK -DTR1 test.cc $here/xdr_pack.o  `pkg-config --libs libtirpc` -o aout
 if test $? -ne 0; then fail; fi
 
 ./aout 

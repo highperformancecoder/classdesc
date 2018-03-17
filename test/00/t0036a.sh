@@ -58,7 +58,7 @@ EOF
 
 if uname|grep CYGWIN; then pass; fi
 
-$CC -I$here -DXDR_PACK test.cc -DTR1 $here/xdr_pack.o
+$CC -I$here -DXDR_PACK test.cc -DTR1 $here/xdr_pack.o `pkg-config --libs libtirpc`
 if test $? -ne 0; then fail; fi
 ./a.out
 if test $? -ne 0; then fail; fi
