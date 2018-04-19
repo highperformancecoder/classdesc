@@ -4,9 +4,6 @@
 #include <classdesc.h>
 namespace std
 {
-  template <>
-  struct is_integral<unsigned int64_t>: public true_type {};
-
   template <class T>
   struct hash<vector<T> >
   {
@@ -55,10 +52,13 @@ int main()
 
   // make sure various C++11 types have valid typenames
   cout << typeName<int64_t>() << endl;
-  cout << typeName<unsigned int64_t>() << endl;
-  cout << typeName<const unsigned int64_t>() << endl;
-  cout << typeName<unsigned const int64_t>() << endl;
-  cout << typeName<signed const int64_t>() << endl;
+  cout << typeName<uint64_t>() << endl;
+  cout << typeName<const uint64_t>() << endl;
+  cout << typeName<const int64_t>() << endl;
+  cout << typeName<int32_t>() << endl;
+  cout << typeName<uint32_t>() << endl;
+  cout << typeName<const uint32_t>() << endl;
+  cout << typeName<const int32_t>() << endl;
   cout << typeName<char32_t>() << endl;
   cout << typeName<Xrefd<int,MyVect>>() << endl;
   cout << typeName<Colour>() << endl;

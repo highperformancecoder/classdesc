@@ -1,0 +1,7 @@
+# ninja log v5
+1	596	1524139404	insert-friend@exe/insert-friend.cc.o	3634bce42abdf1fb
+0	1116	1524139405	classdesc@exe/classdesc.cc.o	12e42a6c5ab60328
+596	1231	1524139405	insert-friend	d74ff969f466cd85
+1116	2380	1524139406	classdesc	85402799e6e50c22
+0	107	0	meson-install	a9dddf61839fc69a
+0	132	0	meson-uninstall	77fb50aa4f3c91fb

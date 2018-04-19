@@ -1,0 +1,24 @@
+Build started at 2018-04-19T08:03:20.752384
+Main binary: /usr/bin/python
+Python system: Linux
+The Meson build system
+Version: 0.45.0.dev1
+Source dir: /home/solaraquarion/classdesc
+Build dir: /home/solaraquarion/classdesc/build
+Build type: native build
+Project name: classdesc
+Sanity testing C++ compiler: ccache c++
+Is cross compiler: False.
+Sanity check compiler command line: ccache c++ /home/solaraquarion/classdesc/build/meson-private/sanitycheckcpp.cc -o /home/solaraquarion/classdesc/build/meson-private/sanitycheckcpp.exe
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Running test binary command: /home/solaraquarion/classdesc/build/meson-private/sanitycheckcpp.exe
+Native C++ compiler: ccache c++ (gcc 7.3.1 "c++ (GCC) 7.3.1 20180312")
+Build machine cpu family: x86_64
+Build machine cpu: x86_64
+Build targets in project: 2
+Found ninja-1.8.2 at /bin/ninja
