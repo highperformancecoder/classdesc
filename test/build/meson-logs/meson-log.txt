@@ -1,8 +1,0 @@
-Build started at 2018-04-19T08:14:47.264333
-Main binary: /usr/bin/python
-Python system: Linux
-The Meson build system
-Version: 0.45.0.dev1
-Source dir: /home/solaraquarion/classdesc/test
-Build dir: /home/solaraquarion/classdesc/test/build
-Build type: native build
