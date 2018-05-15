@@ -9,9 +9,9 @@
 #ifndef POLY_ACCESS_XML_PACK_H
 #define POLY_ACCESS_XML_PACK_H
 
-#ifdef XML_PACK_BASE_H
 namespace classdesc
 {
+#ifdef XML_PACK_BASE_H
 #ifdef POLYXMLBASE_H
   // polymorphic version
   template <class T>
@@ -41,40 +41,34 @@ namespace classdesc
       ::xml_pack(x,d,*a);
   }
   
-}
 
-// special handling of shared pointers to avoid a double wrapping problem
-template<class T>
-void xml_pack(classdesc::xml_pack_t& x, const classdesc::string& d, 
-              classdesc::shared_ptr<T>& a)
-{classdesc::xml_pack_smart_ptr(x,d,a);}
+  // special handling of shared pointers to avoid a double wrapping problem
+  template<class T>
+  void xml_pack(xml_pack_t& x, const string& d, shared_ptr<T>& a)
+  {xml_pack_smart_ptr(x,d,a);}
 
 #if defined(__cplusplus) && __cplusplus<=201402
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
-template<class T>
-void xml_pack(classdesc::xml_pack_t& x, const classdesc::string& d, 
-              std::auto_ptr<T>& a)
-{classdesc::xml_pack_smart_ptr(x,d,a);}
+  template<class T>
+  void xml_pack(xml_pack_t& x, const string& d, std::auto_ptr<T>& a)
+  {xml_pack_smart_ptr(x,d,a);}
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 #endif
 
 #if defined(__cplusplus) && __cplusplus >= 201103L
-template<class T, class D>
-void xml_pack(classdesc::xml_pack_t& x, const classdesc::string& d, 
-              std::unique_ptr<T,D>& a)
-{classdesc::xml_pack_smart_ptr(x,d,a);}
+  template<class T, class D>
+  void xml_pack(xml_pack_t& x, const string& d, std::unique_ptr<T,D>& a)
+  {xml_pack_smart_ptr(x,d,a);}
 #endif
 
 #endif
 
 #ifdef XML_UNPACK_BASE_H
-namespace classdesc
-{
 #ifdef POLYXMLBASE_H
     // polymorphic version
   template <class T>
@@ -93,7 +87,7 @@ namespace classdesc
       a.reset();
   }
 
-    // non polymorphic version
+  // non polymorphic version
   template <class T>
   typename enable_if<Not<is_base_of<PolyXMLBase, typename T::element_type> >, void>::T
 #else
@@ -145,10 +139,8 @@ namespace classdesc
         ::xml_unpack(x,d,*tmp);
       }
   }
-
-
-}
 #endif
+}
 
 namespace classdesc_access
 {

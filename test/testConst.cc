@@ -13,6 +13,8 @@
 #include <string>
 using namespace std;
 
+const int Foo::static_const_b;
+
 int main()
 {
   Foo foo1, foo2;

@@ -25,6 +25,8 @@ namespace classdesc
     virtual ~random_init_t() {}
   };
 
+  typedef random_init_t random_init_onbase_t;
+  
   template <class T> void random_init(random_init_t&, const string&, T&);
   // constant objects cannot be initialised 
   template <class T> void random_initp(random_init_t&, const string&, const T&)
@@ -133,12 +135,6 @@ namespace classdesc
   template <class T> void random_initp(random_init_t&, const string&, T*) {}
 
   /*
-    Method pointers
-  */
-  template <class C, class T>
-  void random_init(random_init_t&, const string&, C&, T) {}
-
- /*
     const static support
   */
   template <class T>
@@ -163,6 +159,12 @@ namespace classdesc_access
 {
   template <class T> struct access_random_init;
 }
+
+#include "use_mbr_pointers.h"
+CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(random_init)
+CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(random_init_onbase)
+CLASSDESC_FUNCTION_NOP(random_init)
+CLASSDESC_FUNCTION_NOP(random_init_onbase)
 
 using classdesc::random_init;
 using classdesc::random_init_onbase;

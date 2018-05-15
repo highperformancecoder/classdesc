@@ -108,12 +108,11 @@ include depend
 	$(CC) $(CFLAGS) -c $< 
 
 .h.cd:
-	../classdesc -I .. -nodef -typeName -i $< random_init pack unpack >$@
+	../classdesc -I .. -nodef -typeName -use_mbr_pointers -i $< random_init pack unpack >$@
 # check that duplicate typeNames can be issued
-#	../classdesc -I .. -nodef -typeName <$< >>$@
-	../classdesc -I .. -nodef -typeName -respect_private -onbase -i $< xml_pack xml_unpack dump xsd_generate  >>$@
+	../classdesc -I .. -nodef -typeName -respect_private -use_mbr_pointers -onbase -i $< xml_pack xml_unpack dump xsd_generate  >>$@
 ifdef JSON
-	../classdesc -I .. -respect_private -typeName -onbase  -i $< json_pack json_unpack >>$@
+	../classdesc -I .. -respect_private -typeName -onbase -use_mbr_pointers  -i $< json_pack json_unpack >>$@
 endif
 
 xml_unpack_base.cd: xml_unpack_base.h

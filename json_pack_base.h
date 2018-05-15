@@ -423,15 +423,6 @@ namespace classdesc
   }
 
   /*
-    Method pointer serialisation (do nothing)
-  */
-  template <class C, class T>
-  void json_pack(json_pack_t& targ, const string& desc, C& c, T arg) {}
-
-  template <class C, class T>
-  void json_unpack(json_unpack_t& targ, const string& desc, C& c, T arg) {}
-
-  /*
     const static support
   */
   template <class T>
@@ -489,6 +480,13 @@ namespace classdesc_access
   template <class T> struct access_json_pack;
   template <class T> struct access_json_unpack;
 }
+
+#include "use_mbr_pointers.h"
+CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(json_pack)
+CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(json_unpack)
+CLASSDESC_FUNCTION_NOP(json_pack)
+CLASSDESC_FUNCTION_NOP(json_unpack)
+
 
 using classdesc::json_pack_onbase;
 using classdesc::json_unpack_onbase;
