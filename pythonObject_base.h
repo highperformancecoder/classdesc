@@ -90,12 +90,6 @@ namespace classdesc
     p.addMemberFunction(d,c,m);
   }
   
-  template<class C, class M>
-  typename enable_if<is_member_object_pointer<M>, void>::T
-  pythonObject(pythonObject_t& p, const string& d, C& c, M m) {
-    pythonObject(p,d,c.*m);
-  }
-
   template <class T>
   typename enable_if<is_fundamental<T>,void>::T
   pythonObject(pythonObject_t& p, const string& d, T& a) {
@@ -140,8 +134,8 @@ namespace classdesc_access
   template <class T> struct access_pythonObject;
 }
 
-using classdesc::pythonObject;
 #include "use_mbr_pointers.h"
-//CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(pythonObject)
+CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(pythonObject)
+using classdesc::pythonObject;
 
 #endif
