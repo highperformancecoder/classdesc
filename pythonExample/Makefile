@@ -4,7 +4,7 @@ CFLAGS=-g `pkg-config --cflags python` -I.. -I. -fPIC
 VPATH=..
 
 example.so: $(OBJS)
-	g++ -fPIC -shared -Wl,-soname,example $^ -lboost_python -o $@
+	g++ -fPIC -shared -Wl,-soname,example $^ `pkg-config --libs python` -lboost_python -o $@
 
 .h.cd:
 	../classdesc -I .. -typeName -use_mbr_pointers pythonObject <$< >$@
