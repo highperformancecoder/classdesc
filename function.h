@@ -109,60 +109,67 @@ namespace classdesc
 
 #include "functiondb.h"
 
-    //std::bind1st is no good, because it assume the functional
-    // has a first_argument_type member. So roll our own
-    template <class F, class X, int Arity>  
-    class binder1st
-    {
-      F f;
-      X x;
-    public:
-      static const int arity=Arity;
-      typedef typename Return<F>::T Ret;
-      binder1st(const F& f, const X& x): f(f), x(x) {}
-      template <class Y>
-      binder1st<binder1st<F,X,Arity>,Y,Arity-1> operator()(const Y& y) const
-      {return binder1st<binder1st<F,X,Arity>,Y,Arity-1>(*this, y);}
-  };
+//    //std::bind1st is no good, because it assume the functional
+//    // has a first_argument_type member. So roll our own
+//    template <class F, class X, int Arity>  
+//    class binder1st
+//    {
+//      F f;
+//      X x;
+//    public:
+//      static const int arity=Arity;
+//      typedef typename Return<F>::T Ret;
+//      binder1st(const F& f, const X& x): f(f), x(x) {}
+//      template <class Y>
+//      binder1st<binder1st<F,X,Arity>,Y,Arity-1> operator()(const Y& y) const
+//      {return binder1st<binder1st<F,X,Arity>,Y,Arity-1>(*this, y);}
+//  };
+//
+//    template <class F, class X>  
+//    class binder1st<F,X,0>
+//    {
+//      F f;
+//      X x;
+//    public:
+//      static const int arity=0;
+//      typedef typename Return<F>::T Ret;
+//      binder1st(const F& f, const X& x): f(f), x(x) {}
+//      typename Return<F>::T operator()() const
+//      {return f(x);}
+//    };
+//    
+//    template <class F, class X, int A>
+//    struct Arity<binder1st<F,X,A> >
+//    {
+//      static const int V=A;
+//    };
+//
+//    template <class F, class X, int A>
+//    struct Return<binder1st<F,X,A> >
+//    {
+//      typedef typename binder1st<F,X,A>::Ret T;
+//    };
+//
+//  template <class F, class X>
+//  binder1st<F,X, Arity<F>::V-1> bind1st(const F& f, const X& x, dummy<0> dum=0) 
+//  {
+//    return binder1st<F,X, Arity<F>::V-1>(f,x);
+//  }
+//
+//  template <class O, class M>
+//  typename enable_if< is_member_function_pointer<M>, bound_method<O,M> >::T
+//  bind1st(const M& member, O& obj, dummy<1> dum=0)
+//  {
+//    return bound_method<O,M>(obj,member);
+//  }
 
-    template <class F, class X>  
-    class binder1st<F,X,0>
-    {
-      F f;
-      X x;
-    public:
-      static const int arity=0;
-      typedef typename Return<F>::T Ret;
-      binder1st(const F& f, const X& x): f(f), x(x) {}
-      typename Return<F>::T operator()() const
-      {return f(x);}
-    };
+    // above method get's mixed up with std::bind1st in practice, so
+    // here's my home grown one??
+    template <class O, class M>
+    bound_method<O,M> bindMethod(O& o, M m)
+    {return bound_method<O,M>(o,m);}
     
-    template <class F, class X, int A>
-    struct Arity<binder1st<F,X,A> >
-    {
-      static const int V=A;
-    };
-
-    template <class F, class X, int A>
-    struct Return<binder1st<F,X,A> >
-    {
-      typedef typename binder1st<F,X,A>::Ret T;
-    };
-
-  template <class F, class X>
-  binder1st<F,X, Arity<F>::V-1> bind1st(const F& f, const X& x, dummy<0> dum=0) 
-  {
-    return binder1st<F,X, Arity<F>::V-1>(f,x);
-  }
-
-  template <class O, class M>
-  typename enable_if< is_member_function_pointer<M>, bound_method<O,M> >::T
-  bind1st(const M& member, O& obj, dummy<1> dum=0)
-  {
-    return bound_method<O,M>(obj,member);
-  }
-   
+    
     template <class F, class Args>
     typename enable_if< 
       Not<is_void<typename Return<F>::T> >,

@@ -221,13 +221,13 @@ real numbers).
 \begin{description}
 \item[Standard parameter passing method:]\mbox{}\\
 \begin{description}
-\item[C++ method :]     \verb+double sum2_x1(double x1, double x2);+
+\item[C++ method:]     \verb+double sum2_x1(double x1, double x2);+
 \item[Objective-C:]     \verb+- (double) sum3_x1: (double) x1 x2: (double) x2;+
 \end{description}
 
 \item[Parameter passing using {\tt va\_list}:]\mbox{}\\
 \begin{description}
-\item[C++ method :]     \verb+double sumN_x1(double x1, objc_t& buf);+
+\item[C++ method:]     \verb+double sumN_x1(double x1, objc_t& buf);+
 \item[Objective-C:]     \verb+- (double) sumN_x1: (double) x1, ...;+
 \end{description}
 
@@ -239,7 +239,7 @@ real numbers).
 \item[Example of user method implementation in C++ (myCounter.cc):]\mbox{}\\
 \begin{verbatim}
    double sumN_x1(double x1, objc_t& buf)
-   { double x2, x3 ; buf >> x2 >> x3, return x1 + x2 + x3; }
+   { double x2, x3; buf >> x2 >> x3, return x1 + x2 + x3; }
 \end{verbatim}
 \end{description}
 \caption{Supported parameter passing methods and examples.}
@@ -248,7 +248,7 @@ real numbers).
 
 \begin{figure}
 \begin{description}
-\item[Objective-C interface functions generated (stored in .m file) :]\mbox{}\\
+\item[Objective-C interface functions generated (stored in .m file):]\mbox{}\\
 \begin{verbatim}
 double cpp_myCounter_sum2_x1(myCounter * obj, double x1 , double x2);
 - (double) sum2_x1: (double) x1 x2: (double) x2 
@@ -262,7 +262,7 @@ double cpp_myCounter_sumN_x1(myCounter * obj, double x1, va_list * ap);
   return rtnvalue; }
 \end{verbatim}
 
-\item[C++ interface functions generated (stored in ExportCpp.cc
+\item[C++ interface functions generated (stored in ExportCpp.cc
   file):]\mbox{}\\
 \begin{verbatim}
 extern "C"
@@ -287,7 +287,7 @@ file \verb+writeobjc_base.h+.
 
 \begin{figure}
 \begin{verbatim}
-Given C++ function prototype :
+Given C++ function prototype:
        Cpp-return-type   function-name   Cpp-argument-list
 Output Objective-C equivalent:
        ObjC-return-type  function-name   ObjC-argument-list
@@ -307,7 +307,7 @@ translation algorithm}\label{fig8}
 
 To support the use of C++ only member-methods in the user model,
 following member functions will not be translated to its
-Objective-C equivalent: argument-list contains any C++ objects (such
+Objective-C equivalent: argument-list contains any C++ objects (such
 as vector) or function-name that contain ``\verb+cpp_+'' prefix.
 
 \subsubsection{Classdesc modification to parse a user supplied C++ model}

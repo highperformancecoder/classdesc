@@ -153,10 +153,21 @@ namespace classdesc
   }
 
   template <class T>
-  typename enable_if<is_container<T>,void>::T
+  typename enable_if<is_sequence<T>,void>::T
   pythonObject(pythonObject_t& p, const string& d, T& a) {
     boost::python::class_<T>((tail(d)+"_type").c_str()).
-      def("__iter__", boost::python::iterator<T>());
+      def("__iter__", boost::python::iterator<T>()).
+      def("__len__", functional::bindMethod(a,&T::size)).
+      def("__getitem__", functional::bindMethod(a,&T::at));
+    p.addObject(d,a);
+  }
+
+  template <class T>
+  typename enable_if<is_associative_container<T>,void>::T
+  pythonObject(pythonObject_t& p, const string& d, T& a) {
+    boost::python::class_<T>((tail(d)+"_type").c_str()).
+      def("__iter__", boost::python::iterator<T>()).
+      def("__len__", functional::bindMethod(a,&T::size));
     p.addObject(d,a);
   }
 
