@@ -1,4 +1,5 @@
 #include "pythonExample.h"
+#include "pythonObject_base.h"
 #include "classdesc_epilogue.h"
 
 Root root;

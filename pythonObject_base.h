@@ -10,6 +10,20 @@
 #define PYTHONOBJECT_BASE_H
 #include "classdesc.h"
 #include "function.h"
+
+namespace classdesc {namespace detail {template<class F> struct Sig;}}
+
+// extend boost::python function signature processing to bound member functions
+namespace boost {
+  namespace python {
+    namespace detail {
+      template <class F>
+      typename classdesc::detail::Sig<F>::T get_signature(F f)
+      {return typename classdesc::detail::Sig<F>::T();}
+    }
+  }
+}
+
 #include "boost/python.hpp"
 #include <vector>
 
@@ -17,6 +31,40 @@ namespace classdesc
 {
   struct PythonDummy {};
   typedef boost::python::class_<PythonDummy> PDC;
+
+  namespace detail
+  {
+    using namespace classdesc::functional;
+
+    template <class R, int> struct SigArg;
+
+    template <class F> struct SigArg<F,0>
+    {
+      typedef boost::mpl::vector<> T;
+    };
+
+    template <class F> struct SigArg<F,1>
+    {
+      typedef boost::mpl::vector<typename Arg<F,Arity<F>::V>::T> T;
+    };
+  
+    template <class F,int N> struct SigArg
+    {
+      typedef typename boost::mpl::push_front<
+        typename Arg<F,Arity<F>::V-N+1>::T,
+        typename SigArg<F,N-1>::T
+        >::type T;
+    };
+
+    template <class F> struct Sig
+    {
+      typedef typename boost::mpl::push_front<
+        typename SigArg<F,Arity<F>::V>::T,
+        typename Return<F>::T
+        >::type T;
+    };
+
+  }
   
   class pythonObject_t
   {
@@ -25,8 +73,8 @@ namespace classdesc
       string name;
       PDC object;
       shared_ptr<boost::python::scope> scope;
-      Scope(const string& name): name(name), object(name.c_str()),
-                                 scope(new boost::python::scope(object)) {}
+      Scope(const string& name):
+        name(name), object(name.c_str()), scope(new boost::python::scope(object)) {}
     };
     std::vector<Scope> scopeStack;
 
@@ -68,11 +116,12 @@ namespace classdesc
       checkScope(d);
       scopeStack.back().object.def(f);
     }
-      
+
     template <class C, class M>
     void addMemberFunction(const string& d, C& o, M m) {
       checkScope(d);
-      scopeStack.back().object.def(functional::bound_method<C,M>(o,m));
+      boost::python::def(tail(d).c_str(),functional::bound_method<C,M>(o,m));
+      scopeStack.back().object.staticmethod(tail(d).c_str());
     }
   };
 
@@ -102,10 +151,12 @@ namespace classdesc
   {
     //TODO
   }
-  
+
   template <class T>
   typename enable_if<is_container<T>,void>::T
   pythonObject(pythonObject_t& p, const string& d, T& a) {
+    boost::python::class_<T>((tail(d)+"_type").c_str()).
+      def("__iter__", boost::python::iterator<T>());
     p.addObject(d,a);
   }
 

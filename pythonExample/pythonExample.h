@@ -60,6 +60,7 @@ struct Foo
       || h!=x.h|| l!=x.l|| m!=x.m || vs!=x.vs || llex!=x.llex || 
       (!sef && sef!=x.sef) || (sef && x.sef && *sef!=*x.sef);}
   bool operator==(const Foo& x) const {return !operator!=(x);}
+  string vs0() const {return vs[0];}
 };
 
 struct Bar: Foo
