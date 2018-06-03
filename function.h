@@ -90,25 +90,49 @@ namespace classdesc
     template <class C, class M> 
     struct Arity<bound_method<C,M> >
     {
-      static const int V=bound_method<C,M>::arity;
-      static const int value=bound_method<C,M>::arity;
+      static const int V=Arity<M>::V;
+      static const int value=V;
     };
 
     template <class C, class M> 
     struct Return<bound_method<C,M> >
     {
-      typedef typename bound_method<C,M>::Ret T;
+      typedef typename Return<M>::T T;
+      typedef T type;
     };
 
     template <class C, class M, int i> 
     struct Arg<bound_method<C,M>,i>
     {
-      typedef typename bound_method<C,M>::template Arg<i>::T T;
+      typedef typename Arg<M,i>::T T;
       typedef T type;
     };
 
 #include "functiondb.h"
 
+    // for generic function objects
+    template <class F> 
+    struct Arity
+    {
+      static const int V=Arity<decltype(&F::operator())>::V;
+      static const int value=V;
+    };
+
+    template <class F> 
+    struct Return
+    {
+      typedef typename Return<decltype(&F::operator())>::T T;
+      typedef T type;
+    };
+
+    template <class F, int i> 
+    struct Arg
+    {
+      typedef typename Arg<decltype(&F::operator()),i>::T T;
+      typedef T type;
+    };
+  
+    
 //    //std::bind1st is no good, because it assume the functional
 //    // has a first_argument_type member. So roll our own
 //    template <class F, class X, int Arity>  
@@ -168,8 +192,7 @@ namespace classdesc
     template <class O, class M>
     bound_method<O,M> bindMethod(O& o, M m)
     {return bound_method<O,M>(o,m);}
-    
-    
+
     template <class F, class Args>
     typename enable_if< 
       Not<is_void<typename Return<F>::T> >,

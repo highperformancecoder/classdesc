@@ -9,31 +9,45 @@
 #ifndef PYTHONOBJECT_BASE_H
 #define PYTHONOBJECT_BASE_H
 #include "classdesc.h"
+
+
 #include "function.h"
-
-namespace classdesc {namespace detail {template<class F> struct Sig;}}
-
-// extend boost::python function signature processing to bound member functions
-namespace boost {
-  namespace python {
-    namespace detail {
-      template <class F>
-      typename classdesc::detail::Sig<F>::T get_signature(F f)
-      {return typename classdesc::detail::Sig<F>::T();}
-    }
-  }
-}
-
-#include "boost/python.hpp"
-#include <vector>
+#include <boost/mpl/vector.hpp>
 
 namespace classdesc
 {
-  struct PythonDummy {};
-  typedef boost::python::class_<PythonDummy> PDC;
-
   namespace detail
   {
+    //    template<class F> struct Sig;
+
+    template <class T> struct Len
+    {
+      T& container;
+      Len(T& container): container(container) {}
+      size_t operator()() const {
+        return container.size();
+      }
+    };
+
+    template <class T>
+    Len<T> len(T& x) {return Len<T>(x);}
+
+    template <class T> struct GetItem
+    {
+      T& container;
+      GetItem(T& container): container(container) {}
+      typename T::value_type operator()(size_t n) const {
+        if (n>=container.size())
+          throw std::runtime_error("out of bounds");
+        typename T::iterator i=container.begin();
+        std::advance(i,n);
+        return *i;
+      }
+    };
+
+    template <class T>
+    GetItem<T> getItem(T& x) {return GetItem<T>(x);}
+
     using namespace classdesc::functional;
 
     template <class R, int> struct SigArg;
@@ -64,6 +78,66 @@ namespace classdesc
         >::type T;
     };
 
+    template <class U> struct Sig<Len<U>>
+    {
+      typedef boost::mpl::vector<size_t> T;
+    };
+    template <class U> struct Sig<GetItem<U>>
+    {
+      typedef boost::mpl::vector<typename U::value_type,size_t> T;
+    };
+//    template <class U> struct Sig<At<U>>
+//    {
+//      typedef boost::mpl::vector<typename U::value_type,U&,size_t> T;
+//    };
+  }
+
+//  namespace functional
+//  {
+//    template <class T> struct Arity<detail::At<T> > {
+//      static const int V=2;
+//      static const int value=2;
+//    };
+//    template <class C> struct Return<detail::At<C> > {
+//      typedef typename C::value_type T;
+//      typedef T type;
+//    };
+//    template <class C> struct Arg<detail::At<C>,0> {
+//      typedef C& T;
+//      typedef T type;
+//    };
+//    template <class C> struct Arg<detail::At<C>,1> {
+//      typedef C& T;
+//      typedef T type;
+//    };
+//  }
+}
+
+
+// extend boost::python function signature processing to bound member functions
+namespace boost {
+  namespace python {
+    namespace detail {
+      template <class F>
+      typename classdesc::detail::Sig<F>::T get_signature(F f)
+      {return typename classdesc::detail::Sig<F>::T();}
+      template <class F, class T>
+      typename classdesc::detail::Sig<F>::T get_signature(F f,T*dummy=0)
+      {return typename classdesc::detail::Sig<F>::T();}
+    }
+  }
+}
+
+#include "boost/python.hpp"
+#include <vector>
+
+namespace classdesc
+{
+  struct PythonDummy {};
+  typedef boost::python::class_<PythonDummy> PDC;
+
+  namespace detail
+  {
   }
   
   class pythonObject_t
@@ -112,16 +186,15 @@ namespace classdesc
     }
 
     template <class F>
-    void addFunction(const string& d, F f) {
+    void addFunctional(const string& d, F f) {
       checkScope(d);
-      scopeStack.back().object.def(f);
+      boost::python::def(tail(d).c_str(),f);
+      scopeStack.back().object.staticmethod(tail(d).c_str());
     }
 
     template <class C, class M>
     void addMemberFunction(const string& d, C& o, M m) {
-      checkScope(d);
-      boost::python::def(tail(d).c_str(),functional::bound_method<C,M>(o,m));
-      scopeStack.back().object.staticmethod(tail(d).c_str());
+      addFunctional(d,functional::bound_method<C,M>(o,m));
     }
   };
 
@@ -156,9 +229,10 @@ namespace classdesc
   typename enable_if<is_sequence<T>,void>::T
   pythonObject(pythonObject_t& p, const string& d, T& a) {
     boost::python::class_<T>((tail(d)+"_type").c_str()).
-      def("__iter__", boost::python::iterator<T>()).
-      def("__len__", functional::bindMethod(a,&T::size)).
-      def("__getitem__", functional::bindMethod(a,&T::at));
+      def("__iter__", boost::python::iterator<T>());//.
+    //def("__getitem__", detail::at(a));
+    p.addFunctional(d+".len", functional::bindMethod(a,&T::size));
+    p.addFunctional(d+".get", detail::getItem(a));
     p.addObject(d,a);
   }
 
