@@ -43,9 +43,9 @@ int main()
   assert(apply_nonvoid_fn(&fooiif,args)==2);
 
   Foo a;
-  assert(apply_nonvoid_fn(bind1st(&Foo::m1,a),args)==1);
-  assert(apply_nonvoid_fn(bind1st(&Foo::m2,a),args)==2);
-  assert(apply_nonvoid_fn(bind1st(&Foo::m3,a),args)==2);
+  assert(apply_nonvoid_fn(bindMethod(a,&Foo::m1),args)==1);
+  assert(apply_nonvoid_fn(bindMethod(a,&Foo::m2),args)==2);
+  assert(apply_nonvoid_fn(bindMethod(a,&Foo::m3),args)==2);
 
   assert(arg_description(&fooiv)=="");
   assert(arg_description(&fooii)=="I");
