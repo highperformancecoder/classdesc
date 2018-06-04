@@ -110,6 +110,7 @@ namespace classdesc
 
 #include "functiondb.h"
 
+#if defined(__cplusplus) && __cplusplus>=201103L 
     // for generic function objects
     template <class F> 
     struct Arity
@@ -131,7 +132,7 @@ namespace classdesc
       typedef typename Arg<decltype(&F::operator()),i>::T T;
       typedef T type;
     };
-  
+#endif
     
 //    //std::bind1st is no good, because it assume the functional
 //    // has a first_argument_type member. So roll our own
