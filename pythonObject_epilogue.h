@@ -7,6 +7,7 @@ namespace classdesc
   typename enable_if<ClassdescEnabledPythonType<T>,void>::T
   pythonObject(pythonObject_t& p, const string& d, T& a) {
     classdesc_access::access_pythonObject<T>()(p,d,a);
+    //pythonObject_t::getClass<T>().completed=true;
   }
 
   

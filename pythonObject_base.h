@@ -14,12 +14,56 @@
 #include "function.h"
 #include <boost/mpl/vector.hpp>
 
+/*
+  For all types, maintain a vector of polymorphic class objects
+  use lazy instantiation 
+
+  std::vector<shared_ptr<BaseObj>> classes;
+  class_<T>& getClass<T>()
+  {
+     static size_t id=classes.size();
+     if (id==classes.size())
+        classes.push_back(shared_ptr<BaseObj>(new class_<T>(typeName<T>())));
+     return dynamic_cast<class_<T>&>(*classes[id]);
+  }
+*/
+
+
 namespace classdesc
 {
   namespace detail
   {
-    //    template<class F> struct Sig;
+    using namespace classdesc::functional;
 
+    template <class R, int> struct SigArg;
+
+    template <class F> struct SigArg<F,0>
+    {
+      typedef boost::mpl::vector<> T;
+    };
+
+    template <class F> struct SigArg<F,1>
+    {
+      typedef boost::mpl::vector<typename Arg<F,Arity<F>::V>::T> T;
+    };
+  
+    template <class F,int N> struct SigArg
+    {
+      typedef typename boost::mpl::push_front<
+        typename Arg<F,Arity<F>::V-N+1>::T,
+        typename SigArg<F,N-1>::T
+        >::type T;
+    };
+    
+    template <class F> struct Sig
+    {
+      typedef typename boost::mpl::push_front<
+        typename SigArg<F,Arity<F>::V>::T,
+        typename Return<F>::T
+        >::type T;
+    };
+
+    // container support
     template <class T> struct Len
     {
       T& container;
@@ -48,36 +92,6 @@ namespace classdesc
     template <class T>
     GetItem<T> getItem(T& x) {return GetItem<T>(x);}
 
-    using namespace classdesc::functional;
-
-    template <class R, int> struct SigArg;
-
-    template <class F> struct SigArg<F,0>
-    {
-      typedef boost::mpl::vector<> T;
-    };
-
-    template <class F> struct SigArg<F,1>
-    {
-      typedef boost::mpl::vector<typename Arg<F,Arity<F>::V>::T> T;
-    };
-  
-    template <class F,int N> struct SigArg
-    {
-      typedef typename boost::mpl::push_front<
-        typename Arg<F,Arity<F>::V-N+1>::T,
-        typename SigArg<F,N-1>::T
-        >::type T;
-    };
-
-    template <class F> struct Sig
-    {
-      typedef typename boost::mpl::push_front<
-        typename SigArg<F,Arity<F>::V>::T,
-        typename Return<F>::T
-        >::type T;
-    };
-
     template <class U> struct Sig<Len<U>>
     {
       typedef boost::mpl::vector<size_t> T;
@@ -86,31 +100,7 @@ namespace classdesc
     {
       typedef boost::mpl::vector<typename U::value_type,size_t> T;
     };
-//    template <class U> struct Sig<At<U>>
-//    {
-//      typedef boost::mpl::vector<typename U::value_type,U&,size_t> T;
-//    };
   }
-
-//  namespace functional
-//  {
-//    template <class T> struct Arity<detail::At<T> > {
-//      static const int V=2;
-//      static const int value=2;
-//    };
-//    template <class C> struct Return<detail::At<C> > {
-//      typedef typename C::value_type T;
-//      typedef T type;
-//    };
-//    template <class C> struct Arg<detail::At<C>,0> {
-//      typedef C& T;
-//      typedef T type;
-//    };
-//    template <class C> struct Arg<detail::At<C>,1> {
-//      typedef C& T;
-//      typedef T type;
-//    };
-//  }
 }
 
 
@@ -133,26 +123,69 @@ namespace boost {
 
 namespace classdesc
 {
-  struct PythonDummy {};
-  typedef boost::python::class_<PythonDummy> PDC;
 
-  namespace detail
-  {
-  }
-  
   class pythonObject_t
   {
     struct Scope
     {
+      struct PythonDummy {};
       string name;
-      PDC object;
+      boost::python::class_<PythonDummy> object;
       shared_ptr<boost::python::scope> scope;
       Scope(const string& name):
         name(name), object(name.c_str()), scope(new boost::python::scope(object)) {}
     };
     std::vector<Scope> scopeStack;
-
+    boost::python::scope topScope;
+    
   public:
+
+    /// @{
+    /// class registry
+    struct ClassBase
+    {
+      virtual ~ClassBase() {}
+      bool completed=false;
+    };
+
+    template <class T> struct Class:
+      public ClassBase, public boost::python::class_<T>
+    {
+      Class(const string& name): boost::python::class_<T>(name.c_str()) {}
+    };
+
+
+    // lazy instantiation pattern to avoid needing an object file, and
+    // link time ordering dependencyy
+
+    //can be cleared after all python descriptor processing has
+    // finished to free memory, otherwise the descriptor will
+    // potentially throw an exception if this vector is cleared
+    static std::vector<shared_ptr<ClassBase> >& classes()
+    {
+      static std::vector<shared_ptr<ClassBase> > impl;
+      return impl;
+    }
+
+    // lazy instantiation pattern to register a unique class object
+    // per type.
+    template <class T>
+    Class<T>& getClass()
+    {
+      static size_t id=classes().size();
+      if (id==classes().size())
+        {
+          // for now, put everything in global scope
+          boost::python::scope scope(topScope);
+          classes().push_back(shared_ptr<ClassBase>
+                              (new Class<T>(typeName<T>())));
+        }
+      else if (id>classes().size())
+        throw exception("classes registry no longer valid");
+      return dynamic_cast<Class<T>&>(*classes()[id]);
+    }
+    /// @}
+
     string tail(const string& d) {
       size_t p=d.rfind('.');
       if (p==string::npos)
@@ -162,7 +195,8 @@ namespace classdesc
     }
     
     void checkScope(string d) {
-      for (size_t p=d.find('.'), level=0; p!=string::npos; p=d.find('.'), level++)
+      size_t level=0;
+      for (size_t p=d.find('.'); p!=string::npos; p=d.find('.'), level++)
         {
           string head=d.substr(0,p);
           if (level<scopeStack.size() && head!=scopeStack[level].name)
@@ -171,6 +205,7 @@ namespace classdesc
             scopeStack.push_back(Scope(head));
           d=d.substr(p+1);
         }
+      scopeStack.erase(scopeStack.begin()+level,scopeStack.end());
       // final component of d is not part of scope
     }
 
@@ -195,6 +230,29 @@ namespace classdesc
     template <class C, class M>
     void addMemberFunction(const string& d, C& o, M m) {
       addFunctional(d,functional::bound_method<C,M>(o,m));
+      Class<C>& c=getClass<C>();
+      if (!c.completed)
+        c.def(tail(d).c_str(),m);
+    }
+    template <class C, class M>
+    void addMemberFunctionPtr(const string& d, C& o, M *m) {
+      addFunctional(d,m);
+      Class<C>& c=getClass<C>();
+      if (!c.completed)
+        c.def(tail(d),m);
+    }
+    template <class C, class M>
+    void addMemberObject(const string& d, C& o, M m) {
+      Class<C>& c=getClass<C>();
+      if (!c.completed)
+        c.def_readwrite(tail(d).c_str(),m);
+    }
+    template <class C, class M>
+    void addMemberObject(const string& d, const C& o, M m) {
+      //addObject(d,o.*m);
+      Class<C>& c=getClass<C>();
+      if (!c.completed)
+        c.def_readonly(tail(d).c_str(),m);
     }
   };
 
@@ -210,6 +268,19 @@ namespace classdesc
   typename enable_if<is_member_function_pointer<M>, void>::T
   pythonObject(pythonObject_t& p, const string& d, C& c, M m) {
     p.addMemberFunction(d,c,m);
+  }
+  
+  template<class C, class M>
+  typename enable_if<is_member_object_pointer<M>, void>::T
+  pythonObject(pythonObject_t& p, const string& d, C& c, M m) {
+    p.addMemberObject(d,c,m);
+    pythonObject(p,d,c.*m);
+  }
+  
+  template<class C, class M>
+  typename enable_if<is_function<M>, void>::T
+  pythonObject(pythonObject_t& p, const string& d, C& c, M *m) {
+    p.addMemberFunctionPtr(d,c,m);
   }
   
   template <class T>
@@ -229,8 +300,7 @@ namespace classdesc
   typename enable_if<is_sequence<T>,void>::T
   pythonObject(pythonObject_t& p, const string& d, T& a) {
     boost::python::class_<T>((tail(d)+"_type").c_str()).
-      def("__iter__", boost::python::iterator<T>());//.
-    //def("__getitem__", detail::at(a));
+      def("__iter__", boost::python::iterator<T>());
     p.addFunctional(d+".len", functional::bindMethod(a,&T::size));
     p.addFunctional(d+".get", detail::getItem(a));
     p.addObject(d,a);
@@ -270,8 +340,6 @@ namespace classdesc_access
   template <class T> struct access_pythonObject;
 }
 
-#include "use_mbr_pointers.h"
-CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(pythonObject)
 using classdesc::pythonObject;
 
 #endif

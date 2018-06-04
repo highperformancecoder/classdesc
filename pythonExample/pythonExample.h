@@ -83,6 +83,8 @@ struct Bar1
   Bar1(int i): f(i), g(2), barfoo(ec)/*, vFoo(2,Foo(1))*/ {}
   bool operator!=(const Bar1& x) const {return f!=x.f||g!=x.g||barfoo!=x.barfoo
       /*||vFoo!=x.vFoo*/;}
+  Foo foo() {return f;}
+  //Foo& fooRef() {return f;}
 };
 
 // root type
