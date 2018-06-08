@@ -241,7 +241,7 @@ namespace classdesc
   processExtraClass(xsd_generate_t& g, const string& d, const T& a);
 
   template <class T>
-  typename enable_if<Not<EverythingElse<T>>, void>::T
+  typename enable_if<Not<EverythingElse<T> >, void>::T
   processExtraClass(xsd_generate_t& g, const string& d, const T& a)
   {xsd_generate(g,"",a);}
   
