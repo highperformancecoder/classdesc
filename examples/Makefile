@@ -96,7 +96,7 @@ include depend
 	$(CC) $(CFLAGS) -c $< 
 
 .h.cd:
-	../classdesc -I .. -typeName pack unpack  xml_pack xml_unpack <$< >$@
+	../classdesc -I .. -typeName -use_mbr_pointers pack unpack  xml_pack xml_unpack <$< >$@
 
 #polymorph2.cd: polymorph2.h
 #	../classdesc -I .. -typeName pack unpack xml_pack xml_unpack <$< >$@

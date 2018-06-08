@@ -1048,9 +1048,13 @@ metaprogramming templates:
   \verb+is_nonmember_function_ptr<F>::value+ is true if F is a ordinary function
   pointer\\
   \verb+is_function_ptr+& \index{is\_function\_ptr}\verb+is_function_ptr<F>::value=true+ if F is
-  either a member function pointer or an ordinary function pointer\\
-\verb+void apply(R* r, F f, Args args);+ & apply function f to an
-array of arguments
+                          either a member function pointer or an ordinary function pointer\\
+  \verb+bound_method<O,M>+ functional class representing a method
+  bound to an object\\
+  \verb+bound_method<O,M> bindMethod(O& o, M m)+ &helper function
+                                        generating a bound\_method object\\
+  \verb+void apply(R* r, F f, Args args);+ & apply function f to an
+                                             array of arguments
 \end{tabular}
 
 Metaprogramming datatypes will have either a static data member
@@ -1060,12 +1064,17 @@ conventions of \verb+value+ and \verb+type+. The \verb+is_+ structure
 use \verb+value+ so as to be compatible with the use of
 \verb+enable_if+ (supplied in the \verb+classdesc.h+ header).
 
-The apply function takes and array of arguments of type Args. Args can
+The apply function takes an array of arguments of type Args. Args can
 be a user defined type, but must be convertible to all the types used
 by F. An example type is defined in \verb+javaClass_base.h+.
 The return object is passed as parameter \verb+r+. This allows for the
 possibility of void returns, in which case apply ignores what is
 passed here (can pass NULL if F is known to have a void return type).
+
+\verb+bound_method+ is an example of a functional object, which has
+Arity, Return and Arg defined for it. For general functional objects,
+including lamdas, the user will need to manually define Arity, Return
+and Arg --- this may change in a future revamp for C++11.
 
 \psection{classdescMP}\index{classdescMP}
 

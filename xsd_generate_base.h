@@ -384,10 +384,6 @@ namespace classdesc
   template <class T>
   void xsd_generate(xsd_generate_t& g, const string& d, const Exclude<T>& a) {}
 
-  //  member functions
-  template <class C, class T>
-  void xsd_generate(xsd_generate_t& g, const string& d, C& c, const T& a) {}
-
   template <class T>
   void xsd_generate(xsd_generate_t& g, const string& d, is_const_static, T a) {}
 
@@ -419,7 +415,11 @@ namespace classdesc
   }
 
 }
-    
+
+#include "use_mbr_pointers.h"
+CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(xsd_generate)
+CLASSDESC_FUNCTION_NOP(xsd_generate)
+
 using classdesc::xsd_generate;
 using classdesc::xsd_generate_onbase;
 

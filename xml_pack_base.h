@@ -17,6 +17,7 @@
 #include <sstream>
 #include <string>
 #include <assert.h>
+#include <stdarg.h>
 
 #include <classdesc.h>
 #include <xml_common.h>
@@ -144,44 +145,36 @@ namespace classdesc
   xml_packp(xml_pack_t& x, const string& d, T& arg)
   {x.pack(d,string(Enum_handle<T>(arg)));}
 
-}
 
-namespace classdesc_access
-{
-  template <class T> struct access_xml_pack;
-}
 
-template <class T> void xml_pack(classdesc::xml_pack_t&,const classdesc::string&, const T&);
+  template <class T> void xml_pack(xml_pack_t&,const string&, const T&);
 
-template <class T> void xml_pack(classdesc::xml_pack_t&,const classdesc::string&, T&);
+  template <class T> void xml_pack(xml_pack_t&,const string&, T&);
 
-template <class T> classdesc::xml_pack_t& operator<<(classdesc::xml_pack_t& t, const T& a);
+  template <class T> xml_pack_t& operator<<(xml_pack_t& t, const T& a);
 
-inline void xml_pack(classdesc::xml_pack_t& x,const classdesc::string& d, 
-                     std::string& a) 
-{
-  std::string tmp;
-  for (std::string::size_type i=0; i<a.length(); i++) tmp+=classdesc::xml_quote(a[i]);
-  x.pack(d,tmp);
-}
+  inline void xml_pack(xml_pack_t& x,const string& d, std::string& a) 
+  {
+    std::string tmp;
+    for (std::string::size_type i=0; i<a.length(); i++) tmp+=classdesc::xml_quote(a[i]);
+    x.pack(d,tmp);
+  }
 
-inline void xml_pack(classdesc::xml_pack_t& x,const classdesc::string& d, const std::string& a) 
-{xml_pack(x,d,const_cast<std::string&>(a));}
+  inline void xml_pack(xml_pack_t& x,const string& d, const std::string& a) 
+  {xml_pack(x,d,const_cast<std::string&>(a));}
 
-/* now define the array version  */
-#include <stdarg.h>
-
-  template <class T> void xml_pack(classdesc::xml_pack_t& x,const classdesc::string& d,classdesc::is_array ia,
+  /* now define the array version  */
+  template <class T> void xml_pack(xml_pack_t& x,const string& d,is_array ia,
                                      T& a, int dims,size_t ncopies,...) 
   {
     va_list ap;
     va_start(ap,ncopies);
     for (int i=1; i<dims; i++) ncopies*=va_arg(ap,int); //assume that 2 and higher D arrays dimensions are int
     va_end(ap);
-    classdesc::xml_pack_t::Tag tag(x,d);
+    xml_pack_t::Tag tag(x,d);
 
     // element name is given by the type name
-    classdesc::string eName=classdesc::typeName<T>().c_str();
+    string eName=typeName<T>().c_str();
     // strip leading namespace and qualifiers
     const char *e=eName.c_str()+eName.length();
     while (e!=eName.c_str() && *(e-1)!=' ' && *(e-1)!=':') e--;
@@ -189,17 +182,14 @@ inline void xml_pack(classdesc::xml_pack_t& x,const classdesc::string& d, const 
     for (size_t i=0; i<ncopies; i++) xml_pack(x,d+"."+e,(&a)[i]);
   }
 
-template <class T1, class T2>
-void xml_pack(classdesc::xml_pack_t& x, const classdesc::string& d, 
-              const std::pair<T1,T2>& arg)
-{
-  classdesc::xml_pack_t::Tag t(x,d);
-  xml_pack(x,d+".first",arg.first);
-  xml_pack(x,d+".second",arg.second);
-}  
+  template <class T1, class T2>
+  void xml_pack(xml_pack_t& x, const string& d, const std::pair<T1,T2>& arg)
+  {
+    xml_pack_t::Tag t(x,d);
+    xml_pack(x,d+".first",arg.first);
+    xml_pack(x,d+".second",arg.second);
+  }  
 
-namespace classdesc
-{
   template <class T> typename
   enable_if<Or<is_sequence<T>, is_associative_container<T> >, void>::T
   xml_packp(xml_pack_t& x, const string& d, T& arg, dummy<1> dum=0)
@@ -213,41 +203,28 @@ namespace classdesc
     while (e!=eName.c_str() && *(e-1)!=' ' && *(e-1)!=':') e--;
 
     for (typename T::const_iterator i=arg.begin(); i!=arg.end(); ++i)
-      ::xml_pack(x,d+"."+e,*i);
+      xml_pack(x,d+"."+e,*i);
   }
 
   template <class T>
   void xml_pack_onbase(xml_pack_t& x,const string& d,T& a)
-  {::xml_pack(x,d+basename<T>(),a);}
+  {xml_pack(x,d+basename<T>(),a);}
 
-}
+  /* const static members */
+  template<class T>
+  void xml_pack(xml_pack_t& targ, const string& desc, is_const_static i, T arg) 
+  {} 
 
-using classdesc::xml_pack_onbase;
+  template<class T, class U>
+  void xml_pack(xml_pack_t& targ, const string& desc, is_const_static i, const T&, U) {} 
 
-/* member functions */
-template<class C, class T>
-void xml_pack(classdesc::xml_pack_t& targ, const classdesc::string& desc, C& c, T arg) {} 
-/* const static members */
-template<class T>
-void xml_pack(classdesc::xml_pack_t& targ, const classdesc::string& desc, 
-              classdesc::is_const_static i, T arg) 
-{} 
+  template<class T>
+  void xml_pack(xml_pack_t& targ, const string& desc, Exclude<T>&) {} 
 
-template<class T, class U>
-void xml_pack(classdesc::xml_pack_t& targ, const classdesc::string& desc, 
-              classdesc::is_const_static i, const T&, U) {} 
+  // special handling of shared pointers to avoid a double wrapping problem
+  template<class T>
+  void xml_pack(xml_pack_t& x, const string& d, shared_ptr<T>& a);
 
-template<class T>
-void xml_pack(classdesc::xml_pack_t& targ, const classdesc::string& desc, 
-              classdesc::Exclude<T>&) {} 
-
-// special handling of shared pointers to avoid a double wrapping problem
-template<class T>
-void xml_pack(classdesc::xml_pack_t& x, const classdesc::string& d, 
-              classdesc::shared_ptr<T>& a);
-
-namespace classdesc
-{
   template<class T>
   void xml_pack(xml_pack_t& targ, const string& desc, is_graphnode, T&)
   {
@@ -256,4 +233,15 @@ namespace classdesc
 
 }
 
+namespace classdesc_access
+{
+  template <class T> struct access_xml_pack;
+}
+
+#include "use_mbr_pointers.h"
+CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(xml_pack)
+CLASSDESC_FUNCTION_NOP(xml_pack)
+
+using classdesc::xml_pack;
+using classdesc::xml_pack_onbase;
 #endif
