@@ -68,7 +68,7 @@ namespace classdesc
     {
       T& container;
       Len(T& container): container(container) {}
-      size_t operator()() const {
+      size_t operator()(T&) const {
         return container.size();
       }
     };
@@ -80,7 +80,7 @@ namespace classdesc
     {
       T& container;
       GetItem(T& container): container(container) {}
-      typename T::value_type operator()(size_t n) const {
+      typename T::value_type operator()(T&,size_t n) const {
         if (n>=container.size())
           throw std::runtime_error("out of bounds");
         typename T::iterator i=container.begin();
@@ -94,12 +94,55 @@ namespace classdesc
 
     template <class U> struct Sig<Len<U>>
     {
-      typedef boost::mpl::vector<size_t> T;
+      typedef boost::mpl::vector<size_t,U&> T;
     };
     template <class U> struct Sig<GetItem<U>>
     {
-      typedef boost::mpl::vector<typename U::value_type,size_t> T;
+      typedef boost::mpl::vector<typename U::value_type,U&,size_t> T;
     };
+    template <class T>
+    struct ArrayWrapper
+    {
+      typedef T value_type;
+      T* data;
+      size_t m_size;      
+      ArrayWrapper(T* d=0, size_t s=0): data(d), m_size(s) {}
+      size_t size() const {return m_size;}
+      typedef T* iterator;
+      typedef const T* const_iterator;
+      iterator begin() {return data;}
+      const_iterator begin() const {return data;}
+      iterator end() {return data+m_size;}
+      const_iterator end() const {return data+m_size;}
+    };
+
+    template <class T>
+    struct Array {};
+    
+
+    template <class T>
+    struct ArrayLen
+    {
+      size_t n;
+      ArrayLen(size_t n=0): n(n) {}
+      size_t operator()(Array<T>&) {return n;}
+    };
+    template <class T>
+    struct ArrayGet
+    {
+      T* x;
+      ArrayGet(T*x=0): x(x) {}
+      T operator()(Array<T>&, size_t i) const {return x[i];}
+    };
+    template <class U> struct Sig<ArrayLen<U>>
+    {
+      typedef boost::mpl::vector<size_t,Array<U>&> T;
+    };
+    template <class U> struct Sig<ArrayGet<U>>
+    {
+      typedef boost::mpl::vector<U,Array<U>&,size_t> T;
+    };
+
   }
 }
 
@@ -249,7 +292,6 @@ namespace classdesc
     }
     template <class C, class M>
     void addMemberObject(const string& d, const C& o, M m) {
-      //addObject(d,o.*m);
       Class<C>& c=getClass<C>();
       if (!c.completed)
         c.def_readonly(tail(d).c_str(),m);
@@ -289,20 +331,45 @@ namespace classdesc
     p.addObject(d,a);
   }
 
+  namespace detail
+  {
+  }
+
+  template <class T>
+  struct is_sequence<detail::ArrayWrapper<T> >: public true_type {};
+
   template <class T>
   void pythonObject(pythonObject_t& p, const string& d, is_array,
-                    T& arg, int dims, size_t ncopies,...)
+                    T& arg, int dims, size_t dim1)
   {
-    //TODO
+    boost::python::class_<detail::Array<T>>((tail(d)+"_type").c_str()).
+      //      def("__iter__", boost::python::iterator<T>()).
+      def("__len__", detail::ArrayLen<T>(dim1)).
+      def("__getitem__", detail::ArrayGet<T>(&arg));
+    p.addObject(d,reinterpret_cast<detail::Array<T>&>(arg));
   }
+
+  template <class T>
+  void pythonObject(pythonObject_t& p, const string& d, is_array,
+                    T& arg, int dims, size_t dim1, size_t dim2)
+  {
+//    detail::ArrayWrapper<T> aw(&arg,dim1);
+//    pythonObject(p,d,aw);
+  }
+
+  
+  
 
   template <class T>
   typename enable_if<is_sequence<T>,void>::T
   pythonObject(pythonObject_t& p, const string& d, T& a) {
     boost::python::class_<T>((tail(d)+"_type").c_str()).
-      def("__iter__", boost::python::iterator<T>());
-    p.addFunctional(d+".len", functional::bindMethod(a,&T::size));
-    p.addFunctional(d+".get", detail::getItem(a));
+      def("__iter__", boost::python::iterator<T>()).
+      //      def("__len__", functional::bindMethod(a,&T::size)).
+      def("__len__", detail::len(a)).
+      def("__getitem__", detail::getItem(a));
+//    p.addFunctional(d+".len", functional::bindMethod(a,&T::size));
+//    p.addFunctional(d+".get", detail::getItem(a));
     p.addObject(d,a);
   }
 
