@@ -10,7 +10,6 @@
 #define PYTHONOBJECT_BASE_H
 #include "classdesc.h"
 
-
 #include "function.h"
 #include <boost/mpl/vector.hpp>
 
@@ -82,7 +81,7 @@ namespace classdesc
       GetItem(T& container): container(container) {}
       typename T::value_type operator()(T&,size_t n) const {
         if (n>=container.size())
-          throw std::runtime_error("out of bounds");
+          throw std::out_of_range("index out of bounds");
         typename T::iterator i=container.begin();
         std::advance(i,n);
         return *i;
@@ -127,12 +126,18 @@ namespace classdesc
       ArrayLen(size_t n=0): n(n) {}
       size_t operator()(Array<T>&) {return n;}
     };
+
     template <class T>
     struct ArrayGet
     {
       T* x;
-      ArrayGet(T*x=0): x(x) {}
-      T operator()(Array<T>&, size_t i) const {return x[i];}
+      size_t n;
+      ArrayGet(T*x=0, size_t n=0): x(x), n(n) {}
+      T operator()(Array<T>&, size_t i) const {
+        if (i<n)
+          return x[i];
+        throw std::out_of_range("index out of bounds");
+      }
     };
     template <class U> struct Sig<ArrayLen<U>>
     {
@@ -166,7 +171,6 @@ namespace boost {
 
 namespace classdesc
 {
-
   class pythonObject_t
   {
     struct Scope
@@ -331,10 +335,6 @@ namespace classdesc
     p.addObject(d,a);
   }
 
-  namespace detail
-  {
-  }
-
   template <class T>
   struct is_sequence<detail::ArrayWrapper<T> >: public true_type {};
 
@@ -343,9 +343,8 @@ namespace classdesc
                     T& arg, int dims, size_t dim1)
   {
     boost::python::class_<detail::Array<T>>((tail(d)+"_type").c_str()).
-      //      def("__iter__", boost::python::iterator<T>()).
       def("__len__", detail::ArrayLen<T>(dim1)).
-      def("__getitem__", detail::ArrayGet<T>(&arg));
+      def("__getitem__", detail::ArrayGet<T>(&arg,dim1));
     p.addObject(d,reinterpret_cast<detail::Array<T>&>(arg));
   }
 
@@ -364,12 +363,8 @@ namespace classdesc
   typename enable_if<is_sequence<T>,void>::T
   pythonObject(pythonObject_t& p, const string& d, T& a) {
     boost::python::class_<T>((tail(d)+"_type").c_str()).
-      def("__iter__", boost::python::iterator<T>()).
-      //      def("__len__", functional::bindMethod(a,&T::size)).
       def("__len__", detail::len(a)).
       def("__getitem__", detail::getItem(a));
-//    p.addFunctional(d+".len", functional::bindMethod(a,&T::size));
-//    p.addFunctional(d+".get", detail::getItem(a));
     p.addObject(d,a);
   }
 
