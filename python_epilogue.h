@@ -5,8 +5,8 @@ namespace classdesc
 {
   template <class T>
   typename enable_if<ClassdescEnabledPythonType<T>,void>::T
-  pythonObject(pythonObject_t& p, const string& d, T& a) {
-    classdesc_access::access_pythonObject<T>()(p,d,a);
+  pythonObject(python_t& p, const string& d, T& a) {
+    classdesc_access::access_python<T>()(p,d,a);
     //pythonObject_t::getClass<T>().completed=true;
   }
 
@@ -18,9 +18,9 @@ namespace classdesc
   };
   
   template <class T, int R>
-  void detail::ArrayGet<T,R>::registerClass(pythonObject_t& p)
+  void detail::ArrayGet<T,R>::registerClass(python_t& p)
   {
-    pythonObject_t::Class<ArrayGet<T,R> >& c=p.getClass<ArrayGet<T,R> >();
+    python_t::Class<ArrayGet<T,R> >& c=p.getClass<ArrayGet<T,R> >();
     if (!c.completed)
       {
         c.def("__len__",&ArrayGet<T,R>::len).
@@ -30,9 +30,9 @@ namespace classdesc
   }
 
   template <class T>
-  void detail::ArrayGet<T,1>::registerClass(pythonObject_t& p)
+  void detail::ArrayGet<T,1>::registerClass(python_t& p)
   {
-    pythonObject_t::Class<ArrayGet<T,1> >& c=p.getClass<ArrayGet<T,1> >();
+    python_t::Class<ArrayGet<T,1> >& c=p.getClass<ArrayGet<T,1> >();
     if (!c.completed)
       {
         c.def("__len__",&ArrayGet<T,1>::len).

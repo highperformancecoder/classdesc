@@ -7,7 +7,7 @@ example.so: $(OBJS)
 	g++ -fPIC -shared -Wl,-soname,example $^ `pkg-config --libs python` -lboost_python -o $@
 
 .h.cd:
-	../classdesc -I .. -typeName -use_mbr_pointers pythonObject <$< >$@
+	../classdesc -I .. -typeName -use_mbr_pointers python <$< >$@
 
 .cc.o:
 	g++ $(CFLAGS) -c -o $@ $<

@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef PYTHONOBJECT_BASE_H
-#define PYTHONOBJECT_BASE_H
+#ifndef PYTHON_BASE_H
+#define PYTHON_BASE_H
 #include "classdesc.h"
 
 #include "function.h"
@@ -30,7 +30,7 @@
 
 namespace classdesc
 {
-  class pythonObject_t;
+  class python_t;
 
   namespace detail
   {
@@ -151,7 +151,7 @@ namespace classdesc
       size_t len() const {return dims[rank-1];}
       
       // ensures this class is registered in the python type system
-      static void registerClass(pythonObject_t&);
+      static void registerClass(python_t&);
     };
 
     template <class T>
@@ -168,7 +168,7 @@ namespace classdesc
       T operator()(Array<T,1>&, size_t i) const {return getItem(i);}
       size_t len() const {return n;}
       // ensures this class is registered in the python type system
-      static void registerClass(pythonObject_t&);
+      static void registerClass(python_t&);
     };
     
     template <class U, int R> struct Sig<ArrayLen<U,R>>
@@ -207,7 +207,7 @@ namespace boost {
 
 namespace classdesc
 {
-  class pythonObject_t
+  class python_t
   {
     struct Scope
     {
@@ -344,30 +344,30 @@ namespace classdesc
 
   template <class T>
   typename enable_if<ClassdescEnabledPythonType<T>,void>::T
-  pythonObject(pythonObject_t& p, const string& d, T& a);
+  python(python_t& p, const string& d, T& a);
   
   template<class C, class M>
   typename enable_if<is_member_function_pointer<M>, void>::T
-  pythonObject(pythonObject_t& p, const string& d, C& c, M m) {
+  python(python_t& p, const string& d, C& c, M m) {
     p.addMemberFunction(d,c,m);
   }
   
   template<class C, class M>
   typename enable_if<is_member_object_pointer<M>, void>::T
-  pythonObject(pythonObject_t& p, const string& d, C& c, M m) {
+  python(python_t& p, const string& d, C& c, M m) {
     p.addMemberObject(d,c,m);
-    pythonObject(p,d,c.*m);
+    python(p,d,c.*m);
   }
   
   template<class C, class M>
   typename enable_if<is_function<M>, void>::T
-  pythonObject(pythonObject_t& p, const string& d, C& c, M *m) {
+  python(python_t& p, const string& d, C& c, M *m) {
     p.addMemberFunctionPtr(d,c,m);
   }
   
   template <class T>
   typename enable_if<is_fundamental<T>,void>::T
-  pythonObject(pythonObject_t& p, const string& d, T& a) {
+  python(python_t& p, const string& d, T& a) {
     p.addObject(d,a);
   }
 
@@ -375,7 +375,7 @@ namespace classdesc
   struct is_sequence<detail::ArrayWrapper<T> >: public true_type {};
 
   template <class T>
-  void pythonObject(pythonObject_t& p, const string& d, is_array,
+  void python(python_t& p, const string& d, is_array,
                     T& arg, int dims, size_t dim1)
   {
     boost::python::class_<detail::Array<T,1>>((tail(d)+"_type").c_str()).
@@ -386,7 +386,7 @@ namespace classdesc
   }
 
   template <class T>
-  void pythonObject(pythonObject_t& p, const string& d, is_array,
+  void python(python_t& p, const string& d, is_array,
                     T& arg, int, size_t dim1, size_t dim2)
   {
     size_t dims[]={dim1,dim2};
@@ -402,7 +402,7 @@ namespace classdesc
 
   template <class T>
   typename enable_if<is_sequence<T>,void>::T
-  pythonObject(pythonObject_t& p, const string& d, T& a) {
+  python(python_t& p, const string& d, T& a) {
     boost::python::class_<T>((tail(d)+"_type").c_str()).
       def("__len__", detail::len(a)).
       def("__getitem__", detail::getItem(a));
@@ -411,7 +411,7 @@ namespace classdesc
 
   template <class T>
   typename enable_if<is_associative_container<T>,void>::T
-  pythonObject(pythonObject_t& p, const string& d, T& a) {
+  python(python_t& p, const string& d, T& a) {
     boost::python::class_<T>((tail(d)+"_type").c_str()).
       def("__iter__", boost::python::iterator<T>()).
       def("__len__", functional::bindMethod(a,&T::size));
@@ -419,19 +419,19 @@ namespace classdesc
   }
 
   template <class T>
-  void pythonObject(pythonObject_t& p, const string& d, const Enum_handle<T>& a) {
+  void python(python_t& p, const string& d, const Enum_handle<T>& a) {
     p.addObject(d,a);
   }
   
   template <class T>
-  void pythonObject(pythonObject_t& p, const string& d, Exclude<T>& a) {}
+  void python(python_t& p, const string& d, Exclude<T>& a) {}
  
   template <class T>
-  void pythonObject(pythonObject_t& p, const string& d, shared_ptr<T>& a)
+  void python(python_t& p, const string& d, shared_ptr<T>& a)
   {//TODO
   }
 
-  void pythonObject(pythonObject_t& p, const string& d, string& a) {
+  void python(python_t& p, const string& d, string& a) {
     p.addObject(d,a);
   }
 
@@ -440,9 +440,9 @@ namespace classdesc
 
 namespace classdesc_access
 {
-  template <class T> struct access_pythonObject;
+  template <class T> struct access_python;
 }
 
-using classdesc::pythonObject;
+using classdesc::python;
 
 #endif
