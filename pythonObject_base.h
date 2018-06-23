@@ -30,6 +30,8 @@
 
 namespace classdesc
 {
+  class pythonObject_t;
+
   namespace detail
   {
     using namespace classdesc::functional;
@@ -115,37 +117,71 @@ namespace classdesc
       const_iterator end() const {return data+m_size;}
     };
 
-    template <class T>
+    template <class T, int rank>
     struct Array {};
     
 
-    template <class T>
+    template <class T, int rank>
     struct ArrayLen
     {
       size_t n;
       ArrayLen(size_t n=0): n(n) {}
-      size_t operator()(Array<T>&) {return n;}
+      size_t operator()(Array<T,rank>&) {return n;}
     };
 
-    template <class T>
+    template <class T, int rank>
     struct ArrayGet
     {
       T* x;
+      size_t dims[rank];
+      ArrayGet(T*x=0, const size_t* d=0): x(x) {
+        memcpy(&dims,d,sizeof(dims));
+      }
+      ArrayGet<T,rank-1> getItem(size_t i) const {
+        if (i<dims[rank-1])
+          {
+            size_t stride=1;
+            for (size_t i=0; i<rank-1; ++i) stride*=dims[i];
+            return ArrayGet<T,rank-1>(x+i*stride, dims);
+          }
+        throw std::out_of_range("index out of bounds");
+      }
+      ArrayGet<T,rank-1> operator()(Array<T,rank>&, size_t i) const 
+        {return getItem(i);}
+      size_t len() const {return dims[rank-1];}
+      
+      // ensures this class is registered in the python type system
+      static void registerClass(pythonObject_t&);
+    };
+
+    template <class T>
+    struct ArrayGet<T,1>
+    {
+      T* x;
       size_t n;
-      ArrayGet(T*x=0, size_t n=0): x(x), n(n) {}
-      T operator()(Array<T>&, size_t i) const {
+      ArrayGet(T*x=0, const size_t* d=0): x(x), n(*d) {}
+      T getItem(size_t i) const {
         if (i<n)
           return x[i];
         throw std::out_of_range("index out of bounds");
       }
+      T operator()(Array<T,1>&, size_t i) const {return getItem(i);}
+      size_t len() const {return n;}
+      // ensures this class is registered in the python type system
+      static void registerClass(pythonObject_t&);
     };
-    template <class U> struct Sig<ArrayLen<U>>
+    
+    template <class U, int R> struct Sig<ArrayLen<U,R>>
     {
-      typedef boost::mpl::vector<size_t,Array<U>&> T;
+      typedef boost::mpl::vector<size_t,Array<U,R>&> T;
     };
-    template <class U> struct Sig<ArrayGet<U>>
+    template <class U,int R> struct Sig<ArrayGet<U,R> >
     {
-      typedef boost::mpl::vector<U,Array<U>&,size_t> T;
+      typedef boost::mpl::vector<ArrayGet<U,R-1>,Array<U,R>&,size_t> T;
+    };
+    template <class U> struct Sig<ArrayGet<U,1> >
+    {
+      typedef boost::mpl::vector<U,Array<U,1>&,size_t> T;
     };
 
   }
@@ -342,18 +378,23 @@ namespace classdesc
   void pythonObject(pythonObject_t& p, const string& d, is_array,
                     T& arg, int dims, size_t dim1)
   {
-    boost::python::class_<detail::Array<T>>((tail(d)+"_type").c_str()).
-      def("__len__", detail::ArrayLen<T>(dim1)).
-      def("__getitem__", detail::ArrayGet<T>(&arg,dim1));
-    p.addObject(d,reinterpret_cast<detail::Array<T>&>(arg));
+    boost::python::class_<detail::Array<T,1>>((tail(d)+"_type").c_str()).
+      def("__len__", detail::ArrayLen<T,1>(dim1)).
+      def("__getitem__", detail::ArrayGet<T,1>(&arg,&dim1));
+    p.addObject(d,reinterpret_cast<detail::Array<T,1>&>(arg));
+    detail::ArrayGet<T,1>::registerClass(p);
   }
 
   template <class T>
   void pythonObject(pythonObject_t& p, const string& d, is_array,
-                    T& arg, int dims, size_t dim1, size_t dim2)
+                    T& arg, int, size_t dim1, size_t dim2)
   {
-//    detail::ArrayWrapper<T> aw(&arg,dim1);
-//    pythonObject(p,d,aw);
+    size_t dims[]={dim1,dim2};
+    boost::python::class_<detail::Array<T,2>>((tail(d)+"_type").c_str()).
+      def("__len__", detail::ArrayLen<T,2>(dim2)).
+      def("__getitem__", detail::ArrayGet<T,2>(&arg,dims));
+    p.addObject(d,reinterpret_cast<detail::Array<T,2>&>(arg));
+    detail::ArrayGet<T,2>::registerClass(p);
   }
 
   

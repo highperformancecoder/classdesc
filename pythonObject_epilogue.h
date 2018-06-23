@@ -10,7 +10,37 @@ namespace classdesc
     //pythonObject_t::getClass<T>().completed=true;
   }
 
+  template <class T, int R>
+  struct tn<detail::ArrayGet<T,R> >
+  {
+    static std::string name()
+    {return "detail::ArrayGet<"+typeName<T>()+","+std::to_string(R)+">";}
+  };
   
+  template <class T, int R>
+  void detail::ArrayGet<T,R>::registerClass(pythonObject_t& p)
+  {
+    pythonObject_t::Class<ArrayGet<T,R> >& c=p.getClass<ArrayGet<T,R> >();
+    if (!c.completed)
+      {
+        c.def("__len__",&ArrayGet<T,R>::len).
+          def("__getitem__",&ArrayGet<T,R>::getItem);
+        c.completed=true;
+      }
+  }
+
+  template <class T>
+  void detail::ArrayGet<T,1>::registerClass(pythonObject_t& p)
+  {
+    pythonObject_t::Class<ArrayGet<T,1> >& c=p.getClass<ArrayGet<T,1> >();
+    if (!c.completed)
+      {
+        c.def("__len__",&ArrayGet<T,1>::len).
+          def("__getitem__",&ArrayGet<T,1>::getItem);
+        c.completed=true;
+      }
+  }
+ 
 }
 
 #endif
