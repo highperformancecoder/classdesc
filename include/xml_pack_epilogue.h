@@ -95,33 +95,33 @@ namespace classdesc
   void xml_unpackp(xml_unpack_t& t,const string& d, const T& a)
   {}
 #endif
-}
 
 #ifdef XML_PACK_BASE_H
-template <class T> void xml_pack(classdesc::xml_pack_t& t,const classdesc::string& d, T& a)
-{
-  classdesc::xml_packp(t,d,a);
-}
+  template <class T> void xml_pack(xml_pack_t& t,const string& d, T& a)
+  {
+    xml_packp(t,d,a);
+  }
   
-template <class T> void xml_pack(classdesc::xml_pack_t& t,const classdesc::string& d, const T& a)
-{
-  classdesc::xml_packp(t,d,const_cast<T&>(a));
-}
+  template <class T> void xml_pack(xml_pack_t& t,const string& d, const T& a)
+  {
+    xml_packp(t,d,const_cast<T&>(a));
+  }
 
-template <class T> classdesc::xml_pack_t& operator<<(classdesc::xml_pack_t& t, const T& a)
-{xml_pack(t,"root",const_cast<T&>(a)); return t;}
+  template <class T> xml_pack_t& operator<<(xml_pack_t& t, const T& a)
+  {xml_pack(t,"root",const_cast<T&>(a)); return t;}
 
 #endif
   
 #ifdef XML_UNPACK_BASE_H
-template <class T> void xml_unpack(classdesc::xml_unpack_t& t,const classdesc::string& d,T& a)
-{
-  classdesc::xml_unpackp(t,d,a);
-}
+  template <class T> void xml_unpack(xml_unpack_t& t,const string& d,T& a)
+  {
+    xml_unpackp(t,d,a);
+  }
   
-template <class T> classdesc::xml_unpack_t& operator>>(classdesc::xml_unpack_t& t, T& a)
-{xml_unpack(t,"root",a); return t;}
+  template <class T> xml_unpack_t& operator>>(xml_unpack_t& t, T& a)
+  {xml_unpack(t,"root",a); return t;}
 #endif
+}
 
 namespace classdesc_access
 {

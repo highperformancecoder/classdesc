@@ -486,8 +486,10 @@ namespace classdesc_access
   template <class T>
   struct access_pack<T*>
   {
+    typedef T Arg;
     template <class C>
-    void operator()(classdesc::pack_t& targ, const classdesc::string& desc, C& arg)
+    typename classdesc::enable_if<classdesc::Not<classdesc::is_function<Arg> >,void>::T
+    operator()(classdesc::pack_t& targ, const classdesc::string& desc, C& arg)
     {
       switch (targ.ptr_flag)
         {
@@ -649,14 +651,6 @@ namespace classdesc
     targ.unpackraw(&arg,ncopies);
   }
 
-  /* what to do about member functions */
-
-  template<class C, class T>
-  void pack(pack_t&, const string&, C&, T) {} 
-  
-  template<class C, class T>
-  void unpack(unpack_t&, const string&, C&,  T) {} 
-    
   /*
     Method pointer serialisation
   */
@@ -706,6 +700,12 @@ using classdesc::pack;
 using classdesc::unpack;
 using classdesc::pack_onbase;
 using classdesc::unpack_onbase;
+
+#include "use_mbr_pointers.h"
+CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(pack)
+CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(unpack)
+CLASSDESC_FUNCTION_NOP(pack)
+CLASSDESC_FUNCTION_NOP(unpack)
 
 #include "pack_stl.h"
 
