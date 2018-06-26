@@ -19,6 +19,7 @@
 #include <limits>
 #include <cstdlib>
 #include <cctype>
+#include <stdarg.h>
 
 #include "xml_common.h"
 #include "classdesc.h"
@@ -438,38 +439,27 @@ namespace classdesc
   }
 
 
-}
 
-namespace classdesc_access
-{
-  template <class T> struct access_xml_unpack;
-}
 
-template <class T> void xml_unpack(classdesc::xml_unpack_t&,const classdesc::string&,T&);
 
-template <class T> classdesc::xml_unpack_t& operator>>(classdesc::xml_unpack_t& t, T& a);
+  template <class T> void xml_unpack(xml_unpack_t&,const string&,T&);
+
+  template <class T> xml_unpack_t& operator>>(xml_unpack_t& t, T& a);
 
   /*
     base type implementations
   */
-namespace classdesc
-{
   template <class T>
   void xml_unpack_onbase(xml_unpack_t& x,const string& d,T& a)
-  {::xml_unpack(x,d+basename<T>(),a);}
+  {xml_unpack(x,d+basename<T>(),a);}
 
   template <class T>
   typename enable_if<is_fundamental<T>, void>::T
   xml_unpackp(xml_unpack_t& x,const string& d,T& a)
   {x.unpack(d,a);}
-}
 
-using classdesc::xml_unpack_onbase;
-
-/* now define the array version  */
-#include <stdarg.h>
-
-  template <class T> void xml_unpack(classdesc::xml_unpack_t& x,const classdesc::string& d,classdesc::is_array ia,
+  /* now define the array version  */
+  template <class T> void xml_unpack(xml_unpack_t& x,const string& d,is_array ia,
                                      T& a, int dims,size_t ncopies,...) 
   {
     va_list ap;
@@ -486,10 +476,8 @@ using classdesc::xml_unpack_onbase;
       xml_unpack(x,classdesc::idx(d+"."+e,i),(&a)[i]);
   }
 
-//Enum_handles have reference semantics
-template <class T> void xml_unpack(classdesc::xml_unpack_t& x,
-                                    const classdesc::string& d,
-                                    classdesc::Enum_handle<T> arg)
+  //Enum_handles have reference semantics
+  template <class T> void xml_unpack(xml_unpack_t& x,const string& d,Enum_handle<T> arg)
 {
   std::string tmp;
   xml_unpack(x,d,tmp);
@@ -499,16 +487,13 @@ template <class T> void xml_unpack(classdesc::xml_unpack_t& x,
   arg=tmp.substr(0,end-tmp.begin());
 }
 
-template <class T1, class T2>
-void xml_unpack(classdesc::xml_unpack_t& x, const classdesc::string& d, 
-                std::pair<T1,T2>& arg)
+  template <class T1, class T2>
+  void xml_unpack(xml_unpack_t& x, const string& d, std::pair<T1,T2>& arg)
 {
   xml_unpack(x,d+".first",arg.first);
   xml_unpack(x,d+".second",arg.second);
 }
 
-namespace classdesc
-{
   template <class T> typename
   enable_if<is_sequence<T>, void>::T
   xml_unpackp(xml_unpack_t& x, const string& d, T& arg, dummy<1> dum=0)
@@ -523,7 +508,7 @@ namespace classdesc
     for (size_t i=0; i<x.count(d+"."+e); ++i) 
       {
         typename T::value_type v;
-        ::xml_unpack(x,classdesc::idx(d+"."+e,i),v);
+        xml_unpack(x,idx(d+"."+e,i),v);
         arg.push_back(v);
       }
   }
@@ -543,31 +528,23 @@ namespace classdesc
     for (size_t i=0; i<x.count(prefix); ++i) 
       {
         typename NonConstKeyValueType<typename T::value_type>::T v;
-        ::xml_unpack(x,idx(prefix,i),v);
+        xml_unpack(x,idx(prefix,i),v);
         arg.insert(v);
       }
   }
-}
+  
+  template<class T>
+  void xml_unpack(xml_unpack_t& targ, const string& desc, is_const_static i, T arg) 
+  {} 
 
-/* member functions */
-template<class C, class T>
-void xml_unpack(classdesc::xml_unpack_t& targ, const classdesc::string& desc, C& c, T arg) {} 
+  template<class T, class U>
+  void xml_unpack(xml_unpack_t& targ, const string& desc, 
+                  is_const_static i, const T&, U) {} 
 
-template<class T>
-void xml_unpack(classdesc::xml_unpack_t& targ, const classdesc::string& desc, 
-                classdesc::is_const_static i, T arg) 
-{} 
+  template<class T>
+  void xml_unpack(xml_unpack_t& targ, const string& desc, 
+                  Exclude<T>&) {} 
 
-template<class T, class U>
-void xml_unpack(classdesc::xml_unpack_t& targ, const classdesc::string& desc, 
-                classdesc::is_const_static i, const T&, U) {} 
-
-template<class T>
-void xml_unpack(classdesc::xml_unpack_t& targ, const classdesc::string& desc, 
-                classdesc::Exclude<T>&) {} 
-
-namespace classdesc
-{
   template<class T>
   void xml_unpack(xml_unpack_t& targ, const string& desc, is_graphnode, T&)
   {
@@ -576,4 +553,17 @@ namespace classdesc
 
 
 }
+
+#include "use_mbr_pointers.h"
+CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(xml_unpack)
+CLASSDESC_FUNCTION_NOP(xml_unpack)
+
+using classdesc::xml_unpack;
+using classdesc::xml_unpack_onbase;
+
+namespace classdesc_access
+{
+  template <class T> struct access_xml_unpack;
+}
+
 #endif

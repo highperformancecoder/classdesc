@@ -50,13 +50,12 @@ ifndef GCC
 ifeq ($(OS),OSF1)
 CC=cc 
 CPLUSPLUS=cxx 
-#CFLAGS+=-DEXPLICIT_FRIEND_TEMPLATE_ARGS_REQUIRED=0
 CFLAGS+=-D__USE_STD_IOSTREAM 
 endif 
 ifeq ($(OS),IRIX64) 
 CC=cc 
 CPLUSPLUS=CC 
-CFLAGS+=-DEXPLICIT_FRIEND_TEMPLATE_ARGS_REQUIRED=0 -LANG:std 
+CFLAGS+=-LANG:std 
 endif 
 endif 
 
@@ -97,7 +96,7 @@ include depend
 	$(CC) $(CFLAGS) -c $< 
 
 .h.cd:
-	../classdesc -I .. -typeName pack unpack  xml_pack xml_unpack <$< >$@
+	../classdesc -I .. -typeName -use_mbr_pointers pack unpack  xml_pack xml_unpack <$< >$@
 
 #polymorph2.cd: polymorph2.h
 #	../classdesc -I .. -typeName pack unpack xml_pack xml_unpack <$< >$@

@@ -26,6 +26,7 @@ int objc = 0;
 bool respect_private=false; /* default is to call descriptor on private members  */
 bool typeName=false; // generate type and enum symbol tables
 bool onBase=false;
+bool use_mbr_pointers=false; // use member pointers for referencing member objects
 
 // name of file being processed
 string inputFile="stdin";
@@ -464,8 +465,12 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
       if (strchr("{;,:=",input.token[0]) && input.token!="::")
 	{ rType.erase();
 	  if (isIdentifierStart(input.lasttoken[0]))
-	    reg.register_class(input.lasttoken,
-			       varname+"." + input.lasttoken );
+            if (use_mbr_pointers)
+              reg.register_class(input.lasttoken,
+                                 varname+",&"+prefix+input.lasttoken);
+            else
+              reg.register_class(input.lasttoken,
+                                 varname+"." + input.lasttoken );
           if (input.token[0]=='{')
             gobble_delimited(input,"{","}");
 	  /* skip over field specifier or initializer */
@@ -867,7 +872,7 @@ int main(int argc, char* argv[])
 
   if (argc<2)
     {
-      printf("usage: %s [-workdir dir] [-objc] [-include header] [-nodef] [-respect_private] [-I classdesc_includes] [-typeName] {descriptor name} <input >output\n",argv[0]);
+      printf("usage: %s [-workdir dir] [-objc] [-include header] [-nodef] [-respect_private] [-use_mbr_pointers] [-I classdesc_includes] [-typeName] {descriptor name} <input >output\n",argv[0]);
       return 0;
     }
 
@@ -903,6 +908,11 @@ int main(int argc, char* argv[])
       if (argc>1 && strcmp(argv[1],"-respect_private")==0) /* don't describe private */
 	{                              /* members */
 	  respect_private=true;
+	  argc--; argv++;
+	}
+      if (argc>1 && strcmp(argv[1],"-use_mbr_pointers")==0) /* use member pointers for member objects */
+	{                              
+	  use_mbr_pointers=true;
 	  argc--; argv++;
 	}
       if (argc>1 && strcmp(argv[1],"-I")==0)  /* use this directory to find */
