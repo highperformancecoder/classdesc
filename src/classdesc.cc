@@ -465,12 +465,14 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
       if (strchr("{;,:=",input.token[0]) && input.token!="::")
 	{ rType.erase();
 	  if (isIdentifierStart(input.lasttoken[0]))
-            if (use_mbr_pointers)
-              reg.register_class(input.lasttoken,
-                                 varname+",&"+prefix+input.lasttoken);
-            else
-              reg.register_class(input.lasttoken,
-                                 varname+"." + input.lasttoken );
+            {
+              if (use_mbr_pointers)
+                reg.register_class(input.lasttoken,
+                                   varname+",&"+prefix+input.lasttoken);
+              else
+                reg.register_class(input.lasttoken,
+                                   varname+"." + input.lasttoken );
+            }
           if (input.token[0]=='{')
             gobble_delimited(input,"{","}");
 	  /* skip over field specifier or initializer */

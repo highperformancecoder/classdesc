@@ -230,13 +230,29 @@ namespace classdesc
       g.addBase(xsd_typeName<T>());
     else
       g.addMember(tail(d),xsd_typeName<T>());
+
     g.openType(transformTypeName(typeName<T>()), d);
     classdesc_access::access_xsd_generate<T>()(g,d,const_cast<T&>(a));
     g.closeType();
   }
 
-  
+  template <class T>
+  typename enable_if<EverythingElse<T>, void>::T
+  processExtraClass(xsd_generate_t& g, const string& d, const T& a);
 
+  template <class T>
+  typename enable_if<Not<EverythingElse<T> >, void>::T
+  processExtraClass(xsd_generate_t& g, const string& d, const T& a)
+  {xsd_generate(g,"",a);}
+  
+  template <>
+  inline void processExtraClass(xsd_generate_t& g, const string& d, const std::string& a)
+  {}
+
+  template <class T, class U>
+  void processExtraClass(xsd_generate_t& g, const string& d, const std::pair<T,U>& a)
+  {xsd_generate(g,"",a);}
+  
   template <> inline string xsd_typeName<bool>() {return "xs:boolean";}
   template <> inline string xsd_typeName<char>() {return "xs:string";}
   template <> inline string xsd_typeName<signed char>() {return "xs:string";}
@@ -352,7 +368,7 @@ namespace classdesc
     g.defineType(type, os.str());
     g.addDependency(type, xsd_typeName<typename T::value_type>());
     // ensure that the value type as a definition also
-    xsd_generate(g,"",typename T::value_type());
+    processExtraClass(g, d+transformTypeName(typeName<typename T::value_type>()), typename T::value_type());
   }
 
   // support for maps
@@ -388,6 +404,15 @@ namespace classdesc
   template <class T>
   void xsd_generate_onbase(xsd_generate_t& g, const string& d, T a) 
   {xsd_generate(g,d+basename<T>(),a);}
+
+  template <class T>
+  typename enable_if<EverythingElse<T>, void>::T
+  processExtraClass(xsd_generate_t& g, const string& d, const T& a)
+  {
+    g.openType(transformTypeName(typeName<T>()), d);
+    classdesc_access::access_xsd_generate<T>()(g,d,const_cast<T&>(a));
+    g.closeType();
+  }
 
 }
 
