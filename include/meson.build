@@ -1,7 +1,9 @@
 custom_target('unpack_base.h',output:'unpack_base.h',input:'pack_base.h',
         command:['cp','@INPUT@','@OUTPUT@'])
-        
+
+# header files to be processed by classdesc
 cdhdrs=['object','polyBase']
+# descriptors to generate
 descriptors=['pack', 'unpack',  'xml_pack', 'xml_unpack']
 
 classdescCmd=[classdesc,'-typeName','-use_mbr_pointers',

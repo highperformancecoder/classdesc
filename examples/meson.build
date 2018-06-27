@@ -12,6 +12,7 @@ foreach d: descriptors
   classdescCmd+=d
 endforeach   
 
+# how to build the polymorph example when wildcards are not allowed?
 sources+='polymorph.cc'
 
 foreach c: cdhdrs
