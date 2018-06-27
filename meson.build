@@ -13,13 +13,16 @@ project('classdesc', 'cpp',
 sources = []
 
 add_global_arguments('-DHAVE_LONGLONG', language : 'cpp')
+add_global_arguments('-g -I.. -I. -I/usr/X11R6/include -DRECUR_MAX=50 -DTR1', 
+                         language: 'c++')
+
 includes = []
 extra_libs = []
-srcdir = include_directories('src')
-incdir = include_directories('src/include')
-testdir = include_directories('src/test')
-inctestdir = include_directories('src/test/include')
+incdir = include_directories('include')
 subdir('src')
+subdir('include')
+subdir('lib')
+subdir('examples')
 
 
 
