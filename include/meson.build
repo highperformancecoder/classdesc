@@ -14,3 +14,9 @@ foreach c: cdhdrs
   custom_target(c+'.cd',output:c+'.cd',input:c+'.h',
         command:classdescCmd,capture:true,build_by_default:true)
 endforeach
+
+bash=find_program('bash',required: false)
+if bash.found()
+  custom_target('functiondb.h', output:'functiondb.h', input: 'functiondb.sh',
+    command:['bash', '@INPUT@'], capture:true,build_by_default:true)
+endif
