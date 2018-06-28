@@ -50,4 +50,8 @@ namespace
 #include "random_init_epilogue.h"
 #endif
 
+#ifdef PYTHON_BASE_H
+#include "python_epilogue.h"
+#endif
+
 #endif
