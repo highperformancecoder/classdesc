@@ -21,6 +21,7 @@ foreach c: cdhdrs
 endforeach
 
 foreach e: exes
-  executable(e, e+'.cc', include_directories: incdir, link_with: libclassdesc)
+  executable(e, e+'.cc', include_directories: incdir, link_with:
+  libclassdesc)
 endforeach   
 
