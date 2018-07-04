@@ -1,5 +1,5 @@
 custom_target('unpack_base.h',output:'unpack_base.h',input:'pack_base.h',
-        command:['cp','@INPUT@','@OUTPUT@'])
+        command:['cp','@INPUT@','@OUTPUT@'],build_by_default:true)
 
 # header files to be processed by classdesc
 cdhdrs=['object','polyBase']
