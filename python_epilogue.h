@@ -5,8 +5,15 @@ namespace classdesc
 {
   template <class T>
   typename enable_if<ClassdescEnabledPythonType<T>,void>::T
-  pythonObject(python_t& p, const string& d, T& a) {
+  python(python_t& p, const string& d, T& a) {
     classdesc_access::access_python<T>()(p,d,a);
+    //pythonObject_t::getClass<T>().completed=true;
+  }
+
+  template <class T>
+  void //typename enable_if<ClassdescEnabledPythonType<T>,void>::T
+  pythonRef(python_t& p, const string& d, T& a) {
+    classdesc_access::access_pythonRef<T>()(p,d,a);
     //pythonObject_t::getClass<T>().completed=true;
   }
 

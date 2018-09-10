@@ -63,7 +63,7 @@ namespace classdesc
         typename Return<F>::T
         >::type T;
     };
-
+  
     // container support
     template <class T> struct Len
     {
@@ -184,7 +184,112 @@ namespace classdesc
       typedef boost::mpl::vector<U,Array<U,1>&,size_t> T;
     };
 
+    template <class M> struct MemberType;
+    template <class U, class V>
+    struct MemberType<U (V::*)>
+    {
+      typedef U T;
+    };
+    
+    template <class U> struct remove_ref{typedef U T;};
+    template <class U> struct remove_ref<U&> {typedef U T;};
+  
+    template <class C>
+    struct PythonRef
+    {
+      C* o=nullptr;
+      PythonRef() {}
+      PythonRef(C& o): o(&o) {}
+      struct NullException: public std::exception
+      {
+        const char* what() const noexcept override {
+          return "null python reference";
+        }
+      };
+      C& operator*() const {
+        if (o)
+          return *o;
+        else
+          throw NullException();
+      }
+    };
+  
+    template <class C, class M>
+    struct MemFn
+    {
+      M m;
+      MemFn(M m): m(m) {}
+      template <class... A>
+      typename Return<M>::T operator()(PythonRef<C>& o, A... a)
+      {return o->*m(std::forward<A>(a)...);}
+    };
+
+    template <class C,class M>
+    struct Get
+    {
+      M m;
+      Get(M m): m(m) {}
+      typename MemberType<M>::T operator()(PythonRef<C>& o)
+      {return o->*m;}
+    };
+    template <class C, class M>
+    struct Set
+    {
+      M m;
+      Set(M m): m(m) {}
+      void operator()(PythonRef<C>& o,const typename MemberType<M>::T& x)
+      {o->*m=x;}
+    };
+
+    template <class C,class M>
+    struct BoundRefMethod: public bound_method<C,M>
+    {
+      BoundRefMethod(C& o, M m): bound_method<C,M>(o,m) {}
+      typedef PythonRef<typename remove_ref<typename functional::Return<M>::T>::T> R;
+      template <class... Args>
+      R operator()(Args... x) {
+        return R(bound_method<C,M>::operator()(std::forward<Args>(x)...));
+      }
+    };
+
+    template <class C, class M>
+    struct Sig<BoundRefMethod<C,M>>
+    {
+      typedef typename boost::mpl::push_front<
+        typename SigArg<M,Arity<M>::V>::T,
+        PythonRef<typename remove_ref<typename Return<M>::T>::T>
+        >::type T;
+    };
+
+
+    template <class C, class M>
+    struct Sig<MemFn<C,M>>
+    {
+      typedef typename boost::mpl::push_front<
+        typename boost::mpl::push_front<
+        typename SigArg<M,Arity<M>::V>::T,
+        PythonRef<C>&>::type,
+        typename Return<M>::T
+        >::type T;
+    };
+    template <class C, class M>
+    struct Sig<Get<C,M>>
+    {
+      typedef typename boost::mpl::vector<typename MemberType<M>::T>::type T;
+    };
+    
+    template <class C, class M>
+    struct Sig<Set<C,M>>
+    {
+      typedef typename boost::mpl::vector<void, const typename MemberType<M>::T&>::type T;
+    };
   }
+
+  template <class T> struct tn<detail::PythonRef<T>>
+  {
+    static std::string name()
+    {return "PythonRef<"+typeName<T>()+">";}
+  };
 }
 
 
@@ -249,7 +354,7 @@ namespace classdesc
       static std::vector<shared_ptr<ClassBase> > impl;
       return impl;
     }
-
+  
     // lazy instantiation pattern to register a unique class object
     // per type.
     template <class T>
@@ -268,7 +373,7 @@ namespace classdesc
       return dynamic_cast<Class<T>&>(*classes()[id]);
     }
     /// @}
-
+  
     string tail(const string& d) {
       size_t p=d.rfind('.');
       if (p==string::npos)
@@ -311,11 +416,22 @@ namespace classdesc
     }
 
     template <class C, class M>
-    void addMemberFunction(const string& d, C& o, M m) {
+    typename enable_if<Not<is_reference<typename functional::Return<M>::T>>,void>::T
+    addMemberFunction(const string& d, C& o, M m) {
       addFunctional(d,functional::bound_method<C,M>(o,m));
       Class<C>& c=getClass<C>();
       if (!c.completed)
         c.def(tail(d).c_str(),m);
+    }
+    // for methods returning a reference, create a wrapper object that
+    // can be pythonified
+    template <class C, class M>
+    typename enable_if<is_reference<typename functional::Return<M>::T>,void>::T
+    addMemberFunction(const string& d, C& o, M m) {
+      addFunctional(d,detail::BoundRefMethod<C,M>(o,m));
+      Class<C>& c=getClass<C>();
+      if (!c.completed)
+        c.def(tail(d).c_str(),detail::BoundRefMethod<C,M>(o,m));
     }
     template <class C, class M>
     void addMemberFunctionPtr(const string& d, C& o, M *m) {
@@ -338,6 +454,8 @@ namespace classdesc
     }
   };
 
+  typedef python_t pythonRef_t;
+  
   template <class T>
   struct ClassdescEnabledPythonType:
     public Not<Or<is_fundamental<T>,is_container<T> > > {};
@@ -345,6 +463,10 @@ namespace classdesc
   template <class T>
   typename enable_if<ClassdescEnabledPythonType<T>,void>::T
   python(python_t& p, const string& d, T& a);
+
+  template <class T>
+  void  //typename enable_if<ClassdescEnabledPythonType<T>,void>::T
+  pythonRef(python_t& p, const string& d, T& a);
   
   template<class C, class M>
   typename enable_if<is_member_function_pointer<M>, void>::T
@@ -369,6 +491,35 @@ namespace classdesc
   typename enable_if<is_fundamental<T>,void>::T
   python(python_t& p, const string& d, T& a) {
     p.addObject(d,a);
+  }
+
+  template <class C, class M>
+  typename enable_if<is_member_function_pointer<M>, void>::T
+  pythonRef(pythonRef_t& p, const string& d, C&, M m)
+  {
+    auto& c=p.getClass<detail::PythonRef<C>>();
+    typedef detail::MemFn<C,M> XX;
+    if (!c.completed)
+      c.def(p.tail(d).c_str(),detail::MemFn<C,M>(m));
+  }
+  template <class T, class M>
+  typename enable_if<is_member_object_pointer<M>,void>::T
+  pythonRef(pythonRef_t& p, const string& d, T&, M m)
+  {
+    auto& c=p.getClass<detail::PythonRef<T>>();
+    if (!c.completed)
+      c.add_property(p.tail(d).c_str(),[&](const detail::PythonRef<T>& o)
+                                       {return (*o).*m;});
+      //      c.add_property(p.tail(d).c_str(),detail::Get<T,M>(m),
+      //                       detail::Set<T,M>(m));
+  }
+  template <class T, class M>
+  typename enable_if<is_member_object_pointer<M>,void>::T
+  pythonRef(pythonRef_t& p, const string& d, const T&, M m)
+  {
+    auto& c=p.getClass<detail::PythonRef<T>>();
+//    if (!c.completed)
+//      c.add_property(p.tail(d).c_str(),detail::Get<T,M>(m));
   }
 
   template <class T>
@@ -440,9 +591,12 @@ namespace classdesc
 
 namespace classdesc_access
 {
+  namespace cd=classdesc;
   template <class T> struct access_python;
+  template <class T> struct access_pythonRef;
 }
 
 using classdesc::python;
+using classdesc::pythonRef;
 
 #endif
