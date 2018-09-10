@@ -8,4 +8,6 @@ BOOST_PYTHON_MODULE(example)
   python_t p;
   python(p,"root",root);
   pythonRef(p,"root",root);
+  Foo foo;
+  pythonRef(p,"foo",foo);
 }

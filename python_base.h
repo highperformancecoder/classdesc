@@ -221,7 +221,7 @@ namespace classdesc
       MemFn(M m): m(m) {}
       template <class... A>
       typename Return<M>::T operator()(PythonRef<C>& o, A... a)
-      {return o->*m(std::forward<A>(a)...);}
+      {return ((*o).*m)(std::forward<A>(a)...);}
     };
 
     template <class C,class M>
@@ -549,7 +549,15 @@ namespace classdesc
   }
 
   
-  
+  template <class T>
+  void pythonRef(python_t& p, const string& d, is_array, 
+                    T& arg, int r, size_t dim1)
+  {python(p,d,is_array(),arg,r,dim1);}
+
+  template <class T>
+  void pythonRef(python_t& p, const string& d, is_array, 
+                    T& arg, int r, size_t dim1, size_t dim2)
+  {python(p,d,is_array(),arg,r,dim1,dim2);}
 
   template <class T>
   typename enable_if<is_sequence<T>,void>::T
