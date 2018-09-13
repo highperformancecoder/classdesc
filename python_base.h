@@ -202,6 +202,7 @@ namespace classdesc
       PythonRef(C& o): o(&o) {}
       struct NullException: public std::exception
       {
+        NullException() {puts("throw null python reference");}
         const char* what() const noexcept override {
           return "null python reference";
         }
@@ -229,8 +230,8 @@ namespace classdesc
     {
       M m;
       Get(M m): m(m) {}
-      typename MemberType<M>::T operator()(PythonRef<C>& o)
-      {return o->*m;}
+      typename MemberType<M>::T operator()(const PythonRef<C>& o)
+      {return (*o).*m;}
     };
     template <class C, class M>
     struct Set
@@ -238,7 +239,7 @@ namespace classdesc
       M m;
       Set(M m): m(m) {}
       void operator()(PythonRef<C>& o,const typename MemberType<M>::T& x)
-      {o->*m=x;}
+      {(*o).*m=x;}
     };
 
     template <class C,class M>
@@ -275,13 +276,13 @@ namespace classdesc
     template <class C, class M>
     struct Sig<Get<C,M>>
     {
-      typedef typename boost::mpl::vector<typename MemberType<M>::T>::type T;
+      typedef typename boost::mpl::vector<typename MemberType<M>::T,const PythonRef<C>&>::type T;
     };
-    
+  
     template <class C, class M>
     struct Sig<Set<C,M>>
     {
-      typedef typename boost::mpl::vector<void, const typename MemberType<M>::T&>::type T;
+      typedef typename boost::mpl::vector<void, PythonRef<C>&, const typename MemberType<M>::T&>::type T;
     };
   }
 
@@ -508,18 +509,18 @@ namespace classdesc
   {
     auto& c=p.getClass<detail::PythonRef<T>>();
     if (!c.completed)
-      c.add_property(p.tail(d).c_str(),[&](const detail::PythonRef<T>& o)
-                                       {return (*o).*m;});
-      //      c.add_property(p.tail(d).c_str(),detail::Get<T,M>(m),
-      //                       detail::Set<T,M>(m));
+//      c.add_property(p.tail(d).c_str(),[&](const detail::PythonRef<T>& o)
+//                                       {return (*o).*m;});
+      c.add_property(p.tail(d).c_str(),detail::Get<T,M>(m),
+                     detail::Set<T,M>(m));
   }
   template <class T, class M>
   typename enable_if<is_member_object_pointer<M>,void>::T
   pythonRef(pythonRef_t& p, const string& d, const T&, M m)
   {
     auto& c=p.getClass<detail::PythonRef<T>>();
-//    if (!c.completed)
-//      c.add_property(p.tail(d).c_str(),detail::Get<T,M>(m));
+    if (!c.completed)
+      c.add_property(p.tail(d).c_str(),detail::Get<T,M>(m));
   }
 
   template <class T>
