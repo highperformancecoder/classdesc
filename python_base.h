@@ -479,32 +479,30 @@ namespace classdesc
       }
     }
     template <class C, class M>
-    void addMemberObject(const string& d, C& o, M m) {
+    void addMemberObject(const string& d, C&, M m) {
       Class<C>& c=getClass<C>();
       if (!c.completed)
         c.def_readwrite(tail(d).c_str(),m);
       {
         auto& c=getClass<detail::PythonRef<C>>();
         if (!c.completed)
-          c.add_property(tail(d).c_str(),detail::Get<C,M>(m));
+          c.add_property(tail(d).c_str(),detail::Get<C,M>(m),
+                         detail::Set<C,M>(m));
       }
     }
     template <class C, class M>
-    void addMemberObject(const string& d, const C& o, M m) {
+    void addMemberObject(const string& d, const C&, M m) {
       Class<C>& c=getClass<C>();
       if (!c.completed)
         c.def_readonly(tail(d).c_str(),m);
       {
         auto c=getClass<detail::PythonRef<C>>();
         if (!c.completed)
-          c.add_property(tail(d).c_str(),detail::Get<C,M>(m),
-                         detail::Set<C,M>(m));
+          c.add_property(tail(d).c_str(),detail::Get<C,M>(m));
       }
     }
   };
 
-  typedef python_t pythonRef_t;
-  
   template <class T>
   struct ClassdescEnabledPythonType:
     public Not<Or<is_fundamental<T>,is_container<T> > > {};
@@ -513,10 +511,6 @@ namespace classdesc
   typename enable_if<ClassdescEnabledPythonType<T>,void>::T
   python(python_t& p, const string& d, T& a);
 
-  template <class T>
-  void  //typename enable_if<ClassdescEnabledPythonType<T>,void>::T
-  pythonRef(python_t& p, const string& d, T& a);
-  
   template<class C, class M>
   typename enable_if<is_member_function_pointer<M>, void>::T
   python(python_t& p, const string& d, C& c, M m) {
@@ -542,34 +536,6 @@ namespace classdesc
     p.addObject(d,a);
   }
 
-  template <class C, class M>
-  typename enable_if<is_member_function_pointer<M>, void>::T
-  pythonRef(pythonRef_t& p, const string& d, C&, M m)
-  {
-    auto& c=p.getClass<detail::PythonRef<C>>();
-    typedef detail::MemFn<C,M> XX;
-    if (!c.completed)
-      c.def(p.tail(d).c_str(),detail::MemFn<C,M>(m));
-  }
-  template <class T, class M>
-  typename enable_if<is_member_object_pointer<M>,void>::T
-  pythonRef(pythonRef_t& p, const string& d, T&, M m)
-  {
-    auto& c=p.getClass<detail::PythonRef<T>>();
-    if (!c.completed)
-//      c.add_property(p.tail(d).c_str(),[&](const detail::PythonRef<T>& o)
-//                                       {return (*o).*m;});
-      c.add_property(p.tail(d).c_str(),detail::Get<T,M>(m),
-                     detail::Set<T,M>(m));
-  }
-  template <class T, class M>
-  typename enable_if<is_member_object_pointer<M>,void>::T
-  pythonRef(pythonRef_t& p, const string& d, const T&, M m)
-  {
-    auto& c=p.getClass<detail::PythonRef<T>>();
-    if (!c.completed)
-      c.add_property(p.tail(d).c_str(),detail::Get<T,M>(m));
-  }
 
   template <class T>
   struct is_sequence<detail::ArrayWrapper<T> >: public true_type {};
@@ -598,16 +564,6 @@ namespace classdesc
   }
 
   
-  template <class T>
-  void pythonRef(python_t& p, const string& d, is_array, 
-                    T& arg, int r, size_t dim1)
-  {python(p,d,is_array(),arg,r,dim1);}
-
-  template <class T>
-  void pythonRef(python_t& p, const string& d, is_array, 
-                    T& arg, int r, size_t dim1, size_t dim2)
-  {python(p,d,is_array(),arg,r,dim1,dim2);}
-
   template <class T>
   typename enable_if<is_sequence<T>,void>::T
   python(python_t& p, const string& d, T& a) {
@@ -650,10 +606,8 @@ namespace classdesc_access
 {
   namespace cd=classdesc;
   template <class T> struct access_python;
-  template <class T> struct access_pythonRef;
 }
 
 using classdesc::python;
-using classdesc::pythonRef;
 
 #endif
