@@ -197,7 +197,7 @@ namespace classdesc
     template <class C>
     struct PythonRef
     {
-      C* o=nullptr;
+      typename std::remove_reference<C>::type* o=nullptr;
       PythonRef() {}
       PythonRef(C& o): o(&o) {}
       struct NullException: public std::exception
@@ -223,6 +223,17 @@ namespace classdesc
       template <class... A>
       typename Return<M>::T operator()(PythonRef<C>& o, A... a)
       {return ((*o).*m)(std::forward<A>(a)...);}
+    };
+
+    template <class C, class M>
+    struct MemFnRef
+    {
+      M m;
+      typedef PythonRef<typename Return<M>::T> R;
+      MemFnRef(M m): m(m) {}
+      template <class... A>
+      R operator()(PythonRef<C>& o, A... a)
+      {return R(((*o).*m)(std::forward<A>(a)...));}
     };
 
     template <class C,class M>
@@ -271,6 +282,16 @@ namespace classdesc
         typename SigArg<M,Arity<M>::V>::T,
         PythonRef<C>&>::type,
         typename Return<M>::T
+        >::type T;
+    };
+    template <class C, class M>
+    struct Sig<MemFnRef<C,M>>
+    {
+      typedef typename boost::mpl::push_front<
+        typename boost::mpl::push_front<
+        typename SigArg<M,Arity<M>::V>::T,
+        PythonRef<C>&>::type,
+        PythonRef<typename Return<M>::T>
         >::type T;
     };
     template <class C, class M>
@@ -423,6 +444,11 @@ namespace classdesc
       Class<C>& c=getClass<C>();
       if (!c.completed)
         c.def(tail(d).c_str(),m);
+      {
+        auto& c=getClass<detail::PythonRef<C>>();
+        if (!c.completed)
+          c.def(tail(d).c_str(),detail::MemFn<C,M>(m));
+      }
     }
     // for methods returning a reference, create a wrapper object that
     // can be pythonified
@@ -433,6 +459,12 @@ namespace classdesc
       Class<C>& c=getClass<C>();
       if (!c.completed)
         c.def(tail(d).c_str(),detail::BoundRefMethod<C,M>(o,m));
+      {
+        typedef typename std::remove_reference<C>::type CC; 
+        auto& c=getClass<detail::PythonRef<CC>>();
+        if (!c.completed)
+          c.def(tail(d).c_str(),detail::MemFnRef<CC,M>(m));
+      }
     }
     template <class C, class M>
     void addMemberFunctionPtr(const string& d, C& o, M *m) {
@@ -440,18 +472,34 @@ namespace classdesc
       Class<C>& c=getClass<C>();
       if (!c.completed)
         c.def(tail(d),m);
+      {
+        auto c=getClass<detail::PythonRef<C>>;
+        if (!c.completed)
+          c.def(tail(d).c_str(),m);
+      }
     }
     template <class C, class M>
     void addMemberObject(const string& d, C& o, M m) {
       Class<C>& c=getClass<C>();
       if (!c.completed)
         c.def_readwrite(tail(d).c_str(),m);
+      {
+        auto& c=getClass<detail::PythonRef<C>>();
+        if (!c.completed)
+          c.add_property(tail(d).c_str(),detail::Get<C,M>(m));
+      }
     }
     template <class C, class M>
     void addMemberObject(const string& d, const C& o, M m) {
       Class<C>& c=getClass<C>();
       if (!c.completed)
         c.def_readonly(tail(d).c_str(),m);
+      {
+        auto c=getClass<detail::PythonRef<C>>();
+        if (!c.completed)
+          c.add_property(tail(d).c_str(),detail::Get<C,M>(m),
+                         detail::Set<C,M>(m));
+      }
     }
   };
 
