@@ -57,7 +57,7 @@ public:
 #include "classdesc_epilogue.h"
 using namespace classdesc;
 
-main()
+int main()
 {
   pack_t p;
   colour a=green,b=red;

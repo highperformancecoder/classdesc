@@ -1095,18 +1095,19 @@ int main(int argc, char* argv[])
   for (int k=0; k<nactions; k++)
     printf("#include \"%s_base.h\"\n",action[k]);
 
-  {
-    PrintNameSpace ns("classdesc");
-    // add an external declaration of member type functions for
-    // backwards compatibility
-    for (size_t i=0; i<nactions; ++i)
-      {
-        puts("template <class M>\n");
-        puts("typename enable_if<Or<is_member_object_pointer<M>,is_member_function_pointer<M> >,void>::T\n");
+  if (nactions>0)
+    {
+      PrintNameSpace ns("classdesc");
+      // add an external declaration of member type functions for
+      // backwards compatibility
+      for (size_t i=0; i<nactions; ++i)
+        {
+          puts("template <class M>\n");
+          puts("typename enable_if<Or<is_member_object_pointer<M>,is_member_function_pointer<M> >,void>::T\n");
   
-        printf("%s_type(%s_t&,const string&,M);\n",action[i],action[i]);
-      }
-  }
+          printf("%s_type(%s_t&,const string&,M);\n",action[i],action[i]);
+        }
+    }
   for (size_t i=0; i<nactions; ++i)
     printf("using classdesc::%s_type;\n",action[i]);
   

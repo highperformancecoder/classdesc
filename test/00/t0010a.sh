@@ -52,7 +52,7 @@ struct foo
 #include "test.cd"
 #include "classdesc_epilogue.h"
 using namespace classdesc;
-main()
+int main()
 {
  pack_t b; b<<foo();
 }

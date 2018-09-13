@@ -54,12 +54,21 @@ EOF
 
 cat >test.out <<EOF
 #include "classdesc.h"
+
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #endif
 #include "p_base.h"
+namespace classdesc {
+template <class M>
+
+typename enable_if<Or<is_member_object_pointer<M>,is_member_function_pointer<M> >,void>::T
+
+p_type(p_t&,const string&,M);
+}
+using classdesc::p_type;
 namespace classdesc_access {
 }
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
