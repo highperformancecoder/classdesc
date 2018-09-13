@@ -28,7 +28,7 @@ endif
 # Utility programs
 EXES=classdesc insert-friend
 # wildcard runs before functiondb.h is created on some systems
-INCLUDES=$(wildcard *.h) functiondb.h unpack_base.h json_unpack_base.h pythonRef_base.h
+INCLUDES=$(wildcard *.h) functiondb.h unpack_base.h json_unpack_base.h 
 
 # canonicalise CYGWIN's OS name
 ifeq ($(findstring CYGWIN,$(OS)),CYGWIN)
@@ -83,16 +83,13 @@ else
 XDRPACK=
 endif
 
-build: $(EXES)  $(XDRPACK) functiondb.h unpack_base.h json_unpack_base.h pythonRef_base.h
+build: $(EXES)  $(XDRPACK) functiondb.h unpack_base.h json_unpack_base.h 
 
 unpack_base.h:
 	-ln -s pack_base.h unpack_base.h
 
 json_unpack_base.h:
 	-ln -s json_pack_base.h json_unpack_base.h
-
-pythonRef_base.h:
-	-ln -s python_base.h pythonRef_base.h
 
 aegis-all: build latex-docs
 	echo $(LD_LIBRARY_PATH)

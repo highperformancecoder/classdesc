@@ -45,10 +45,10 @@ inline bool isIdentifierChar(char x)
 
 struct act_pair
 {
-  string name, action;
+  string name, action, member;
   bool base; // is a base (not a member)
-  act_pair(string n, string a, bool b=false): 
-    name(n), action(a), base(b) {}
+  act_pair(string n, string a, string m="", bool b=false): 
+    name(n), action(a), member(m), base(b) {}
 };
 
 typedef vector<act_pair> actionlist_t;
@@ -233,15 +233,19 @@ public:
   register_classname(actionlist_t& a, bool p): 
     actionlist(a), is_static(false), is_const(false), is_private(p) {}
 
-  void register_class(string name, string action)
+  void register_class(string name, string memberName, string action)
   {
     // We need to treat static const members differently, as simple
     // ones do not have addresses
     if (is_static && is_const)
       actionlist.push_back(act_pair("."+name,"classdesc::is_const_static(),"+action));
-    else
+    else 
       if (!is_private) /* don't register private, if privates respected */
-      actionlist.push_back(act_pair("."+name,action));
+//        if (is_static && memberName.length()>0)
+//          // do emit type functions for static members
+//          actionlist.push_back(act_pair("."+name,memberName+"."+action));
+//        else
+          actionlist.push_back(act_pair("."+name,action,memberName));
     is_static=0;
   }
 };
@@ -321,15 +325,15 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
                 }
                 
 	  if (!respect_private || !is_private)
-            actionlist.push_back(
-			       act_pair("", 
-                                        "classdesc::base_cast<"+
-    // look for member qualification in a template context
-           string(typename_needed? "typename ": "")+
-                                        baseclass+" >::cast("+varname+")",
-                                        onBase
-                                        )
-                               );
+            actionlist.push_back
+              (act_pair("", 
+                        "classdesc::base_cast<"+
+                        // look for member qualification in a template context
+                        string(typename_needed? "typename ": "")+
+                        baseclass+" >::cast("+varname+")","",
+                        onBase
+                        )
+               );
 	  virt_list_t t=virtualsdb[baseclass+"::"];
 	  virt_list.insert(t.begin(),t.end());
 	  baseclass.erase();
@@ -455,7 +459,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 	  while (input.token!=";") input.nexttok();
           if (isIdentifierStart(input.lasttoken[0]))
             reg.register_class
-              (input.lasttoken,
+              (input.lasttoken,"",
                "classdesc::is_array(),(char&)("+varname+"."+input.lasttoken+
                "),1,sizeof("+varname+"."+input.lasttoken+")");
           continue;
@@ -466,11 +470,11 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 	{ rType.erase();
 	  if (isIdentifierStart(input.lasttoken[0]))
             {
-              if (use_mbr_pointers)
+              if (!reg.is_static && use_mbr_pointers)
                 reg.register_class(input.lasttoken,
-                                   varname+",&"+prefix+input.lasttoken);
+                                   varname,"&"+prefix+input.lasttoken);
               else
-                reg.register_class(input.lasttoken,
+                reg.register_class(input.lasttoken,"",
                                    varname+"." + input.lasttoken );
             }
           if (input.token[0]=='{')
@@ -561,10 +565,13 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 		  memname!="CLASSDESC_ACCESS" &&
 		  memname!="CLASSDESC_ACCESS_TEMPLATE")
               {  string action = 
-                  varname+",&"+ namespace_name + prefix + memname;
+                  "&"+ namespace_name + prefix + memname;
                  if (objc) { action += ", \"" + rType + "\", " + "\"" + argList + "\""; }
                  rType.erase();
-                 reg.register_class(memname, action);
+                 if (reg.is_static)
+                   reg.register_class(memname, "", action);
+                 else
+                   reg.register_class(memname, varname, action);
               }
 	    }
 	  reg.is_static=0;
@@ -602,7 +609,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
           action += action2;
 	  if (!objc) action.erase(action.size()-1,1); /* remove trailing "," */
           else  action+="\"";
-	  reg.register_class(name,action);
+	  reg.register_class(name,"",action);
 	}
 
       if (input.token=="{")  /* skip function/enum/whatever definitions */
@@ -1088,6 +1095,21 @@ int main(int argc, char* argv[])
   for (int k=0; k<nactions; k++)
     printf("#include \"%s_base.h\"\n",action[k]);
 
+  {
+    PrintNameSpace ns("classdesc");
+    // add an external declaration of member type functions for
+    // backwards compatibility
+    for (size_t i=0; i<nactions; ++i)
+      {
+        puts("template <class M>\n");
+        puts("typename enable_if<Or<is_member_object_pointer<M>,is_member_function_pointer<M> >,void>::T\n");
+  
+        printf("%s_type(%s_t&,const string&,M);\n",action[i],action[i]);
+      }
+  }
+  for (size_t i=0; i<nactions; ++i)
+    printf("using classdesc::%s_type;\n",action[i]);
+  
   /* output typeName database on standard output if requested. */
   if (typeName)
     {
@@ -1292,11 +1314,29 @@ int main(int argc, char* argv[])
                 for (size_t j=0; j<actions[i].actionlist.size(); j++)
                   {
                     string a=action[k];
+                    const act_pair& aj=actions[i].actionlist[j];
                     if (actions[i].actionlist[j].base)
                       a+="_onbase";
-                    printf("::%s(targ,desc+\"%s\",%s);\n",a.c_str(),
-                           actions[i].actionlist[j].name.c_str(),
-                           actions[i].actionlist[j].action.c_str());
+                    if (aj.member.length())
+                      printf("::%s(targ,desc+\"%s\",%s,%s);\n",a.c_str(),
+                             aj.name.c_str(),aj.member.c_str(),aj.action.c_str());
+                    else
+                      printf("::%s(targ,desc+\"%s\",%s);\n",a.c_str(),
+                             aj.name.c_str(),aj.action.c_str());
+                  }
+                printf("}\n");
+                printf("void type(classdesc::%s_t& targ, const classdesc::string& desc)\n{\n",action[k]);
+                if (actions[i].namespace_name.size())
+                  printf("using namespace %s;\n",actions[i].namespace_name.c_str());
+                for (size_t j=0; j<actions[i].actionlist.size(); j++)
+                  {
+                    string a=string(action[k])+"_type";
+                    const act_pair& aj=actions[i].actionlist[j];
+                    if (aj.base)
+                      a+="_onbase";
+                    if (aj.member.length())
+                      printf("::%s(targ,desc+\"%s\",%s);\n",a.c_str(),
+                             aj.name.c_str(),aj.action.c_str());
                   }
                 printf("}\n};\n");
               }

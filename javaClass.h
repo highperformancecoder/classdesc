@@ -32,6 +32,7 @@
 #endif
 
 #include "pack_base.h"
+#include "classdesc_access.h"
 #include <vector>
 
 namespace classdesc
@@ -604,7 +605,7 @@ enum {
   {
     u1 _tag;
     shared_ptr<void> info;
-
+    CLASSDESC_ACCESS(cp_info);
   public:
     cp_info(): _tag(0) {}
     template <class T>
