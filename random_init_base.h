@@ -134,12 +134,6 @@ namespace classdesc
   // regular pointers
   template <class T> void random_initp(random_init_t&, const string&, T*) {}
 
-  /*
-    const static support
-  */
-  template <class T>
-  void random_init(random_init_t&, const string&, is_const_static, T) {}
-
   // static methods
   template <class T, class U>
   void random_init(random_init_t&, const string&, is_const_static, const T&, U) {}
