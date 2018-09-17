@@ -662,22 +662,22 @@ namespace classdesc
   void unpack(pack_t& targ, const string& desc, R (C::*&arg)(A1))
   {targ.unpackraw((char*)&arg,sizeof(arg));}
 
-  /// const static support. No need to stream
-  template <class T>
-  void pack(pack_t& targ, const string& desc, is_const_static i, T t)
-  {}
-
-  template <class T>
-  void unpack(pack_t& targ, const string& desc,is_const_static i, T t)
-  {}
-
-  // static methods
-  template <class T, class U>
-  void pack(pack_t&, const string&,is_const_static, const T&, U) {}
-
-  template <class T, class U>
-  void unpack(pack_t& targ, const string& desc,is_const_static i, const T&, U) {}
-
+//  /// const static support. No need to stream
+//  template <class T>
+//  void pack(pack_t& targ, const string& desc, is_const_static i, T t)
+//  {}
+//
+//  template <class T>
+//  void unpack(pack_t& targ, const string& desc,is_const_static i, T t)
+//  {}
+//
+//  // static methods
+//  template <class T, class U>
+//  void pack(pack_t&, const string&,is_const_static, const T&, U) {}
+//
+//  template <class T, class U>
+//  void unpack(pack_t& targ, const string& desc,is_const_static i, const T&, U) {}
+//
   // to handle pack/unpacking of enums when -typeName is in effect
   template <class E>
   void pack(pack_t& targ, const string& desc,Enum_handle<E> a) 
