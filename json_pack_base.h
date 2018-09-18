@@ -435,14 +435,6 @@ namespace classdesc
   json_unpack(json_unpack_t& targ, const string& desc, is_const_static, T) 
   {}
 
-//  // static methods
-//  template <class T, class U>
-//  void json_pack(json_pack_t&, const string&, is_const_static, const T&, U) {}
-//
-//  // static methods
-//  template <class T, class U>
-//  void json_unpack(json_unpack_t&, const string&, is_const_static, const T&, U) {} 
-//
   template <class T>
   void json_unpack(json_unpack_t& targ, const string& desc, const T& arg) {}
 

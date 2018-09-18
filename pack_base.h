@@ -673,13 +673,6 @@ namespace classdesc
   unpack(pack_t& targ, const string& desc,is_const_static, T)
   {}
 
-//  // static methods
-//  template <class T, class U>
-//  void pack(pack_t&, const string&,is_const_static, const T&, U) {}
-//
-//  template <class T, class U>
-//  void unpack(pack_t& targ, const string& desc,is_const_static i, const T&, U) {}
-//
   // to handle pack/unpacking of enums when -typeName is in effect
   template <class E>
   void pack(pack_t& targ, const string& desc,Enum_handle<E> a) 

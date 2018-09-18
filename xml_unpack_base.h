@@ -538,10 +538,6 @@ namespace classdesc
   xml_unpack(xml_unpack_t& targ, const string& desc, is_const_static i, T arg) 
   {} 
 
-//  template<class T, class U>
-//  void xml_unpack(xml_unpack_t& targ, const string& desc, 
-//                  is_const_static i, const T&, U) {} 
-
   template<class T>
   void xml_unpack(xml_unpack_t& targ, const string& desc, 
                   Exclude<T>&) {} 

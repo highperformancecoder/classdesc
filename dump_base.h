@@ -157,11 +157,8 @@ namespace classdesc
   void dump(dump_t& o, const string& d, is_const_static i, T arg)
   {dump(o,d,arg);}
 
-  template <class T, class U>
-  void dump(dump_t& o, const string& d, is_const_static i, const T&, U) {}
-
-   template <class T>
-   void dump(dump_t& o, const string& d, Exclude<T>&) {}
+  template <class T>
+  void dump(dump_t& o, const string& d, Exclude<T>&) {}
 
   // shared_ptr support - polymorphism not supported
   template <class T>
