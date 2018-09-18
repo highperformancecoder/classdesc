@@ -212,12 +212,13 @@ namespace classdesc
 
   /* const static members */
   template<class T>
-  void xml_pack(xml_pack_t& targ, const string& desc, is_const_static i, T arg) 
+  typename enable_if<Not<is_pointer<T> >,void>::T
+  xml_pack(xml_pack_t& targ, const string& desc, is_const_static i, T arg) 
   {} 
 
-  template<class T, class U>
-  void xml_pack(xml_pack_t& targ, const string& desc, is_const_static i, const T&, U) {} 
-
+//  template<class T, class U>
+//  void xml_pack(xml_pack_t& targ, const string& desc, is_const_static i, const T&, U) {} 
+//
   template<class T>
   void xml_pack(xml_pack_t& targ, const string& desc, Exclude<T>&) {} 
 

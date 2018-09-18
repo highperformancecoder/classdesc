@@ -662,15 +662,17 @@ namespace classdesc
   void unpack(pack_t& targ, const string& desc, R (C::*&arg)(A1))
   {targ.unpackraw((char*)&arg,sizeof(arg));}
 
-//  /// const static support. No need to stream
-//  template <class T>
-//  void pack(pack_t& targ, const string& desc, is_const_static i, T t)
-//  {}
-//
-//  template <class T>
-//  void unpack(pack_t& targ, const string& desc,is_const_static i, T t)
-//  {}
-//
+  /// const static support. No need to stream
+  template <class T>
+  typename enable_if<Not<is_pointer<T> >,void>::T
+  pack(pack_t& targ, const string& desc, is_const_static, T)
+  {}
+
+  template <class T>
+  typename enable_if<Not<is_pointer<T> >,void>::T
+  unpack(pack_t& targ, const string& desc,is_const_static, T)
+  {}
+
 //  // static methods
 //  template <class T, class U>
 //  void pack(pack_t&, const string&,is_const_static, const T&, U) {}

@@ -42,7 +42,7 @@
     /* -use_mbr_pointers support for function pointer members */        \
     template<class C, class T>                                          \
     typename enable_if<is_function<T>,void>::T                          \
-    descriptor(descriptor##_t& b, const string& d, C& o, T* y)          \
+    descriptor(descriptor##_t& b, const string& d, C, T*)               \
     {}                                                                  \
   }
 

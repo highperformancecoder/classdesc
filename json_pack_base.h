@@ -426,21 +426,23 @@ namespace classdesc
     const static support
   */
   template <class T>
-  void json_pack(json_pack_t& targ, const string& desc, is_const_static i, T arg) 
+  typename enable_if<Not<is_pointer<T> >,void>::T
+  json_pack(json_pack_t& targ, const string& desc, is_const_static, T) 
   {}
 
   template <class T>
-  void json_unpack(json_unpack_t& targ, const string& desc, is_const_static i, T arg) 
+  typename enable_if<Not<is_pointer<T> >,void>::T
+  json_unpack(json_unpack_t& targ, const string& desc, is_const_static, T) 
   {}
 
-  // static methods
-  template <class T, class U>
-  void json_pack(json_pack_t&, const string&, is_const_static, const T&, U) {}
-
-  // static methods
-  template <class T, class U>
-  void json_unpack(json_unpack_t&, const string&, is_const_static, const T&, U) {} 
-
+//  // static methods
+//  template <class T, class U>
+//  void json_pack(json_pack_t&, const string&, is_const_static, const T&, U) {}
+//
+//  // static methods
+//  template <class T, class U>
+//  void json_unpack(json_unpack_t&, const string&, is_const_static, const T&, U) {} 
+//
   template <class T>
   void json_unpack(json_unpack_t& targ, const string& desc, const T& arg) {}
 
