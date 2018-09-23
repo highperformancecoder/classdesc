@@ -113,6 +113,27 @@ struct Return<R (C::*)($arg_types) const>
 };
 
 template <class C, class R$template_args> 
+struct ClassOf<R (C::*)($arg_types)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R$template_args> 
+struct ClassOf<R (*C::*)($arg_types)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R$template_args> 
+struct ClassOf<R (C::*)($arg_types) const> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R$template_args> 
 struct is_member_function_ptr<R (C::*)($arg_types)>
 {
    static const bool value=true;
@@ -132,6 +153,12 @@ struct is_const_method<R (C::*)($arg_types) const>
 
 template <class R$template_args> 
 struct is_nonmember_function_ptr<R (*)($arg_types)>
+{
+   static const bool value=true;
+};
+
+template <class C, class R$template_args> 
+struct is_nonmember_function_ptr<R (*C::*)($arg_types)>
 {
    static const bool value=true;
 };

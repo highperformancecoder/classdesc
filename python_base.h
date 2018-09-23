@@ -32,6 +32,15 @@ namespace classdesc
 {
   class python_t;
 
+  // objectless call
+  template <class T>
+  typename enable_if<is_class<T>,void>::T
+  python(python_t& p, const string& d);
+
+  template <class T>
+  typename enable_if<Not<is_class<T> >,void>::T
+  python(python_t& p, const string& d) {}
+
   namespace detail
   {
     using namespace classdesc::functional;
@@ -437,6 +446,17 @@ namespace classdesc
       scopeStack.back().object.staticmethod(tail(d).c_str());
     }
 
+    // no object present, update class definition
+    template <class C, class M>
+    typename enable_if<Not<is_reference<typename functional::Return<M>::T>>,void>::T
+    addMemberFunction(const string& d, M m)
+    {
+      auto& c=getClass<detail::PythonRef<C>>();
+      if (!c.completed)
+          c.def(tail(d).c_str(),detail::MemFn<C,M>(m));
+      python<typename functional::Return<M>::T>(*this,"");
+    }
+    
     template <class C, class M>
     typename enable_if<Not<is_reference<typename functional::Return<M>::T>>,void>::T
     addMemberFunction(const string& d, C& o, M m) {
@@ -444,14 +464,21 @@ namespace classdesc
       Class<C>& c=getClass<C>();
       if (!c.completed)
         c.def(tail(d).c_str(),m);
-      {
-        auto& c=getClass<detail::PythonRef<C>>();
-        if (!c.completed)
-          c.def(tail(d).c_str(),detail::MemFn<C,M>(m));
-      }
+      addMemberFunction<C>(d,m);
     }
     // for methods returning a reference, create a wrapper object that
     // can be pythonified
+    template <class C, class M>
+    typename enable_if<is_reference<typename functional::Return<M>::T>,void>::T
+    addMemberFunction(const string& d, M m) 
+    {
+      typedef typename std::remove_reference<C>::type CC; 
+      auto& c=getClass<detail::PythonRef<CC>>();
+      if (!c.completed)
+        c.def(tail(d).c_str(),detail::MemFnRef<CC,M>(m));
+      python<typename remove_reference<typename functional::Return<M>::T>::type>(*this,"");
+    }
+
     template <class C, class M>
     typename enable_if<is_reference<typename functional::Return<M>::T>,void>::T
     addMemberFunction(const string& d, C& o, M m) {
@@ -459,36 +486,45 @@ namespace classdesc
       Class<C>& c=getClass<C>();
       if (!c.completed)
         c.def(tail(d).c_str(),detail::BoundRefMethod<C,M>(o,m));
-      {
-        typedef typename std::remove_reference<C>::type CC; 
-        auto& c=getClass<detail::PythonRef<CC>>();
-        if (!c.completed)
-          c.def(tail(d).c_str(),detail::MemFnRef<CC,M>(m));
-      }
+      addMemberFunction<C>(d,m);
     }
     template <class C, class M>
-    void addMemberFunctionPtr(const string& d, C& o, M *m) {
+    typename enable_if<functional::is_nonmember_function_ptr<M>,void>::T
+    addMemberObject(const string& d, M m)
+    {
+      Class<C>& c=getClass<C>();
+      if (!c.completed)
+        c.def(tail(d).c_str(),m);
+    }
+
+    template <class C, class M>
+    typename enable_if<functional::is_nonmember_function_ptr<M>,void>::T
+      addMemberObject(const string& d, C& o, M m)
+    {
       addFunctional(d,m);
       Class<C>& c=getClass<C>();
       if (!c.completed)
         c.def(tail(d),m);
-      {
-        auto c=getClass<detail::PythonRef<C>>;
-        if (!c.completed)
-          c.def(tail(d).c_str(),m);
-      }
+      addMemberObject<C>(d,m);
     }
+
     template <class C, class M>
-    void addMemberObject(const string& d, C&, M m) {
+    typename enable_if<Not<functional::is_nonmember_function_ptr<M> >,void>::T
+    addMemberObject(const string& d, M m)
+    {
+      auto& c=getClass<detail::PythonRef<C>>();
+      if (!c.completed)
+        c.add_property(tail(d).c_str(),detail::Get<C,M>(m),
+                       detail::Set<C,M>(m));
+    }
+
+    template <class C, class M>
+    typename enable_if<Not<functional::is_nonmember_function_ptr<M> >,void>::T
+    addMemberObject(const string& d, C&, M m) {
       Class<C>& c=getClass<C>();
       if (!c.completed)
         c.def_readwrite(tail(d).c_str(),m);
-      {
-        auto& c=getClass<detail::PythonRef<C>>();
-        if (!c.completed)
-          c.add_property(tail(d).c_str(),detail::Get<C,M>(m),
-                         detail::Set<C,M>(m));
-      }
+      addMemberObject<C>(d,m);
     }
     template <class C, class M>
     void addMemberObject(const string& d, const C&, M m) {
@@ -501,6 +537,13 @@ namespace classdesc
           c.add_property(tail(d).c_str(),detail::Get<C,M>(m));
       }
     }
+    template <class C, class M>
+    typename enable_if<is_member_function_pointer<M>,void>::T
+    addMember(const string& d, M m) {addMemberFunction<C>(d,m);}
+    
+    template <class C, class M>
+    typename enable_if<is_member_object_pointer<M>,void>::T
+    addMember(const string& d, M m) {addMemberObject<C>(d,m);}
   };
 
   template <class T>
@@ -524,11 +567,11 @@ namespace classdesc
     python(p,d,c.*m);
   }
   
-  template<class C, class M>
-  typename enable_if<is_function<M>, void>::T
-  python(python_t& p, const string& d, C& c, M *m) {
-    p.addMemberFunctionPtr(d,c,m);
-  }
+//  template<class C, class M>
+//  typename enable_if<is_function<M>, void>::T
+//  python(python_t& p, const string& d, C& c, M *m) {
+//    p.addMemberFunctionPtr(d,c,m);
+//  }
   
   template <class T>
   typename enable_if<is_fundamental<T>,void>::T
@@ -599,7 +642,15 @@ namespace classdesc
     p.addObject(d,a);
   }
 
+  template <> void python<string>(python_t& p, const string& d) {}
+  
+  template <class M>
+  void python_type(python_t& p, const string& d, M m)
+  {
+    p.addMember<typename functional::ClassOf<M>::T>(d,m);
+  }
 
+   
 }
 
 namespace classdesc_access

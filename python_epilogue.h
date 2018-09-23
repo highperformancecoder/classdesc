@@ -10,6 +10,14 @@ namespace classdesc
     //pythonObject_t::getClass<T>().completed=true;
   }
 
+  template <class T>
+  typename enable_if<is_class<T>, void>::T
+  python(python_t& p, const string& d)
+  {
+    classdesc_access::access_python<T>().type(p,d);
+  }
+
+  
   template <class T, int R>
   struct tn<detail::ArrayGet<T,R> >
   {

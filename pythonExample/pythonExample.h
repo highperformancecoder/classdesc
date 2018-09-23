@@ -19,6 +19,8 @@ using namespace classdesc;
 
 enum EnumFoo {ea, eb, ec=12, ed};
 
+string printHello() {return "hello";}
+
 struct Foo
 {
   char ch;
@@ -37,12 +39,13 @@ struct Foo
   Exclude<int> iex;
   std::vector<string> vs;
   classdesc::shared_ptr<EnumFoo> sef;
+  //string (*hello)();
   //  classdesc::StringKeyMap<int> sm;
   Foo() {}
   Foo(int i): ch('M'), a(0.1), af(0.2), b(3), bf(false), bt(true),
               c("\r hello & 123 "), c1(2,"\r"), h(3,2), l(3,2), 
               //llex(2,std::list<std::string>(2,"hello")),
-              vs(2," hello") 
+              vs(2," hello")//, hello(printHello)
   {
     for (int i=0; i<3; i++) 
       {
@@ -87,12 +90,24 @@ struct Bar1
   Foo& fooRef() {return f;}
 };
 
+struct FooBar1
+{
+  Foo f{0};
+};
+
 // root type
 struct Root
 {
   Bar bar;
   Bar1 bar1;
+  FooBar1& getFB1() {
+    static FooBar1 m;
+    return m;
+  }
+  double fb1a() {return getFB1().f.a;}
   Root(): bar(3), bar1(2) {}
 };
+
+
 
 #include "pythonExample.cd"
