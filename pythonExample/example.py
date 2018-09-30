@@ -56,3 +56,6 @@ for i in r.bar.vs:
 # r.bar.sef
 
 assert r.bar.vs0()==' hello'
+
+from example import Foo
+assert Foo.shello()=='hello'

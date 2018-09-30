@@ -46,9 +46,10 @@ inline bool isIdentifierChar(char x)
 struct act_pair
 {
   string name, action, member;
+  bool is_static; // is a static member
   bool base; // is a base (not a member)
-  act_pair(string n, string a, string m="", bool b=false): 
-    name(n), action(a), member(m), base(b) {}
+  act_pair(string n, string a, string m="", bool is_static=false, bool b=false): 
+    name(n), action(a), member(m), is_static(is_static), base(b) {}
 };
 
 typedef vector<act_pair> actionlist_t;
@@ -245,7 +246,7 @@ public:
 //          // do emit type functions for static members
 //          actionlist.push_back(act_pair("."+name,memberName+"."+action));
 //        else
-          actionlist.push_back(act_pair("."+name,action,memberName));
+        actionlist.push_back(act_pair("."+name,action,memberName,is_static));
     is_static=0;
   }
 };
@@ -330,7 +331,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
                         "classdesc::base_cast<"+
                         // look for member qualification in a template context
                         string(typename_needed? "typename ": "")+
-                        baseclass+" >::cast("+varname+")","",
+                        baseclass+" >::cast("+varname+")","",false,/*!static*/
                         onBase
                         )
                );
@@ -1335,8 +1336,8 @@ int main(int argc, char* argv[])
                     const act_pair& aj=actions[i].actionlist[j];
                     if (aj.base)
                       a+="_onbase";
-                    if (aj.member.length())
-                      printf("::%s(targ,desc+\"%s\",%s);\n",a.c_str(),
+                    if (aj.member.length()||aj.is_static)
+                      printf("::%s<%s>(targ,desc+\"%s\",%s);\n",a.c_str(),type_arg_name.c_str(),
                              aj.name.c_str(),aj.action.c_str());
                   }
                 printf("}\n};\n");

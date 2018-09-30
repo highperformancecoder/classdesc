@@ -64,6 +64,7 @@ struct Foo
       (!sef && sef!=x.sef) || (sef && x.sef && *sef!=*x.sef);}
   bool operator==(const Foo& x) const {return !operator!=(x);}
   string vs0() const {return vs[0];}
+  static string shello() {return "hello";}
 };
 
 struct Bar: Foo

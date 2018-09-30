@@ -544,6 +544,13 @@ namespace classdesc
     template <class C, class M>
     typename enable_if<is_member_object_pointer<M>,void>::T
     addMember(const string& d, M m) {addMemberObject<C>(d,m);}
+    template <class C, class M>
+    typename enable_if<functional::is_nonmember_function_ptr<M>,void>::T
+    addMember(const string& d, M m) {
+      auto& c=getClass<C>();
+      if (!c.completed)
+          c.def(tail(d).c_str(),m);
+    }
   };
 
   template <class T>
@@ -642,12 +649,18 @@ namespace classdesc
     p.addObject(d,a);
   }
 
-  template <> void python<string>(python_t& p, const string& d) {}
+  template <class F>
+  typename enable_if<functional::is_nonmember_function_ptr<F>,void>::T
+  python(python_t& p, const string& d, F f) {
+    p.addFunctional(d,f);
+  }
+
+ template <> void python<string>(python_t& p, const string& d) {}
   
-  template <class M>
+  template <class C, class M>
   void python_type(python_t& p, const string& d, M m)
   {
-    p.addMember<typename functional::ClassOf<M>::T>(d,m);
+    p.addMember<C>(d,m);
   }
 
    
