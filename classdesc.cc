@@ -471,7 +471,10 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 	{ rType.erase();
 	  if (isIdentifierStart(input.lasttoken[0]))
             {
-              if (!reg.is_static && use_mbr_pointers)
+              // taking a reference to a const static member can cause
+              // problems, as they may be optimised away and have no
+              // address
+              if (/*!(reg.is_static && reg.is_const) &&*/ use_mbr_pointers)
                 reg.register_class(input.lasttoken,
                                    varname,"&"+prefix+input.lasttoken);
               else
@@ -1103,7 +1106,7 @@ int main(int argc, char* argv[])
       // backwards compatibility
       for (size_t i=0; i<nactions; ++i)
         {
-          puts("template <class M>\n");
+          puts("template <class C,class M>");
           //          puts("typename enable_if<Or<is_member_object_pointer<M>,is_member_function_pointer<M> >,void>::T\n");
   
           printf("void %s_type(%s_t&,const string&,M);\n",action[i],action[i]);
@@ -1332,13 +1335,16 @@ int main(int argc, char* argv[])
                   printf("using namespace %s;\n",actions[i].namespace_name.c_str());
                 for (size_t j=0; j<actions[i].actionlist.size(); j++)
                   {
-                    string a=string(action[k])+"_type";
                     const act_pair& aj=actions[i].actionlist[j];
-                    if (aj.base)
-                      a+="_onbase";
-                    if (aj.member.length()||aj.is_static)
-                      printf("::%s<%s>(targ,desc+\"%s\",%s);\n",a.c_str(),type_arg_name.c_str(),
-                             aj.name.c_str(),aj.action.c_str());
+                    // only emit actions that are member pointers
+                    if (aj.action[0]=='&' && aj.action.find("::"))
+                      {
+                        string a=string(action[k])+"_type";
+                        if (aj.base)
+                          a+="_onbase";
+                        printf("::%s<%s>(targ,desc+\"%s\",%s);\n",a.c_str(),type_arg_name.c_str(),
+                               aj.name.c_str(),aj.action.c_str());
+                      }
                   }
                 printf("}\n};\n");
               }

@@ -385,7 +385,7 @@ namespace classdesc
   void xsd_generate(xsd_generate_t& g, const string& d, const Exclude<T>& a) {}
 
   template <class T>
-  typename enable_if<Not<is_pointer<T> >,void>::T
+  void//typename enable_if<Not<is_pointer<T> >,void>::T
   xsd_generate(xsd_generate_t& g, const string& d, is_const_static, T a) {}
 
   // with shared_ptrs, just write out the schema for the base

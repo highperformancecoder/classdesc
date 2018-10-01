@@ -534,7 +534,7 @@ namespace classdesc
   }
   
   template<class T>
-  typename enable_if<Not<is_pointer<T> >,void>::T
+  void//typename enable_if<Not<is_pointer<T> >,void>::T
   xml_unpack(xml_unpack_t& targ, const string& desc, is_const_static i, T arg) 
   {} 
 

@@ -212,7 +212,7 @@ namespace classdesc
 
   /* const static members */
   template<class T>
-  typename enable_if<Not<is_pointer<T> >,void>::T
+  void//typename enable_if<Not<is_pointer<T> >,void>::T
   xml_pack(xml_pack_t& targ, const string& desc, is_const_static i, T arg) 
   {} 
 

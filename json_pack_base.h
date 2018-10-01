@@ -426,12 +426,12 @@ namespace classdesc
     const static support
   */
   template <class T>
-  typename enable_if<Not<is_pointer<T> >,void>::T
+  void//typename enable_if<Not<is_pointer<T> >,void>::T
   json_pack(json_pack_t& targ, const string& desc, is_const_static, T) 
   {}
 
   template <class T>
-  typename enable_if<Not<is_pointer<T> >,void>::T
+  void//typename enable_if<Not<is_pointer<T> >,void>::T
   json_unpack(json_unpack_t& targ, const string& desc, is_const_static, T) 
   {}
 
