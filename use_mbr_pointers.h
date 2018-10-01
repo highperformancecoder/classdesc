@@ -20,9 +20,11 @@
     descriptor(descriptor##_t& b, const string& d, C& o, T y)           \
     {descriptor(b,d,o.*y);}                                             \
                                                                         \
-      /* for static object members */                                   \
-      template<class C, class T>                                        \
-      typename enable_if<is_object<T>,void>::T                          \
+    /* for static object members */                                     \
+    template<class C, class T>                                          \
+    typename enable_if<                                                 \
+                 And<Not<is_base_of<is_const_static,C> >,               \
+                     is_object<T> >,void>::T                            \
       descriptor(descriptor##_t& b, const string& d, C&, T* y)          \
       {descriptor(b,d,*y);}                                             \
   }  

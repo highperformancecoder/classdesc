@@ -71,7 +71,7 @@ void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE
 }
 void type(classdesc::p_t& targ, const classdesc::string& desc)
 {
-::p_type<class ::foo>(targ,desc+".b",&foo::b);
+::p_type<class ::foo >(targ,desc+".b",&foo::b);
 }
 };
 }
