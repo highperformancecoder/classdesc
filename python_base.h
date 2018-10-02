@@ -56,12 +56,12 @@ namespace classdesc
     {
       typedef boost::mpl::vector<typename Arg<F,Arity<F>::V>::T> T;
     };
-  
+
     template <class F,int N> struct SigArg
     {
       typedef typename boost::mpl::push_front<
-        typename Arg<F,Arity<F>::V-N+1>::T,
-        typename SigArg<F,N-1>::T
+        typename SigArg<F,N-1>::T,
+        typename Arg<F,Arity<F>::V-N+1>::T
         >::type T;
     };
     
@@ -84,13 +84,13 @@ namespace classdesc
     };
 
     template <class T>
-    Len<T> len(T& x) {return Len<T>(x);}
+    size_t len(T& x) {return x.size();}
 
     template <class T> struct GetItem
     {
       T& container;
       GetItem(T& container): container(container) {}
-      typename T::value_type operator()(T&,size_t n) const {
+      typename T::value_type operator()(T& c,size_t n) const {
         if (n>=container.size())
           throw std::out_of_range("index out of bounds");
         typename T::iterator i=container.begin();
@@ -100,7 +100,13 @@ namespace classdesc
     };
 
     template <class T>
-    GetItem<T> getItem(T& x) {return GetItem<T>(x);}
+    typename T::value_type getItem(const T& c, size_t n) {
+        if (n>=c.size())
+          throw std::out_of_range("index out of bounds");
+        typename T::const_iterator i=c.begin();
+        std::advance(i,n);
+        return *i;
+    }
 
     template <class U> struct Sig<Len<U>>
     {
@@ -617,9 +623,11 @@ namespace classdesc
   template <class T>
   typename enable_if<is_sequence<T>,void>::T
   python(python_t& p, const string& d, T& a) {
-    boost::python::class_<T>((tail(d)+"_type").c_str()).
-      def("__len__", detail::len(a)).
-      def("__getitem__", detail::getItem(a));
+    //boost::python::class_<T>((tail(d)+"_type").c_str()).
+    auto& c=p.getClass<T>();
+    if (!c.completed)
+      c.def("__len__", &detail::len<T>).
+      def("__getitem__", &detail::getItem<T>);
     p.addObject(d,a);
   }
 

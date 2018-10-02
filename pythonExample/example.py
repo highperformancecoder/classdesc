@@ -11,8 +11,8 @@ assert r.bar.c=='\r hello & 123 '
 assert len(r.bar.c)==len('\r hello & 123 ')
 assert len(r.bar.c1)==2
 # doesn't work???
-#for i in r.bar.c1:
-#    assert i=='\r'
+for i in r.bar.c1:
+    assert i=='\r'
 assert len(r.bar.d)==3
 for i in range(len(r.bar.d)):
     assert r.bar.d[i]==i

@@ -117,27 +117,27 @@ namespace classdesc
 #include "functiondb.h"
 
 #if defined(__cplusplus) && __cplusplus>=201103L 
-    // for generic function objects
-    template <class F> 
-    struct Arity
-    {
-      static const int V=Arity<decltype(&F::operator())>::V;
-      static const int value=V;
-    };
-
-    template <class F> 
-    struct Return
-    {
-      typedef typename Return<decltype(&F::operator())>::T T;
-      typedef T type;
-    };
-
-    template <class F, int i> 
-    struct Arg
-    {
-      typedef typename Arg<decltype(&F::operator()),i>::T T;
-      typedef T type;
-    };
+//    // for generic function objects
+//    template <class F> 
+//    struct Arity
+//    {
+//      static const int V=Arity<decltype(&F::operator())>::V;
+//      static const int value=V;
+//    };
+//
+//    template <class F> 
+//    struct Return
+//    {
+//      typedef typename Return<decltype(&F::operator())>::T T;
+//      typedef T type;
+//    };
+//
+//    template <class F, int i> 
+//    struct Arg
+//    {
+//      typedef typename Arg<decltype(&F::operator()),i>::T T;
+//      typedef T type;
+//    };
 #endif
     
     template <class O, class M>
