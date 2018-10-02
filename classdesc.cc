@@ -1342,7 +1342,7 @@ int main(int argc, char* argv[])
                         string a=string(action[k])+"_type";
                         if (aj.base)
                           a+="_onbase";
-                        printf("::%s<%s>(targ,desc+\"%s\",%s);\n",a.c_str(),type_arg_name.c_str(),
+                        printf("::%s<%s >(targ,desc+\"%s\",%s);\n",a.c_str(),type_arg_name.c_str(),
                                aj.name.c_str(),aj.action.c_str());
                       }
                   }
