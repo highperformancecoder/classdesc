@@ -36,6 +36,11 @@ namespace classdesc
   struct ClassdescEnabledPythonType:
     public Or<And<is_class<T>, Not<is_container<T> > >, is_enum<T> > {};
 
+  /// types that have a primitive representation in Python
+  template <class T>
+  struct PythonBasicType:
+    public Or<is_fundamental<T>, is_string<T> > {};
+  
   // objectless calls
   // classdesc generated
   template <class T>
@@ -92,7 +97,7 @@ namespace classdesc
 
     template <class T>
     size_t len(T& x) {return x.size();}
-
+    
     template <class T> struct GetItem
     {
       T& container;
@@ -329,13 +334,50 @@ namespace classdesc
     };
 
     template <class T>
-    PythonRef<typename T::value_type> getItem(T& c, size_t n) {
+    typename T::value_type& getItemRef(T& c, size_t n)
+    {
         if (n>=c.size())
           throw std::out_of_range("index out of bounds");
         typename T::iterator i=c.begin();
         std::advance(i,n);
         return *i;
     }
+
+    // for a structured type, return a PythonRef
+    template <class T>
+    typename enable_if<Not<PythonBasicType<typename T::value_type> >,
+                         PythonRef<typename T::value_type> >::T
+    getItem(T& c, size_t n) {return getItemRef(c,n);}
+
+    // for a basic python type, return by value
+    template <class T>
+    typename enable_if<PythonBasicType<typename T::value_type>,
+                         typename T::value_type>::T
+    getItem(T& c, size_t n) {return getItemRef(c,n);}
+
+    template <class T>
+    typename functional::Return<decltype(&getItem<T>)>::T
+    getItemPythonRef(PythonRef<T>& c, size_t n) {
+      return getItem(*c,n);
+    }
+    
+    template <class T>
+    typename enable_if<Not<PythonBasicType<typename T::value_type> >,
+                         void>::T
+    setItem(T& c, size_t n,const typename T::value_type& v) {}
+
+    template <class T>
+    typename enable_if<PythonBasicType<typename T::value_type>,
+                         void>::T
+    setItem(T& c, size_t n,const typename T::value_type& v)
+    {getItemRef(c,n)=v;}
+
+    template <class T>
+    void setItemPythonRef(PythonRef<T>& c, size_t n,const typename T::value_type& v)
+    {setItem(*c,n,v);}
+    
+    template <class T>
+    size_t lenPythonRef(detail::PythonRef<T>& x) {return (*x).size();}
 
   }
 
@@ -640,7 +682,14 @@ namespace classdesc
     auto& c=p.getClass<T>();
     if (!c.completed)
       c.def("__len__", &detail::len<T>).
-      def("__getitem__", &detail::getItem<T>);
+      def("__getitem__", &detail::getItem<T>).
+      def("__setitem__", &detail::setItem<T>);
+    auto& cr=p.getClass<detail::PythonRef<T> >();
+    if (!cr.completed)
+      cr.def("__len__", &detail::lenPythonRef<T>).
+        def("__getitem__", &detail::getItemPythonRef<T>).
+        def("__setitem__", &detail::setItemPythonRef<T>);
+
     p.addObject(d,a);
     python<typename T::value_type>(p,"");
   }
@@ -652,8 +701,16 @@ namespace classdesc
     auto& c=p.getClass<T>();
     if (!c.completed)
       c.def("__len__", &detail::len<T>).
-      def("__getitem__", &detail::getItem<T>);
+      def("__getitem__", &detail::getItem<T>).
+      def("__setitem__", &detail::setItem<T>);
+    auto& cr=p.getClass<detail::PythonRef<T> >();
+    if (!cr.completed)
+      cr.def("__len__", &detail::lenPythonRef<T>).
+        def("__getitem__", &detail::getItemPythonRef<T>).
+        def("__setitem__", &detail::setItemPythonRef<T>);
     python<typename T::value_type>(p,"");
+    
+    python<typename functional::Return<decltype(&detail::getItem<T>)>::T>(p,"");
   }
 
   template <class T>

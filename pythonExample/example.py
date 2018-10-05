@@ -17,8 +17,6 @@ assert len(r.bar.d)==3
 for i in range(len(r.bar.d)):
     assert r.bar.d[i]==i
 
-
-    
 # TODO indices wrong way around
 #assert len(r.bar.d1)==3
 #for i in len(r.bar.d1):
@@ -41,6 +39,12 @@ for i in r.bar.h:
 # TODO
 #r.bar.l[1]=3
 #assert r.bar.l[1]==3
+
+assert len(r.bar.llex)==2
+for i in r.bar.llex:
+    assert len(i)==2
+    for j in i:
+        assert j=="hello"
 
 assert "iex" not in r.bar.__dict__ # tests Exclude
 assert len(r.bar.vs)==2
