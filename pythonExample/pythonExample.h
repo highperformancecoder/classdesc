@@ -35,7 +35,7 @@ struct Foo
   std::vector<int> h;
   std::list<int> l;
   //  std::map<int,int> m;
-  //  std::list<std::list<std::string> > llex;
+  std::list<std::list<std::string> > llex;
   Exclude<int> iex;
   std::vector<string> vs;
   classdesc::shared_ptr<EnumFoo> sef;
@@ -44,7 +44,7 @@ struct Foo
   Foo() {}
   Foo(int i): ch('M'), a(0.1), af(0.2), b(3), bf(false), bt(true),
               c("\r hello & 123 "), c1(2,"\r"), h(3,2), l(3,2), 
-              //llex(2,std::list<std::string>(2,"hello")),
+              llex(2,std::list<std::string>(2,"hello")),
               vs(2," hello")//, hello(printHello)
   {
     for (int i=0; i<3; i++) 

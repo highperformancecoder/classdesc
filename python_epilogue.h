@@ -11,7 +11,7 @@ namespace classdesc
   }
 
   template <class T>
-  typename enable_if<is_class<T>, void>::T
+  typename enable_if<ClassdescEnabledPythonType<T>,void>::T
   python(python_t& p, const string& d)
   {
     classdesc_access::access_python<T>().type(p,d);
@@ -49,6 +49,17 @@ namespace classdesc
       }
   }
  
+}
+
+namespace classdesc_access
+{
+  template <> struct access_python<string>
+  {
+    void type(classdesc::python_t&,const string&) {}
+  };
+
+  
+  
 }
 
 #endif

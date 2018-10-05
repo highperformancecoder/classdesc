@@ -32,11 +32,18 @@ namespace classdesc
 {
   class python_t;
 
-  // objectless call
   template <class T>
-  typename enable_if<is_class<T>,void>::T
+  struct ClassdescEnabledPythonType:
+    public Or<And<is_class<T>, Not<is_container<T> > >, is_enum<T> > {};
+
+  // objectless calls
+  // classdesc generated
+  template <class T>
+  typename enable_if<ClassdescEnabledPythonType<T>,void>::T
   python(python_t& p, const string& d);
 
+
+  // anything that is not a class
   template <class T>
   typename enable_if<Not<is_class<T> >,void>::T
   python(python_t& p, const string& d) {}
@@ -99,14 +106,14 @@ namespace classdesc
       }
     };
 
-    template <class T>
-    typename T::value_type getItem(const T& c, size_t n) {
-        if (n>=c.size())
-          throw std::out_of_range("index out of bounds");
-        typename T::const_iterator i=c.begin();
-        std::advance(i,n);
-        return *i;
-    }
+//    template <class T>
+//    typename T::value_type getItem(const T& c, size_t n) {
+//        if (n>=c.size())
+//          throw std::out_of_range("index out of bounds");
+//        typename T::const_iterator i=c.begin();
+//        std::advance(i,n);
+//        return *i;
+//    }
 
     template <class U> struct Sig<Len<U>>
     {
@@ -320,6 +327,16 @@ namespace classdesc
     {
       typedef typename boost::mpl::vector<void, PythonRef<C>&, const typename MemberType<M>::T&>::type T;
     };
+
+    template <class T>
+    PythonRef<typename T::value_type> getItem(T& c, size_t n) {
+        if (n>=c.size())
+          throw std::out_of_range("index out of bounds");
+        typename T::iterator i=c.begin();
+        std::advance(i,n);
+        return *i;
+    }
+
   }
 
   template <class T> struct tn<detail::PythonRef<T>>
@@ -560,10 +577,6 @@ namespace classdesc
   };
 
   template <class T>
-  struct ClassdescEnabledPythonType:
-    public Not<Or<is_fundamental<T>,is_container<T> > > {};
-
-  template <class T>
   typename enable_if<ClassdescEnabledPythonType<T>,void>::T
   python(python_t& p, const string& d, T& a);
 
@@ -629,6 +642,18 @@ namespace classdesc
       c.def("__len__", &detail::len<T>).
       def("__getitem__", &detail::getItem<T>);
     p.addObject(d,a);
+    python<typename T::value_type>(p,"");
+  }
+
+  template <class T>
+  typename enable_if<is_sequence<T>,void>::T
+  python(python_t& p, const string& ) {
+    //boost::python::class_<T>((tail(d)+"_type").c_str()).
+    auto& c=p.getClass<T>();
+    if (!c.completed)
+      c.def("__len__", &detail::len<T>).
+      def("__getitem__", &detail::getItem<T>);
+    python<typename T::value_type>(p,"");
   }
 
   template <class T>
@@ -663,8 +688,6 @@ namespace classdesc
     p.addFunctional(d,f);
   }
 
- template <> void python<string>(python_t& p, const string& d) {}
-  
   template <class C, class M>
   void python_type(python_t& p, const string& d, M m)
   {
