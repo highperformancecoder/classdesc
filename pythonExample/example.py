@@ -22,6 +22,9 @@ for i in range(len(r.bar.d1)):
     assert len(r.bar.d1[i])==2
     for j in range(len(r.bar.d1[i])):
         assert r.bar.d1[i][j]==2*i+j
+
+r.bar.d1[0][1]=10
+assert r.bar.d1[0][1]==10
         
 assert len(r.bar.h)==3
 for i in r.bar.h:

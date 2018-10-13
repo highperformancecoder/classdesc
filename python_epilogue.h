@@ -44,7 +44,8 @@ namespace classdesc
     if (!c.completed)
       {
         c.def("__len__",&ArrayGet<T,1>::len).
-          def("__getitem__",&ArrayGet<T,1>::getItem);
+          def("__getitem__",&ArrayGet<T,1>::getItem).
+          def("__setitem__",&ArrayGet<T,1>::setItem);
         c.completed=true;
       }
   }

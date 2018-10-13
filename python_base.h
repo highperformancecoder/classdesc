@@ -184,6 +184,14 @@ namespace classdesc
       static void registerClass(python_t&);
     };
 
+    template <class T, class U>
+    typename enable_if<is_assignable<T&,U>, void>::T
+    assign(T& x, const U& y) {x=y;}
+
+    template <class T, class U>
+    typename enable_if<Not<is_assignable<T&,U> >, void>::T
+    assign(T& x, const U& y) {throw std::runtime_error("assignment not supported between "+typeName<U>()+" and "+typeName<T>());}
+  
     template <class T>
     struct ArrayGet<T,1>
     {
@@ -195,6 +203,7 @@ namespace classdesc
           return x[i];
         throw std::out_of_range("index out of bounds");
       }
+      void setItem(size_t i, const T& y) {assign(x[i],y);}
       T operator()(Array<T,1>&, size_t i) const {return getItem(i);}
       size_t len() const {return n;}
       // ensures this class is registered in the python type system
