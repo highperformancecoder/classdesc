@@ -589,8 +589,6 @@ namespace classdesc
   {
   public:
     T& ref;
-    T defaultVal;
-    Enum_handle(): ref(defaultVal) {}
     Enum_handle(T& arg): ref(arg) {}
     operator std::string() const {
       return enumKey<typename remove_const<T>::type>(static_cast<int>(ref));
