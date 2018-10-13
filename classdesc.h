@@ -587,12 +587,15 @@ namespace classdesc
   template <class T> //T is an enum
   class Enum_handle
   {
-    T& ref;
   public:
+    T& ref;
+    T defaultVal;
+    Enum_handle(): ref(defaultVal) {}
     Enum_handle(T& arg): ref(arg) {}
     operator std::string() const {
       return enumKey<typename remove_const<T>::type>(static_cast<int>(ref));
     }
+    Enum_handle(const Enum_handle&)=default;
     operator int() const {return static_cast<int>(ref);}
     const Enum_handle& operator=(T x) {ref=x; return *this;}
     const Enum_handle& operator=(int x) {ref=T(x); return *this;}
@@ -618,6 +621,13 @@ namespace classdesc
 
   template <class T>
   Enum_handle<T> enum_handle(T& x) {return Enum_handle<T>(x);}
+
+  template <class T> struct tn<Enum_handle<T> >
+  {
+    static std::string name()
+    {return "classdecs::Enum_handle<"+typeName<T>()+">";}
+  };
+  
 
   /** support for constant sized arrays  */
   class is_array {};

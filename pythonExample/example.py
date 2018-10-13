@@ -30,12 +30,12 @@ assert len(r.bar.h)==3
 for i in r.bar.h:
     assert i==2
 
-r.bar.h[1]=3
-assert r.bar.h[1]==3
-
 assert len(r.bar.l)==3
 for i in r.bar.h:
     assert i==2
+
+r.bar.h[1]=3
+assert r.bar.h[1]==3
 
 r.bar.l[1]=3
 assert r.bar.l[1]==3
@@ -54,7 +54,11 @@ for i in r.bar.vs:
 r.bar.vs[1]="world"
 assert r.bar.vs[1]=="world"
 
-    
+# TODO - get static_properties to work properly
+assert r.bar.ef.fget()=="ea"
+assert r.bar.getEF()==0
+r.bar.ef.fset("ec")
+assert r.bar.getEF()==12
 # TODO
 # r.bar.sef
 

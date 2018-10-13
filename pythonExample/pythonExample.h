@@ -38,14 +38,15 @@ struct Foo
   std::list<std::list<std::string> > llex;
   Exclude<int> iex;
   std::vector<string> vs;
-  classdesc::shared_ptr<EnumFoo> sef;
+  EnumFoo ef;
+  //classdesc::shared_ptr<EnumFoo> sef;
   //string (*hello)();
   //  classdesc::StringKeyMap<int> sm;
   Foo() {}
   Foo(int i): ch('M'), a(0.1), af(0.2), b(3), bf(false), bt(true),
               c("\r hello & 123 "), c1(2,"\r"), h(3,2), l(3,2), 
               llex(2,std::list<std::string>(2,"hello")),
-              vs(2," hello")//, hello(printHello)
+              vs(2," hello"), ef(ea)//, hello(printHello)
   {
     for (int i=0; i<3; i++) 
       {
@@ -58,13 +59,15 @@ struct Foo
 //    sm["hello"]=2;
 //    sm["goodbye"]=3;
   }
-  bool operator!=(const Foo& x) const {return ch!=x.ch || fabs(a-x.a)>1e-10 || b!=x.b ||bf !=x.bf || bt!=x.bt || c!=x.c ||c1!=x.c1|| memcmp(d,x.d,sizeof(d)) ||
-      memcmp(d1,x.d1,sizeof(d1))
-      || h!=x.h|| l!=x.l|| /*m!=x.m ||*/ vs!=x.vs || /*llex!=x.llex || */
-      (!sef && sef!=x.sef) || (sef && x.sef && *sef!=*x.sef);}
-  bool operator==(const Foo& x) const {return !operator!=(x);}
+//  bool operator!=(const Foo& x) const {return ch!=x.ch || fabs(a-x.a)>1e-10 || b!=x.b ||bf !=x.bf || bt!=x.bt || c!=x.c ||c1!=x.c1|| memcmp(d,x.d,sizeof(d)) ||
+//      memcmp(d1,x.d1,sizeof(d1))
+//      || h!=x.h|| l!=x.l|| /*m!=x.m ||*/ vs!=x.vs /* || llex!=x.llex || */
+//      /*(!sef && sef!=x.sef) || (sef && x.sef && *sef!=*x.sef)*/;}
+//  bool operator==(const Foo& x) const {return !operator!=(x);}
   string vs0() const {return vs[0];}
   static string shello() {return "hello";}
+  int getEF() {return ef;}
+  string getc() {return c;}
 };
 
 struct Bar: Foo
@@ -74,7 +77,7 @@ struct Bar: Foo
   //  std::vector<Foo> vFoo;
   Bar() {}
   Bar(int i): Foo(i), f(20), barfoo(eb)/*, vFoo(3,1)*/ {}
-  bool operator!=(const Bar& x) const {return Foo::operator!=(x)||f!=x.f||barfoo!=x.barfoo /*|| vFoo!=x.vFoo*/;}
+  //  bool operator!=(const Bar& x) const {return Foo::operator!=(x)||f!=x.f||barfoo!=x.barfoo /*|| vFoo!=x.vFoo*/;}
 };
 
 struct Bar1
@@ -85,8 +88,8 @@ struct Bar1
   //  std::vector<Foo> vFoo;
   Bar1() {}
   Bar1(int i): f(i), g(2), barfoo(ec)/*, vFoo(2,Foo(1))*/ {}
-  bool operator!=(const Bar1& x) const {return f!=x.f||g!=x.g||barfoo!=x.barfoo
-      /*||vFoo!=x.vFoo*/;}
+//  bool operator!=(const Bar1& x) const {return f!=x.f||g!=x.g||barfoo!=x.barfoo
+//      /*||vFoo!=x.vFoo*/;}
   Foo foo() {return f;}
   Foo& fooRef() {return f;}
 };

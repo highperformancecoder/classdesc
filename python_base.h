@@ -346,6 +346,37 @@ namespace classdesc
     };
 
     template <class T>
+    string enumGet(const Enum_handle<T>& a){return a;}
+    template <class T>
+    void enumSet(Enum_handle<T>& a, const string& x) {a=x;}
+
+    
+  template <class T>
+  struct EnumGet
+  {
+    Enum_handle<T> a;
+    EnumGet(const Enum_handle<T>& a): a(a) {}
+    string operator()() const {return a;}
+  };
+  
+  template <class T>
+  struct EnumSet
+  {
+    Enum_handle<T> a;
+    EnumSet(const Enum_handle<T>& a): a(a) {}
+    void operator()(const string& x) {a=x;}
+  };
+
+  template <class E> struct Sig<EnumGet<E> >
+  {
+    typedef typename boost::mpl::vector<string>::type T;
+  };
+  template <class E> struct Sig<EnumSet<E> >
+  {
+    typedef typename boost::mpl::vector<void,string>::type T;
+  };
+
+    template <class T>
     typename T::value_type& getItemRef(T& c, size_t n)
     {
         if (n>=c.size())
@@ -398,6 +429,7 @@ namespace classdesc
     static std::string name()
     {return "PythonRef<"+typeName<T>()+">";}
   };
+
 }
 
 
@@ -516,6 +548,14 @@ namespace classdesc
       scopeStack.back().object.def_readonly(tail(d).c_str(),o);
     }
 
+    template <class T>
+    void addObject(const string& d, Enum_handle<T> a) {
+      checkScope(d);
+      // should be add_static_property
+      scopeStack.back().object.add_property
+        (tail(d).c_str(), detail::EnumGet<T>(a), detail::EnumSet<T>(a));
+    }
+    
     template <class F>
     void addFunctional(const string& d, F f) {
       checkScope(d);
@@ -690,7 +730,6 @@ namespace classdesc
   template <class T>
   typename enable_if<is_sequence<T>,void>::T
   python(python_t& p, const string& d, T& a) {
-    //boost::python::class_<T>((tail(d)+"_type").c_str()).
     auto& c=p.getClass<T>();
     if (!c.completed)
       c.def("__len__", &detail::len<T>).
@@ -709,7 +748,6 @@ namespace classdesc
   template <class T>
   typename enable_if<is_sequence<T>,void>::T
   python(python_t& p, const string& ) {
-    //boost::python::class_<T>((tail(d)+"_type").c_str()).
     auto& c=p.getClass<T>();
     if (!c.completed)
       c.def("__len__", &detail::len<T>).
@@ -735,16 +773,44 @@ namespace classdesc
   }
 
   template <class T>
+  string getEnum(T a) {return Enum_handle<T>(a);}
+
+  template <class T>
+  void setEnum(T a, const string& x) {
+    Enum_handle<T> tmp(a);
+    tmp=x;
+  }
+  
+  template <class T>
   void python(python_t& p, const string& d, const Enum_handle<T>& a) {
+//    auto& c=p.getClass<Enum_handle<T> >();
+//    if (!c.completed)
+//      c.def("__getitem__",&getEnum<T>).
+//        def("__setitem__",&setEnum<T>);
     p.addObject(d,a);
   }
   
   template <class T>
   void python(python_t& p, const string& d, Exclude<T>& a) {}
- 
+
+  template <class T>
+  T& sharedPtrGetter(const shared_ptr<T>& self)
+  {
+    if (self)
+      return *self;
+    else
+      throw std::runtime_error("null dereference");
+  }
+  
   template <class T>
   void python(python_t& p, const string& d, shared_ptr<T>& a)
   {//TODO
+//    auto& c=p.getClass<T>();
+//    if (!c.completed)
+//      c.//def("get",&sharedPtrGetter).
+//        def("__getitem__", &detail::getItem<shared_ptr<T> >).
+//        def("__setitem__", &detail::setItem<shared_ptr<T> >);
+//    //python<T>(p,"");
   }
 
   void python(python_t& p, const string& d, string& a) {
