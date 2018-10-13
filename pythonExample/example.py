@@ -30,17 +30,15 @@ assert len(r.bar.h)==3
 for i in r.bar.h:
     assert i==2
 
-# TODO
-#r.bar.h[1]=3
-#assert r.bar.h[1]==3
+r.bar.h[1]=3
+assert r.bar.h[1]==3
 
 assert len(r.bar.l)==3
 for i in r.bar.h:
     assert i==2
 
-# TODO
-#r.bar.l[1]=3
-#assert r.bar.l[1]==3
+r.bar.l[1]=3
+assert r.bar.l[1]==3
 
 assert len(r.bar.llex)==2
 for i in r.bar.llex:
@@ -53,9 +51,8 @@ assert len(r.bar.vs)==2
 for i in r.bar.vs:
     assert i==' hello'
 
-# TODO
-#r.bar.vs[1]="world"
-#assert r.bar.vs[1]=="world"
+r.bar.vs[1]="world"
+assert r.bar.vs[1]=="world"
 
     
 # TODO
