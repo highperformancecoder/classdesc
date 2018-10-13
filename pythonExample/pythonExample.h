@@ -51,7 +51,7 @@ struct Foo
       {
         d[i]=i; 
         for (int j=0; j<2; ++j)
-          d1[i][j]=i+j;
+          d1[i][j]=2*i+j;
       }
     //    m[0]=5; m[3]=2;
 

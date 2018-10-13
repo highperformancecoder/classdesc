@@ -17,12 +17,11 @@ assert len(r.bar.d)==3
 for i in range(len(r.bar.d)):
     assert r.bar.d[i]==i
 
-# TODO indices wrong way around
-#assert len(r.bar.d1)==3
-#for i in len(r.bar.d1):
-#    assert len(r.bar.d1[i])==2
-#    for j in len(r.bar.d1[i]):
-#        assert r.bar.d1[i][j]==i+j
+assert len(r.bar.d1)==3
+for i in range(len(r.bar.d1)):
+    assert len(r.bar.d1[i])==2
+    for j in range(len(r.bar.d1[i])):
+        assert r.bar.d1[i][j]==2*i+j
         
 assert len(r.bar.h)==3
 for i in r.bar.h:

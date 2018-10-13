@@ -161,21 +161,24 @@ namespace classdesc
     {
       T* x;
       size_t dims[rank];
-      ArrayGet(T*x=0, const size_t* d=0): x(x) {
-        memcpy(&dims,d,sizeof(dims));
+      size_t stride;
+      ArrayGet(T*x=0, const size_t* d=0):
+        x(x), stride(1) {
+        if (d)
+          memcpy(&dims,d,sizeof(dims));
+        for (size_t i=1; i<rank; ++i)
+          stride*=dims[i];
       }
       ArrayGet<T,rank-1> getItem(size_t i) const {
-        if (i<dims[rank-1])
+        if (i<dims[0])
           {
-            size_t stride=1;
-            for (size_t i=0; i<rank-1; ++i) stride*=dims[i];
-            return ArrayGet<T,rank-1>(x+i*stride, dims);
+            return ArrayGet<T,rank-1>(x+i*stride, dims+1);
           }
         throw std::out_of_range("index out of bounds");
       }
       ArrayGet<T,rank-1> operator()(Array<T,rank>&, size_t i) const 
         {return getItem(i);}
-      size_t len() const {return dims[rank-1];}
+      size_t len() const {return dims[0];}
       
       // ensures this class is registered in the python type system
       static void registerClass(python_t&);
@@ -185,7 +188,7 @@ namespace classdesc
     struct ArrayGet<T,1>
     {
       T* x;
-      size_t n;
+      size_t n;      
       ArrayGet(T*x=0, const size_t* d=0): x(x), n(*d) {}
       T getItem(size_t i) const {
         if (i<n)
@@ -668,7 +671,7 @@ namespace classdesc
   {
     size_t dims[]={dim1,dim2};
     boost::python::class_<detail::Array<T,2>>((tail(d)+"_type").c_str()).
-      def("__len__", detail::ArrayLen<T,2>(dim2)).
+      def("__len__", detail::ArrayLen<T,2>(dim1)).
       def("__getitem__", detail::ArrayGet<T,2>(&arg,dims));
     p.addObject(d,reinterpret_cast<detail::Array<T,2>&>(arg));
     detail::ArrayGet<T,2>::registerClass(p);
