@@ -32,6 +32,10 @@ namespace classdesc
     /// \c Return::T (or ::type) is the return type of \a F
     template <class F> struct Return;
 
+    /// overloaded for member object pointers
+    template <class R, class C> struct Return<R (C::*)>
+    {typedef R T; typedef R type;};
+    
     /** \c Arg<F,i> is the type of argument \a i of \a F, i=1..Arity<F> */
     template <class F, int> struct Arg;
 
@@ -40,7 +44,7 @@ namespace classdesc
     {typedef F T; typedef F type;};
     template <class C, class U> struct ClassOf<U C::*>
     {typedef C T; typedef C type;};
-    
+
     /// \c is_member_function_ptr::value is true if \a F is a member function pointer
     // note - this basically duplicates std::is_member_function_pointer
     template <class F> struct is_member_function_ptr

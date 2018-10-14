@@ -15,6 +15,7 @@ namespace classdesc
   python(python_t& p, const string& d)
   {
     classdesc_access::access_python<T>().type(p,d);
+    p.getClass<T>().completed=true;
   }
 
   

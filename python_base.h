@@ -34,7 +34,7 @@ namespace classdesc
 
   template <class T>
   struct ClassdescEnabledPythonType:
-    public Or<And<is_class<T>, Not<is_container<T> > >, is_enum<T> > {};
+    public And<is_class<T>, Not<is_container<T> > > {};
 
   /// types that have a primitive representation in Python
   template <class T>
@@ -254,6 +254,10 @@ namespace classdesc
       }
     };
   
+    /// returns the target type of a PythonRef, T otherwise
+    template <class U>  struct DePythonRef {typedef U T;};
+    template <class U>  struct DePythonRef<PythonRef<U> > {typedef U T;};
+    
     template <class C, class M>
     struct MemFn
     {
@@ -552,8 +556,10 @@ namespace classdesc
     void addObject(const string& d, Enum_handle<T> a) {
       checkScope(d);
       // should be add_static_property
+      puts("b4");
       scopeStack.back().object.add_property
         (tail(d).c_str(), detail::EnumGet<T>(a), detail::EnumSet<T>(a));
+      puts("after");
     }
     
     template <class F>
@@ -571,7 +577,7 @@ namespace classdesc
       auto& c=getClass<detail::PythonRef<C>>();
       if (!c.completed)
           c.def(tail(d).c_str(),detail::MemFn<C,M>(m));
-      python<typename functional::Return<M>::T>(*this,"");
+      python<typename detail::DePythonRef<typename functional::Return<M>::T>::T>(*this,"");
     }
     
     template <class C, class M>
@@ -629,9 +635,14 @@ namespace classdesc
     typename enable_if<Not<functional::is_nonmember_function_ptr<M> >,void>::T
     addMemberObject(const string& d, M m)
     {
-      auto& c=getClass<detail::PythonRef<C>>();
+      // recursively register class details for the member
+      python<typename detail::DePythonRef<typename functional::Return<M>::T>::T>(*this,d);
+      auto& c=getClass<C>();
       if (!c.completed)
-        c.add_property(tail(d).c_str(),detail::Get<C,M>(m),
+        c.def_readwrite(tail(d).c_str(),m);
+      auto& cr=getClass<detail::PythonRef<C>>();
+      if (!cr.completed)
+        cr.add_property(tail(d).c_str(),detail::Get<C,M>(m),
                        detail::Set<C,M>(m));
     }
 
@@ -668,6 +679,7 @@ namespace classdesc
       if (!c.completed)
           c.def(tail(d).c_str(),m);
     }
+
   };
 
   template <class T>
@@ -760,7 +772,7 @@ namespace classdesc
         def("__setitem__", &detail::setItemPythonRef<T>);
     python<typename T::value_type>(p,"");
     
-    python<typename functional::Return<decltype(&detail::getItem<T>)>::T>(p,"");
+    python<typename detail::DePythonRef<typename functional::Return<decltype(&detail::getItem<T>)>::T>::T>(p,"");
   }
 
   template <class T>
@@ -788,6 +800,13 @@ namespace classdesc
 //      c.def("__getitem__",&getEnum<T>).
 //        def("__setitem__",&setEnum<T>);
     p.addObject(d,a);
+  }
+
+  template <class E, class C>
+  typename enable_if<is_enum<E>,void>::T
+  python(python_t& p, const string& d, E (C::*m)) 
+  {
+    //TODO   p.addEnum<C>(d,m);
   }
   
   template <class T>
@@ -829,13 +848,23 @@ namespace classdesc
     p.addMember<C>(d,m);
   }
 
-   
+  template <class C, class T>
+  void python_type(python_t& p, const string& d, Exclude<T> (C::*m))
+  {
+  }
+
+  
 }
 
 namespace classdesc_access
 {
   namespace cd=classdesc;
   template <class T> struct access_python;
+
+  template <class T> struct access_python<cd::Exclude<T> >
+  {
+    void type(cd::python_t&,const cd::string&) {}
+  };
 }
 
 using classdesc::python;
