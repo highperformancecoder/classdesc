@@ -82,6 +82,7 @@ void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE
 {
 ::p(targ,desc+".a",arg.a);
 }
+template <class _CD_TYPE>
 void type(classdesc::p_t& targ, const classdesc::string& desc)
 {
 }
@@ -93,6 +94,7 @@ void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE
 using namespace bar;
 ::p(targ,desc+".b",arg.b);
 }
+template <class _CD_TYPE>
 void type(classdesc::p_t& targ, const classdesc::string& desc)
 {
 using namespace bar;

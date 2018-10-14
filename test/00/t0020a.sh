@@ -72,6 +72,7 @@ template <class _CD_ARG_TYPE>
 void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
 {
 }
+template <class _CD_TYPE>
 void type(classdesc::p_t& targ, const classdesc::string& desc)
 {
 }

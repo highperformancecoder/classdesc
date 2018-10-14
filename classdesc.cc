@@ -1342,11 +1342,11 @@ int main(int argc, char* argv[])
                     if (aj.action[0]=='&' && aj.action.find("::")||aj.base)
                       {
                         if (aj.base)
-                          printf("::%s<_CD_TYPE,%s>(targ,desc+\"%s\");\n",
+                          printf("::%s<_CD_TYPE,%s >(targ,desc+\"%s\");\n",
                                  action[k], aj.member.c_str(),
                                  aj.name.c_str());
                         else
-                          printf("::%s_type<_CD_TYPE,%s>(targ,desc+\"%s\",%s);\n",
+                          printf("::%s_type<_CD_TYPE,%s >(targ,desc+\"%s\",%s);\n",
                                  action[k], type_arg_name.c_str(),
                                  aj.name.c_str(),aj.action.c_str());
                       }
