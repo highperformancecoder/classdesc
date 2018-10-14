@@ -787,6 +787,13 @@ namespace classdesc
 
   /// @}
 
+  template <class T>
+  struct tn<Exclude<T> >
+  {
+    static std::string name()
+    {return "classdesc::Exclude<"+typeName<T>()+">";}
+  };
+  
   /// helper for constructing null descriptors
   template <class action_t>
   struct NullDescriptor

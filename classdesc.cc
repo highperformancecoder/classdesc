@@ -331,7 +331,8 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
                         "classdesc::base_cast<"+
                         // look for member qualification in a template context
                         string(typename_needed? "typename ": "")+
-                        baseclass+" >::cast("+varname+")","",false,/*!static*/
+                        baseclass+" >::cast("+varname+")",
+                        onBase? baseclass:"",false,/*!static*/
                         onBase
                         )
                );
@@ -1320,9 +1321,9 @@ int main(int argc, char* argv[])
                   {
                     string a=action[k];
                     const act_pair& aj=actions[i].actionlist[j];
-                    if (actions[i].actionlist[j].base)
+                    if (aj.base)
                       a+="_onbase";
-                    if (aj.member.length())
+                    if (aj.member.length() && !aj.base)
                       printf("::%s(targ,desc+\"%s\",%s,%s);\n",a.c_str(),
                              aj.name.c_str(),aj.member.c_str(),aj.action.c_str());
                     else
@@ -1330,20 +1331,24 @@ int main(int argc, char* argv[])
                              aj.name.c_str(),aj.action.c_str());
                   }
                 printf("}\n");
+                printf("template <class _CD_TYPE>\n");
                 printf("void type(classdesc::%s_t& targ, const classdesc::string& desc)\n{\n",action[k]);
                 if (actions[i].namespace_name.size())
                   printf("using namespace %s;\n",actions[i].namespace_name.c_str());
                 for (size_t j=0; j<actions[i].actionlist.size(); j++)
                   {
                     const act_pair& aj=actions[i].actionlist[j];
-                    // only emit actions that are member pointers
-                    if (aj.action[0]=='&' && aj.action.find("::"))
+                    // only emit actions that are member pointers or base classes
+                    if (aj.action[0]=='&' && aj.action.find("::")||aj.base)
                       {
-                        string a=string(action[k])+"_type";
                         if (aj.base)
-                          a+="_onbase";
-                        printf("::%s<%s >(targ,desc+\"%s\",%s);\n",a.c_str(),type_arg_name.c_str(),
-                               aj.name.c_str(),aj.action.c_str());
+                          printf("::%s<_CD_TYPE,%s>(targ,desc+\"%s\");\n",
+                                 action[k], aj.member.c_str(),
+                                 aj.name.c_str());
+                        else
+                          printf("::%s_type<_CD_TYPE,%s>(targ,desc+\"%s\",%s);\n",
+                                 action[k], type_arg_name.c_str(),
+                                 aj.name.c_str(),aj.action.c_str());
                       }
                   }
                 printf("}\n};\n");

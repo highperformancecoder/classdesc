@@ -43,7 +43,7 @@ namespace classdesc
   
   // objectless calls
   // classdesc generated
-  template <class T>
+  template <class T, class Base=T>
   typename enable_if<ClassdescEnabledPythonType<T>,void>::T
   python(python_t& p, const string& d);
 
@@ -842,7 +842,7 @@ namespace classdesc
     p.addFunctional(d,f);
   }
 
-  template <class C, class M>
+  template <class C, class B, class M>
   void python_type(python_t& p, const string& d, M m)
   {
     p.addMember<C>(d,m);
@@ -853,7 +853,10 @@ namespace classdesc
   {
   }
 
-  
+  template <class T>
+  void python_onbase(python_t& p, const string& d, T& a)
+  {python(p,d,a);}
+ 
 }
 
 namespace classdesc_access
@@ -863,10 +866,12 @@ namespace classdesc_access
 
   template <class T> struct access_python<cd::Exclude<T> >
   {
+    template <class U>
     void type(cd::python_t&,const cd::string&) {}
   };
 }
 
 using classdesc::python;
+using classdesc::python_onbase;
 
 #endif
