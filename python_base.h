@@ -223,7 +223,7 @@ namespace classdesc
       typedef boost::mpl::vector<U,Array<U,1>&,size_t> T;
     };
 
-    template <class M> struct MemberType;
+    template <class M> struct MemberType {typedef M T;};
     template <class U, class V>
     struct MemberType<U (V::*)>
     {
@@ -349,36 +349,75 @@ namespace classdesc
       typedef typename boost::mpl::vector<void, PythonRef<C>&, const typename MemberType<M>::T&>::type T;
     };
 
-    template <class T>
-    string enumGet(const Enum_handle<T>& a){return a;}
-    template <class T>
-    void enumSet(Enum_handle<T>& a, const string& x) {a=x;}
-
     
-  template <class T>
-  struct EnumGet
-  {
-    Enum_handle<T> a;
-    EnumGet(const Enum_handle<T>& a): a(a) {}
-    string operator()() const {return a;}
-  };
+    template <class C, class M>
+    struct EnumGet
+    {
+      typedef typename MemberType<M>::T E;
+      M m;
+      EnumGet(M m): m(m) {}
+      string operator()(const C& o) const {return enum_keys<E>()(o.*m);}
+    };
   
-  template <class T>
-  struct EnumSet
-  {
-    Enum_handle<T> a;
-    EnumSet(const Enum_handle<T>& a): a(a) {}
-    void operator()(const string& x) {a=x;}
-  };
+    template <class C,class M>
+    struct EnumSet
+    {
+      typedef typename MemberType<M>::T E;
+      M m;
+      EnumSet(M m): m(m) {}
+      void operator()(C& o, const string& v) const {o.*m=enum_keys<E>()(v);}
+    };
 
-  template <class E> struct Sig<EnumGet<E> >
-  {
-    typedef typename boost::mpl::vector<string>::type T;
-  };
-  template <class E> struct Sig<EnumSet<E> >
-  {
-    typedef typename boost::mpl::vector<void,string>::type T;
-  };
+    template <class C,class E> struct Sig<EnumGet<C,E> >
+    {
+      typedef typename boost::mpl::vector<string, const C&>::type T;
+    };
+    template <class C,class E> struct Sig<EnumSet<C,E> >
+    {
+      typedef typename boost::mpl::vector<void,C&,string>::type T;
+    };
+
+    template <class C, class M>
+    EnumGet<C,M> enumGet(M m) {return EnumGet<C,M>(m);}
+    template <class C, class M>
+    EnumSet<C,M> enumSet(M m) {return EnumSet<C,M>(m);}
+
+    template <class C, class M>
+    struct EnumRefGet
+    {
+      typedef typename MemberType<M>::T E;
+      M m;
+      EnumRefGet(M m): m(m) {}
+      string operator()(const PythonRef<C>& o) const {return enum_keys<E>()((*o).*m);}
+    };
+  
+    template <class C,class M>
+    struct EnumRefSet
+    {
+      typedef typename MemberType<M>::T E;
+      M m;
+      EnumRefSet(M m): m(m) {}
+      void operator()(const PythonRef<C>& o, const string& v) const {(*o).*m=enum_keys<E>()(v);}
+    };
+
+    template <class C, class M>
+    EnumRefGet<C,M> enumRefGet(M m) {return EnumRefGet<C,M>(m);}
+    template <class C, class M>
+    EnumRefSet<C,M> enumRefSet(M m) {return EnumRefSet<C,M>(m);}
+
+    template <class C,class E> struct Sig<EnumRefGet<C,E> >
+    {
+      typedef typename boost::mpl::vector<string, const PythonRef<C>&>::type T;
+    };
+    template <class C,class E> struct Sig<EnumRefSet<C,E> >
+    {
+      typedef typename boost::mpl::vector<void,const PythonRef<C>&,string>::type T;
+    };
+
+//    template <class C, class E>
+//    string enumGet(E (C::*m)) {return EnumGet<C,E>(m);}
+//    template <class T>
+//    void enumSet(Enum_handle<T>& a, const string& x) {a=x;}
 
     template <class T>
     typename T::value_type& getItemRef(T& c, size_t n)
@@ -555,11 +594,11 @@ namespace classdesc
     template <class T>
     void addObject(const string& d, Enum_handle<T> a) {
       checkScope(d);
-      // should be add_static_property
-      puts("b4");
-      scopeStack.back().object.add_property
-        (tail(d).c_str(), detail::EnumGet<T>(a), detail::EnumSet<T>(a));
-      puts("after");
+//      // should be add_static_property
+//      puts("b4");
+//      scopeStack.back().object.add_property
+//        (tail(d).c_str(), detail::EnumGet<T>(a), detail::EnumSet<T>(a));
+//      puts("after");
     }
     
     template <class F>
@@ -680,6 +719,17 @@ namespace classdesc
           c.def(tail(d).c_str(),m);
     }
 
+    template <class C, class M>
+    void addEnum(const string& d, M m)
+    {
+      auto& c=getClass<C>();
+      if (!c.completed)
+        c.add_property(tail(d).c_str(),detail::enumGet<C>(m),detail::enumSet<C>(m));
+      
+      auto& cr=getClass<detail::PythonRef<C> >();
+      if (!cr.completed)
+        cr.add_property(tail(d).c_str(),detail::enumRefGet<C>(m),detail::enumRefSet<C>(m));
+    }
   };
 
   template <class T>
@@ -802,13 +852,6 @@ namespace classdesc
     p.addObject(d,a);
   }
 
-  template <class E, class C>
-  typename enable_if<is_enum<E>,void>::T
-  python(python_t& p, const string& d, E (C::*m)) 
-  {
-    //TODO   p.addEnum<C>(d,m);
-  }
-  
   template <class T>
   void python(python_t& p, const string& d, Exclude<T>& a) {}
 
@@ -843,11 +886,19 @@ namespace classdesc
   }
 
   template <class C, class B, class M>
-  void python_type(python_t& p, const string& d, M m)
+  typename enable_if<Not<is_enum<typename detail::MemberType<M>::T> >,void>::T
+  python_type(python_t& p, const string& d, M m)
   {
     p.addMember<C>(d,m);
   }
 
+  template <class C, class B, class M>
+  typename enable_if<is_enum<typename detail::MemberType<M>::T>,void>::T
+  python_type(python_t& p, const string& d, M m) 
+  {
+    p.addEnum<C>(d,m);
+  }
+  
   template <class C, class T>
   void python_type(python_t& p, const string& d, Exclude<T> (C::*m))
   {
@@ -856,7 +907,6 @@ namespace classdesc
   template <class T>
   void python_onbase(python_t& p, const string& d, T& a)
   {python(p,d,a);}
- 
 }
 
 namespace classdesc_access
