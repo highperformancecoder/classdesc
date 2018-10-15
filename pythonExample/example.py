@@ -1,4 +1,5 @@
-from example import root as r
+import example
+r=example.static.root
 assert r.bar.ch=='M'
 r.bar.ch='A'
 assert r.bar.ch=='A'

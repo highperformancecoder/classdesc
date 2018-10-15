@@ -505,8 +505,11 @@ namespace classdesc
       shared_ptr<boost::python::scope> scope;
       Scope(const string& name):
         name(name), object(name.c_str()), scope(new boost::python::scope(object)) {}
+      // default object refers to current module
+      Scope(): name(PyModule_GetName(boost::python::scope().ptr())),
+               object(name.c_str()), scope(new boost::python::scope(object)) {}
     };
-    std::vector<Scope> scopeStack;
+    std::vector<Scope> scopeStack; //push back current module onto stack
     boost::python::scope topScope;
     
   public:
@@ -583,7 +586,9 @@ namespace classdesc
     template <class T>
     void addObject(const string& d, T& o) {
       checkScope(d);
-      scopeStack.back().object.def_readwrite(tail(d).c_str(),o);
+      
+      if (!scopeStack.empty())
+        scopeStack.back().object.def_readwrite(tail(d).c_str(),o);
     }
     template <class T>
     void addObject(const string& d, const T& o) {
