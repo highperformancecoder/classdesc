@@ -618,9 +618,12 @@ namespace classdesc
     typename enable_if<Not<is_reference<typename functional::Return<M>::T>>,void>::T
     addMemberFunction(const string& d, M m)
     {
-      auto& c=getClass<detail::PythonRef<C>>();
+      auto& c=getClass<C>();
       if (!c.completed)
-          c.def(tail(d).c_str(),detail::MemFn<C,M>(m));
+          c.def(tail(d).c_str(),m);
+      auto& cr=getClass<detail::PythonRef<C>>();
+      if (!cr.completed)
+          cr.def(tail(d).c_str(),detail::MemFn<C,M>(m));
       python<typename detail::DePythonRef<typename functional::Return<M>::T>::T>(*this,"");
     }
     

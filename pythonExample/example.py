@@ -3,7 +3,6 @@ r=example.static.root
 assert r.bar.ch=='M'
 r.bar.ch='A'
 assert r.bar.ch=='A'
-print(r.bar.af)
 assert r.bar.bf==False
 assert r.bar.bt==True
 r.bar.bt=False
@@ -14,18 +13,18 @@ assert len(r.bar.c1)==2
 # doesn't work???
 for i in r.bar.c1:
     assert i=='\r'
-assert len(r.bar.d)==3
-for i in range(len(r.bar.d)):
-    assert r.bar.d[i]==i
-
-assert len(r.bar.d1)==3
-for i in range(len(r.bar.d1)):
-    assert len(r.bar.d1[i])==2
-    for j in range(len(r.bar.d1[i])):
-        assert r.bar.d1[i][j]==2*i+j
-
-r.bar.d1[0][1]=10
-assert r.bar.d1[0][1]==10
+#assert len(r.bar.d)==3
+#for i in range(len(r.bar.d)):
+#    assert r.bar.d[i]==i
+#
+#assert len(r.bar.d1)==3
+#for i in range(len(r.bar.d1)):
+#    assert len(r.bar.d1[i])==2
+#    for j in range(len(r.bar.d1[i])):
+#        assert r.bar.d1[i][j]==2*i+j
+#
+#r.bar.d1[0][1]=10
+#assert r.bar.d1[0][1]==10
         
 assert len(r.bar.h)==3
 for i in r.bar.h:
@@ -55,10 +54,9 @@ for i in r.bar.vs:
 r.bar.vs[1]="world"
 assert r.bar.vs[1]=="world"
 
-# TODO - get static_properties to work properly
-assert r.bar.ef.fget()=="ea"
+assert r.bar.ef=="ea"
 assert r.bar.getEF()==0
-r.bar.ef.fset("ec")
+r.bar.ef="ec"
 assert r.bar.getEF()==12
 # TODO
 # r.bar.sef
