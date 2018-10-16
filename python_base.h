@@ -359,27 +359,6 @@ namespace classdesc
       {(*o).*m=x;}
     };
 
-    template <class C,class M>
-    struct BoundRefMethod: public bound_method<C,M>
-    {
-      BoundRefMethod(C& o, M m): bound_method<C,M>(o,m) {}
-      typedef PythonRef<typename remove_ref<typename functional::Return<M>::T>::T> R;
-      template <class... Args>
-      R operator()(Args... x) {
-        return R(bound_method<C,M>::operator()(std::forward<Args>(x)...));
-      }
-    };
-
-    template <class C, class M>
-    struct Sig<BoundRefMethod<C,M>>
-    {
-      typedef typename boost::mpl::push_front<
-        typename SigArg<M,Arity<M>::V>::T,
-        PythonRef<typename remove_ref<typename Return<M>::T>::T>
-        >::type T;
-    };
-
-
     template <class C, class M>
     struct Sig<MemFn<C,M>>
     {
@@ -476,11 +455,6 @@ namespace classdesc
     {
       typedef typename boost::mpl::vector<void,const PythonRef<C>&,string>::type T;
     };
-
-//    template <class C, class E>
-//    string enumGet(E (C::*m)) {return EnumGet<C,E>(m);}
-//    template <class T>
-//    void enumSet(Enum_handle<T>& a, const string& x) {a=x;}
 
     template <class T>
     typename T::value_type& getItemRef(T& c, size_t n)
@@ -688,15 +662,6 @@ namespace classdesc
       python<typename detail::DePythonRef<typename functional::Return<M>::T>::T>(*this,"");
     }
     
-    template <class C, class M>
-    typename enable_if<Not<is_reference<typename functional::Return<M>::T>>,void>::T
-    addMemberFunction(const string& d, C& o, M m) {
-      addFunctional(d,functional::bound_method<C,M>(o,m));
-      Class<C>& c=getClass<C>();
-      if (!c.completed)
-        c.def(tail(d).c_str(),m);
-      addMemberFunction<C>(d,m);
-    }
     // for methods returning a reference, create a wrapper object that
     // can be pythonified
     template <class C, class M>
@@ -711,32 +676,12 @@ namespace classdesc
     }
 
     template <class C, class M>
-    typename enable_if<is_reference<typename functional::Return<M>::T>,void>::T
-    addMemberFunction(const string& d, C& o, M m) {
-      addFunctional(d,detail::BoundRefMethod<C,M>(o,m));
-      Class<C>& c=getClass<C>();
-      if (!c.completed)
-        c.def(tail(d).c_str(),detail::BoundRefMethod<C,M>(o,m));
-      addMemberFunction<C>(d,m);
-    }
-    template <class C, class M>
     typename enable_if<functional::is_nonmember_function_ptr<M>,void>::T
     addMemberObject(const string& d, M m)
     {
       Class<C>& c=getClass<C>();
       if (!c.completed)
         c.def(tail(d).c_str(),m);
-    }
-
-    template <class C, class M>
-    typename enable_if<functional::is_nonmember_function_ptr<M>,void>::T
-      addMemberObject(const string& d, C& o, M m)
-    {
-      addFunctional(d,m);
-      Class<C>& c=getClass<C>();
-      if (!c.completed)
-        c.def(tail(d),m);
-      addMemberObject<C>(d,m);
     }
 
     template <class C, class M>
@@ -764,26 +709,6 @@ namespace classdesc
         c.add_property(tail(d).c_str(), detail::ArrayMemRef<C,M>(m),
                        detail::ArrayMemRef<C,M>(m));
       detail::ArrayMemRef<C,M>::L::registerClass(*this);
-    }
-
-   template <class C, class M>
-    typename enable_if<Not<functional::is_nonmember_function_ptr<M> >,void>::T
-    addMemberObject(const string& d, C&, M m) {
-      Class<C>& c=getClass<C>();
-      if (!c.completed)
-        c.def_readwrite(tail(d).c_str(),m);
-      addMemberObject<C>(d,m);
-    }
-    template <class C, class M>
-    void addMemberObject(const string& d, const C&, M m) {
-      Class<C>& c=getClass<C>();
-      if (!c.completed)
-        c.def_readonly(tail(d).c_str(),m);
-      {
-        auto c=getClass<detail::PythonRef<C>>();
-        if (!c.completed)
-          c.add_property(tail(d).c_str(),detail::Get<C,M>(m));
-      }
     }
     template <class C, class M>
     typename enable_if<is_member_function_pointer<M>,void>::T
