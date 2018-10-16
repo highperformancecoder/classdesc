@@ -92,96 +92,9 @@ namespace classdesc
         >::type T;
     };
   
-    // container support
-    template <class T> struct Len
-    {
-      T& container;
-      Len(T& container): container(container) {}
-      size_t operator()(T&) const {
-        return container.size();
-      }
-    };
-
     template <class T>
     size_t len(T& x) {return x.size();}
     
-    template <class T> struct GetItem
-    {
-      T& container;
-      GetItem(T& container): container(container) {}
-      typename T::value_type operator()(T& c,size_t n) const {
-        if (n>=container.size())
-          throw std::out_of_range("index out of bounds");
-        typename T::iterator i=container.begin();
-        std::advance(i,n);
-        return *i;
-      }
-    };
-
-    template <class U> struct Sig<Len<U>>
-    {
-      typedef boost::mpl::vector<size_t,U&> T;
-    };
-    template <class U> struct Sig<GetItem<U>>
-    {
-      typedef boost::mpl::vector<typename U::value_type,U&,size_t> T;
-    };
-    template <class T>
-    struct ArrayWrapper
-    {
-      typedef T value_type;
-      T* data;
-      size_t m_size;      
-      ArrayWrapper(T* d=0, size_t s=0): data(d), m_size(s) {}
-      size_t size() const {return m_size;}
-      typedef T* iterator;
-      typedef const T* const_iterator;
-      iterator begin() {return data;}
-      const_iterator begin() const {return data;}
-      iterator end() {return data+m_size;}
-      const_iterator end() const {return data+m_size;}
-    };
-
-    template <class T, int rank>
-    struct Array {};
-    
-
-    template <class T, int rank>
-    struct ArrayLen
-    {
-      size_t n;
-      ArrayLen(size_t n=0): n(n) {}
-      size_t operator()(Array<T,rank>&) {return n;}
-    };
-
-    template <class T, int rank>
-    struct ArrayGet
-    {
-      T* x;
-      size_t dims[rank];
-      size_t stride;
-      ArrayGet(T*x=0, const size_t* d=0):
-        x(x), stride(1) {
-        if (d)
-          memcpy(&dims,d,sizeof(dims));
-        for (size_t i=1; i<rank; ++i)
-          stride*=dims[i];
-      }
-      ArrayGet<T,rank-1> getItem(size_t i) const {
-        if (i<dims[0])
-          {
-            return ArrayGet<T,rank-1>(x+i*stride, dims+1);
-          }
-        throw std::out_of_range("index out of bounds");
-      }
-      ArrayGet<T,rank-1> operator()(Array<T,rank>&, size_t i) const 
-        {return getItem(i);}
-      size_t len() const {return dims[0];}
-      
-      // ensures this class is registered in the python type system
-      static void registerClass(python_t&);
-    };
-
     template <class T, class U>
     typename enable_if<is_assignable<T&,U>, void>::T
     assign(T& x, const U& y) {x=y;}
@@ -262,37 +175,6 @@ namespace classdesc
       typedef boost::mpl::vector<void,U&,size_t,typename ArrayMemRefSetItem<U,M>::V> T;
     };
    
-    template <class T>
-    struct ArrayGet<T,1>
-    {
-      T* x;
-      size_t n;      
-      ArrayGet(T*x=0, const size_t* d=0): x(x), n(*d) {}
-      T getItem(size_t i) const {
-        if (i<n)
-          return x[i];
-        throw std::out_of_range("index out of bounds");
-      }
-      void setItem(size_t i, const T& y) {assign(x[i],y);}
-      T operator()(Array<T,1>&, size_t i) const {return getItem(i);}
-      size_t len() const {return n;}
-      // ensures this class is registered in the python type system
-      static void registerClass(python_t&);
-    };
-    
-    template <class U, int R> struct Sig<ArrayLen<U,R>>
-    {
-      typedef boost::mpl::vector<size_t,Array<U,R>&> T;
-    };
-    template <class U,int R> struct Sig<ArrayGet<U,R> >
-    {
-      typedef boost::mpl::vector<ArrayGet<U,R-1>,Array<U,R>&,size_t> T;
-    };
-    template <class U> struct Sig<ArrayGet<U,1> >
-    {
-      typedef boost::mpl::vector<U,Array<U,1>&,size_t> T;
-    };
-
     template <class U> struct remove_ref{typedef U T;};
     template <class U> struct remove_ref<U&> {typedef U T;};
   
