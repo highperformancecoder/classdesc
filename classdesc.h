@@ -596,7 +596,7 @@ namespace classdesc
     operator std::string() const {
       return enumKey<typename remove_const<T>::type>(static_cast<int>(ref));
     }
-    Enum_handle(const Enum_handle&)=default;
+    Enum_handle(const Enum_handle& x): ref(x.ref) {}
     operator int() const {return static_cast<int>(ref);}
     const Enum_handle& operator=(T x) {ref=x; return *this;}
     const Enum_handle& operator=(int x) {ref=T(x); return *this;}
