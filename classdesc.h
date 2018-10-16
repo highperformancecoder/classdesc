@@ -78,7 +78,9 @@ namespace classdesc
   using std::is_integral;
   using std::is_floating_point;
   // is_arry conflicts with an already established classdesc concept
-  //  using std::is_array; 
+  //  using std::is_array;
+  template <class T>
+  struct is_Carray: public std::is_array<T> {};
   using std::is_pointer;
   using std::is_reference;
   using std::is_member_object_pointer;
@@ -152,6 +154,7 @@ namespace classdesc
   using std::tr1::is_floating_point;
   // conflicts with an already established classdesc concept
   //using std::tr1::is_array;
+  struct is_Carray: public std::tr1::is_array;
   using std::tr1::is_pointer;
   using std::tr1::is_reference;
   using std::tr1::is_member_object_pointer;
@@ -623,10 +626,16 @@ namespace classdesc
   template <class T> struct tn<Enum_handle<T> >
   {
     static std::string name()
-    {return "classdecs::Enum_handle<"+typeName<T>()+">";}
+    {return "classdesc::Enum_handle<"+typeName<T>()+">";}
   };
   
+  template <class T,int n> struct tn<T [n]>
+  {
+    static std::string name()
+    {return typeName<T>()+"["+std::to_string(n)+"]";}
+  };
 
+  
   /** support for constant sized arrays  */
   class is_array {};
 

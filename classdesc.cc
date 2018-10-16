@@ -614,7 +614,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
           action += action2;
 	  if (!objc) action.erase(action.size()-1,1); /* remove trailing "," */
           else  action+="\"";
-	  reg.register_class(name,"",action);
+	  reg.register_class(name,name,action);
 	}
 
       if (input.token=="{")  /* skip function/enum/whatever definitions */
@@ -1323,7 +1323,7 @@ int main(int argc, char* argv[])
                     const act_pair& aj=actions[i].actionlist[j];
                     if (aj.base)
                       a+="_onbase";
-                    if (aj.member.length() && !aj.base)
+                    if (aj.member.length() && !aj.base && aj.action.find("classdesc::is_array")!=0)
                       printf("::%s(targ,desc+\"%s\",%s,%s);\n",a.c_str(),
                              aj.name.c_str(),aj.member.c_str(),aj.action.c_str());
                     else
@@ -1338,18 +1338,20 @@ int main(int argc, char* argv[])
                 for (size_t j=0; j<actions[i].actionlist.size(); j++)
                   {
                     const act_pair& aj=actions[i].actionlist[j];
+                    if (aj.base)
+                      printf("::%s<_CD_TYPE,%s >(targ,desc+\"%s\");\n",
+                             action[k], aj.member.c_str(),
+                             aj.name.c_str());
                     // only emit actions that are member pointers or base classes
-                    if (aj.action[0]=='&' && aj.action.find("::")||aj.base)
-                      {
-                        if (aj.base)
-                          printf("::%s<_CD_TYPE,%s >(targ,desc+\"%s\");\n",
-                                 action[k], aj.member.c_str(),
-                                 aj.name.c_str());
-                        else
-                          printf("::%s_type<_CD_TYPE,%s >(targ,desc+\"%s\",%s);\n",
-                                 action[k], type_arg_name.c_str(),
-                                 aj.name.c_str(),aj.action.c_str());
-                      }
+                    else if (aj.action[0]=='&' && aj.action.find("::"))
+                      printf("::%s_type<_CD_TYPE,%s >(targ,desc+\"%s\",%s);\n",
+                             action[k], type_arg_name.c_str(),
+                             aj.name.c_str(),aj.action.c_str());
+                    else if (aj.action.find("classdesc::is_array")==0)
+                      printf("::%s_type<_CD_TYPE,%s >(targ,desc+\"%s\",&%s::%s);\n",
+                             action[k], type_arg_name.c_str(),
+                             aj.name.c_str(),without_type_qualifier(type_arg_name).c_str(),aj.member.c_str());
+                      
                   }
                 printf("}\n};\n");
               }

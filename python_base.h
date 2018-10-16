@@ -57,6 +57,13 @@ namespace classdesc
   {
     using namespace classdesc::functional;
 
+    template <class M> struct MemberType {typedef M T;};
+    template <class U, class V>
+    struct MemberType<U (V::*)>
+    {
+      typedef U T;
+    };
+    
     template <class R, int> struct SigArg;
 
     template <class F> struct SigArg<F,0>
@@ -191,7 +198,91 @@ namespace classdesc
     template <class T, class U>
     typename enable_if<Not<is_assignable<T&,U> >, void>::T
     assign(T& x, const U& y) {throw std::runtime_error("assignment not supported between "+typeName<U>()+" and "+typeName<T>());}
+
+    template <class T, int rank>
+    struct NewArrayGetRegisterClass
+    {static void registerClass(python_t& p);};
+
+    template <class T>
+    struct NewArrayGetRegisterClass<T,0>
+    {
+      static void registerClass(python_t& p)
+      {python<T>(p,"");}
+    };
+      
+    template <class T, int rank>
+    struct NewArrayGet: public NewArrayGetRegisterClass<T,rank>
+    {
+      static_assert(rank==std::rank<T>::value);
+      T* x;
+      NewArrayGet(): x(0) {}
+      NewArrayGet(T& x): x(&x) {}
+      typedef NewArrayGet<typename std::remove_extent<T>::type,rank-1> L; 
+      L get(size_t i) const
+      {return L((*x)[i]);}
+      void set(size_t i, const L& v) {assign((*x)[i],v);}
+//      static void registerType(python_t& p)
+//      {NewArrayGetRegisterClass<T,rank>::registerClass(p);}
+    };
+
+    template <class T>
+    struct NewArrayGet<T,1>: public NewArrayGetRegisterClass<T,1>
+    {
+      static_assert(1==std::rank<T>::value);
+      T* x;
+      NewArrayGet(): x(0) {}
+      NewArrayGet(T& x): x(&x) {}
+      typedef typename std::remove_extent<T>::type L; 
+      L get(size_t i) const
+      {return L((*x)[i]);}
+      void set(size_t i, const L& v) {assign((*x)[i],v);}
+//      static void registerType(python_t& p)
+//      {NewArrayGetRegisterClass<T,rank>::registerClass(p);}
+    };
+
+   
+    template <class T, class M>
+    struct ArrayMemRef
+    {
+      typedef typename MemberType<M>::T MT;
+      static constexpr size_t rank=std::rank<MT>::value;
+      static_assert(rank>0);
+      M m;
+      ArrayMemRef(M m): m(m) {}
+      typedef NewArrayGet<MT,rank> L; 
+
+      L operator()(T& o) const 
+      {return L(o.*m);}
+    };
+
+    template<class T, class M>
+    struct ArrayMemRefSetItem
+    {
+      static constexpr size_t rank=std::rank<M>::value;
+      M m;
+      ArrayMemRefSetItem(M m): m(m) {}
+      typedef typename std::remove_all_extents<typename MemberType<M>::T>::type V; 
+      void operator()(T& o, size_t i, V& v) const 
+      {assign((o.*m)[i], v);}
+    };
   
+    template <class T, class M>
+    size_t arrayMemLen(const T&) {return std::extent<M>::value;}
+    
+    template <class U, class M>
+    struct Sig<ArrayMemRef<U,M> >
+    {
+      typedef boost::mpl::vector<typename ArrayMemRef<U,M>::L,U&> T;
+    };
+
+    
+    
+    template <class U, class M>
+    struct Sig<ArrayMemRefSetItem<U,M> >
+    {
+      typedef boost::mpl::vector<void,U&,size_t,typename ArrayMemRefSetItem<U,M>::V> T;
+    };
+   
     template <class T>
     struct ArrayGet<T,1>
     {
@@ -223,13 +314,6 @@ namespace classdesc
       typedef boost::mpl::vector<U,Array<U,1>&,size_t> T;
     };
 
-    template <class M> struct MemberType {typedef M T;};
-    template <class U, class V>
-    struct MemberType<U (V::*)>
-    {
-      typedef U T;
-    };
-    
     template <class U> struct remove_ref{typedef U T;};
     template <class U> struct remove_ref<U&> {typedef U T;};
   
@@ -473,6 +557,14 @@ namespace classdesc
     {return "PythonRef<"+typeName<T>()+">";}
   };
 
+  template <class T, int rank> struct tn<detail::NewArrayGet<T,rank>>
+  {
+    static std::string name()
+    {return "detail::NewArrayGet<"+typeName<T>()+","+std::to_string(rank)+">";}
+  };
+
+
+  
 }
 
 
@@ -679,7 +771,7 @@ namespace classdesc
     }
 
     template <class C, class M>
-    typename enable_if<Not<functional::is_nonmember_function_ptr<M> >,void>::T
+    typename enable_if<And<Not<is_Carray<typename detail::MemberType<M>::T> >, Not<functional::is_nonmember_function_ptr<M> > >,void>::T
     addMemberObject(const string& d, M m)
     {
       // recursively register class details for the member
@@ -694,6 +786,18 @@ namespace classdesc
     }
 
     template <class C, class M>
+    typename enable_if<is_Carray<typename detail::MemberType<M>::T>,void>::T
+    addMemberObject(const string& d, M m)
+    {
+      static constexpr size_t rank=std::rank<typename detail::MemberType<M>::T>::value;
+      auto& c=getClass<C>();
+      if (!c.completed)
+        c.add_property(tail(d).c_str(), detail::ArrayMemRef<C,M>(m),
+                       detail::ArrayMemRef<C,M>(m));
+      detail::ArrayMemRef<C,M>::L::registerClass(*this);
+    }
+
+   template <class C, class M>
     typename enable_if<Not<functional::is_nonmember_function_ptr<M> >,void>::T
     addMemberObject(const string& d, C&, M m) {
       Class<C>& c=getClass<C>();
