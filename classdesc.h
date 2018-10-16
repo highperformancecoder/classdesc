@@ -632,7 +632,11 @@ namespace classdesc
   template <class T,int n> struct tn<T [n]>
   {
     static std::string name()
-    {return typeName<T>()+"["+std::to_string(n)+"]";}
+    {
+      std::ostringstream os;
+      os << typeName<T>()<<"["<<n<<"]";
+      return os.str();
+    }
   };
 
   
