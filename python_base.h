@@ -3,7 +3,7 @@
   @author Russell Standish
   This file is part of Classdesc
 
-  Open source licensed under the MIT license. See LICENSE for details.
+  Open source licensed under the MIT license. See LICENSE for pythonDetails.
 */
 
 #ifndef PYTHON_BASE_H
@@ -53,7 +53,7 @@ namespace classdesc
   typename enable_if<Not<is_class<T> >,void>::T
   python(python_t& p, const string& d) {}
 
-  namespace detail
+  namespace pythonDetail
   {
     using namespace classdesc::functional;
 
@@ -382,20 +382,20 @@ namespace classdesc
     {setItem(*c,n,v);}
     
     template <class T>
-    size_t lenPythonRef(detail::PythonRef<T>& x) {return (*x).size();}
+    size_t lenPythonRef(pythonDetail::PythonRef<T>& x) {return (*x).size();}
 
   }
 
-  template <class T> struct tn<detail::PythonRef<T>>
+  template <class T> struct tn<pythonDetail::PythonRef<T>>
   {
     static std::string name()
     {return "PythonRef<"+typeName<T>()+">";}
   };
 
-  template <class T, int rank> struct tn<detail::ArrayGet<T,rank>>
+  template <class T, int rank> struct tn<pythonDetail::ArrayGet<T,rank>>
   {
     static std::string name()
-    {return "detail::ArrayGet<"+typeName<T>()+","+std::to_string(rank)+">";}
+    {return "pythonDetail::ArrayGet<"+typeName<T>()+","+std::to_string(rank)+">";}
   };
 
 
@@ -408,11 +408,11 @@ namespace boost {
   namespace python {
     namespace detail {
       template <class F>
-      typename classdesc::detail::Sig<F>::T get_signature(F f)
-      {return typename classdesc::detail::Sig<F>::T();}
+      typename classdesc::pythonDetail::Sig<F>::T get_signature(F f)
+      {return typename classdesc::pythonDetail::Sig<F>::T();}
       template <class F, class T>
-      typename classdesc::detail::Sig<F>::T get_signature(F f,T*dummy=0)
-      {return typename classdesc::detail::Sig<F>::T();}
+      typename classdesc::pythonDetail::Sig<F>::T get_signature(F f,T*dummy=0)
+      {return typename classdesc::pythonDetail::Sig<F>::T();}
     }
   }
 }
@@ -538,10 +538,10 @@ namespace classdesc
       auto& c=getClass<C>();
       if (!c.completed)
           c.def(tail(d).c_str(),m);
-      auto& cr=getClass<detail::PythonRef<C>>();
+      auto& cr=getClass<pythonDetail::PythonRef<C>>();
       if (!cr.completed)
-          cr.def(tail(d).c_str(),detail::MemFn<C,M>(m));
-      python<typename detail::DePythonRef<typename functional::Return<M>::T>::T>(*this,"");
+          cr.def(tail(d).c_str(),pythonDetail::MemFn<C,M>(m));
+      python<typename pythonDetail::DePythonRef<typename functional::Return<M>::T>::T>(*this,"");
     }
     
     // for methods returning a reference, create a wrapper object that
@@ -551,9 +551,9 @@ namespace classdesc
     addMemberFunction(const string& d, M m) 
     {
       typedef typename std::remove_reference<C>::type CC; 
-      auto& c=getClass<detail::PythonRef<CC>>();
+      auto& c=getClass<pythonDetail::PythonRef<CC>>();
       if (!c.completed)
-        c.def(tail(d).c_str(),detail::MemFnRef<CC,M>(m));
+        c.def(tail(d).c_str(),pythonDetail::MemFnRef<CC,M>(m));
       python<typename remove_reference<typename functional::Return<M>::T>::type>(*this,"");
     }
 
@@ -567,30 +567,30 @@ namespace classdesc
     }
 
     template <class C, class M>
-    typename enable_if<And<Not<is_Carray<typename detail::MemberType<M>::T> >, Not<functional::is_nonmember_function_ptr<M> > >,void>::T
+    typename enable_if<And<Not<is_Carray<typename pythonDetail::MemberType<M>::T> >, Not<functional::is_nonmember_function_ptr<M> > >,void>::T
     addMemberObject(const string& d, M m)
     {
-      // recursively register class details for the member
-      python<typename detail::DePythonRef<typename functional::Return<M>::T>::T>(*this,d);
+      // recursively register class pythonDetails for the member
+      python<typename pythonDetail::DePythonRef<typename functional::Return<M>::T>::T>(*this,d);
       auto& c=getClass<C>();
       if (!c.completed)
         c.def_readwrite(tail(d).c_str(),m);
-      auto& cr=getClass<detail::PythonRef<C>>();
+      auto& cr=getClass<pythonDetail::PythonRef<C>>();
       if (!cr.completed)
-        cr.add_property(tail(d).c_str(),detail::Get<C,M>(m),
-                       detail::Set<C,M>(m));
+        cr.add_property(tail(d).c_str(),pythonDetail::Get<C,M>(m),
+                       pythonDetail::Set<C,M>(m));
     }
 
     template <class C, class M>
-    typename enable_if<is_Carray<typename detail::MemberType<M>::T>,void>::T
+    typename enable_if<is_Carray<typename pythonDetail::MemberType<M>::T>,void>::T
     addMemberObject(const string& d, M m)
     {
-      static constexpr size_t rank=std::rank<typename detail::MemberType<M>::T>::value;
+      static constexpr size_t rank=std::rank<typename pythonDetail::MemberType<M>::T>::value;
       auto& c=getClass<C>();
       if (!c.completed)
-        c.add_property(tail(d).c_str(), detail::ArrayMemRef<C,M>(m),
-                       detail::ArrayMemRef<C,M>(m));
-      detail::ArrayMemRef<C,M>::L::registerClass(*this);
+        c.add_property(tail(d).c_str(), pythonDetail::ArrayMemRef<C,M>(m),
+                       pythonDetail::ArrayMemRef<C,M>(m));
+      pythonDetail::ArrayMemRef<C,M>::L::registerClass(*this);
     }
     template <class C, class M>
     typename enable_if<is_member_function_pointer<M>,void>::T
@@ -612,11 +612,11 @@ namespace classdesc
     {
       auto& c=getClass<C>();
       if (!c.completed)
-        c.add_property(tail(d).c_str(),detail::enumGet<C>(m),detail::enumSet<C>(m));
+        c.add_property(tail(d).c_str(),pythonDetail::enumGet<C>(m),pythonDetail::enumSet<C>(m));
       
-      auto& cr=getClass<detail::PythonRef<C> >();
+      auto& cr=getClass<pythonDetail::PythonRef<C> >();
       if (!cr.completed)
-        cr.add_property(tail(d).c_str(),detail::enumRefGet<C>(m),detail::enumRefSet<C>(m));
+        cr.add_property(tail(d).c_str(),pythonDetail::enumRefGet<C>(m),pythonDetail::enumRefSet<C>(m));
     }
   };
 
@@ -625,17 +625,17 @@ namespace classdesc
   python(python_t& p, const string& ) {
     auto& c=p.getClass<T>();
     if (!c.completed)
-      c.def("__len__", &detail::len<T>).
-      def("__getitem__", &detail::getItem<T>).
-      def("__setitem__", &detail::setItem<T>);
-    auto& cr=p.getClass<detail::PythonRef<T> >();
+      c.def("__len__", &pythonDetail::len<T>).
+      def("__getitem__", &pythonDetail::getItem<T>).
+      def("__setitem__", &pythonDetail::setItem<T>);
+    auto& cr=p.getClass<pythonDetail::PythonRef<T> >();
     if (!cr.completed)
-      cr.def("__len__", &detail::lenPythonRef<T>).
-        def("__getitem__", &detail::getItemPythonRef<T>).
-        def("__setitem__", &detail::setItemPythonRef<T>);
+      cr.def("__len__", &pythonDetail::lenPythonRef<T>).
+        def("__getitem__", &pythonDetail::getItemPythonRef<T>).
+        def("__setitem__", &pythonDetail::setItemPythonRef<T>);
     python<typename T::value_type>(p,"");
     
-    python<typename detail::DePythonRef<typename functional::Return<decltype(&detail::getItem<T>)>::T>::T>(p,"");
+    python<typename pythonDetail::DePythonRef<typename functional::Return<decltype(&pythonDetail::getItem<T>)>::T>::T>(p,"");
   }
 
   template <class T>
@@ -654,14 +654,14 @@ namespace classdesc
   }
 
   template <class C, class B, class M>
-  typename enable_if<Not<is_enum<typename detail::MemberType<M>::T> >,void>::T
+  typename enable_if<Not<is_enum<typename pythonDetail::MemberType<M>::T> >,void>::T
   python_type(python_t& p, const string& d, M m)
   {
     p.addMember<C>(d,m);
   }
 
   template <class C, class B, class M>
-  typename enable_if<is_enum<typename detail::MemberType<M>::T>,void>::T
+  typename enable_if<is_enum<typename pythonDetail::MemberType<M>::T>,void>::T
   python_type(python_t& p, const string& d, M m) 
   {
     p.addEnum<C>(d,m);

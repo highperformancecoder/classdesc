@@ -112,11 +112,4 @@ struct Root
   Root(): bar(3), bar1(2) {}
 };
 
-struct rootInit: classdesc::detail::PythonRef<Root>
-{
-  static Root root;
-  rootInit(): classdesc::detail::PythonRef<Root>(root) {}
-};
-
-
 #include "pythonExample.cd"

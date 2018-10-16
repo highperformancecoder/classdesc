@@ -14,7 +14,7 @@ namespace classdesc
 
   
   template <class T, int rank>
-  void detail::ArrayGetRegisterClass<T,rank>::registerClass(python_t& p)
+  void pythonDetail::ArrayGetRegisterClass<T,rank>::registerClass(python_t& p)
   {
     auto& c=p.getClass<ArrayGet<T,rank> >();
     if (!c.completed)
