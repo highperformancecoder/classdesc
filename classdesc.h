@@ -154,7 +154,8 @@ namespace classdesc
   using std::tr1::is_floating_point;
   // conflicts with an already established classdesc concept
   //using std::tr1::is_array;
-  struct is_Carray: public std::tr1::is_array;
+  template <class T>
+  struct is_Carray: public std::tr1::is_array<T> {};
   using std::tr1::is_pointer;
   using std::tr1::is_reference;
   using std::tr1::is_member_object_pointer;
