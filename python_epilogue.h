@@ -14,17 +14,17 @@ namespace classdesc
 
   
   template <class T, int rank>
-  void detail::NewArrayGetRegisterClass<T,rank>::registerClass(python_t& p)
+  void detail::ArrayGetRegisterClass<T,rank>::registerClass(python_t& p)
   {
-    auto& c=p.getClass<NewArrayGet<T,rank> >();
+    auto& c=p.getClass<ArrayGet<T,rank> >();
     if (!c.completed)
       {
-        c.def("__len__",&arrayMemLen<NewArrayGet<T,rank>, T>).
-          def("__getitem__",&NewArrayGet<T,rank>::get);
+        c.def("__len__",&arrayMemLen<ArrayGet<T,rank>, T>).
+          def("__getitem__",&ArrayGet<T,rank>::get);
         if (rank==1)
-          c.def("__setitem__",&NewArrayGet<T,rank>::set);
+          c.def("__setitem__",&ArrayGet<T,rank>::set);
       }
-    NewArrayGetRegisterClass<typename std::remove_extent<T>::type,rank-1>::registerClass(p);
+    ArrayGetRegisterClass<typename std::remove_extent<T>::type,rank-1>::registerClass(p);
   }
 }
 

@@ -105,22 +105,22 @@ namespace classdesc
 
     // registerClass is a MixIn because terminating rank differs from that of NewArrayGet
     template <class T, int rank>
-    struct NewArrayGetRegisterClass
+    struct ArrayGetRegisterClass
     {static void registerClass(python_t& p);};
 
     template <class T>
-    struct NewArrayGetRegisterClass<T,0>
+    struct ArrayGetRegisterClass<T,0>
     {static void registerClass(python_t& p) {python<T>(p,"");}};
 
     template <class T, int rank> struct ArrayGetReturn;
     
     template <class T, int rank>
-    struct NewArrayGet: public NewArrayGetRegisterClass<T,rank>
+    struct ArrayGet: public ArrayGetRegisterClass<T,rank>
     {
       static_assert(rank==std::rank<T>::value);
       T* x;
-      NewArrayGet(): x(0) {}
-      NewArrayGet(T& x): x(&x) {}
+      ArrayGet(): x(0) {}
+      ArrayGet(T& x): x(&x) {}
       typedef typename ArrayGetReturn<T,rank>::T L; 
       L get(size_t i) const
       {return L((*x)[i]);}
@@ -128,7 +128,7 @@ namespace classdesc
     };
 
     template <class U, int rank> struct ArrayGetReturn
-    {typedef NewArrayGet<typename std::remove_extent<U>::type,rank-1> T;};
+    {typedef ArrayGet<typename std::remove_extent<U>::type,rank-1> T;};
     template <class U> struct ArrayGetReturn<U,1>
     {typedef typename std::remove_extent<U>::type T;};
 
@@ -141,7 +141,7 @@ namespace classdesc
       static_assert(rank>0);
       M m;
       ArrayMemRef(M m): m(m) {}
-      typedef NewArrayGet<MT,rank> L; 
+      typedef ArrayGet<MT,rank> L; 
 
       L operator()(T& o) const 
       {return L(o.*m);}
@@ -392,10 +392,10 @@ namespace classdesc
     {return "PythonRef<"+typeName<T>()+">";}
   };
 
-  template <class T, int rank> struct tn<detail::NewArrayGet<T,rank>>
+  template <class T, int rank> struct tn<detail::ArrayGet<T,rank>>
   {
     static std::string name()
-    {return "detail::NewArrayGet<"+typeName<T>()+","+std::to_string(rank)+">";}
+    {return "detail::ArrayGet<"+typeName<T>()+","+std::to_string(rank)+">";}
   };
 
 
