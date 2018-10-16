@@ -118,15 +118,6 @@ namespace classdesc
       }
     };
 
-//    template <class T>
-//    typename T::value_type getItem(const T& c, size_t n) {
-//        if (n>=c.size())
-//          throw std::out_of_range("index out of bounds");
-//        typename T::const_iterator i=c.begin();
-//        std::advance(i,n);
-//        return *i;
-//    }
-
     template <class U> struct Sig<Len<U>>
     {
       typedef boost::mpl::vector<size_t,U&> T;
@@ -199,17 +190,17 @@ namespace classdesc
     typename enable_if<Not<is_assignable<T&,U> >, void>::T
     assign(T& x, const U& y) {throw std::runtime_error("assignment not supported between "+typeName<U>()+" and "+typeName<T>());}
 
+    // registerClass is a MixIn because terminating rank differs from that of NewArrayGet
     template <class T, int rank>
     struct NewArrayGetRegisterClass
     {static void registerClass(python_t& p);};
 
     template <class T>
     struct NewArrayGetRegisterClass<T,0>
-    {
-      static void registerClass(python_t& p)
-      {python<T>(p,"");}
-    };
-      
+    {static void registerClass(python_t& p) {python<T>(p,"");}};
+
+    template <class T, int rank> struct ArrayGetReturn;
+    
     template <class T, int rank>
     struct NewArrayGet: public NewArrayGetRegisterClass<T,rank>
     {
@@ -217,28 +208,16 @@ namespace classdesc
       T* x;
       NewArrayGet(): x(0) {}
       NewArrayGet(T& x): x(&x) {}
-      typedef NewArrayGet<typename std::remove_extent<T>::type,rank-1> L; 
+      typedef typename ArrayGetReturn<T,rank>::T L; 
       L get(size_t i) const
       {return L((*x)[i]);}
       void set(size_t i, const L& v) {assign((*x)[i],v);}
-//      static void registerType(python_t& p)
-//      {NewArrayGetRegisterClass<T,rank>::registerClass(p);}
     };
 
-    template <class T>
-    struct NewArrayGet<T,1>: public NewArrayGetRegisterClass<T,1>
-    {
-      static_assert(1==std::rank<T>::value);
-      T* x;
-      NewArrayGet(): x(0) {}
-      NewArrayGet(T& x): x(&x) {}
-      typedef typename std::remove_extent<T>::type L; 
-      L get(size_t i) const
-      {return L((*x)[i]);}
-      void set(size_t i, const L& v) {assign((*x)[i],v);}
-//      static void registerType(python_t& p)
-//      {NewArrayGetRegisterClass<T,rank>::registerClass(p);}
-    };
+    template <class U, int rank> struct ArrayGetReturn
+    {typedef NewArrayGet<typename std::remove_extent<U>::type,rank-1> T;};
+    template <class U> struct ArrayGetReturn<U,1>
+    {typedef typename std::remove_extent<U>::type T;};
 
    
     template <class T, class M>
@@ -688,15 +667,15 @@ namespace classdesc
       scopeStack.back().object.def_readonly(tail(d).c_str(),o);
     }
 
-    template <class T>
-    void addObject(const string& d, Enum_handle<T> a) {
-      checkScope(d);
-//      // should be add_static_property
-//      puts("b4");
-//      scopeStack.back().object.add_property
-//        (tail(d).c_str(), detail::EnumGet<T>(a), detail::EnumSet<T>(a));
-//      puts("after");
-    }
+//    template <class T>
+//    void addObject(const string& d, Enum_handle<T> a) {
+//      checkScope(d);
+////      // should be add_static_property
+////      puts("b4");
+////      scopeStack.back().object.add_property
+////        (tail(d).c_str(), detail::EnumGet<T>(a), detail::EnumSet<T>(a));
+////      puts("after");
+//    }
     
     template <class F>
     void addFunctional(const string& d, F f) {
