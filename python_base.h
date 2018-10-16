@@ -814,9 +814,6 @@ namespace classdesc
   };
 
   template <class T>
-  struct is_sequence<detail::ArrayWrapper<T> >: public true_type {};
-
-  template <class T>
   typename enable_if<is_sequence<T>,void>::T
   python(python_t& p, const string& ) {
     auto& c=p.getClass<T>();
@@ -843,21 +840,6 @@ namespace classdesc
       throw std::runtime_error("null dereference");
   }
   
-  template <class T>
-  void python(python_t& p, const string& d, shared_ptr<T>& a)
-  {//TODO
-//    auto& c=p.getClass<T>();
-//    if (!c.completed)
-//      c.//def("get",&sharedPtrGetter).
-//        def("__getitem__", &detail::getItem<shared_ptr<T> >).
-//        def("__setitem__", &detail::setItem<shared_ptr<T> >);
-//    //python<T>(p,"");
-  }
-
-  void python(python_t& p, const string& d, string& a) {
-    p.addObject(d,a);
-  }
-
   template <class F>
   typename enable_if<functional::is_nonmember_function_ptr<F>,void>::T
   python(python_t& p, const string& d, F f) {
@@ -884,8 +866,7 @@ namespace classdesc
   }
 
   template <class T>
-  void python_onbase(python_t& p, const string& d, T& a)
-  {python(p,d,a);}
+  void python_onbase(python_t& p, const string& d, T& a);
 }
 
 namespace classdesc_access
