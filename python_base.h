@@ -667,16 +667,6 @@ namespace classdesc
       scopeStack.back().object.def_readonly(tail(d).c_str(),o);
     }
 
-//    template <class T>
-//    void addObject(const string& d, Enum_handle<T> a) {
-//      checkScope(d);
-////      // should be add_static_property
-////      puts("b4");
-////      scopeStack.back().object.add_property
-////        (tail(d).c_str(), detail::EnumGet<T>(a), detail::EnumSet<T>(a));
-////      puts("after");
-//    }
-    
     template <class F>
     void addFunctional(const string& d, F f) {
       checkScope(d);
@@ -824,79 +814,7 @@ namespace classdesc
   };
 
   template <class T>
-  typename enable_if<ClassdescEnabledPythonType<T>,void>::T
-  python(python_t& p, const string& d, T& a);
-
-  template<class C, class M>
-  typename enable_if<is_member_function_pointer<M>, void>::T
-  python(python_t& p, const string& d, C& c, M m) {
-    p.addMemberFunction(d,c,m);
-  }
-  
-  template<class C, class M>
-  typename enable_if<is_member_object_pointer<M>, void>::T
-  python(python_t& p, const string& d, C& c, M m) {
-    p.addMemberObject(d,c,m);
-    python(p,d,c.*m);
-  }
-  
-//  template<class C, class M>
-//  typename enable_if<is_function<M>, void>::T
-//  python(python_t& p, const string& d, C& c, M *m) {
-//    p.addMemberFunctionPtr(d,c,m);
-//  }
-  
-  template <class T>
-  typename enable_if<is_fundamental<T>,void>::T
-  python(python_t& p, const string& d, T& a) {
-    p.addObject(d,a);
-  }
-
-
-  template <class T>
   struct is_sequence<detail::ArrayWrapper<T> >: public true_type {};
-
-  template <class T>
-  void python(python_t& p, const string& d, is_array,
-                    T& arg, int dims, size_t dim1)
-  {
-    boost::python::class_<detail::Array<T,1>>((tail(d)+"_type").c_str()).
-      def("__len__", detail::ArrayLen<T,1>(dim1)).
-      def("__getitem__", detail::ArrayGet<T,1>(&arg,&dim1));
-    p.addObject(d,reinterpret_cast<detail::Array<T,1>&>(arg));
-    detail::ArrayGet<T,1>::registerClass(p);
-  }
-
-  template <class T>
-  void python(python_t& p, const string& d, is_array,
-                    T& arg, int, size_t dim1, size_t dim2)
-  {
-    size_t dims[]={dim1,dim2};
-    boost::python::class_<detail::Array<T,2>>((tail(d)+"_type").c_str()).
-      def("__len__", detail::ArrayLen<T,2>(dim1)).
-      def("__getitem__", detail::ArrayGet<T,2>(&arg,dims));
-    p.addObject(d,reinterpret_cast<detail::Array<T,2>&>(arg));
-    detail::ArrayGet<T,2>::registerClass(p);
-  }
-
-  
-  template <class T>
-  typename enable_if<is_sequence<T>,void>::T
-  python(python_t& p, const string& d, T& a) {
-    auto& c=p.getClass<T>();
-    if (!c.completed)
-      c.def("__len__", &detail::len<T>).
-      def("__getitem__", &detail::getItem<T>).
-      def("__setitem__", &detail::setItem<T>);
-    auto& cr=p.getClass<detail::PythonRef<T> >();
-    if (!cr.completed)
-      cr.def("__len__", &detail::lenPythonRef<T>).
-        def("__getitem__", &detail::getItemPythonRef<T>).
-        def("__setitem__", &detail::setItemPythonRef<T>);
-
-    p.addObject(d,a);
-    python<typename T::value_type>(p,"");
-  }
 
   template <class T>
   typename enable_if<is_sequence<T>,void>::T
@@ -915,36 +833,6 @@ namespace classdesc
     
     python<typename detail::DePythonRef<typename functional::Return<decltype(&detail::getItem<T>)>::T>::T>(p,"");
   }
-
-  template <class T>
-  typename enable_if<is_associative_container<T>,void>::T
-  python(python_t& p, const string& d, T& a) {
-    boost::python::class_<T>((tail(d)+"_type").c_str()).
-      def("__iter__", boost::python::iterator<T>()).
-      def("__len__", functional::bindMethod(a,&T::size));
-    p.addObject(d,a);
-  }
-
-  template <class T>
-  string getEnum(T a) {return Enum_handle<T>(a);}
-
-  template <class T>
-  void setEnum(T a, const string& x) {
-    Enum_handle<T> tmp(a);
-    tmp=x;
-  }
-  
-  template <class T>
-  void python(python_t& p, const string& d, const Enum_handle<T>& a) {
-//    auto& c=p.getClass<Enum_handle<T> >();
-//    if (!c.completed)
-//      c.def("__getitem__",&getEnum<T>).
-//        def("__setitem__",&setEnum<T>);
-    p.addObject(d,a);
-  }
-
-  template <class T>
-  void python(python_t& p, const string& d, Exclude<T>& a) {}
 
   template <class T>
   T& sharedPtrGetter(const shared_ptr<T>& self)
