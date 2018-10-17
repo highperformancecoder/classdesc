@@ -12,6 +12,7 @@
 
 #include "function.h"
 #include <boost/mpl/vector.hpp>
+//#include <boost/python.hpp>
 
 /*
   For all types, maintain a vector of polymorphic class objects
@@ -83,8 +84,8 @@ namespace classdesc
         typename Arg<F,Arity<F>::V-N+1>::T
         >::type T;
     };
-    
-    template <class F> struct Sig
+
+    template <class F> struct SigFun
     {
       typedef typename boost::mpl::push_front<
         typename SigArg<F,Arity<F>::V>::T,
@@ -92,6 +93,14 @@ namespace classdesc
         >::type T;
     };
   
+    template <class F>
+    struct SigObj
+    {
+      typedef typename classdesc::pythonDetail::SigFun<decltype(&F::operator())>::T T;
+    };
+
+    template <class T> struct Sig: public std::conditional<is_class<T>::value, SigObj<T>, SigFun<T>>::type {};
+    
     template <class T>
     size_t len(T& x) {return x.size();}
     
@@ -143,7 +152,6 @@ namespace classdesc
       ArrayMemRef(M m): m(m) {}
       typedef ArrayGet<MT,rank> L; 
 
-      typedef boost::mpl::vector<typename L,U&> Sig;
       L operator()(T& o) const 
       {return L(o.*m);}
     };
@@ -162,19 +170,6 @@ namespace classdesc
     template <class T, class M>
     size_t arrayMemLen(const T&) {return std::extent<M>::value;}
     
-//    template <class U, class M>
-//    struct Sig<ArrayMemRef<U,M> >
-//    {
-//      typedef boost::mpl::vector<typename ArrayMemRef<U,M>::L,U&> T;
-//    };
-
-   
-    template <class U, class M>
-    struct Sig<ArrayMemRefSetItem<U,M> >
-    {
-      typedef boost::mpl::vector<void,U&,size_t,typename ArrayMemRefSetItem<U,M>::V> T;
-    };
-   
     template <class U> struct remove_ref{typedef U T;};
     template <class U> struct remove_ref<U&> {typedef U T;};
   
@@ -213,6 +208,19 @@ namespace classdesc
       {return ((*o).*m)(std::forward<A>(a)...);}
     };
 
+    // explicit signatures are required when variadic types are present
+    // note signature is not the same as that of M, as the self argument differs
+    template <class C, class M>
+    struct Sig<MemFn<C,M>>
+    {
+      typedef typename boost::mpl::push_front<
+        typename boost::mpl::push_front<
+        typename SigArg<M,Arity<M>::V>::T,
+        PythonRef<C>&>::type,
+        typename Return<M>::T
+        >::type T;
+    };
+
     template <class C, class M>
     struct MemFnRef
     {
@@ -224,6 +232,19 @@ namespace classdesc
       {return R(((*o).*m)(std::forward<A>(a)...));}
     };
 
+    // explicit signatures are required when variadic types are present
+    // note signature is not the same as that of M, as the self argument differs
+    template <class C, class M>
+    struct Sig<MemFnRef<C,M>>
+    {
+      typedef typename boost::mpl::push_front<
+        typename boost::mpl::push_front<
+        typename SigArg<M,Arity<M>::V>::T,
+        PythonRef<C>&>::type,
+        PythonRef<typename Return<M>::T>
+        >::type T;
+    };
+    
     template <class C,class M>
     struct Get
     {
@@ -242,39 +263,6 @@ namespace classdesc
     };
 
     template <class C, class M>
-    struct Sig<MemFn<C,M>>
-    {
-      typedef typename boost::mpl::push_front<
-        typename boost::mpl::push_front<
-        typename SigArg<M,Arity<M>::V>::T,
-        PythonRef<C>&>::type,
-        typename Return<M>::T
-        >::type T;
-    };
-    template <class C, class M>
-    struct Sig<MemFnRef<C,M>>
-    {
-      typedef typename boost::mpl::push_front<
-        typename boost::mpl::push_front<
-        typename SigArg<M,Arity<M>::V>::T,
-        PythonRef<C>&>::type,
-        PythonRef<typename Return<M>::T>
-        >::type T;
-    };
-    template <class C, class M>
-    struct Sig<Get<C,M>>
-    {
-      typedef typename boost::mpl::vector<typename MemberType<M>::T,const PythonRef<C>&>::type T;
-    };
-  
-    template <class C, class M>
-    struct Sig<Set<C,M>>
-    {
-      typedef typename boost::mpl::vector<void, PythonRef<C>&, const typename MemberType<M>::T&>::type T;
-    };
-
-    
-    template <class C, class M>
     struct EnumGet
     {
       typedef typename MemberType<M>::T E;
@@ -290,15 +278,6 @@ namespace classdesc
       M m;
       EnumSet(M m): m(m) {}
       void operator()(C& o, const string& v) const {o.*m=enum_keys<E>()(v);}
-    };
-
-    template <class C,class E> struct Sig<EnumGet<C,E> >
-    {
-      typedef typename boost::mpl::vector<string, const C&>::type T;
-    };
-    template <class C,class E> struct Sig<EnumSet<C,E> >
-    {
-      typedef typename boost::mpl::vector<void,C&,string>::type T;
     };
 
     template <class C, class M>
@@ -328,15 +307,6 @@ namespace classdesc
     EnumRefGet<C,M> enumRefGet(M m) {return EnumRefGet<C,M>(m);}
     template <class C, class M>
     EnumRefSet<C,M> enumRefSet(M m) {return EnumRefSet<C,M>(m);}
-
-    template <class C,class E> struct Sig<EnumRefGet<C,E> >
-    {
-      typedef typename boost::mpl::vector<string, const PythonRef<C>&>::type T;
-    };
-    template <class C,class E> struct Sig<EnumRefSet<C,E> >
-    {
-      typedef typename boost::mpl::vector<void,const PythonRef<C>&,string>::type T;
-    };
 
     template <class T>
     typename T::value_type& getItemRef(T& c, size_t n)
@@ -403,13 +373,10 @@ namespace classdesc
 }
 
 
-// extend boost::python function signature processing to bound member functions
+// extend boost::python function signature processing on callable objects
 namespace boost {
   namespace python {
     namespace detail {
-      template <class F>
-      typename classdesc::pythonDetail::Sig<F>::T get_signature(F f)
-      {return typename classdesc::pythonDetail::Sig<F>::T();}
       template <class F, class T>
       typename classdesc::pythonDetail::Sig<F>::T get_signature(F f,T*dummy=0)
       {return typename classdesc::pythonDetail::Sig<F>::T();}
