@@ -1,5 +1,5 @@
 /*
-  @copyright Russell Standish 2018
+  @copyright Russell Standisgh 2018
   @author Russell Standish
   This file is part of Classdesc
 
@@ -354,6 +354,62 @@ namespace classdesc
     template <class T>
     size_t lenPythonRef(pythonDetail::PythonRef<T>& x) {return (*x).size();}
 
+    template <class T>
+    typename T::mapped_type basicGetMapItem(T& x, const typename T::key_type& k)
+    {
+      auto i=x.find(k);
+      if (i!=x.end())
+        return i->second;
+      else
+        throw std::runtime_error("key not found");
+    }
+      
+    template <class T>
+    typename enable_if<PythonBasicType<typename T::mapped_type>,
+                       typename T::mapped_type>::T
+    getMapItem(T& x, const typename T::key_type& k)
+    {return basicGetMapItem(x,k);}
+    
+    template <class T>
+    typename enable_if<Not<PythonBasicType<typename T::mapped_type> >,
+                         PythonRef<typename T::mapped_type> >::T
+    getMapItem(T& x, const typename T::key_type& k)
+    {return basicGetMapItem(x,k);}
+      
+    template <class T>
+    void setMapItem
+    (T& x, const typename T::key_type& k, const typename T::mapped_type& v)
+    {
+      auto i=x.find(k);
+      if (i!=x.end())
+        assign(i->second,v);
+      else
+        throw std::runtime_error("key not found");
+    }
+      
+    template <class T>
+    PythonRef<typename T::mapped_type> getMapItemPythonRef
+    (const PythonRef<T>& x, const typename T::key_type& k)
+    {
+      auto i=(*x).find(k);
+      if (i!=(*x).end())
+        return PythonRef<typename T::mapped_type>(i->second);
+      else
+        throw std::runtime_error("key not found");
+    }
+      
+    template <class T>
+    void setMapItemPythonRef
+    (const PythonRef<T>& x, const typename T::key_type& k, const typename T::mapped_type& v)
+    {
+      auto i=(*x).find(k);
+      if (i!=(*x).end())
+        assign(*i,v);
+      else
+        throw std::runtime_error("key not found");
+    }
+      
+ 
   }
 
   template <class T> struct tn<pythonDetail::PythonRef<T>>
@@ -601,6 +657,25 @@ namespace classdesc
         def("__getitem__", &pythonDetail::getItemPythonRef<T>).
         def("__setitem__", &pythonDetail::setItemPythonRef<T>);
     python<typename T::value_type>(p,"");
+    
+    python<typename pythonDetail::DePythonRef<typename functional::Return<decltype(&pythonDetail::getItem<T>)>::T>::T>(p,"");
+  }
+  
+  template <class T>
+  typename enable_if<is_associative_container<T>,void>::T
+  python(python_t& p, const string& ) {
+    auto& c=p.getClass<T>();
+    if (!c.completed)
+      c.def("__len__", &pythonDetail::len<T>).
+      def("__getitem__", &pythonDetail::getMapItem<T>).
+      def("__setitem__", &pythonDetail::setMapItem<T>);
+    auto& cr=p.getClass<pythonDetail::PythonRef<T> >();
+    if (!cr.completed)
+      cr.def("__len__", &pythonDetail::lenPythonRef<T>).
+        def("__getitem__", &pythonDetail::getMapItemPythonRef<T>).
+        def("__setitem__", &pythonDetail::setMapItemPythonRef<T>);
+    python<typename T::mapped_type>(p,"");
+    python<typename T::key_type>(p,"");
     
     python<typename pythonDetail::DePythonRef<typename functional::Return<decltype(&pythonDetail::getItem<T>)>::T>::T>(p,"");
   }

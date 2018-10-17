@@ -34,7 +34,7 @@ struct Foo
   int d1[3][2];
   std::vector<int> h;
   std::list<int> l;
-  //  std::map<int,int> m;
+  std::map<int,int> m;
   std::list<std::list<std::string> > llex;
   Exclude<int> iex;
   std::vector<string> vs;
@@ -54,7 +54,7 @@ struct Foo
         for (int j=0; j<2; ++j)
           d1[i][j]=2*i+j;
       }
-    //    m[0]=5; m[3]=2;
+    m[0]=5; m[3]=2;
 
 //    sm["hello"]=2;
 //    sm["goodbye"]=3;

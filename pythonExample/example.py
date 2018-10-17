@@ -40,6 +40,19 @@ assert r.bar.h[1]==3
 r.bar.l[1]=3
 assert r.bar.l[1]==3
 
+assert r.bar.m[0]==5
+assert r.bar.m[3]==2
+
+try:
+    r.bar.m[1]
+    assert False
+except:
+    pass
+
+r.bar.m[3]=1
+assert r.bar.m[3]==1
+
+
 assert len(r.bar.llex)==2
 for i in r.bar.llex:
     assert len(i)==2

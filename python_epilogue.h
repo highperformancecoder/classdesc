@@ -36,7 +36,12 @@ namespace classdesc_access
     void type(classdesc::python_t&,const string&) {}
   };
 
-  
+  template <class F, class S>
+  struct access_python<std::pair<F,S>>
+  {
+    template <class T>
+    void type(classdesc::python_t&,const string&) {}
+  };
   
 }
 
