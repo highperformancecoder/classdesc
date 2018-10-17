@@ -461,7 +461,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 	  while (input.token!=";") input.nexttok();
           if (isIdentifierStart(input.lasttoken[0]))
             reg.register_class
-              (input.lasttoken,"",
+              (input.lasttoken,input.lasttoken,
                "classdesc::is_array(),(char&)("+varname+"."+input.lasttoken+
                "),1,sizeof("+varname+"."+input.lasttoken+")");
           continue;
@@ -967,7 +967,7 @@ int main(int argc, char* argv[])
   tokeninput input(inputStream);
 
   char **action=argv+1;
-  int nactions=argc-1;
+  unsigned nactions=argc-1;
   string basename;
   FILE *basef;
   char tname[1024];
@@ -1097,7 +1097,7 @@ int main(int argc, char* argv[])
       if (!i->second)
 	printf("class %s {};\n",i->first.c_str());
 
-  for (int k=0; k<nactions; k++)
+  for (unsigned k=0; k<nactions; k++)
     printf("#include \"%s_base.h\"\n",action[k]);
 
   if (nactions>0)
@@ -1205,7 +1205,7 @@ int main(int argc, char* argv[])
 
   {
     PrintNameSpace ns("classdesc_access");
-    for (int k=0; k<nactions; k++)
+    for (unsigned k=0; k<nactions; k++)
       {
         /* parse action_base for types to omit */
         //      omit.clear();
@@ -1347,7 +1347,7 @@ int main(int argc, char* argv[])
                       printf("::%s_type<_CD_TYPE,%s >(targ,desc+\"%s\",%s);\n",
                              action[k], type_arg_name.c_str(),
                              aj.name.c_str(),aj.action.c_str());
-                    else if (aj.action.find("classdesc::is_array")==0)
+                    else if (aj.action.find("classdesc::is_array")==0 && aj.member.length())
                       printf("::%s_type<_CD_TYPE,%s >(targ,desc+\"%s\",&%s::%s);\n",
                              action[k], type_arg_name.c_str(),
                              aj.name.c_str(),without_type_qualifier(type_arg_name).c_str(),aj.member.c_str());

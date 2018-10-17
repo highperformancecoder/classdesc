@@ -143,6 +143,7 @@ namespace classdesc
       ArrayMemRef(M m): m(m) {}
       typedef ArrayGet<MT,rank> L; 
 
+      typedef boost::mpl::vector<typename L,U&> Sig;
       L operator()(T& o) const 
       {return L(o.*m);}
     };
@@ -161,14 +162,13 @@ namespace classdesc
     template <class T, class M>
     size_t arrayMemLen(const T&) {return std::extent<M>::value;}
     
-    template <class U, class M>
-    struct Sig<ArrayMemRef<U,M> >
-    {
-      typedef boost::mpl::vector<typename ArrayMemRef<U,M>::L,U&> T;
-    };
+//    template <class U, class M>
+//    struct Sig<ArrayMemRef<U,M> >
+//    {
+//      typedef boost::mpl::vector<typename ArrayMemRef<U,M>::L,U&> T;
+//    };
 
-    
-    
+   
     template <class U, class M>
     struct Sig<ArrayMemRefSetItem<U,M> >
     {
