@@ -408,8 +408,32 @@ namespace classdesc
       else
         throw std::runtime_error("key not found");
     }
-      
- 
+
+    /// exception to signal end of iteration
+    struct StopIteration {};
+    
+    template <class T>
+    struct Iterator
+    {
+      typedef typename T::const_iterator I;
+      I i, end;
+      Iterator() {}
+      Iterator(I begin, I end): i(begin), end(end) {}
+      typename T::key_type next() {
+        if (i==end)
+          throw StopIteration();
+        else
+          {
+            auto j=i++;
+            return j->first;
+          }
+      }
+      static void registerClass(python_t&);
+    };
+
+    template <class T>
+    Iterator<T> iter(const T& m) {return Iterator<T>(m.begin(), m.end());}
+
   }
 
   template <class T> struct tn<pythonDetail::PythonRef<T>>
@@ -424,6 +448,11 @@ namespace classdesc
     {return "pythonDetail::ArrayGet<"+typeName<T>()+","+std::to_string(rank)+">";}
   };
 
+  template <class T>
+  struct tn<pythonDetail::Iterator<T>>
+  {
+    static string name() {return "classdesc::pythonDetail::Iterator<"+typeName<T>()+">";}
+  };
 
   
 }
@@ -441,6 +470,7 @@ namespace boost {
 }
 
 #include "boost/python.hpp"
+//#include <boost/python/exception_translator.hpp>
 #include <vector>
 
 namespace classdesc
@@ -667,8 +697,9 @@ namespace classdesc
     auto& c=p.getClass<T>();
     if (!c.completed)
       c.def("__len__", &pythonDetail::len<T>).
-      def("__getitem__", &pythonDetail::getMapItem<T>).
-      def("__setitem__", &pythonDetail::setMapItem<T>);
+        def("__getitem__", &pythonDetail::getMapItem<T>).
+        def("__setitem__", &pythonDetail::setMapItem<T>).
+        def("__iter__", &pythonDetail::iter<T>);
     auto& cr=p.getClass<pythonDetail::PythonRef<T> >();
     if (!cr.completed)
       cr.def("__len__", &pythonDetail::lenPythonRef<T>).
@@ -676,8 +707,7 @@ namespace classdesc
         def("__setitem__", &pythonDetail::setMapItemPythonRef<T>);
     python<typename T::mapped_type>(p,"");
     python<typename T::key_type>(p,"");
-    
-    python<typename pythonDetail::DePythonRef<typename functional::Return<decltype(&pythonDetail::getItem<T>)>::T>::T>(p,"");
+    pythonDetail::Iterator<T>::registerClass(p);
   }
 
   template <class T>
@@ -716,6 +746,25 @@ namespace classdesc
 
   template <class T>
   void python_onbase(python_t& p, const string& d, T& a);
+
+  namespace pythonDetail
+  {
+    
+    inline void translate(StopIteration)
+    {PyErr_SetString(PyExc_StopIteration,"");}
+    int dummy = (boost::python::register_exception_translator<StopIteration>(&translate),0);
+
+    template <class T>
+    void Iterator<T>::registerClass(python_t& p)
+    {
+      auto& c=p.getClass<Iterator<T>>();
+      if (!c.completed)
+        {
+          c.def("__next__",&Iterator<T>::next);
+          c.completed=true;
+        }
+    }
+  }
 }
 
 namespace classdesc_access
