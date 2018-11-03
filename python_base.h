@@ -711,7 +711,7 @@ namespace classdesc
   }
 
   template <class T>
-  T& sharedPtrGetter(const shared_ptr<T>& self)
+  pythonDetail::PythonRef<T> sharedPtrGetter(const shared_ptr<T>& self)
   {
     if (self)
       return *self;
@@ -719,6 +719,25 @@ namespace classdesc
       throw std::runtime_error("null dereference");
   }
   
+  template <class T>
+  void sharedPtrSetter(const shared_ptr<T>& self, const T& v)
+  {
+    if (self)
+      *self=v;
+    else
+      throw std::runtime_error("null dereference");
+  }
+
+  template <class T>
+  void pythonSharedPtr(python_t& p, const string& d)
+  {
+    auto& c=p.getClass<classdesc::shared_ptr<T> >();
+    if (!c.completed)
+      c.def("__getitem__", &sharedPtrGetter<T>).
+        def("__setitem__", &sharedPtrSetter<T>);
+    python<T>(p,d);
+  }
+      
   template <class F>
   typename enable_if<functional::is_nonmember_function_ptr<F>,void>::T
   python(python_t& p, const string& d, F f) {
@@ -776,6 +795,14 @@ namespace classdesc_access
   {
     template <class U>
     void type(cd::python_t&,const cd::string&) {}
+  };
+
+  template <class T> struct access_python<classdesc::shared_ptr<T> >
+  {
+    template <class U>
+    void type(cd::python_t& p,const cd::string& d) {
+      classdesc::pythonSharedPtr<T>(p,d);
+    }
   };
 }
 

@@ -39,7 +39,6 @@ struct Foo
   Exclude<int> iex;
   std::vector<string> vs;
   EnumFoo ef;
-  //classdesc::shared_ptr<EnumFoo> sef;
   //string (*hello)();
   //  classdesc::StringKeyMap<int> sm;
   Foo() {}
@@ -83,6 +82,7 @@ struct Bar: Foo
 struct Bar1
 {
   Foo f;
+  shared_ptr<Foo> fp{new Foo};
   int g;
   EnumFoo barfoo;
   //  std::vector<Foo> vFoo;
