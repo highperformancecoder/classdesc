@@ -236,24 +236,25 @@ namespace classdesc
           throw pack_error("filed to write data to stream");
           
     }
+    
+#if defined(__GNUC__) && !defined(__ICC)
+#pragma GCC diagnostic push
+    // this warning is randomly triggered on Tumbleweed docker environment
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
     virtual void unpackraw(char *x, size_t s) 
     {
       if (mode==buf)
-#if defined(__GNUC__) && !defined(__ICC)
-#pragma GCC diagnostic push
-        // this warning is randomly triggered on Tumbleweed docker environment
-#pragma GCC diagnostic ignored "-Warray-bounds"
-#endif
         memcpy(x,m_data+m_pos,s);
-#if defined(__GNUC__) && !defined(__ICC)
-#pragma GCC diagnostic pop
-#endif
-
       else
         if (fread(x,s,1,f)!=1)
           throw pack_error("premature end of stream");
       m_pos+=s;
     }
+#if defined(__GNUC__) && !defined(__ICC)
+#pragma GCC diagnostic pop
+#endif
+
     virtual void swap(pack_t& other) {
       if (typeid(*this)!=typeid(other))
         throw pack_error("cannot swap differing types");
@@ -673,12 +674,19 @@ namespace classdesc
 
   /// const static support. No need to stream
   template <class T>
-  void//typename enable_if<Not<is_pointer<T> >,void>::T
-  pack(pack_t&, const string&, is_const_static, T) {}
-  
+  void pack(pack_t& targ, const string& desc, is_const_static i, T t)
+  {}
+
   template <class T>
-  void//typename enable_if<Not<is_pointer<T> >,void>::T
-  unpack(pack_t&, const string&,is_const_static, T) {}
+  void unpack(pack_t& targ, const string& desc,is_const_static i, T t)
+  {}
+
+  // static methods
+  template <class T, class U>
+  void pack(pack_t&, const string&,is_const_static, const T&, U) {}
+
+  template <class T, class U>
+  void unpack(pack_t& targ, const string& desc,is_const_static i, const T&, U) {}
 
   // to handle pack/unpacking of enums when -typeName is in effect
   template <class E>

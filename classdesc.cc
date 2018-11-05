@@ -1335,6 +1335,21 @@ int main(int argc, char* argv[])
                 printf("void type(classdesc::%s_t& targ, const classdesc::string& desc)\n{\n",action[k]);
                 if (actions[i].namespace_name.size())
                   printf("using namespace %s;\n",actions[i].namespace_name.c_str());
+                p=actions[i].type.rfind("::");
+                if (p!=string::npos)
+                  {
+                    string::size_type s=actions[i].type.rfind(" "); //strip leading words
+                    if (s==string::npos) 
+                      s=0;
+                    else
+                      s++;
+                    string prefix=actions[i].type.substr(s,p+2-s);
+                    for (size_t j=0; j<nested[prefix].size(); j++)
+                      printf("typedef %s %s%s %s;\n",
+                             actions[i].templ.empty()? "": "typename",
+                             prefix.c_str(),
+                             nested[prefix][j].c_str(),nested[prefix][j].c_str());
+                  }
                 for (size_t j=0; j<actions[i].actionlist.size(); j++)
                   {
                     const act_pair& aj=actions[i].actionlist[j];
