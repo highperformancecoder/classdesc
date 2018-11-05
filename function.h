@@ -31,6 +31,20 @@ namespace classdesc
     template <class F> struct Arity;
     /// \c Return::T (or ::type) is the return type of \a F
     template <class F> struct Return;
+
+    /// overloaded for member object pointers
+    template <class R, class C> struct Return<R (C::*)>
+    {typedef R T; typedef R type;};
+    
+    /** \c Arg<F,i> is the type of argument \a i of \a F, i=1..Arity<F> */
+    template <class F, int> struct Arg;
+
+    /** \c ClassOf<F> returns the class type that F is a member function of. Returns F if F is not a class */
+    template <class F> struct ClassOf
+    {typedef F T; typedef F type;};
+    template <class C, class U> struct ClassOf<U C::*>
+    {typedef C T; typedef C type;};
+
     /// \c is_member_function_ptr::value is true if \a F is a member function pointer
     // note - this basically duplicates std::is_member_function_pointer
     template <class F> struct is_member_function_ptr
@@ -40,7 +54,7 @@ namespace classdesc
     template <class F> struct is_const_method
     {static const bool value=false;};
 
-    /// \c is_nonmember_function_ptr::value is true if \a F is an ordinary function pointer
+    /// \c is_nonmember_function_ptr::value is true if \a F is an ordinary function pointer (maybe a member)
     template <class F> struct is_nonmember_function_ptr
     {static const bool value=false;};
     /// is_member_function_ptr<F>||is_nonmember_function_ptr<F>
@@ -62,10 +76,6 @@ namespace classdesc
 //      static const bool value=!AllArgs<F,Not<Pred> >::value;
 //    };
    /// @}
-
-    /** \c Arg<F,i> is the type of argument \a i of \a F, i=1..Arity<F> */
-
-    template <class F, int> struct Arg;
 
     template <class C, class M> class bound_method;
 
@@ -111,27 +121,27 @@ namespace classdesc
 #include "functiondb.h"
 
 #if defined(__cplusplus) && __cplusplus>=201103L 
-    // for generic function objects
-    template <class F> 
-    struct Arity
-    {
-      static const int V=Arity<decltype(&F::operator())>::V;
-      static const int value=V;
-    };
-
-    template <class F> 
-    struct Return
-    {
-      typedef typename Return<decltype(&F::operator())>::T T;
-      typedef T type;
-    };
-
-    template <class F, int i> 
-    struct Arg
-    {
-      typedef typename Arg<decltype(&F::operator()),i>::T T;
-      typedef T type;
-    };
+//    // for generic function objects
+//    template <class F> 
+//    struct Arity
+//    {
+//      static const int V=Arity<decltype(&F::operator())>::V;
+//      static const int value=V;
+//    };
+//
+//    template <class F> 
+//    struct Return
+//    {
+//      typedef typename Return<decltype(&F::operator())>::T T;
+//      typedef T type;
+//    };
+//
+//    template <class F, int i> 
+//    struct Arg
+//    {
+//      typedef typename Arg<decltype(&F::operator()),i>::T T;
+//      typedef T type;
+//    };
 #endif
     
     template <class O, class M>

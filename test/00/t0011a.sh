@@ -60,7 +60,7 @@ void test(const T& a)
     if (a!=b) {puts("xdr_pack failure"); exit(1);}
 }    
 
-main()
+int main()
 {
     test(1);
     test(1.0);

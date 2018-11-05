@@ -134,16 +134,6 @@ namespace classdesc
   // regular pointers
   template <class T> void random_initp(random_init_t&, const string&, T*) {}
 
-  /*
-    const static support
-  */
-  template <class T>
-  void random_init(random_init_t&, const string&, is_const_static, T) {}
-
-  // static methods
-  template <class T, class U>
-  void random_init(random_init_t&, const string&, is_const_static, const T&, U) {}
-
   // Exclude
   template <class T>
   void random_init(random_init_t& targ, const string& desc, Exclude<T>& arg) {}
@@ -151,7 +141,10 @@ namespace classdesc
   template <class T>
   void random_init_onbase(random_init_t& targ, const string& desc, T& arg) 
   {random_init(targ,desc,arg);}
- 
+
+  template <class T>
+  void//typename enable_if<Not<is_pointer<T> >,void>::T
+  random_init(random_init_t&,const string&,is_const_static,T) {}
 
 }
 

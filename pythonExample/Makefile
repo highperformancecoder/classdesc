@@ -1,13 +1,13 @@
 .SUFFIXES: .c .cc .o .d .h .cd
 OBJS=pythonExample.o
-CFLAGS=-g `pkg-config --cflags python` -I.. -I. -fPIC
+CFLAGS=-g `pkg-config --cflags python3` -I.. -I. -fPIC
 VPATH=..
 
 example.so: $(OBJS)
-	g++ -fPIC -shared -Wl,-soname,example $^ `pkg-config --libs python` -lboost_python -o $@
+	g++ -fPIC -shared -Wl,-soname,example $^ `pkg-config --libs python3` -lboost_python3 -o $@
 
 .h.cd:
-	../classdesc -I .. -typeName -use_mbr_pointers python <$< >$@
+	../classdesc -I .. -typeName -use_mbr_pointers -onbase python <$< >$@
 
 .cc.o:
 	g++ $(CFLAGS) -c -o $@ $<

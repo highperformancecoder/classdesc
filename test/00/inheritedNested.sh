@@ -58,12 +58,21 @@ cat >test.cd.expected <<EOF
 #pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #endif
 #include "p_base.h"
+namespace classdesc {
+template <class C,class M>
+void p_type(p_t&,const string&,M);
+}
+using classdesc::p_type;
 namespace classdesc_access {
 template <> struct access_p<struct ::FlowCounter > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
 {
 ::p(targ,desc+"",classdesc::base_cast<std::set<FiveTuple<6>> >::cast(arg));
+}
+template <class _CD_TYPE>
+void type(classdesc::p_t& targ, const classdesc::string& desc)
+{
 }
 };
 }

@@ -124,6 +124,6 @@ int main(int argc, char *argv[])
     }
 #endif
   }
-  catch (runtime_error x) {cerr <<x.what()<<endl; abort();}
+  catch (const runtime_error& x) {cerr <<x.what()<<endl; abort();}
   return 0;
 }

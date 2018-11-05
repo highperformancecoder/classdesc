@@ -57,7 +57,7 @@ namespace foo
 }
 #include "test.cd"
 
-main() {}
+int main() {}
 EOF
 
 classdesc pack unpack <test.cc >test.cd

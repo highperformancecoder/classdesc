@@ -54,7 +54,7 @@ namespace foo
 #include "test.cd"
 #include "classdesc_epilogue.h"
 
-main()
+int main()
 {}
 EOF
 

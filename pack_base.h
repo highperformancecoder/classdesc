@@ -673,19 +673,12 @@ namespace classdesc
 
   /// const static support. No need to stream
   template <class T>
-  void pack(pack_t& targ, const string& desc, is_const_static i, T t)
-  {}
-
+  void//typename enable_if<Not<is_pointer<T> >,void>::T
+  pack(pack_t&, const string&, is_const_static, T) {}
+  
   template <class T>
-  void unpack(pack_t& targ, const string& desc,is_const_static i, T t)
-  {}
-
-  // static methods
-  template <class T, class U>
-  void pack(pack_t&, const string&,is_const_static, const T&, U) {}
-
-  template <class T, class U>
-  void unpack(pack_t& targ, const string& desc,is_const_static i, const T&, U) {}
+  void//typename enable_if<Not<is_pointer<T> >,void>::T
+  unpack(pack_t&, const string&,is_const_static, T) {}
 
   // to handle pack/unpacking of enums when -typeName is in effect
   template <class E>

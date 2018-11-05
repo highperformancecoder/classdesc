@@ -61,7 +61,7 @@ namespace classdesc_access
   template <> struct access_unpack<foo>: public NullDescriptor<pack_t>{};
 }
 
-main()
+int main()
 {
   foo a;
   foo *f=&a;

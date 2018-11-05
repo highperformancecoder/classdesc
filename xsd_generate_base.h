@@ -385,11 +385,9 @@ namespace classdesc
   void xsd_generate(xsd_generate_t& g, const string& d, const Exclude<T>& a) {}
 
   template <class T>
-  void xsd_generate(xsd_generate_t& g, const string& d, is_const_static, T a) {}
+  void//typename enable_if<Not<is_pointer<T> >,void>::T
+  xsd_generate(xsd_generate_t& g, const string& d, is_const_static, T a) {}
 
-  template <class T, class U>
-  void xsd_generate(xsd_generate_t& g, const string& d, is_const_static, const T&, U) {}
-   
   // with shared_ptrs, just write out the schema for the base
   // class. Additional data may included in the XML file, but in
   // general, XML does not support polymorphism, so this won't really

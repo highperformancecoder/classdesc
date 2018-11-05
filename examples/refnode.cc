@@ -76,7 +76,7 @@ int main()
       p << A;
       p >> B;
     }
-  catch (pack_error x)
+  catch (const pack_error& x)
     {
       puts(x.what()); exit(1);
     }

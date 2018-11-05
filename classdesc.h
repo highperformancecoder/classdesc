@@ -78,7 +78,9 @@ namespace classdesc
   using std::is_integral;
   using std::is_floating_point;
   // is_arry conflicts with an already established classdesc concept
-  //  using std::is_array; 
+  //  using std::is_array;
+  template <class T>
+  struct is_Carray: public std::is_array<T> {};
   using std::is_pointer;
   using std::is_reference;
   using std::is_member_object_pointer;
@@ -152,6 +154,8 @@ namespace classdesc
   using std::tr1::is_floating_point;
   // conflicts with an already established classdesc concept
   //using std::tr1::is_array;
+  template <class T>
+  struct is_Carray: public std::tr1::is_array<T> {};
   using std::tr1::is_pointer;
   using std::tr1::is_reference;
   using std::tr1::is_member_object_pointer;
@@ -587,12 +591,13 @@ namespace classdesc
   template <class T> //T is an enum
   class Enum_handle
   {
-    T& ref;
   public:
+    T& ref;
     Enum_handle(T& arg): ref(arg) {}
     operator std::string() const {
       return enumKey<typename remove_const<T>::type>(static_cast<int>(ref));
     }
+    Enum_handle(const Enum_handle& x): ref(x.ref) {}
     operator int() const {return static_cast<int>(ref);}
     const Enum_handle& operator=(T x) {ref=x; return *this;}
     const Enum_handle& operator=(int x) {ref=T(x); return *this;}
@@ -619,6 +624,23 @@ namespace classdesc
   template <class T>
   Enum_handle<T> enum_handle(T& x) {return Enum_handle<T>(x);}
 
+  template <class T> struct tn<Enum_handle<T> >
+  {
+    static std::string name()
+    {return "classdesc::Enum_handle<"+typeName<T>()+">";}
+  };
+  
+  template <class T,int n> struct tn<T [n]>
+  {
+    static std::string name()
+    {
+      std::ostringstream os;
+      os << typeName<T>()<<"["<<n<<"]";
+      return os.str();
+    }
+  };
+
+  
   /** support for constant sized arrays  */
   class is_array {};
 
@@ -779,6 +801,13 @@ namespace classdesc
 
   /// @}
 
+  template <class T>
+  struct tn<Exclude<T> >
+  {
+    static std::string name()
+    {return "classdesc::Exclude<"+typeName<T>()+">";}
+  };
+  
   /// helper for constructing null descriptors
   template <class action_t>
   struct NullDescriptor

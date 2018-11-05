@@ -72,7 +72,7 @@ ComponentVect _components;
 };
 #include "input.cd"
 
-main() {}
+int main() {}
 EOF
 
 $here/classdesc pack <input.cc >input.cd

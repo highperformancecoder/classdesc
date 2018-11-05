@@ -57,12 +57,22 @@ cat >output <<EOF
 #pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #endif
 #include "p_base.h"
+namespace classdesc {
+template <class C,class M>
+void p_type(p_t&,const string&,M);
+}
+using classdesc::p_type;
 namespace classdesc_access {
 template <> struct access_p<class ::foo > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
 {
 ::p(targ,desc+".b",arg,&foo::b);
+}
+template <class _CD_TYPE>
+void type(classdesc::p_t& targ, const classdesc::string& desc)
+{
+::p_type<_CD_TYPE,class ::foo >(targ,desc+".b",&foo::b);
 }
 };
 }

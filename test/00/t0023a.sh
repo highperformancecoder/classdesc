@@ -49,12 +49,18 @@ if test $? -ne 0; then fail; fi
 
 cat >out2 <<EOF
 #include "classdesc.h"
+
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #endif
 #include "p_base.h"
+namespace classdesc {
+template <class C,class M>
+void p_type(p_t&,const string&,M);
+}
+using classdesc::p_type;
 namespace classdesc_access {
 template <>
 struct access_p<class foo*>
@@ -67,6 +73,10 @@ struct access_p<class foo*>
 template <> struct access_p<class ::foo > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
+{
+}
+template <class _CD_TYPE>
+void type(classdesc::p_t& targ, const classdesc::string& desc)
 {
 }
 };

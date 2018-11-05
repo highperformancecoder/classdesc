@@ -1,9 +1,9 @@
 /*
-  @copyright Russell Standish 2018
+  @copyright Russell Standisgh 2018
   @author Russell Standish
   This file is part of Classdesc
 
-  Open source licensed under the MIT license. See LICENSE for details.
+  Open source licensed under the MIT license. See LICENSE for pythonDetails.
 */
 
 #ifndef PYTHON_BASE_H
@@ -12,6 +12,7 @@
 
 #include "function.h"
 #include <boost/mpl/vector.hpp>
+//#include <boost/python.hpp>
 
 /*
   For all types, maintain a vector of polymorphic class objects
@@ -32,10 +33,38 @@ namespace classdesc
 {
   class python_t;
 
-  namespace detail
+  template <class T>
+  struct ClassdescEnabledPythonType:
+    public And<is_class<T>, Not<is_container<T> > > {};
+
+  /// types that have a primitive representation in Python
+  template <class T>
+  struct PythonBasicType:
+    public Or<is_fundamental<T>, is_string<T> > {};
+  
+  // objectless calls
+  // classdesc generated
+  template <class T, class Base=T>
+  typename enable_if<ClassdescEnabledPythonType<T>,void>::T
+  python(python_t& p, const string& d);
+
+
+  // anything that is not a class
+  template <class T>
+  typename enable_if<Not<is_class<T> >,void>::T
+  python(python_t& p, const string& d) {}
+
+  namespace pythonDetail
   {
     using namespace classdesc::functional;
 
+    template <class M> struct MemberType {typedef M T;};
+    template <class U, class V>
+    struct MemberType<U (V::*)>
+    {
+      typedef U T;
+    };
+    
     template <class R, int> struct SigArg;
 
     template <class F> struct SigArg<F,0>
@@ -47,162 +76,401 @@ namespace classdesc
     {
       typedef boost::mpl::vector<typename Arg<F,Arity<F>::V>::T> T;
     };
-  
+
     template <class F,int N> struct SigArg
     {
       typedef typename boost::mpl::push_front<
-        typename Arg<F,Arity<F>::V-N+1>::T,
-        typename SigArg<F,N-1>::T
+        typename SigArg<F,N-1>::T,
+        typename Arg<F,Arity<F>::V-N+1>::T
         >::type T;
     };
-    
-    template <class F> struct Sig
+
+    template <class F> struct SigFun
     {
       typedef typename boost::mpl::push_front<
         typename SigArg<F,Arity<F>::V>::T,
         typename Return<F>::T
         >::type T;
     };
-
-    // container support
-    template <class T> struct Len
+  
+    template <class F>
+    struct SigObj
     {
-      T& container;
-      Len(T& container): container(container) {}
-      size_t operator()(T&) const {
-        return container.size();
-      }
+      typedef typename classdesc::pythonDetail::SigFun<decltype(&F::operator())>::T T;
     };
 
+    template <class T> struct Sig: public std::conditional<is_class<T>::value, SigObj<T>, SigFun<T>>::type {};
+    
     template <class T>
-    Len<T> len(T& x) {return Len<T>(x);}
+    size_t len(T& x) {return x.size();}
+    
+    template <class T, class U>
+    typename enable_if<is_assignable<T&,U>, void>::T
+    assign(T& x, const U& y) {x=y;}
 
-    template <class T> struct GetItem
+    template <class T, class U>
+    typename enable_if<Not<is_assignable<T&,U> >, void>::T
+    assign(T& x, const U& y) {throw std::runtime_error("assignment not supported between "+typeName<U>()+" and "+typeName<T>());}
+
+    // registerClass is a MixIn because terminating rank differs from that of NewArrayGet
+    template <class T, int rank>
+    struct ArrayGetRegisterClass
+    {static void registerClass(python_t& p);};
+
+    template <class T>
+    struct ArrayGetRegisterClass<T,0>
+    {static void registerClass(python_t& p) {python<T>(p,"");}};
+
+    template <class T, int rank> struct ArrayGetReturn;
+    
+    template <class T, int rank>
+    struct ArrayGet: public ArrayGetRegisterClass<T,rank>
     {
-      T& container;
-      GetItem(T& container): container(container) {}
-      typename T::value_type operator()(T&,size_t n) const {
-        if (n>=container.size())
+      static_assert(rank==std::rank<T>::value);
+      T* x;
+      ArrayGet(): x(0) {}
+      ArrayGet(T& x): x(&x) {}
+      typedef typename ArrayGetReturn<T,rank>::T L; 
+      L get(size_t i) const
+      {return L((*x)[i]);}
+      void set(size_t i, const L& v) {assign((*x)[i],v);}
+    };
+
+    template <class U, int rank> struct ArrayGetReturn
+    {typedef ArrayGet<typename std::remove_extent<U>::type,rank-1> T;};
+    template <class U> struct ArrayGetReturn<U,1>
+    {typedef typename std::remove_extent<U>::type T;};
+
+   
+    template <class T, class M>
+    struct ArrayMemRef
+    {
+      typedef typename MemberType<M>::T MT;
+      static constexpr size_t rank=std::rank<MT>::value;
+      static_assert(rank>0);
+      M m;
+      ArrayMemRef(M m): m(m) {}
+      typedef ArrayGet<MT,rank> L; 
+
+      L operator()(T& o) const 
+      {return L(o.*m);}
+    };
+
+    template<class T, class M>
+    struct ArrayMemRefSetItem
+    {
+      static constexpr size_t rank=std::rank<M>::value;
+      M m;
+      ArrayMemRefSetItem(M m): m(m) {}
+      typedef typename std::remove_all_extents<typename MemberType<M>::T>::type V; 
+      void operator()(T& o, size_t i, V& v) const 
+      {assign((o.*m)[i], v);}
+    };
+  
+    template <class T, class M>
+    size_t arrayMemLen(const T&) {return std::extent<M>::value;}
+    
+    template <class U> struct remove_ref{typedef U T;};
+    template <class U> struct remove_ref<U&> {typedef U T;};
+  
+    template <class C>
+    struct PythonRef
+    {
+      typename std::remove_reference<C>::type* o=nullptr;
+      PythonRef() {}
+      PythonRef(C& o): o(&o) {}
+      struct NullException: public std::exception
+      {
+        NullException() {puts("throw null python reference");}
+        const char* what() const noexcept override {
+          return "null python reference";
+        }
+      };
+      C& operator*() const {
+        if (o)
+          return *o;
+        else
+          throw NullException();
+      }
+    };
+  
+    /// returns the target type of a PythonRef, T otherwise
+    template <class U>  struct DePythonRef {typedef U T;};
+    template <class U>  struct DePythonRef<PythonRef<U> > {typedef U T;};
+    
+    template <class C, class M>
+    struct MemFn
+    {
+      M m;
+      MemFn(M m): m(m) {}
+      template <class... A>
+      typename Return<M>::T operator()(PythonRef<C>& o, A... a)
+      {return ((*o).*m)(std::forward<A>(a)...);}
+    };
+
+    // explicit signatures are required when variadic types are present
+    // note signature is not the same as that of M, as the self argument differs
+    template <class C, class M>
+    struct Sig<MemFn<C,M>>
+    {
+      typedef typename boost::mpl::push_front<
+        typename boost::mpl::push_front<
+        typename SigArg<M,Arity<M>::V>::T,
+        PythonRef<C>&>::type,
+        typename Return<M>::T
+        >::type T;
+    };
+
+    template <class C, class M>
+    struct MemFnRef
+    {
+      M m;
+      typedef PythonRef<typename Return<M>::T> R;
+      MemFnRef(M m): m(m) {}
+      template <class... A>
+      R operator()(PythonRef<C>& o, A... a)
+      {return R(((*o).*m)(std::forward<A>(a)...));}
+    };
+
+    // explicit signatures are required when variadic types are present
+    // note signature is not the same as that of M, as the self argument differs
+    template <class C, class M>
+    struct Sig<MemFnRef<C,M>>
+    {
+      typedef typename boost::mpl::push_front<
+        typename boost::mpl::push_front<
+        typename SigArg<M,Arity<M>::V>::T,
+        PythonRef<C>&>::type,
+        PythonRef<typename Return<M>::T>
+        >::type T;
+    };
+    
+    template <class C,class M>
+    struct Get
+    {
+      M m;
+      Get(M m): m(m) {}
+      typename MemberType<M>::T operator()(const PythonRef<C>& o)
+      {return (*o).*m;}
+    };
+    template <class C, class M>
+    struct Set
+    {
+      M m;
+      Set(M m): m(m) {}
+      void operator()(PythonRef<C>& o,const typename MemberType<M>::T& x)
+      {(*o).*m=x;}
+    };
+
+    template <class C, class M>
+    struct EnumGet
+    {
+      typedef typename MemberType<M>::T E;
+      M m;
+      EnumGet(M m): m(m) {}
+      string operator()(const C& o) const {return enum_keys<E>()(o.*m);}
+    };
+  
+    template <class C,class M>
+    struct EnumSet
+    {
+      typedef typename MemberType<M>::T E;
+      M m;
+      EnumSet(M m): m(m) {}
+      void operator()(C& o, const string& v) const {o.*m=enum_keys<E>()(v);}
+    };
+
+    template <class C, class M>
+    EnumGet<C,M> enumGet(M m) {return EnumGet<C,M>(m);}
+    template <class C, class M>
+    EnumSet<C,M> enumSet(M m) {return EnumSet<C,M>(m);}
+
+    template <class C, class M>
+    struct EnumRefGet
+    {
+      typedef typename MemberType<M>::T E;
+      M m;
+      EnumRefGet(M m): m(m) {}
+      string operator()(const PythonRef<C>& o) const {return enum_keys<E>()((*o).*m);}
+    };
+  
+    template <class C,class M>
+    struct EnumRefSet
+    {
+      typedef typename MemberType<M>::T E;
+      M m;
+      EnumRefSet(M m): m(m) {}
+      void operator()(const PythonRef<C>& o, const string& v) const {(*o).*m=enum_keys<E>()(v);}
+    };
+
+    template <class C, class M>
+    EnumRefGet<C,M> enumRefGet(M m) {return EnumRefGet<C,M>(m);}
+    template <class C, class M>
+    EnumRefSet<C,M> enumRefSet(M m) {return EnumRefSet<C,M>(m);}
+
+    template <class T>
+    typename T::value_type& getItemRef(T& c, size_t n)
+    {
+        if (n>=c.size())
           throw std::out_of_range("index out of bounds");
-        typename T::iterator i=container.begin();
+        typename T::iterator i=c.begin();
         std::advance(i,n);
         return *i;
-      }
-    };
+    }
+
+    // for a structured type, return a PythonRef
+    template <class T>
+    typename enable_if<Not<PythonBasicType<typename T::value_type> >,
+                         PythonRef<typename T::value_type> >::T
+    getItem(T& c, size_t n) {return getItemRef(c,n);}
+
+    // for a basic python type, return by value
+    template <class T>
+    typename enable_if<PythonBasicType<typename T::value_type>,
+                         typename T::value_type>::T
+    getItem(T& c, size_t n) {return getItemRef(c,n);}
 
     template <class T>
-    GetItem<T> getItem(T& x) {return GetItem<T>(x);}
-
-    template <class U> struct Sig<Len<U>>
-    {
-      typedef boost::mpl::vector<size_t,U&> T;
-    };
-    template <class U> struct Sig<GetItem<U>>
-    {
-      typedef boost::mpl::vector<typename U::value_type,U&,size_t> T;
-    };
-    template <class T>
-    struct ArrayWrapper
-    {
-      typedef T value_type;
-      T* data;
-      size_t m_size;      
-      ArrayWrapper(T* d=0, size_t s=0): data(d), m_size(s) {}
-      size_t size() const {return m_size;}
-      typedef T* iterator;
-      typedef const T* const_iterator;
-      iterator begin() {return data;}
-      const_iterator begin() const {return data;}
-      iterator end() {return data+m_size;}
-      const_iterator end() const {return data+m_size;}
-    };
-
-    template <class T, int rank>
-    struct Array {};
+    typename functional::Return<decltype(&getItem<T>)>::T
+    getItemPythonRef(PythonRef<T>& c, size_t n) {
+      return getItem(*c,n);
+    }
     
+    template <class T>
+    typename enable_if<Not<PythonBasicType<typename T::value_type> >,
+                         void>::T
+    setItem(T& c, size_t n,const typename T::value_type& v) {}
 
-    template <class T, int rank>
-    struct ArrayLen
-    {
-      size_t n;
-      ArrayLen(size_t n=0): n(n) {}
-      size_t operator()(Array<T,rank>&) {return n;}
-    };
+    template <class T>
+    typename enable_if<PythonBasicType<typename T::value_type>,
+                         void>::T
+    setItem(T& c, size_t n,const typename T::value_type& v)
+    {getItemRef(c,n)=v;}
 
-    template <class T, int rank>
-    struct ArrayGet
+    template <class T>
+    void setItemPythonRef(PythonRef<T>& c, size_t n,const typename T::value_type& v)
+    {setItem(*c,n,v);}
+    
+    template <class T>
+    size_t lenPythonRef(pythonDetail::PythonRef<T>& x) {return (*x).size();}
+
+    template <class T>
+    typename T::mapped_type basicGetMapItem(T& x, const typename T::key_type& k)
     {
-      T* x;
-      size_t dims[rank];
-      ArrayGet(T*x=0, const size_t* d=0): x(x) {
-        memcpy(&dims,d,sizeof(dims));
-      }
-      ArrayGet<T,rank-1> getItem(size_t i) const {
-        if (i<dims[rank-1])
-          {
-            size_t stride=1;
-            for (size_t i=0; i<rank-1; ++i) stride*=dims[i];
-            return ArrayGet<T,rank-1>(x+i*stride, dims);
-          }
-        throw std::out_of_range("index out of bounds");
-      }
-      ArrayGet<T,rank-1> operator()(Array<T,rank>&, size_t i) const 
-        {return getItem(i);}
-      size_t len() const {return dims[rank-1];}
+      auto i=x.find(k);
+      if (i!=x.end())
+        return i->second;
+      else
+        throw std::runtime_error("key not found");
+    }
       
-      // ensures this class is registered in the python type system
+    template <class T>
+    typename enable_if<PythonBasicType<typename T::mapped_type>,
+                       typename T::mapped_type>::T
+    getMapItem(T& x, const typename T::key_type& k)
+    {return basicGetMapItem(x,k);}
+    
+    template <class T>
+    typename enable_if<Not<PythonBasicType<typename T::mapped_type> >,
+                         PythonRef<typename T::mapped_type> >::T
+    getMapItem(T& x, const typename T::key_type& k)
+    {return basicGetMapItem(x,k);}
+      
+    template <class T>
+    void setMapItem
+    (T& x, const typename T::key_type& k, const typename T::mapped_type& v)
+    {
+      auto i=x.find(k);
+      if (i!=x.end())
+        assign(i->second,v);
+      else
+        throw std::runtime_error("key not found");
+    }
+      
+    template <class T>
+    PythonRef<typename T::mapped_type> getMapItemPythonRef
+    (const PythonRef<T>& x, const typename T::key_type& k)
+    {
+      auto i=(*x).find(k);
+      if (i!=(*x).end())
+        return PythonRef<typename T::mapped_type>(i->second);
+      else
+        throw std::runtime_error("key not found");
+    }
+      
+    template <class T>
+    void setMapItemPythonRef
+    (const PythonRef<T>& x, const typename T::key_type& k, const typename T::mapped_type& v)
+    {
+      auto i=(*x).find(k);
+      if (i!=(*x).end())
+        assign(*i,v);
+      else
+        throw std::runtime_error("key not found");
+    }
+
+    /// exception to signal end of iteration
+    struct StopIteration {};
+    
+    template <class T>
+    struct Iterator
+    {
+      typedef typename T::const_iterator I;
+      I i, end;
+      Iterator() {}
+      Iterator(I begin, I end): i(begin), end(end) {}
+      typename T::key_type next() {
+        if (i==end)
+          throw StopIteration();
+        else
+          {
+            auto j=i++;
+            return j->first;
+          }
+      }
       static void registerClass(python_t&);
     };
 
     template <class T>
-    struct ArrayGet<T,1>
-    {
-      T* x;
-      size_t n;
-      ArrayGet(T*x=0, const size_t* d=0): x(x), n(*d) {}
-      T getItem(size_t i) const {
-        if (i<n)
-          return x[i];
-        throw std::out_of_range("index out of bounds");
-      }
-      T operator()(Array<T,1>&, size_t i) const {return getItem(i);}
-      size_t len() const {return n;}
-      // ensures this class is registered in the python type system
-      static void registerClass(python_t&);
-    };
-    
-    template <class U, int R> struct Sig<ArrayLen<U,R>>
-    {
-      typedef boost::mpl::vector<size_t,Array<U,R>&> T;
-    };
-    template <class U,int R> struct Sig<ArrayGet<U,R> >
-    {
-      typedef boost::mpl::vector<ArrayGet<U,R-1>,Array<U,R>&,size_t> T;
-    };
-    template <class U> struct Sig<ArrayGet<U,1> >
-    {
-      typedef boost::mpl::vector<U,Array<U,1>&,size_t> T;
-    };
+    Iterator<T> iter(const T& m) {return Iterator<T>(m.begin(), m.end());}
 
   }
+
+  template <class T> struct tn<pythonDetail::PythonRef<T>>
+  {
+    static std::string name()
+    {return "PythonRef<"+typeName<T>()+">";}
+  };
+
+  template <class T, int rank> struct tn<pythonDetail::ArrayGet<T,rank>>
+  {
+    static std::string name()
+    {return "pythonDetail::ArrayGet<"+typeName<T>()+","+std::to_string(rank)+">";}
+  };
+
+  template <class T>
+  struct tn<pythonDetail::Iterator<T>>
+  {
+    static string name() {return "classdesc::pythonDetail::Iterator<"+typeName<T>()+">";}
+  };
+
+  
 }
 
 
-// extend boost::python function signature processing to bound member functions
+// extend boost::python function signature processing on callable objects
 namespace boost {
   namespace python {
     namespace detail {
-      template <class F>
-      typename classdesc::detail::Sig<F>::T get_signature(F f)
-      {return typename classdesc::detail::Sig<F>::T();}
       template <class F, class T>
-      typename classdesc::detail::Sig<F>::T get_signature(F f,T*dummy=0)
-      {return typename classdesc::detail::Sig<F>::T();}
+      typename classdesc::pythonDetail::Sig<F>::T get_signature(F f,T*dummy=0)
+      {return typename classdesc::pythonDetail::Sig<F>::T();}
     }
   }
 }
 
 #include "boost/python.hpp"
+//#include <boost/python/exception_translator.hpp>
 #include <vector>
 
 namespace classdesc
@@ -217,8 +485,11 @@ namespace classdesc
       shared_ptr<boost::python::scope> scope;
       Scope(const string& name):
         name(name), object(name.c_str()), scope(new boost::python::scope(object)) {}
+      // default object refers to current module
+      Scope(): name(PyModule_GetName(boost::python::scope().ptr())),
+               object(name.c_str()), scope(new boost::python::scope(object)) {}
     };
-    std::vector<Scope> scopeStack;
+    std::vector<Scope> scopeStack; //push back current module onto stack
     boost::python::scope topScope;
     
   public:
@@ -249,7 +520,7 @@ namespace classdesc
       static std::vector<shared_ptr<ClassBase> > impl;
       return impl;
     }
-
+  
     // lazy instantiation pattern to register a unique class object
     // per type.
     template <class T>
@@ -268,7 +539,7 @@ namespace classdesc
       return dynamic_cast<Class<T>&>(*classes()[id]);
     }
     /// @}
-
+  
     string tail(const string& d) {
       size_t p=d.rfind('.');
       if (p==string::npos)
@@ -295,7 +566,9 @@ namespace classdesc
     template <class T>
     void addObject(const string& d, T& o) {
       checkScope(d);
-      scopeStack.back().object.def_readwrite(tail(d).c_str(),o);
+      
+      if (!scopeStack.empty())
+        scopeStack.back().object.def_readwrite(tail(d).c_str(),o);
     }
     template <class T>
     void addObject(const string& d, const T& o) {
@@ -310,139 +583,230 @@ namespace classdesc
       scopeStack.back().object.staticmethod(tail(d).c_str());
     }
 
+    // no object present, update class definition
     template <class C, class M>
-    void addMemberFunction(const string& d, C& o, M m) {
-      addFunctional(d,functional::bound_method<C,M>(o,m));
+    typename enable_if<Not<is_reference<typename functional::Return<M>::T>>,void>::T
+    addMemberFunction(const string& d, M m)
+    {
+      auto& c=getClass<C>();
+      if (!c.completed)
+          c.def(tail(d).c_str(),m);
+      auto& cr=getClass<pythonDetail::PythonRef<C>>();
+      if (!cr.completed)
+          cr.def(tail(d).c_str(),pythonDetail::MemFn<C,M>(m));
+      python<typename pythonDetail::DePythonRef<typename functional::Return<M>::T>::T>(*this,"");
+    }
+    
+    // for methods returning a reference, create a wrapper object that
+    // can be pythonified
+    template <class C, class M>
+    typename enable_if<is_reference<typename functional::Return<M>::T>,void>::T
+    addMemberFunction(const string& d, M m) 
+    {
+      typedef typename std::remove_reference<C>::type CC; 
+      auto& c=getClass<pythonDetail::PythonRef<CC>>();
+      if (!c.completed)
+        c.def(tail(d).c_str(),pythonDetail::MemFnRef<CC,M>(m));
+      python<typename remove_reference<typename functional::Return<M>::T>::type>(*this,"");
+    }
+
+    template <class C, class M>
+    typename enable_if<functional::is_nonmember_function_ptr<M>,void>::T
+    addMemberObject(const string& d, M m)
+    {
       Class<C>& c=getClass<C>();
       if (!c.completed)
         c.def(tail(d).c_str(),m);
     }
+
     template <class C, class M>
-    void addMemberFunctionPtr(const string& d, C& o, M *m) {
-      addFunctional(d,m);
-      Class<C>& c=getClass<C>();
-      if (!c.completed)
-        c.def(tail(d),m);
-    }
-    template <class C, class M>
-    void addMemberObject(const string& d, C& o, M m) {
-      Class<C>& c=getClass<C>();
+    typename enable_if<And<Not<is_Carray<typename pythonDetail::MemberType<M>::T> >, Not<functional::is_nonmember_function_ptr<M> > >,void>::T
+    addMemberObject(const string& d, M m)
+    {
+      // recursively register class pythonDetails for the member
+      python<typename pythonDetail::DePythonRef<typename functional::Return<M>::T>::T>(*this,d);
+      auto& c=getClass<C>();
       if (!c.completed)
         c.def_readwrite(tail(d).c_str(),m);
+      auto& cr=getClass<pythonDetail::PythonRef<C>>();
+      if (!cr.completed)
+        cr.add_property(tail(d).c_str(),pythonDetail::Get<C,M>(m),
+                       pythonDetail::Set<C,M>(m));
+    }
+
+    template <class C, class M>
+    typename enable_if<is_Carray<typename pythonDetail::MemberType<M>::T>,void>::T
+    addMemberObject(const string& d, M m)
+    {
+      static constexpr size_t rank=std::rank<typename pythonDetail::MemberType<M>::T>::value;
+      auto& c=getClass<C>();
+      if (!c.completed)
+        c.add_property(tail(d).c_str(), pythonDetail::ArrayMemRef<C,M>(m),
+                       pythonDetail::ArrayMemRef<C,M>(m));
+      pythonDetail::ArrayMemRef<C,M>::L::registerClass(*this);
     }
     template <class C, class M>
-    void addMemberObject(const string& d, const C& o, M m) {
-      Class<C>& c=getClass<C>();
+    typename enable_if<is_member_function_pointer<M>,void>::T
+    addMember(const string& d, M m) {addMemberFunction<C>(d,m);}
+    
+    template <class C, class M>
+    typename enable_if<is_member_object_pointer<M>,void>::T
+    addMember(const string& d, M m) {addMemberObject<C>(d,m);}
+    template <class C, class M>
+    typename enable_if<functional::is_nonmember_function_ptr<M>,void>::T
+    addMember(const string& d, M m) {
+      auto& c=getClass<C>();
       if (!c.completed)
-        c.def_readonly(tail(d).c_str(),m);
+          c.def(tail(d).c_str(),m);
+    }
+
+    template <class C, class M>
+    void addEnum(const string& d, M m)
+    {
+      auto& c=getClass<C>();
+      if (!c.completed)
+        c.add_property(tail(d).c_str(),pythonDetail::enumGet<C>(m),pythonDetail::enumSet<C>(m));
+      
+      auto& cr=getClass<pythonDetail::PythonRef<C> >();
+      if (!cr.completed)
+        cr.add_property(tail(d).c_str(),pythonDetail::enumRefGet<C>(m),pythonDetail::enumRefSet<C>(m));
     }
   };
 
   template <class T>
-  struct ClassdescEnabledPythonType:
-    public Not<Or<is_fundamental<T>,is_container<T> > > {};
-
-  template <class T>
-  typename enable_if<ClassdescEnabledPythonType<T>,void>::T
-  python(python_t& p, const string& d, T& a);
-  
-  template<class C, class M>
-  typename enable_if<is_member_function_pointer<M>, void>::T
-  python(python_t& p, const string& d, C& c, M m) {
-    p.addMemberFunction(d,c,m);
-  }
-  
-  template<class C, class M>
-  typename enable_if<is_member_object_pointer<M>, void>::T
-  python(python_t& p, const string& d, C& c, M m) {
-    p.addMemberObject(d,c,m);
-    python(p,d,c.*m);
-  }
-  
-  template<class C, class M>
-  typename enable_if<is_function<M>, void>::T
-  python(python_t& p, const string& d, C& c, M *m) {
-    p.addMemberFunctionPtr(d,c,m);
-  }
-  
-  template <class T>
-  typename enable_if<is_fundamental<T>,void>::T
-  python(python_t& p, const string& d, T& a) {
-    p.addObject(d,a);
-  }
-
-  template <class T>
-  struct is_sequence<detail::ArrayWrapper<T> >: public true_type {};
-
-  template <class T>
-  void python(python_t& p, const string& d, is_array,
-                    T& arg, int dims, size_t dim1)
-  {
-    boost::python::class_<detail::Array<T,1>>((tail(d)+"_type").c_str()).
-      def("__len__", detail::ArrayLen<T,1>(dim1)).
-      def("__getitem__", detail::ArrayGet<T,1>(&arg,&dim1));
-    p.addObject(d,reinterpret_cast<detail::Array<T,1>&>(arg));
-    detail::ArrayGet<T,1>::registerClass(p);
-  }
-
-  template <class T>
-  void python(python_t& p, const string& d, is_array,
-                    T& arg, int, size_t dim1, size_t dim2)
-  {
-    size_t dims[]={dim1,dim2};
-    boost::python::class_<detail::Array<T,2>>((tail(d)+"_type").c_str()).
-      def("__len__", detail::ArrayLen<T,2>(dim2)).
-      def("__getitem__", detail::ArrayGet<T,2>(&arg,dims));
-    p.addObject(d,reinterpret_cast<detail::Array<T,2>&>(arg));
-    detail::ArrayGet<T,2>::registerClass(p);
-  }
-
-  
-  
-
-  template <class T>
   typename enable_if<is_sequence<T>,void>::T
-  python(python_t& p, const string& d, T& a) {
-    boost::python::class_<T>((tail(d)+"_type").c_str()).
-      def("__len__", detail::len(a)).
-      def("__getitem__", detail::getItem(a));
-    p.addObject(d,a);
+  python(python_t& p, const string& ) {
+    auto& c=p.getClass<T>();
+    if (!c.completed)
+      c.def("__len__", &pythonDetail::len<T>).
+      def("__getitem__", &pythonDetail::getItem<T>).
+      def("__setitem__", &pythonDetail::setItem<T>);
+    auto& cr=p.getClass<pythonDetail::PythonRef<T> >();
+    if (!cr.completed)
+      cr.def("__len__", &pythonDetail::lenPythonRef<T>).
+        def("__getitem__", &pythonDetail::getItemPythonRef<T>).
+        def("__setitem__", &pythonDetail::setItemPythonRef<T>);
+    python<typename T::value_type>(p,"");
+    
+    python<typename pythonDetail::DePythonRef<typename functional::Return<decltype(&pythonDetail::getItem<T>)>::T>::T>(p,"");
   }
-
+  
   template <class T>
   typename enable_if<is_associative_container<T>,void>::T
-  python(python_t& p, const string& d, T& a) {
-    boost::python::class_<T>((tail(d)+"_type").c_str()).
-      def("__iter__", boost::python::iterator<T>()).
-      def("__len__", functional::bindMethod(a,&T::size));
-    p.addObject(d,a);
+  python(python_t& p, const string& ) {
+    auto& c=p.getClass<T>();
+    if (!c.completed)
+      c.def("__len__", &pythonDetail::len<T>).
+        def("__getitem__", &pythonDetail::getMapItem<T>).
+        def("__setitem__", &pythonDetail::setMapItem<T>).
+        def("__iter__", &pythonDetail::iter<T>);
+    auto& cr=p.getClass<pythonDetail::PythonRef<T> >();
+    if (!cr.completed)
+      cr.def("__len__", &pythonDetail::lenPythonRef<T>).
+        def("__getitem__", &pythonDetail::getMapItemPythonRef<T>).
+        def("__setitem__", &pythonDetail::setMapItemPythonRef<T>);
+    python<typename T::mapped_type>(p,"");
+    python<typename T::key_type>(p,"");
+    pythonDetail::Iterator<T>::registerClass(p);
   }
 
   template <class T>
-  void python(python_t& p, const string& d, const Enum_handle<T>& a) {
-    p.addObject(d,a);
+  pythonDetail::PythonRef<T> sharedPtrGetter(const shared_ptr<T>& self)
+  {
+    if (self)
+      return *self;
+    else
+      throw std::runtime_error("null dereference");
   }
   
   template <class T>
-  void python(python_t& p, const string& d, Exclude<T>& a) {}
- 
+  void sharedPtrSetter(const shared_ptr<T>& self, const T& v)
+  {
+    if (self)
+      *self=v;
+    else
+      throw std::runtime_error("null dereference");
+  }
+
   template <class T>
-  void python(python_t& p, const string& d, shared_ptr<T>& a)
-  {//TODO
+  void pythonSharedPtr(python_t& p, const string& d)
+  {
+    auto& c=p.getClass<classdesc::shared_ptr<T> >();
+    if (!c.completed)
+      c.def("__getitem__", &sharedPtrGetter<T>).
+        def("__setitem__", &sharedPtrSetter<T>);
+    python<T>(p,d);
+  }
+      
+  template <class F>
+  typename enable_if<functional::is_nonmember_function_ptr<F>,void>::T
+  python(python_t& p, const string& d, F f) {
+    p.addFunctional(d,f);
   }
 
-  void python(python_t& p, const string& d, string& a) {
-    p.addObject(d,a);
+  template <class C, class B, class M>
+  typename enable_if<Not<is_enum<typename pythonDetail::MemberType<M>::T> >,void>::T
+  python_type(python_t& p, const string& d, M m)
+  {
+    p.addMember<C>(d,m);
   }
 
+  template <class C, class B, class M>
+  typename enable_if<is_enum<typename pythonDetail::MemberType<M>::T>,void>::T
+  python_type(python_t& p, const string& d, M m) 
+  {
+    p.addEnum<C>(d,m);
+  }
+  
+  template <class C, class T>
+  void python_type(python_t& p, const string& d, Exclude<T> (C::*m))
+  {
+  }
 
+  template <class T>
+  void python_onbase(python_t& p, const string& d, T& a);
+
+  namespace pythonDetail
+  {
+    
+    inline void translate(StopIteration)
+    {PyErr_SetString(PyExc_StopIteration,"");}
+    int dummy = (boost::python::register_exception_translator<StopIteration>(&translate),0);
+
+    template <class T>
+    void Iterator<T>::registerClass(python_t& p)
+    {
+      auto& c=p.getClass<Iterator<T>>();
+      if (!c.completed)
+        {
+          c.def("__next__",&Iterator<T>::next);
+          c.completed=true;
+        }
+    }
+  }
 }
 
 namespace classdesc_access
 {
+  namespace cd=classdesc;
   template <class T> struct access_python;
+
+  template <class T> struct access_python<cd::Exclude<T> >
+  {
+    template <class U>
+    void type(cd::python_t&,const cd::string&) {}
+  };
+
+  template <class T> struct access_python<classdesc::shared_ptr<T> >
+  {
+    template <class U>
+    void type(cd::python_t& p,const cd::string& d) {
+      classdesc::pythonSharedPtr<T>(p,d);
+    }
+  };
 }
 
 using classdesc::python;
+using classdesc::python_onbase;
 
 #endif

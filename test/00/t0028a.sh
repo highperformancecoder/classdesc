@@ -63,7 +63,7 @@ cat >test.cc <<EOF
 #include "test.cd"
 #include "classdesc_epilogue.h"
 
-main()
+int main()
 {
   foo2 bar4;
 }

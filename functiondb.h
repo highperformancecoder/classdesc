@@ -48,6 +48,27 @@ struct Return<R (C::*)() const>
 };
 
 template <class C, class R> 
+struct ClassOf<R (C::*)()> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R> 
+struct ClassOf<R (*C::*)()> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R> 
+struct ClassOf<R (C::*)() const> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R> 
 struct is_member_function_ptr<R (C::*)()>
 {
    static const bool value=true;
@@ -67,6 +88,12 @@ struct is_const_method<R (C::*)() const>
 
 template <class R> 
 struct is_nonmember_function_ptr<R (*)()>
+{
+   static const bool value=true;
+};
+
+template <class C, class R> 
+struct is_nonmember_function_ptr<R (*C::*)()>
 {
    static const bool value=true;
 };
@@ -212,6 +239,27 @@ struct Return<R (C::*)(A1) const>
 };
 
 template <class C, class R, class A1> 
+struct ClassOf<R (C::*)(A1)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1> 
+struct ClassOf<R (*C::*)(A1)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1> 
+struct ClassOf<R (C::*)(A1) const> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1> 
 struct is_member_function_ptr<R (C::*)(A1)>
 {
    static const bool value=true;
@@ -231,6 +279,12 @@ struct is_const_method<R (C::*)(A1) const>
 
 template <class R, class A1> 
 struct is_nonmember_function_ptr<R (*)(A1)>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1> 
+struct is_nonmember_function_ptr<R (*C::*)(A1)>
 {
    static const bool value=true;
 };
@@ -387,6 +441,27 @@ struct Return<R (C::*)(A1,A2) const>
 };
 
 template <class C, class R, class A1, class A2> 
+struct ClassOf<R (C::*)(A1,A2)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2> 
+struct ClassOf<R (*C::*)(A1,A2)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2> 
+struct ClassOf<R (C::*)(A1,A2) const> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2> 
 struct is_member_function_ptr<R (C::*)(A1,A2)>
 {
    static const bool value=true;
@@ -406,6 +481,12 @@ struct is_const_method<R (C::*)(A1,A2) const>
 
 template <class R, class A1, class A2> 
 struct is_nonmember_function_ptr<R (*)(A1,A2)>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2)>
 {
    static const bool value=true;
 };
@@ -573,6 +654,27 @@ struct Return<R (C::*)(A1,A2,A3) const>
 };
 
 template <class C, class R, class A1, class A2, class A3> 
+struct ClassOf<R (C::*)(A1,A2,A3)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct ClassOf<R (*C::*)(A1,A2,A3)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct ClassOf<R (C::*)(A1,A2,A3) const> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
 struct is_member_function_ptr<R (C::*)(A1,A2,A3)>
 {
    static const bool value=true;
@@ -592,6 +694,12 @@ struct is_const_method<R (C::*)(A1,A2,A3) const>
 
 template <class R, class A1, class A2, class A3> 
 struct is_nonmember_function_ptr<R (*)(A1,A2,A3)>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3)>
 {
    static const bool value=true;
 };
@@ -770,6 +878,27 @@ struct Return<R (C::*)(A1,A2,A3,A4) const>
 };
 
 template <class C, class R, class A1, class A2, class A3, class A4> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4) const> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
 struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4)>
 {
    static const bool value=true;
@@ -789,6 +918,12 @@ struct is_const_method<R (C::*)(A1,A2,A3,A4) const>
 
 template <class R, class A1, class A2, class A3, class A4> 
 struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4)>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4)>
 {
    static const bool value=true;
 };
@@ -978,6 +1113,27 @@ struct Return<R (C::*)(A1,A2,A3,A4,A5) const>
 };
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5) const> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
 struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5)>
 {
    static const bool value=true;
@@ -997,6 +1153,12 @@ struct is_const_method<R (C::*)(A1,A2,A3,A4,A5) const>
 
 template <class R, class A1, class A2, class A3, class A4, class A5> 
 struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5)>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5)>
 {
    static const bool value=true;
 };
@@ -1197,6 +1359,27 @@ struct Return<R (C::*)(A1,A2,A3,A4,A5,A6) const>
 };
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6) const> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6)>
 {
    static const bool value=true;
@@ -1216,6 +1399,12 @@ struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6) const>
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6)>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6)>
 {
    static const bool value=true;
 };
@@ -1427,6 +1616,27 @@ struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const>
 };
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7)>
 {
    static const bool value=true;
@@ -1446,6 +1656,12 @@ struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const>
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7)>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7)>
 {
    static const bool value=true;
 };
@@ -1668,6 +1884,27 @@ struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const>
 };
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8)>
 {
    static const bool value=true;
@@ -1687,6 +1924,12 @@ struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const>
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7,A8)>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8)>
 {
    static const bool value=true;
 };
@@ -1920,6 +2163,27 @@ struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const>
 };
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)>
 {
    static const bool value=true;
@@ -1939,6 +2203,12 @@ struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const>
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)>
 {
    static const bool value=true;
 };
@@ -2183,6 +2453,27 @@ struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const>
 };
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)>
 {
    static const bool value=true;
@@ -2202,6 +2493,12 @@ struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const>
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)>
 {
    static const bool value=true;
 };
