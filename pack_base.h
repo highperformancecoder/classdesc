@@ -239,7 +239,16 @@ namespace classdesc
     virtual void unpackraw(char *x, size_t s) 
     {
       if (mode==buf)
+#if defined(__GNUC__) && !defined(__ICC)
+#pragma GCC diagnostic push
+        // this warning is randomly triggered on Tumbleweed docker environment
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
         memcpy(x,m_data+m_pos,s);
+#if defined(__GNUC__) && !defined(__ICC)
+#pragma GCC diagnostic pop
+#endif
+
       else
         if (fread(x,s,1,f)!=1)
           throw pack_error("premature end of stream");
