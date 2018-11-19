@@ -71,10 +71,23 @@ assert r.bar.ef=="ea"
 assert r.bar.getEF()==0
 r.bar.ef="ec"
 assert r.bar.getEF()==12
-# TODO
-# r.bar.sef
+
+
 
 assert r.bar.vs0()==' hello'
 
 from example import Foo
 assert Foo.shello()=='hello'
+
+# assign to a shared pointer target
+r.bar1.fp.target=r.bar1.f
+# chack we can examine a shared ppointer target
+assert r.bar1.fp.target.a==r.bar1.f.a
+
+b1=example.Bar1()
+# assign a reference
+b1.fp=r.bar1.fp
+b1.fp.target.a=54
+assert r.bar1.fp.target.a==54
+
+# cannot reset a pointer to null, unless explicit support provided by user

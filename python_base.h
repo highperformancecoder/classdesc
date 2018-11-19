@@ -633,7 +633,7 @@ namespace classdesc
         cr.add_property(tail(d).c_str(),pythonDetail::Get<C,M>(m),
                        pythonDetail::Set<C,M>(m));
     }
-
+    
     template <class C, class M>
     typename enable_if<is_Carray<typename pythonDetail::MemberType<M>::T>,void>::T
     addMemberObject(const string& d, M m)
@@ -711,16 +711,15 @@ namespace classdesc
   }
 
   template <class T>
-  pythonDetail::PythonRef<T> sharedPtrGetter(const shared_ptr<T>& self)
+  pythonDetail::PythonRef<T> sharedPtrTargetGetter(const shared_ptr<T>& self)
   {
     if (self)
       return *self;
     else
       throw std::runtime_error("null dereference");
   }
-  
   template <class T>
-  void sharedPtrSetter(const shared_ptr<T>& self, const T& v)
+  void sharedPtrTargetSetter(const shared_ptr<T>& self,const T& v)
   {
     if (self)
       *self=v;
@@ -733,8 +732,7 @@ namespace classdesc
   {
     auto& c=p.getClass<classdesc::shared_ptr<T> >();
     if (!c.completed)
-      c.def("__getitem__", &sharedPtrGetter<T>).
-        def("__setitem__", &sharedPtrSetter<T>);
+      c.add_property("target", &sharedPtrTargetGetter<T>, &sharedPtrTargetSetter<T>);
     python<T>(p,d);
   }
       
