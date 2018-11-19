@@ -90,4 +90,17 @@ b1.fp=r.bar1.fp
 b1.fp.target.a=54
 assert r.bar1.fp.target.a==54
 
-# cannot reset a pointer to null, unless explicit support provided by user
+nullRef=getattr(example,"classdesc::shared_ptr<Foo>")()
+try:
+    nullRef.target
+    assert False
+except RuntimeError:
+    pass
+
+# this doesn't work!!!
+#b1.fp=nullRef
+#try:
+#    b1.fp.target
+#    assert False
+#except RuntimeError:
+#    pass
