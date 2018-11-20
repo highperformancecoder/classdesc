@@ -35,7 +35,7 @@ namespace classdesc
 
   template <class T>
   struct ClassdescEnabledPythonType:
-    public And<is_class<T>, Not<is_container<T> > > {};
+    public And<And<is_class<T>, Not<is_container<T> > >, Not<is_associative_container<T> > > {};
 
   /// types that have a primitive representation in Python
   template <class T>
@@ -45,7 +45,7 @@ namespace classdesc
   // objectless calls
   // classdesc generated
   template <class T, class Base=T>
-  typename enable_if<ClassdescEnabledPythonType<T>,void>::T
+  typename enable_if<ClassdescEnabledPythonType<Base>,void>::T
   python(python_t& p, const string& d);
 
 
@@ -379,13 +379,7 @@ namespace classdesc
     template <class T>
     void setMapItem
     (T& x, const typename T::key_type& k, const typename T::mapped_type& v)
-    {
-      auto i=x.find(k);
-      if (i!=x.end())
-        assign(i->second,v);
-      else
-        throw std::runtime_error("key not found");
-    }
+    {x[k]=v;}
       
     template <class T>
     PythonRef<typename T::mapped_type> getMapItemPythonRef
@@ -650,7 +644,8 @@ namespace classdesc
     addMember(const string& d, M m) {addMemberFunction<C>(d,m);}
     
     template <class C, class M>
-    typename enable_if<is_member_object_pointer<M>,void>::T
+    typename enable_if<And<is_member_object_pointer<M>,
+                           Not<functional::is_nonmember_function_ptr<M> > >,void>::T
     addMember(const string& d, M m) {addMemberObject<C>(d,m);}
     template <class C, class M>
     typename enable_if<functional::is_nonmember_function_ptr<M>,void>::T
@@ -673,10 +668,10 @@ namespace classdesc
     }
   };
 
-  template <class T>
+  template <class C, class T=C>
   typename enable_if<is_sequence<T>,void>::T
   python(python_t& p, const string& ) {
-    auto& c=p.getClass<T>();
+    auto& c=p.getClass<C>();
     if (!c.completed)
       c.def("__len__", &pythonDetail::len<T>).
       def("__getitem__", &pythonDetail::getItem<T>).
@@ -691,23 +686,23 @@ namespace classdesc
     python<typename pythonDetail::DePythonRef<typename functional::Return<decltype(&pythonDetail::getItem<T>)>::T>::T>(p,"");
   }
   
-  template <class T>
+  template <class C, class T=C>
   typename enable_if<is_associative_container<T>,void>::T
   python(python_t& p, const string& ) {
-    auto& c=p.getClass<T>();
+    auto& c=p.getClass<C>();
     if (!c.completed)
-      c.def("__len__", &pythonDetail::len<T>).
-        def("__getitem__", &pythonDetail::getMapItem<T>).
-        def("__setitem__", &pythonDetail::setMapItem<T>).
-        def("__iter__", &pythonDetail::iter<T>);
-    auto& cr=p.getClass<pythonDetail::PythonRef<T> >();
+      c.def("__len__", &pythonDetail::len<C>).
+        def("__getitem__", &pythonDetail::getMapItem<C>).
+        def("__setitem__", &pythonDetail::setMapItem<C>).
+        def("__iter__", &pythonDetail::iter<C>);
+    auto& cr=p.getClass<pythonDetail::PythonRef<C> >();
     if (!cr.completed)
-      cr.def("__len__", &pythonDetail::lenPythonRef<T>).
-        def("__getitem__", &pythonDetail::getMapItemPythonRef<T>).
-        def("__setitem__", &pythonDetail::setMapItemPythonRef<T>);
+      cr.def("__len__", &pythonDetail::lenPythonRef<C>).
+        def("__getitem__", &pythonDetail::getMapItemPythonRef<C>).
+        def("__setitem__", &pythonDetail::setMapItemPythonRef<C>);
     python<typename T::mapped_type>(p,"");
     python<typename T::key_type>(p,"");
-    pythonDetail::Iterator<T>::registerClass(p);
+    pythonDetail::Iterator<C>::registerClass(p);
   }
 
   template <class T>

@@ -72,7 +72,14 @@ assert r.bar.getEF()==0
 r.bar.ef="ec"
 assert r.bar.getEF()==12
 
-
+sm=r.bar.sm
+assert len(sm)==0
+sm['foo']=2
+sm['bar']=3
+assert len(sm)==2
+assert sm['foo']==2
+assert sm['bar']==3
+for i in sm: assert i in sm
 
 assert r.bar.vs0()==' hello'
 

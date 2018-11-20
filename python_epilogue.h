@@ -4,7 +4,7 @@
 namespace classdesc
 {
   template <class T, class Base>
-  typename enable_if<ClassdescEnabledPythonType<T>,void>::T
+  typename enable_if<ClassdescEnabledPythonType<Base>,void>::T
   python(python_t& p, const string& d)
   {
     classdesc_access::access_python<Base>().template type<T>(p,d);

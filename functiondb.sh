@@ -84,6 +84,20 @@ struct Return<R (*)($arg_types)>
     typedef R type;
 };
 
+template <class C,class R$template_args> 
+struct Arity<R (* C::*)($arg_types)> 
+{
+    static const int V=$arity;
+    static const int value=$arity;
+};
+
+template <class C,class R$template_args> 
+struct Return<R (* C::*)($arg_types)> 
+{
+    typedef R T;
+    typedef R type;
+};
+
 template <class C, class R$template_args> 
 struct Arity<R (C::*)($arg_types)> 
 {

@@ -40,8 +40,8 @@ struct Foo
   std::vector<string> vs;
   EnumFoo ef;
   std::shared_ptr<EnumFoo> sef;
-  //string (*hello)();
-  //  classdesc::StringKeyMap<int> sm;
+  //string (*hello)(); // still not working ...
+  classdesc::StringKeyMap<int> sm;
   Foo() {}
   Foo(int i): ch('M'), a(0.1), af(0.2), b(3), bf(false), bt(true),
               c("\r hello & 123 "), c1(2,"\r"), h(3,2), l(3,2), 
