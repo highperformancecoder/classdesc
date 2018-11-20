@@ -221,17 +221,32 @@ namespace classdesc
         >::type T;
     };
 
+    template <class T> class WhichType;
+    
     template <class C, class M>
     struct MemFnRef
     {
       M m;
-      typedef PythonRef<typename Return<M>::T> R;
+      typedef PythonRef<typename remove_reference<typename functional::Return<M>::T>::type> R;
+      //WhichType<R> r;
       MemFnRef(M m): m(m) {}
+      template <class... A>
+      R operator()(C& o, A... a)
+      {return R((o.*m)(std::forward<A>(a)...));}
+    };
+
+    template <class C, class M>
+    struct MemFnRefRef
+    {
+      M m;
+      typedef PythonRef<typename remove_reference<typename functional::Return<M>::T>::type> R;
+      //WhichType<R> r;
+      MemFnRefRef(M m): m(m) {}
       template <class... A>
       R operator()(PythonRef<C>& o, A... a)
       {return R(((*o).*m)(std::forward<A>(a)...));}
     };
-
+    
     // explicit signatures are required when variadic types are present
     // note signature is not the same as that of M, as the self argument differs
     template <class C, class M>
@@ -239,9 +254,20 @@ namespace classdesc
     {
       typedef typename boost::mpl::push_front<
         typename boost::mpl::push_front<
-        typename SigArg<M,Arity<M>::V>::T,
-        PythonRef<C>&>::type,
-        PythonRef<typename Return<M>::T>
+          typename SigArg<M,Arity<M>::V>::T,
+          C&>::type,
+        typename MemFnRef<C,M>::R
+        >::type T;
+    };
+
+    template <class C, class M>
+    struct Sig<MemFnRefRef<C,M>>
+    {
+      typedef typename boost::mpl::push_front<
+        typename boost::mpl::push_front<
+          typename SigArg<M,Arity<M>::V>::T,
+          PythonRef<C>&>::type,
+        typename MemFnRef<C,M>::R
         >::type T;
     };
     
@@ -597,11 +623,18 @@ namespace classdesc
     typename enable_if<is_reference<typename functional::Return<M>::T>,void>::T
     addMemberFunction(const string& d, M m) 
     {
+      std::cout << typeName<C>()<<" in is_ref "<<d<<std::endl;
       typedef typename std::remove_reference<C>::type CC; 
-      auto& c=getClass<pythonDetail::PythonRef<CC>>();
+      auto& c=getClass<C>();
       if (!c.completed)
-        c.def(tail(d).c_str(),pythonDetail::MemFnRef<CC,M>(m));
+        //        c.def(tail(d).c_str(),pythonDetail::MemFnRef<C,M>(m));
+        c.def(tail(d).c_str(),m,boost::python::return_internal_reference<>());
+      auto& cr=getClass<pythonDetail::PythonRef<C>>();
+      if (!cr.completed)
+        cr.def(tail(d).c_str(),pythonDetail::MemFnRefRef<C,M>(m));
       python<typename remove_reference<typename functional::Return<M>::T>::type>(*this,"");
+//      pythonDetail::WhichType<typename pythonDetail::MemFnRef<C,M>::R> wt1;
+//      pythonDetail::WhichType<typename remove_reference<typename functional::Return<M>::T>::type> wt2;
     }
 
     template <class C, class M>

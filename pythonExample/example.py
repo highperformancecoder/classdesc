@@ -86,6 +86,16 @@ assert r.bar.vs0()==' hello'
 from example import Foo
 assert Foo.shello()=='hello'
 
+# check reference returning functions
+f=r.bar1.fooRef()
+f.a=3
+assert f.a==r.bar1.f.a
+# check reference to a static object
+assert r.getFB1().f.a!=3
+r.getFB1().f.a=3
+assert r.getFB1().f.a==3
+
+
 # assign to a shared pointer target
 r.bar1.fp.target=r.bar1.f
 # chack we can examine a shared ppointer target
