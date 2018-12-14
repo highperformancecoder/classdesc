@@ -27,6 +27,7 @@ bool respect_private=false; /* default is to call descriptor on private members 
 bool typeName=false; // generate type and enum symbol tables
 bool onBase=false;
 bool use_mbr_pointers=false; // use member pointers for referencing member objects
+bool qt=false; // true for processing Qt MOC header files
 
 // name of file being processed
 string inputFile="stdin";
@@ -352,7 +353,24 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
   /* now handle members */
   for  (input.nexttok(); input.token!="}"; input.nexttok() )
     {
-
+      // handle qt macros
+      if (qt)
+        {
+          if (input.token=="Q_OBJECT") continue;
+          if (input.token=="Q_PROPERTY" || input.token=="Q_ENUMS" || input.token=="Q_CLASSINFO")
+            {
+              input.nexttok();
+              gobble_delimited(input,"(",")");
+              continue;
+            }
+          if (input.token=="signals" || input.token=="slots") // these appear to be reserved words in MOC C++
+            {
+              gobble_delimited(input,"",":");
+              continue;
+            }
+            
+        }
+      
       // cout << "Token = [" << input.token << "]\n";
       rType += input.token + " ";
 
@@ -362,7 +380,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 	{
           is_private = (input.token=="private" || input.token=="protected");
 	  reg.is_private = respect_private && is_private;
-	  input.nexttok(); 
+	  gobble_delimited(input,"",":");
 	  rType.erase(); 
 	  continue;  /* skip ':' */
 	}
@@ -886,7 +904,7 @@ int main(int argc, char* argv[])
 
   if (argc<2)
     {
-      printf("usage: %s [-workdir dir] [-objc] [-include header] [-nodef] [-respect_private] [-use_mbr_pointers] [-I classdesc_includes] [-typeName] {descriptor name} <input >output\n",argv[0]);
+      printf("usage: %s [-workdir dir] [-objc] [-include header] [-nodef] [-respect_private] [-use_mbr_pointers] [-I classdesc_includes] [-typeName] [-qt] {descriptor name} <input >output\n",argv[0]);
       return 0;
     }
 
@@ -957,6 +975,11 @@ int main(int argc, char* argv[])
           argc--; argv++;
           cout << "Version: "<<CLASSDESC_VERSION<<endl;
           return 0;
+        }
+      if (argc>1 && strcmp(argv[1],"-qt")==0) 
+        { 
+          argc--; argv++;
+          qt=true;
         }
     }
 

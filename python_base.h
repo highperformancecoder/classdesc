@@ -448,7 +448,6 @@ namespace classdesc
     typename enable_if<is_reference<typename functional::Return<M>::T>,void>::T
     addMemberFunction(const string& d, M m) 
     {
-      typedef typename std::remove_reference<C>::type CC; 
       auto& c=getClass<C>();
       if (!c.completed)
         c.def(tail(d).c_str(),m,boost::python::return_internal_reference<>());

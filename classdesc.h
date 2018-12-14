@@ -814,6 +814,8 @@ namespace classdesc
   {
     template <class U>
     void operator()(action_t&,const string&,U&) {}
+    template <class T>
+    void type(action_t&,const string&) {}
   };
 
   /// @{
