@@ -30,12 +30,8 @@ namespace classdesc
 
 namespace classdesc_access
 {
-  template <> struct access_python<std::string>:
-    public classdesc::NullDescriptor<classdesc::python_t> {};
-
-  template <class F, class S>
-  struct access_python<std::pair<F,S>>:
-    public classdesc::NullDescriptor<classdesc::python_t> {};
+  // define anything not yet defined to be the null descriptor
+  template <class T> struct access_python<T,void>: public classdesc::NullDescriptor<classdesc::python_t> {};
 }
 
 #endif

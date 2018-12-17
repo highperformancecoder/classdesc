@@ -51,7 +51,7 @@ namespace classdesc
   // anything that is not a class
   template <class T>
   typename enable_if<Not<is_class<T> >,void>::T
-  python(python_t& p, const string& d) {}
+  python(python_t&, const string&) {}
 
   namespace pythonDetail
   {
@@ -303,7 +303,10 @@ namespace boost {
   namespace python {
     namespace detail {
       template <class F, class T>
-      typename classdesc::pythonDetail::Sig<F>::T get_signature(F f,T*dummy=0)
+      typename classdesc::pythonDetail::Sig<F>::T get_signature(F)
+      {return typename classdesc::pythonDetail::Sig<F>::T();}
+      template <class F, class T>
+      typename classdesc::pythonDetail::Sig<F>::T get_signature(F,T*)
       {return typename classdesc::pythonDetail::Sig<F>::T();}
     }
   }
@@ -670,7 +673,7 @@ namespace classdesc
 namespace classdesc_access
 {
   namespace cd=classdesc;
-  template <class T> struct access_python;
+  template <class T, class Enable=void> struct access_python;
 
   template <class T> struct access_python<cd::Exclude<T> >
   {
