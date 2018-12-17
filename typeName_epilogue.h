@@ -8,6 +8,7 @@
 
 #ifndef TYPENAME_EPILOGUE_H
 #define TYPENAME_EPILOGUE_H
+#include "classdesc.h"
 
 namespace classdesc
 {
