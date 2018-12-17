@@ -466,7 +466,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
               isIdentifierStart(input.token[0]))  /* named enum */
 	    assign_enum_action(input,prefix);
           else
-            gobble_delimited(input,"{","}");
+            gobble_delimited(input,"","}");
 	}
 
       /* handle templated types */
