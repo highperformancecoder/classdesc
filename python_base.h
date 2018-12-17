@@ -501,6 +501,18 @@ namespace classdesc
       if (!c.completed)
           c.def(tail(d).c_str(),m);
     }
+    template <class C, class T>
+    void addStaticMember(const string& d, T* a) {
+      auto& c=getClass<C>();
+      if (!c.completed)
+          c.def_readwrite(tail(d).c_str(),a);
+    }
+    template <class C, class T>
+    void addStaticMember(const string& d, const T* a) {
+      auto& c=getClass<C>();
+      if (!c.completed)
+          c.def_readonly(tail(d).c_str(),a);
+    }
 
     template <class C, class M>
     void addEnum(const string& d, M m)
@@ -601,6 +613,18 @@ namespace classdesc
     p.addFunctional(d,f);
   }
 
+  template <class T>
+  void python(python_t& p, const string& d, is_const_static, T* a)
+  {
+    p.addObject(tail(d),*a);
+  }
+  
+  template <class C, class T, class M>
+  void python_type(python_t& p, const string& d, is_const_static, M m)
+  {
+    p.addStaticMember<C>(d,m);
+  }
+  
   template <class C, class B, class M>
   typename enable_if<Not<is_enum<typename pythonDetail::MemberType<M>::T> >,void>::T
   python_type(python_t& p, const string& d, M m)

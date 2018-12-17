@@ -240,7 +240,7 @@ public:
     // We need to treat static const members differently, as simple
     // ones do not have addresses
     if (is_static && is_const)
-      actionlist.push_back(act_pair("."+name,"classdesc::is_const_static(),"+action));
+      actionlist.push_back(act_pair("."+name,"classdesc::is_const_static(),"+action,memberName));
     else 
       if (!is_private) /* don't register private, if privates respected */
 //        if (is_static && memberName.length()>0)
@@ -248,7 +248,7 @@ public:
 //          actionlist.push_back(act_pair("."+name,memberName+"."+action));
 //        else
         actionlist.push_back(act_pair("."+name,action,memberName,is_static));
-    is_static=0;
+    is_static=false;
   }
 };
 
@@ -1389,6 +1389,9 @@ int main(int argc, char* argv[])
                       printf("::%s_type<_CD_TYPE,%s >(targ,desc+\"%s\",&%s::%s);\n",
                              action[k], type_arg_name.c_str(),
                              aj.name.c_str(),without_type_qualifier(type_arg_name).c_str(),aj.member.c_str());
+                    else if (aj.action.find("classdesc::is_const_static")==0 && aj.member.length())
+                      printf("::%s_type<_CD_TYPE,%s >(targ,desc+\"%s\",%s);\n",
+                             action[k], type_arg_name.c_str(),aj.name.c_str(),aj.action.c_str());
                       
                   }
                 printf("}\n};\n");

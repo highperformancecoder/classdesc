@@ -23,6 +23,8 @@ string printHello() {return "hello";}
 
 struct Foo
 {
+  const static int csi=20;
+  static int si;
   char ch;
   double a;
   float af;
