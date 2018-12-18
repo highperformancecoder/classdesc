@@ -353,10 +353,19 @@ namespace classdesc
       bool completed=false;
     };
 
-    template <class T> struct Class:
+    template <class T, bool copiable> struct Class;
+    template <class T>
+    struct Class<T,true>:
       public ClassBase, public boost::python::class_<T>
     {
       Class(const string& name): boost::python::class_<T>(name.c_str()) {}
+    };
+    
+    template <class T>
+    struct Class<T,false>:
+      public ClassBase, public boost::python::class_<T,boost::noncopyable>
+    {
+      Class(const string& name): boost::python::class_<T,boost::noncopyable>(name.c_str()) {}
     };
 
 
@@ -375,19 +384,20 @@ namespace classdesc
     // lazy instantiation pattern to register a unique class object
     // per type.
     template <class T>
-    Class<T>& getClass()
+    Class<T,is_copy_constructible<T>::value>& getClass()
     {
+      typedef Class<T,is_copy_constructible<T>::value> C;
       static size_t id=classes().size();
       if (id==classes().size())
         {
           // for now, put everything in global scope
           boost::python::scope scope(topScope);
           classes().push_back(shared_ptr<ClassBase>
-                              (new Class<T>(typeName<T>())));
+                              (new C(typeName<T>())));
         }
       else if (id>classes().size())
         throw exception("classes registry no longer valid");
-      return dynamic_cast<Class<T>&>(*classes()[id]);
+      return dynamic_cast<C&>(*classes()[id]);
     }
     /// @}
   
@@ -461,7 +471,7 @@ namespace classdesc
     typename enable_if<functional::is_nonmember_function_ptr<M>,void>::T
     addMemberObject(const string& d, M m)
     {
-      Class<C>& c=getClass<C>();
+      auto& c=getClass<C>();
       if (!c.completed)
         c.def(tail(d).c_str(),m);
     }

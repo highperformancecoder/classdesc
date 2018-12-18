@@ -66,6 +66,7 @@ struct Foo
 
 struct Bar: Foo
 {
+  Bar(const Bar&)=delete;
   int f;
   EnumFoo barfoo;
   std::vector<Foo> vFoo;
