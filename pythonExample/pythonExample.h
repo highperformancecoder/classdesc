@@ -85,6 +85,7 @@ struct Bar1
   Bar1(int i): f(i), g(2), barfoo(ec), vFoo(2,Foo(1)) {}
   Foo foo() {return f;}
   Foo& fooRef() {return f;}
+  Foo* foop() {return &f;} // should be ignored, as can't determine ownership
 };
 
 struct FooBar1

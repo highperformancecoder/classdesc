@@ -114,6 +114,12 @@ try:
 except RuntimeError:
     pass
 
+try:
+    r.bar1.foop()
+    assert False
+except AttributeError:
+    pass
+
 # this doesn't work!!!
 #b1.fp=nullRef
 #try:

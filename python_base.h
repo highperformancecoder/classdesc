@@ -438,15 +438,25 @@ namespace classdesc
     }
 
     template <class F>
-    void addFunctional(const string& d, F f) {
+    typename enable_if<Not<is_pointer<typename functional::Return<F>::T>>, void>::T
+    addFunctional(const string& d, F f) {
       checkScope(d);
       boost::python::def(tail(d).c_str(),f);
       scopeStack.back().object.staticmethod(tail(d).c_str());
     }
 
+    // ignore pointer returns, as we don't know anything about the object being pointed to.
+    template <class F>
+    typename enable_if<is_pointer<typename functional::Return<F>::T>, void>::T
+    addFunctional(const string& d, F f) {}
+
     // no object present, update class definition
     template <class C, class M>
-    typename enable_if<Not<is_reference<typename functional::Return<M>::T>>,void>::T
+    typename enable_if<
+      And<
+        Not<is_reference<typename functional::Return<M>::T>>,
+        Not<is_pointer<typename functional::Return<M>::T>>
+        >,void>::T
     addMemberFunction(const string& d, M m)
     {
       auto& c=getClass<C>();
@@ -466,6 +476,11 @@ namespace classdesc
         c.def(tail(d).c_str(),m,boost::python::return_internal_reference<>());
       python<typename remove_reference<typename functional::Return<M>::T>::type>(*this,"");
     }
+    
+    // ignore pointer returns, as we don't know anything about the object being pointed to.
+    template <class C, class M>
+    typename enable_if<is_pointer<typename functional::Return<M>::T>,void>::T
+    addMemberFunction(const string& d, M m) {}
 
     template <class C, class M>
     typename enable_if<functional::is_nonmember_function_ptr<M>,void>::T
