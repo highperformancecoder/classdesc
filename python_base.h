@@ -448,7 +448,7 @@ namespace classdesc
     // ignore pointer returns, as we don't know anything about the object being pointed to.
     template <class F>
     typename enable_if<is_pointer<typename functional::Return<F>::T>, void>::T
-    addFunctional(const string& d, F f) {}
+    addFunctional(const string&, F) {}
 
     // no object present, update class definition
     template <class C, class M>
@@ -480,7 +480,7 @@ namespace classdesc
     // ignore pointer returns, as we don't know anything about the object being pointed to.
     template <class C, class M>
     typename enable_if<is_pointer<typename functional::Return<M>::T>,void>::T
-    addMemberFunction(const string& d, M m) {}
+    addMemberFunction(const string&, M) {}
 
     template <class C, class M>
     typename enable_if<functional::is_nonmember_function_ptr<M>,void>::T
