@@ -63,7 +63,12 @@ namespace classdesc
     {
       typedef U T;
     };
-    
+    template <class U>
+    struct MemberType<U*>
+    {
+      typedef U T;
+    };
+
     template <class R, int> struct SigArg;
 
     template <class F> struct SigArg<F,0>
@@ -351,6 +356,21 @@ namespace classdesc
     {
       virtual ~ClassBase() {}
       bool completed=false;
+      // distinguish between assignable and unassignable properties, which may be const, or may have assignment deleted
+      template <class C,class X>
+      typename enable_if<
+        And<
+        std::is_copy_assignable<typename pythonDetail::MemberType<X>::T>,
+          Not<is_const<typename pythonDetail::MemberType<X>::T>>
+          >,void>::T
+      addProperty(C& c,const string& d, X x) {c.def_readwrite(d.c_str(),x);}
+      template <class C,class X>
+      typename enable_if<
+        Or<
+          Not<std::is_copy_assignable<typename pythonDetail::MemberType<X>::T>>,
+          is_const<typename pythonDetail::MemberType<X>::T>
+          >,void>::T
+      addProperty(C& c,const string& d, X x) {c.def_readonly(d.c_str(),x);}
     };
 
     template <class T, bool copiable> struct Class;
@@ -359,6 +379,8 @@ namespace classdesc
       public ClassBase, public boost::python::class_<T>
     {
       Class(const string& name): boost::python::class_<T>(name.c_str()) {}
+      template <class X>
+      void addProperty(const string& d,X x) {ClassBase::addProperty(*this,d,x);}
     };
     
     template <class T>
@@ -366,6 +388,8 @@ namespace classdesc
       public ClassBase, public boost::python::class_<T,boost::noncopyable>
     {
       Class(const string& name): boost::python::class_<T,boost::noncopyable>(name.c_str()) {}
+      template <class X>
+      void addProperty(const string& d,X x) {ClassBase::addProperty(*this,d,x);}
     };
 
 
@@ -500,7 +524,7 @@ namespace classdesc
       python<typename functional::Return<M>::T>(*this,d);
       auto& c=getClass<C>();
       if (!c.completed)
-        c.def_readwrite(tail(d).c_str(),m);
+        c.addProperty(tail(d),m);
    }
     
     template <class C, class M>
@@ -522,24 +546,33 @@ namespace classdesc
     typename enable_if<And<is_member_object_pointer<M>,
                            Not<functional::is_nonmember_function_ptr<M> > >,void>::T
     addMember(const string& d, M m) {addMemberObject<C>(d,m);}
+    
     template <class C, class M>
-    typename enable_if<functional::is_nonmember_function_ptr<M>,void>::T
+    typename enable_if<
+      And<
+        functional::is_nonmember_function_ptr<M>,
+        Not<is_pointer<typename functional::Return<M>::T>>
+        >,void>::T
     addMember(const string& d, M m) {
       auto& c=getClass<C>();
       if (!c.completed)
           c.def(tail(d).c_str(),m);
     }
+    
+    // ignore pointer returns
+    template <class C, class M>
+    typename enable_if<
+      And<
+        functional::is_nonmember_function_ptr<M>,
+        is_pointer<typename functional::Return<M>::T>
+        >,void>::T
+    addMember(const string&, M) {}
+
     template <class C, class T>
     void addStaticMember(const string& d, T* a) {
       auto& c=getClass<C>();
       if (!c.completed)
-          c.def_readwrite(tail(d).c_str(),a);
-    }
-    template <class C, class T>
-    void addStaticMember(const string& d, const T* a) {
-      auto& c=getClass<C>();
-      if (!c.completed)
-          c.def_readonly(tail(d).c_str(),a);
+          c.addProperty(tail(d).c_str(),a);
     }
 
     template <class C, class M>

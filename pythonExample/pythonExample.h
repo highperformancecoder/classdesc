@@ -86,6 +86,7 @@ struct Bar1
   Foo foo() {return f;}
   Foo& fooRef() {return f;}
   Foo* foop() {return &f;} // should be ignored, as can't determine ownership
+  static Foo* sfoop() {return nullptr;}// should be ignored, as can't determine ownership
 };
 
 struct FooBar1
