@@ -71,10 +71,59 @@ assert r.bar.ef=="ea"
 assert r.bar.getEF()==0
 r.bar.ef="ec"
 assert r.bar.getEF()==12
-# TODO
-# r.bar.sef
+
+sm=r.bar.sm
+assert len(sm)==0
+sm['foo']=2
+sm['bar']=3
+assert len(sm)==2
+assert sm['foo']==2
+assert sm['bar']==3
+for i in sm: assert i in sm
 
 assert r.bar.vs0()==' hello'
 
 from example import Foo
 assert Foo.shello()=='hello'
+
+# check reference returning functions
+f=r.bar1.fooRef()
+f.a=3
+assert f.a==r.bar1.f.a
+# check reference to a static object
+assert r.getFB1().f.a!=3
+r.getFB1().f.a=3
+assert r.getFB1().f.a==3
+
+
+# assign to a shared pointer target
+r.bar1.fp.target=r.bar1.f
+# chack we can examine a shared ppointer target
+assert r.bar1.fp.target.a==r.bar1.f.a
+
+b1=example.Bar1()
+# assign a reference
+b1.fp=r.bar1.fp
+b1.fp.target.a=54
+assert r.bar1.fp.target.a==54
+
+nullRef=getattr(example,"classdesc::shared_ptr<Foo>")()
+try:
+    nullRef.target
+    assert False
+except RuntimeError:
+    pass
+
+try:
+    r.bar1.foop()
+    assert False
+except AttributeError:
+    pass
+
+# this doesn't work!!!
+#b1.fp=nullRef
+#try:
+#    b1.fp.target
+#    assert False
+#except RuntimeError:
+#    pass

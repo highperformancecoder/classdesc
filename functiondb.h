@@ -19,6 +19,20 @@ struct Return<R (*)()>
     typedef R type;
 };
 
+template <class C,class R> 
+struct Arity<R (* C::*)()> 
+{
+    static const int V=0;
+    static const int value=0;
+};
+
+template <class C,class R> 
+struct Return<R (* C::*)()> 
+{
+    typedef R T;
+    typedef R type;
+};
+
 template <class C, class R> 
 struct Arity<R (C::*)()> 
 {
@@ -205,6 +219,20 @@ struct Arity<R (*)(A1)>
 
 template <class R, class A1> 
 struct Return<R (*)(A1)> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1> 
+struct Arity<R (* C::*)(A1)> 
+{
+    static const int V=1;
+    static const int value=1;
+};
+
+template <class C,class R, class A1> 
+struct Return<R (* C::*)(A1)> 
 {
     typedef R T;
     typedef R type;
@@ -407,6 +435,20 @@ struct Arity<R (*)(A1,A2)>
 
 template <class R, class A1, class A2> 
 struct Return<R (*)(A1,A2)> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2> 
+struct Arity<R (* C::*)(A1,A2)> 
+{
+    static const int V=2;
+    static const int value=2;
+};
+
+template <class C,class R, class A1, class A2> 
+struct Return<R (* C::*)(A1,A2)> 
 {
     typedef R T;
     typedef R type;
@@ -620,6 +662,20 @@ struct Arity<R (*)(A1,A2,A3)>
 
 template <class R, class A1, class A2, class A3> 
 struct Return<R (*)(A1,A2,A3)> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3> 
+struct Arity<R (* C::*)(A1,A2,A3)> 
+{
+    static const int V=3;
+    static const int value=3;
+};
+
+template <class C,class R, class A1, class A2, class A3> 
+struct Return<R (* C::*)(A1,A2,A3)> 
 {
     typedef R T;
     typedef R type;
@@ -844,6 +900,20 @@ struct Arity<R (*)(A1,A2,A3,A4)>
 
 template <class R, class A1, class A2, class A3, class A4> 
 struct Return<R (*)(A1,A2,A3,A4)> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4> 
+struct Arity<R (* C::*)(A1,A2,A3,A4)> 
+{
+    static const int V=4;
+    static const int value=4;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4> 
+struct Return<R (* C::*)(A1,A2,A3,A4)> 
 {
     typedef R T;
     typedef R type;
@@ -1079,6 +1149,20 @@ struct Arity<R (*)(A1,A2,A3,A4,A5)>
 
 template <class R, class A1, class A2, class A3, class A4, class A5> 
 struct Return<R (*)(A1,A2,A3,A4,A5)> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5)> 
+{
+    static const int V=5;
+    static const int value=5;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5)> 
 {
     typedef R T;
     typedef R type;
@@ -1325,6 +1409,20 @@ struct Arity<R (*)(A1,A2,A3,A4,A5,A6)>
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Return<R (*)(A1,A2,A3,A4,A5,A6)> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6)> 
+{
+    static const int V=6;
+    static const int value=6;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6)> 
 {
     typedef R T;
     typedef R type;
@@ -1582,6 +1680,20 @@ struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7)>
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7)> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7)> 
+{
+    static const int V=7;
+    static const int value=7;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7)> 
 {
     typedef R T;
     typedef R type;
@@ -1850,6 +1962,20 @@ struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7,A8)>
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7,A8)> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8)> 
+{
+    static const int V=8;
+    static const int value=8;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8)> 
 {
     typedef R T;
     typedef R type;
@@ -2129,6 +2255,20 @@ struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)>
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)> 
+{
+    static const int V=9;
+    static const int value=9;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)> 
 {
     typedef R T;
     typedef R type;
@@ -2419,6 +2559,20 @@ struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)>
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)> 
+{
+    static const int V=10;
+    static const int value=10;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)> 
 {
     typedef R T;
     typedef R type;

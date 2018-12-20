@@ -96,6 +96,7 @@ aegis-all: build latex-docs
 	-ln -s pack_base.h unpack_base.h
 	if which mpicxx; then	cd mpi-examples && $(MAKE) CPLUSPLUS=mpicxx CC=mpicc; fi
 	cd examples && $(MAKE) NOGUI=1
+	cd pythonExample && $(MAKE) 
 #NB if these builds fail, check for jni.h and jni_md.h in the standard include path
 	if which javac; then cd java && $(MAKE) && cd ../javaExamples && $(MAKE); fi
 	cd test && $(MAKE)
@@ -120,6 +121,7 @@ clean:
 	cd objc-examples && $(MAKE) clean
 	cd java && $(MAKE) clean
 	cd javaExamples && $(MAKE) clean
+	cd pythonExample && $(MAKE) clean
 	cd test && $(MAKE) clean
 	cd test/c++11 && $(MAKE) clean
 	cd doc && rm -f *~ *.aux *.dvi *.log *.blg *.toc *.lof

@@ -55,10 +55,10 @@ int main()
 }
 EOF
 
-g++ -DOP="==" -DTR1  -I$here should-fail.cc
+g++ -DOP="==" -DTR1  -I$here should-fail.cc &>/dev/null
 if test $? -eq 0; then fail; fi
 
-g++ -DOP="!=" -DTR1  -I$here should-fail.cc
+g++ -DOP="!=" -DTR1  -I$here should-fail.cc &>/dev/null
 if test $? -eq 0; then fail; fi
 
 cat >should-fail.cc <<EOF

@@ -4,7 +4,7 @@
 namespace classdesc
 {
   template <class T, class Base>
-  typename enable_if<ClassdescEnabledPythonType<T>,void>::T
+  typename enable_if<ClassdescEnabledPythonType<Base>,void>::T
   python(python_t& p, const string& d)
   {
     classdesc_access::access_python<Base>().template type<T>(p,d);
@@ -30,19 +30,8 @@ namespace classdesc
 
 namespace classdesc_access
 {
-  template <> struct access_python<string>
-  {
-    template <class T>
-    void type(classdesc::python_t&,const string&) {}
-  };
-
-  template <class F, class S>
-  struct access_python<std::pair<F,S>>
-  {
-    template <class T>
-    void type(classdesc::python_t&,const string&) {}
-  };
-  
+  // define anything not yet defined to be the null descriptor
+  template <class T> struct access_python<T,void>: public classdesc::NullDescriptor<classdesc::python_t> {};
 }
 
 #endif

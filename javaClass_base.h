@@ -414,11 +414,18 @@ namespace classdesc
     T tmp(a);
     javaClass(cl,d,tmp);
   }
+  
+  template <class T>
+  void javaClass_type(javaClass_t& cl,const string& d, is_const_static i, T a)
+  {
+  }
 
   template <class T>
   void javaClass_onbase(javaClass_t& cl,const string& d,T a)
   {javaClass(cl,d,a);}
 
+  
+  
 }  
   // const members, just discard constness as we're just doing descriptors
 //  template <class C, class R>
