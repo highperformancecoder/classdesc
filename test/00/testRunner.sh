@@ -41,7 +41,22 @@ else #standalone test
 fi
 CC=${CC:-g++}
 
-$here/test/testXMLcd
-if test $? -ne 0; then fail; fi
+# runs all test executable with assertion statements
+for i in $here/test/*.cc; do
+    if grep assert $i >& null; then
+        if [ $i = $here/test/testJavaClass.cc ]; then
+            continue  # javaClass tested in t0043a.sh
+        fi
+        if [ $i = $here/test/testXML_base.cc ]; then
+            continue  # XML_base tested in t0038a.sh
+        fi
+        if [ -f ${i%%.cc} ]; then
+            echo $i
+            ${i%%.cc} >& null
+            if test $? -ne 0; then fail; fi
+        fi
+    fi
+done
+
 
 pass
