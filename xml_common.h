@@ -17,6 +17,12 @@ namespace classdesc
     s<<prefix<<"#"<<i;
     return s.str();
   }
+
+  /// used to transfer contents of CDATA sections.
+  struct CDATA: public std::string
+  {
+    using std::string::operator=;
+  };
 }
 
 #endif

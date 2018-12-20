@@ -230,8 +230,39 @@ namespace classdesc
             c=getNoEOF();
             switch (c)
               {
-              case '?':
-              case '!': //we have a comment or XML declaration, which we ignore
+              case '!': 
+                // look ahead for [CDATA[
+                {
+                  std::string leadin;
+                  for (int i=0; i<7; i++)
+                    {
+                      if (!get(c) || c=='>') break; // in case of EOF, or end of tag
+                      leadin+=c;
+                    }
+                  if (leadin=="[CDATA[")
+                    { // CDATA processing, add CDATA contents verbatim
+                      leadin.clear();
+                      while (c=getNoEOF())
+                        {
+                          if (c==']')
+                            if (leadin=="]")
+                              leadin+=c;
+                            else
+                              leadin=c;
+                          else if (c=='>' && leadin=="]]")
+                            break;
+                          else
+                            {
+                              tok+=leadin+c;
+                              leadin.clear();
+                            }
+                        }
+                    }
+                  else if (c!='>')
+                    gobble_comment();
+                  continue;
+                }
+              case '?': //we have a comment or XML declaration, which we ignore, except for CDATA
                 gobble_comment(); continue;
               case '/': //we have begin end tag token
                 return  retval('/',tok);
@@ -262,7 +293,7 @@ namespace classdesc
     else
       throw xml_pack_error("XML file truncated?");
   }
-
+  
   /**
      XML deserialisation object
   */
@@ -366,6 +397,9 @@ namespace classdesc
       if (it != contentMap.end())
         var=it->second; 
     }
+    void unpack(std::string key, CDATA& a)
+    {unpack(key,static_cast<std::string&>(a));}
+    
     /// checks for existence of token unpacked from XML stream
     bool exists(const std::string& key) {return count(key)>0;}
     /// returns number of array elements with prefix key

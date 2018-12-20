@@ -44,6 +44,9 @@ namespace classdesc
     return std::string(1,c);
   }
 
+  inline std::ostream& operator<<(std::ostream& o, const CDATA& x)
+  {return o<<"<![CDATA["<<static_cast<const std::string&>(x)<<"]]>";}
+  
   /**
      XML serialisation object
   */
@@ -119,12 +122,13 @@ namespace classdesc
       *o << "<"<<tag<<">" << x << "</"<<tag<<">";
       endpretty();
     }
+
     /**
        pack an untagged simple type
     */
     template <class T>
     void pack_notag(const string& d, const T&x) 
-    {/*pretty(d);*/ o<<x; /*endpretty();*/}
+    {/*pretty(d);*/ *o<<x; /*endpretty();*/}
 
   };
 
