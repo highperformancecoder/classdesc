@@ -242,7 +242,7 @@ namespace classdesc
                   if (leadin=="[CDATA[")
                     { // CDATA processing, add CDATA contents verbatim
                       leadin.clear();
-                      while (c=getNoEOF())
+                      while ((c=getNoEOF()))
                         {
                           if (c==']')
                             if (leadin=="]")
@@ -597,4 +597,8 @@ namespace classdesc_access
   template <class T> struct access_xml_unpack;
 }
 
+#ifndef XML_COMMON_CD
+#define XML_COMMON_CD
+#include "xml_common.cd"
+#endif
 #endif

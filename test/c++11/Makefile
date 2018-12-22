@@ -39,7 +39,7 @@ ifeq ($(CYG_OS),CYGWIN)
 LINK+= -Wl,--enable-auto-import
 endif
 
-VPATH=..
+VPATH=../..
 
 ifndef GCC 
 ifeq ($(OS),OSF1)

@@ -1,7 +1,8 @@
 #include <xml_pack_base.h>
 struct Foo
 {
-  int a=1;
+  int a;
   classdesc::CDATA bar;
+  Foo(): a(1) {}
 };
 

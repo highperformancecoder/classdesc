@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
       MPIbuf b; b<<ij;
       s.get_counts(b);
       b >> rij >> ret_count;
-      for(int i=0; i<ret_count.size(); i++) T1[rij+i]=ret_count[i];
+      for(size_t i=0; i<ret_count.size(); i++) T1[rij+i]=ret_count[i];
     }
   int same=1;
   for (ij=0; same && ij<nx*ny; ij++) same &= T[ij]==T1[ij];
