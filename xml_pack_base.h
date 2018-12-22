@@ -249,6 +249,6 @@ using classdesc::xml_pack_onbase;
 
 #ifndef XML_COMMON_CD
 #define XML_COMMON_CD
-#include "xml_common.cd"
+//#include "xml_common.cd"
 #endif
 #endif

@@ -25,7 +25,7 @@ int main()
   assert(x.bar==y.bar);
 
   // check processing of CDATA within elements
-  istringstream is2("<root><bar><base_std__string>Some data with <![CDATA[&amp;[]>]]> stuff</base_std__string></bar></root>");
+  istringstream is2("<root><bar>Some data with <![CDATA[&amp;[]>]]> stuff</bar></root>");
   xup.clear();
   xup.parse(is2);
   xup >> y;

@@ -574,7 +574,12 @@ namespace classdesc
 
   template<class T>
   void xml_unpack(xml_unpack_t& targ, const string& desc, 
-                  Exclude<T>&) {} 
+                  Exclude<T>&) {}
+
+  template<class T>
+  void xml_unpack(xml_unpack_t& targ, const string& desc, 
+                  CDATA& a)
+  {targ.unpack(desc,a);} 
 
   template<class T>
   void xml_unpack(xml_unpack_t& targ, const string& desc, is_graphnode, T&)
@@ -599,6 +604,6 @@ namespace classdesc_access
 
 #ifndef XML_COMMON_CD
 #define XML_COMMON_CD
-#include "xml_common.cd"
+//#include "xml_common.cd"
 #endif
 #endif
