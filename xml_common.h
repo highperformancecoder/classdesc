@@ -25,4 +25,5 @@ namespace classdesc
   };
 }
 
+#include "xml_common.cd"
 #endif
