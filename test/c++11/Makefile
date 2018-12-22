@@ -67,9 +67,6 @@ $(EXES): %: %.o  $(OBJS)
 $(MPIEXES): %: %.o  $(OBJS)
 	mpicxx $(CFLAGS) -o $@  $< $(OBJS) $(LIBS)
 
-# needed because many examples do not explicitly reference xml_pack/unpack
-$(EXES:%=%.o): xml_common.cd
-
 HAVE_GCC=$(words $(foreach dir,$(subst :, ,$(PATH)),$(wildcard $(dir)/gcc $(dir)/gcc.exe)))
 ifneq ($(HAVE_GCC),0)
 .c.d: 
