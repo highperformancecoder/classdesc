@@ -23,6 +23,15 @@ namespace classdesc
   {
     using std::string::operator=;
   };
+
+  class xml_pack_t;
+  class xml_unpack_t;
 }
 
+#ifdef _CLASSDESC
+#pragma omit xml_pack classdesc::CDATA
+#pragma omit xml_unpack classdesc::CDATA
+#endif
+
+#include "xml_common.cd"
 #endif

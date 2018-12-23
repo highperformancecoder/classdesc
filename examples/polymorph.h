@@ -10,6 +10,7 @@
 #include "polyPackBase.h"
 #include "polyXMLBase.h"
 #include "factory.h"
+#include "xml_pack_base.h"
 using namespace classdesc;
 
 // base type

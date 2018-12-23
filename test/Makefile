@@ -112,7 +112,7 @@ include depend
 # check that duplicate typeNames can be issued
 	../classdesc -I .. -nodef -typeName -respect_private -use_mbr_pointers -onbase -i $< xml_pack xml_unpack dump xsd_generate  >>$@
 ifdef JSON
-	../classdesc -I .. -respect_private -typeName -onbase -use_mbr_pointers  -i $< json_pack json_unpack >>$@
+	../classdesc -I .. -nodef -respect_private -typeName -onbase -use_mbr_pointers  -i $< json_pack json_unpack >>$@
 endif
 
 xml_unpack_base.cd: xml_unpack_base.h
