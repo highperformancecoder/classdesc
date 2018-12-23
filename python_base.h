@@ -621,10 +621,20 @@ namespace classdesc
       throw std::runtime_error("null dereference");
   }
   template <class T>
-  void sharedPtrTargetSetter(const shared_ptr<T>& self,const T& v)
+  typename enable_if<std::is_copy_assignable<T>, void>::T
+  sharedPtrTargetSetter(const shared_ptr<T>& self,const T& v)
   {
     if (self)
       *self=v;
+    else
+      throw std::runtime_error("null dereference");
+  }
+  template <class T>
+  typename enable_if<Not<std::is_copy_assignable<T>>, void>::T
+  sharedPtrTargetSetter(const shared_ptr<T>& self,const T&)
+  {
+    if (self)
+      throw std::runtime_error(typeName<T>()+" not assignable");
     else
       throw std::runtime_error("null dereference");
   }
