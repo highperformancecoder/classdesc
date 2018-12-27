@@ -22,6 +22,9 @@ namespace classdesc
   struct CDATA: public std::string
   {
     using std::string::operator=;
+    CDATA() {}
+    template <class T> CDATA(T x): std::string(x) {}
+    template <class T, class U> CDATA(T x, U y): std::string(x,y) {}
   };
 
   class xml_pack_t;
