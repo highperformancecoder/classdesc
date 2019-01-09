@@ -2,7 +2,8 @@
 CC=gcc
 CPLUSPLUS=g++
 # -I. should _not_ be necessary, but seems to be necessary on OpenSUSE
-FLAGS=-g -I.
+# -I/usr/include/tirpc is needed for Fedora
+FLAGS=-g -I. -I/usr/include/tirpc
 
 ifdef GCOV
 GCOV_FLAGS+=-fprofile-arcs -ftest-coverage
