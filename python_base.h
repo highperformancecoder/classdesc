@@ -737,7 +737,7 @@ namespace classdesc
     
     inline void translate(StopIteration)
     {PyErr_SetString(PyExc_StopIteration,"");}
-    int dummy = (boost::python::register_exception_translator<StopIteration>(&translate),0);
+    static int dummy = (boost::python::register_exception_translator<StopIteration>(&translate),0);
 
     template <class T>
     void Iterator<T>::registerClass(python_t& p)
