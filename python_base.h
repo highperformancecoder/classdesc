@@ -363,14 +363,18 @@ namespace classdesc
         std::is_copy_assignable<typename pythonDetail::MemberType<X>::T>,
           Not<is_const<typename pythonDetail::MemberType<X>::T>>
           >,void>::T
-      addProperty(C& c,const string& d, X x) {c.def_readwrite(d.c_str(),x);}
+      addProperty(C& c,const string& d, X x) {
+        c.def_readwrite(d.c_str(),x);
+      }
       template <class C,class X>
       typename enable_if<
         Or<
           Not<std::is_copy_assignable<typename pythonDetail::MemberType<X>::T>>,
           is_const<typename pythonDetail::MemberType<X>::T>
           >,void>::T
-      addProperty(C& c,const string& d, X x) {c.def_readonly(d.c_str(),x);}
+      addProperty(C& c,const string& d, X x) {
+        c.def_readonly(d.c_str(),x);
+      }
     };
 
     template <class T, bool copiable> struct Class;
@@ -449,16 +453,25 @@ namespace classdesc
     }
 
     template <class T>
-    void addObject(const string& d, T& o) {
+    typename enable_if<std::is_copy_assignable<T>,void>::T
+    addObject(const string& d, T& o) {
+      using namespace boost::python;
       checkScope(d);
       
       if (!scopeStack.empty())
         scopeStack.back().object.def_readwrite(tail(d).c_str(),o);
+      else
+        extract<dict>(scope().attr("__dict__"))()[tail(d).c_str()]=ptr(&o);
     }
     template <class T>
-    void addObject(const string& d, const T& o) {
+    typename enable_if<Not<std::is_copy_assignable<T>>,void>::T
+    addObject(const string& d, const T& o) {
+      using namespace boost::python;
       checkScope(d);
-      scopeStack.back().object.def_readonly(tail(d).c_str(),o);
+      if (!scopeStack.empty())
+        scopeStack.back().object.def_readonly(tail(d).c_str(),o);
+      else
+        extract<dict>(scope().attr("__dict__"))()[tail(d).c_str()]=ptr(&o);
     }
 
     template <class F>
@@ -466,7 +479,8 @@ namespace classdesc
     addFunctional(const string& d, F f) {
       checkScope(d);
       boost::python::def(tail(d).c_str(),f);
-      scopeStack.back().object.staticmethod(tail(d).c_str());
+      if (!scopeStack.empty())
+        scopeStack.back().object.staticmethod(tail(d).c_str());
     }
 
     // ignore pointer returns, as we don't know anything about the object being pointed to.
@@ -735,6 +749,41 @@ namespace classdesc
           c.completed=true;
         }
     }
+  }
+
+  /// add a python reference to a C++ static object
+  /// path is a '.' delimited name qualified by namespaces
+  /// if no '.' present, object is inserted into global namespace
+
+  /// Lifetime of \a object should exceed that of any reference to it
+  /// in Python, so best used for logn lived objects. You can
+  /// programmatically delete the python reference by call "del
+  /// objectname" using boost::python::exec
+
+  /// NB: this function has to be run after the requested module is
+  /// created. That means in particular, it cannot be run in the
+  /// initialiser of static variable, nor within the initialiser of
+  /// the module in question. Please use python_t::addObject()
+  /// instead. It can be used to insert an object into the global
+  /// module, however within a module initialiser.
+  template <class T>
+  void addPythonObject(const std::string& path, T& object)
+  {
+    using namespace boost::python;
+    auto lastDot=path.rfind('.');
+    string module, name;
+    if (lastDot==std::string::npos)
+      {
+        module="__main__";
+        name=path;
+      }
+    else
+      {
+        module=path.substr(0,lastDot);
+        name=path.substr(lastDot+1);
+      }
+    dict the_dict=extract<dict>(import(module.c_str()).attr("__dict__"));
+    the_dict[name]=ptr(&object);
   }
 }
 

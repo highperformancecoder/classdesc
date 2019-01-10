@@ -1,5 +1,5 @@
 import example
-r=example.static.root
+r=example.root
 assert r.bar.ch=='M'
 r.bar.ch='A'
 assert r.bar.ch=='A'
@@ -127,3 +127,11 @@ except AttributeError:
 #    assert False
 #except RuntimeError:
 #    pass
+
+# check that the various aliases set up do refer to the same object
+example.registerRoot1()
+root.bar.a+=0.1
+assert root.bar.a==root1.bar.a
+assert root.bar.a==example.root.bar.a
+assert root.bar.a==example.root1.bar.a
+assert root.bar.a==example.static.root.bar.a
