@@ -17,13 +17,16 @@ PATH=.:$PATH
 passed=0
 failed=0
 for i in $*; do 
-  echo $i
-  bash $i
-  if test $? -eq 0 ; then 
-    passed=`expr $passed + 1`
-  else
-    failed=`expr $failed + 1`
-  fi
+    echo -n "$i: "
+    # absorb stdio to reduce chatter
+    bash $i &> /dev/null
+    if test $? -eq 0 ; then 
+        passed=`expr $passed + 1`
+        echo passed
+    else
+        failed=`expr $failed + 1`
+        echo -e "\033[31mfailed\033[0m"
+    fi
 done
 
 echo "$passed tests passed, $failed tests failed"

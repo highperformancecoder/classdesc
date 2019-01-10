@@ -161,6 +161,14 @@ namespace classdesc
 #endif
     }
     void realloc(size_t s) {m_data=realloc(m_data,s);}
+    /** resizes the buffer, leaving any extra allocated space uninitialised
+        use this for expanding an input buffer when reading from a stream
+     */
+    void resize(size_t s) {
+      realloc(s);
+      if (!m_data) throw std::bad_alloc();
+      m_size=s;
+    }
      
     virtual void append(const basic_type& x)
     {

@@ -250,7 +250,7 @@ namespace classdesc
                             else
                               leadin=c;
                           else if (c=='>' && leadin=="]]")
-                            break;
+                            return tok;
                           else
                             {
                               tok+=leadin+c;
