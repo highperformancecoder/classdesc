@@ -200,11 +200,11 @@ namespace classdesc
     template <class T>
     typename T::value_type& getItemRef(T& c, size_t n)
     {
-        if (n>=c.size())
-          throw std::out_of_range("index out of bounds");
-        typename T::iterator i=c.begin();
-        std::advance(i,n);
-        return *i;
+      if (n>=size_t(c.size()))
+        throw std::out_of_range("index out of bounds");
+      typename T::iterator i=c.begin();
+      std::advance(i,n);
+      return *i;
     }
 
     // for a structured type, return a PythonRef
@@ -224,7 +224,7 @@ namespace classdesc
     template <class T>
     typename enable_if<Not<PythonBasicType<typename T::value_type> >,
                          void>::T
-    setItem(T& c, size_t n,const typename T::value_type& v) {}
+    setItem(T&, size_t,const typename T::value_type&) {}
 
     template <class T>
     typename enable_if<PythonBasicType<typename T::value_type>,
