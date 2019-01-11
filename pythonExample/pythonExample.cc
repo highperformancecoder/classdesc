@@ -8,6 +8,7 @@ int Foo::si=25;
 void registerRoot()
 {
   addPythonObject("root1",root);
+  addPythonObject("root1",root);
   addPythonObject("example.root1",root);
 }
 
@@ -15,7 +16,7 @@ void registerRoot()
 BOOST_PYTHON_MODULE(example)
 {
   python_t p;
-  python<Root>(p,"");
+  p.defineClass<Root>();
   p.addFunctional("registerRoot1",registerRoot);
   p.addObject("static.root",root);
   p.addObject("root",root);

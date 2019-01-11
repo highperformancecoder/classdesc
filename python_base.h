@@ -596,6 +596,10 @@ namespace classdesc
       if (!c.completed)
         c.add_property(tail(d).c_str(),pythonDetail::enumGet<C>(m),pythonDetail::enumSet<C>(m));
     }
+
+    /// utility method to add a Python wrapper class for \a T
+    template <class T>
+    void defineClass() {python<T>(*this,"");}
   };
 
   template <class C, class T=C>
