@@ -8,7 +8,9 @@
 
 #include <classdesc.h>
 #include <stringKeyMap.h>
+#include <python_base.h>
 using namespace classdesc;
+using namespace boost::python;
 
 #include <string>
 #include <vector>
@@ -70,6 +72,11 @@ struct Bar: Foo
   int f;
   EnumFoo barfoo;
   std::vector<Foo> vFoo;
+  static tuple varArgExample(tuple args, dict kw) {
+    Bar& self=extract<Bar&>(args[0]);
+    std::cout << self.f << std::endl;
+    return make_tuple(args,kw);
+  }
   Bar() {}
   Bar(int i): Foo(i), f(20), barfoo(eb), vFoo(3,1) {}
 };

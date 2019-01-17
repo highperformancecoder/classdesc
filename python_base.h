@@ -104,7 +104,7 @@ namespace classdesc
     };
 
     template <class T> struct Sig: public std::conditional<is_class<T>::value, SigObj<T>, SigFun<T>>::type {};
-    
+
     template <class T>
     size_t len(T& x) {return x.size();}
     
@@ -330,7 +330,27 @@ namespace classdesc
   typename enable_if<PythonBasicType<T>, boost::python::default_call_policies>::T
   return_policy() {return boost::python::default_call_policies();}
 
+  namespace pythonDetail
+  {
+    template <class F, int arity=Arity<F>::value==2>
+    struct is_rawFunction;
+
+    // used for detecting a raw function R f(tuple, dict) that can be
+    // used to implement variable and named argument functions,
+    // including implementing overload dispatching
+    template <class F> struct is_rawFunction<F,true>
+    {
+      static const bool value=
+        is_same<typename Arg<F,1>::T,boost::python::tuple>::value &&
+        is_same<typename Arg<F,2>::T,boost::python::dict>::value;
+    };
     
+    template <class F> struct is_rawFunction<F,false>
+    {
+      static const bool value=false;
+    };
+  }
+
   class python_t
   {
     struct Scope
@@ -356,47 +376,54 @@ namespace classdesc
     {
       virtual ~ClassBase() {}
       bool completed=false;
+
+      template <class T, bool copiable> struct PyClass;
+      template <class T> struct PyClass<T,true>: public boost::python::class_<T>
+      {
+        PyClass(const char* n): boost::python::class_<T>(n){}
+      };
+      template <class T> struct PyClass<T,false>: public boost::python::class_<T,boost::noncopyable>
+      {
+        PyClass(const char* n): boost::python::class_<T,boost::noncopyable>(n){}
+      };
+      
+    };
+    
+    template <class T, bool copiable> struct Class:
+     public ClassBase, public ClassBase::PyClass<T,copiable>
+    {
+      Class(const string& name): ClassBase::PyClass<T,copiable>(name.c_str()) {}
+      
       // distinguish between assignable and unassignable properties, which may be const, or may have assignment deleted
-      template <class C,class X>
+      template <class X>
       typename enable_if<
         And<
         std::is_copy_assignable<typename pythonDetail::MemberType<X>::T>,
           Not<is_const<typename pythonDetail::MemberType<X>::T>>
           >,void>::T
-      addProperty(C& c,const string& d, X x) {
-        c.def_readwrite(d.c_str(),x);
-      }
-      template <class C,class X>
+      addProperty(const string& d, X x) {this->def_readwrite(d.c_str(),x);}
+      
+      template <class X>
       typename enable_if<
         Or<
           Not<std::is_copy_assignable<typename pythonDetail::MemberType<X>::T>>,
           is_const<typename pythonDetail::MemberType<X>::T>
           >,void>::T
-      addProperty(C& c,const string& d, X x) {
-        c.def_readonly(d.c_str(),x);
+      addProperty(const string& d, X x) {this->def_readonly(d.c_str(),x);}
+      
+      using PyClass<T,copiable>::def;
+      // handle "raw" functions, enabling variable arguments and overload dispatch
+      template <class F>
+      typename enable_if<pythonDetail::is_rawFunction<F>, Class&>::T
+      def(const char* n, F f) {
+        PyClass<T,copiable>::def(n,boost::python::raw_function(f));
+        return *this;
       }
-    };
-
-    template <class T, bool copiable> struct Class;
-    template <class T>
-    struct Class<T,true>:
-      public ClassBase, public boost::python::class_<T>
-    {
-      Class(const string& name): boost::python::class_<T>(name.c_str()) {}
-      template <class X>
-      void addProperty(const string& d,X x) {ClassBase::addProperty(*this,d,x);}
+      template <class F>
+      typename enable_if<Not<pythonDetail::is_rawFunction<F>>, Class&>::T
+      def(const char* n, F f) {PyClass<T,copiable>::def(n,f); return *this;}
     };
     
-    template <class T>
-    struct Class<T,false>:
-      public ClassBase, public boost::python::class_<T,boost::noncopyable>
-    {
-      Class(const string& name): boost::python::class_<T,boost::noncopyable>(name.c_str()) {}
-      template <class X>
-      void addProperty(const string& d,X x) {ClassBase::addProperty(*this,d,x);}
-    };
-
-
     // lazy instantiation pattern to avoid needing an object file, and
     // link time ordering dependencyy
 
@@ -789,6 +816,13 @@ namespace classdesc
     dict the_dict=extract<dict>(import(module.c_str()).attr("__dict__"));
     the_dict[name]=ptr(&object);
   }
+
+  template <> void python<boost::python::object>(python_t&,const string&) {}
+  template <> void python<boost::python::tuple>(python_t&,const string&) {}
+  template <> void python<boost::python::list>(python_t&,const string&) {}
+  template <> void python<boost::python::dict>(python_t&,const string&) {}
+  template <> void python<boost::python::slice>(python_t&,const string&) {}
+  template <> void python<boost::python::str>(python_t&,const string&) {}
 }
 
 namespace classdesc_access
@@ -809,6 +843,7 @@ namespace classdesc_access
       classdesc::pythonSharedPtr<T>(p,d);
     }
   };
+
 }
 
 using classdesc::python;
