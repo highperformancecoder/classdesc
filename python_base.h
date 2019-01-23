@@ -1,5 +1,5 @@
 /*
-  @copyright Russell Standisgh 2018
+  @copyright Russell Standish 2018
   @author Russell Standish
   This file is part of Classdesc
 
@@ -817,12 +817,12 @@ namespace classdesc
     the_dict[name]=ptr(&object);
   }
 
-  template <> void python<boost::python::object>(python_t&,const string&) {}
-  template <> void python<boost::python::tuple>(python_t&,const string&) {}
-  template <> void python<boost::python::list>(python_t&,const string&) {}
-  template <> void python<boost::python::dict>(python_t&,const string&) {}
-  template <> void python<boost::python::slice>(python_t&,const string&) {}
-  template <> void python<boost::python::str>(python_t&,const string&) {}
+  template <> inline void python<boost::python::object>(python_t&,const string&) {}
+  template <> inline void python<boost::python::tuple>(python_t&,const string&) {}
+  template <> inline void python<boost::python::list>(python_t&,const string&) {}
+  template <> inline void python<boost::python::dict>(python_t&,const string&) {}
+  template <> inline void python<boost::python::slice>(python_t&,const string&) {}
+  template <> inline void python<boost::python::str>(python_t&,const string&) {}
 }
 
 namespace classdesc_access
