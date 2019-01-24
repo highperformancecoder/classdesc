@@ -77,7 +77,7 @@ struct Bar: Foo
     std::cout << self.f << std::endl;
     return make_tuple(args,kw);
   }
-  static pointer_wrapper<Bar*> self(tuple args, dict kw) {
+  static pointer_wrapper<Bar*> self(const tuple& args, const dict& kw) {
     return ptr(&extract<Bar&>(args[0])());
   }
   Bar() {}

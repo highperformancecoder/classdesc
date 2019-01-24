@@ -340,9 +340,15 @@ namespace classdesc
     // including implementing overload dispatching
     template <class F> struct is_rawFunction<F,true>
     {
+      // strips reference and const qualifiers for the ith argument
+      template <int i> struct Arg
+      {
+        typedef typename remove_const<typename remove_reference<typename functional::Arg<F,i>::T>::type>::type T;
+      };
+      
       static const bool value=
-        is_same<typename Arg<F,1>::T,boost::python::tuple>::value &&
-        is_same<typename Arg<F,2>::T,boost::python::dict>::value;
+        is_same<typename Arg<1>::T,boost::python::tuple>::value &&
+        is_same<typename Arg<2>::T,boost::python::dict>::value;
     };
     
     template <class F> struct is_rawFunction<F,false>
@@ -414,7 +420,7 @@ namespace classdesc
       using PyClass<T,copiable>::def;
       // handle "raw" functions, enabling variable arguments and overload dispatch
       template <class F>
-      typename enable_if<pythonDetail::is_rawFunction<F>,Class&>::T
+      typename enable_if<pythonDetail::is_rawFunction<F>, Class&>::T
       def(const char* n, F f) {
         static_assert(Not<is_reference<typename functional::Return<F>::T>>::value,
                       "\nreference return of raw function not supported.\nUse boost::python::ptr instead");
