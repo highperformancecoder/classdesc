@@ -414,8 +414,10 @@ namespace classdesc
       using PyClass<T,copiable>::def;
       // handle "raw" functions, enabling variable arguments and overload dispatch
       template <class F>
-      typename enable_if<pythonDetail::is_rawFunction<F>, Class&>::T
+      typename enable_if<pythonDetail::is_rawFunction<F>,Class&>::T
       def(const char* n, F f) {
+        static_assert(Not<is_reference<typename functional::Return<F>::T>>::value,
+                      "\nreference return of raw function not supported.\nUse boost::python::ptr instead");
         PyClass<T,copiable>::def(n,boost::python::raw_function(f));
         return *this;
       }

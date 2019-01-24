@@ -135,4 +135,6 @@ assert root.bar.a==root1.bar.a
 assert root.bar.a==example.root.bar.a
 assert root.bar.a==example.root1.bar.a
 assert root.bar.a==example.static.root.bar.a
+b=root.bar.self()
+assert b.a==root.bar.a
 exit(0)
