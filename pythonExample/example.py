@@ -137,4 +137,7 @@ assert root.bar.a==example.root1.bar.a
 assert root.bar.a==example.static.root.bar.a
 b=root.bar.self()
 assert b.a==root.bar.a
+assert b.overloadExample().a==b.a
+assert b.overloadExample(1)==1
+assert b.overloadExample(1,2)==3
 exit(0)

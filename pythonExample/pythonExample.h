@@ -80,6 +80,8 @@ struct Bar: Foo
   static pointer_wrapper<Bar*> self(const tuple& args, const dict& kw) {
     return ptr(&extract<Bar&>(args[0])());
   }
+  Bar& overloadExample() {return *this;}
+  int overloadExample(int x, int y=0) {return x+y;}
   Bar() {}
   Bar(int i): Foo(i), f(20), barfoo(eb), vFoo(3,1) {}
 };
