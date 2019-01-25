@@ -160,10 +160,6 @@ namespace classdesc
     typename enable_if<is_void<typename Return<F>::T>, void>::T
     apply(void* r, F f, Args& args, dummy<1> d=0)
     {apply_void_fn(f,args);}
-  
-    
-
-
   }
 
 }

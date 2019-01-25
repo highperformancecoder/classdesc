@@ -430,6 +430,28 @@ namespace classdesc
       template <class F>
       typename enable_if<Not<pythonDetail::is_rawFunction<F>>, Class&>::T
       def(const char* n, F f) {PyClass<T,copiable>::def(n,f); return *this;}
+
+      template <class R, class... Args>
+      typename enable_if<is_reference<R>, void>::T
+      overload(const char* n, R (T::*m)(Args...)) {
+        PyClass<T,copiable>::def(n,m,boost::python::return_internal_reference<>());
+      }
+      template <class R, class... Args>
+      typename enable_if<Not<is_reference<R>>, void>::T
+      overload(const char* n, R (T::*m)(Args...)) {
+        PyClass<T,copiable>::def(n,m);
+      }
+      template <class R, class O,class... Args>
+      typename enable_if<is_reference<R>, void>::T
+      overload(const char* n, R (T::*m)(Args...),const O& o) {
+        PyClass<T,copiable>::def(n,m,o[boost::python::return_internal_reference<>()]);
+      }
+      template <class R, class O, class... Args>
+      typename enable_if<Not<is_reference<R>>, void>::T
+      overload(const char* n, R (T::*m)(Args...), const O& o) {
+        PyClass<T,copiable>::def(n,m,o);
+      }
+      
     };
     
     // lazy instantiation pattern to avoid needing an object file, and

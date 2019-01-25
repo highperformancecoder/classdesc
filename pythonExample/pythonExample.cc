@@ -25,7 +25,7 @@ BOOST_PYTHON_MODULE(example)
   addPythonObject("root",root);
   Bar& (Bar::*o1)()=&Bar::overloadExample;
   int (Bar::*o2)(int,int)=&Bar::overloadExample;
-  p.getClass<Bar>().def("overloadExample",o1,Bar_overloadExample0()[return_internal_reference<>()]);
-  p.getClass<Bar>().def("overloadExample",o2,Bar_overloadExample1(args("x","y")));
+  p.getClass<Bar>().overload("overloadExample",o1);
+  p.getClass<Bar>().overload("overloadExample",o2,Bar_overloadExample1(args("x","y")));
 }
 
