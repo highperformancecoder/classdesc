@@ -163,7 +163,6 @@ namespace classdesc
     template<class T, class M>
     struct ArrayMemRefSetItem
     {
-      static constexpr size_t rank=std::rank<M>::value;
       M m;
       ArrayMemRefSetItem(M m): m(m) {}
       typedef typename std::remove_all_extents<typename MemberType<M>::T>::type V; 
@@ -606,7 +605,6 @@ namespace classdesc
     typename enable_if<is_Carray<typename pythonDetail::MemberType<M>::T>,void>::T
     addMemberObject(const string& d, M m)
     {
-      static constexpr size_t rank=std::rank<typename pythonDetail::MemberType<M>::T>::value;
       auto& c=getClass<C>();
       if (!c.completed)
         c.add_property(tail(d).c_str(), pythonDetail::ArrayMemRef<C,M>(m),
