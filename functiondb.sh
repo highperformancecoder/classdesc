@@ -2,7 +2,7 @@
 
 # system shell is assumed to be bash.
 
-max_arity=10
+max_arity=20
 arity=0
 
 # required to handle reference arguments
