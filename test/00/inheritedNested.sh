@@ -68,7 +68,7 @@ template <> struct access_p<struct ::FlowCounter > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
 {
-::p(targ,desc+"",classdesc::base_cast<std::set<FiveTuple<6>> >::cast(arg));
+::p(targ,desc+"",classdesc::base_cast<std::set< FiveTuple < 6 >>  >::cast(arg));
 }
 template <class _CD_TYPE>
 void type(classdesc::p_t& targ, const classdesc::string& desc)
