@@ -284,7 +284,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
                  (input.lasttoken!=">" && input.lasttoken!=">>");
 	       input.nexttok())	
 	    {
-	      baseclass += input.token;
+	      baseclass += " "+input.token;
 	      if (input.token=="<") ang_count++;
 	      if (input.token==">") 
 		{
