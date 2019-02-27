@@ -551,7 +551,7 @@ namespace classdesc
 
     template <class F>
     struct DefineArgClasses<F,0> {
-      static void define(python_t& p) {}
+      static void define(python_t&) {}
     };
     
     template <class T>
