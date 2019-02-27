@@ -375,7 +375,8 @@ namespace classdesc
 //        c.def("__init__",&assignList<T>);
 //      }
 //    };
-    
+
+
   }
 
   class python_t
@@ -534,6 +535,25 @@ namespace classdesc
       // final component of d is not part of scope
     }
 
+    // recursively define classes of arguments
+    template <class F, int N>
+    struct DefineArgClasses {
+      static void define(python_t& p) {
+        p.defineClass<
+          typename remove_const<
+            typename remove_reference<
+              typename functional::Arg<F,N>::T
+              >::type
+            >::type>();
+        DefineArgClasses<F,N-1>::define(p);
+      }
+    };
+
+    template <class F>
+    struct DefineArgClasses<F,0> {
+      static void define(python_t& p) {}
+    };
+    
     template <class T>
     typename enable_if<std::is_copy_assignable<T>,void>::T
     addObject(const string& d, T& o) {
@@ -563,6 +583,8 @@ namespace classdesc
       boost::python::def(tail(d).c_str(),f);
       if (!scopeStack.empty())
         scopeStack.back().object.staticmethod(tail(d).c_str());
+      defineClass<typename remove_reference<typename functional::Return<F>::T>::type>();
+      DefineArgClasses<F,functional::Arity<F>::value>::define(*this);
     }
 
     // ignore pointer returns, as we don't know anything about the object being pointed to.
@@ -582,7 +604,8 @@ namespace classdesc
       auto& c=getClass<C>();
       if (!c.completed)
           c.def(tail(d).c_str(),m);
-      python<typename functional::Return<M>::T>(*this,"");
+      defineClass<typename functional::Return<M>::T>();
+      DefineArgClasses<M,functional::Arity<M>::value>::define(*this);
     }
     
     // for methods returning a reference, create a wrapper object that
@@ -594,7 +617,8 @@ namespace classdesc
       auto& c=getClass<C>();
       if (!c.completed)
         c.def(tail(d).c_str(),m,boost::python::return_internal_reference<>());
-      python<typename remove_reference<typename functional::Return<M>::T>::type>(*this,"");
+      defineClass<typename remove_reference<typename functional::Return<M>::T>::type>();
+      DefineArgClasses<M,functional::Arity<M>::value>::define(*this);
     }
     
     // ignore pointer returns, as we don't know anything about the object being pointed to.
@@ -681,6 +705,7 @@ namespace classdesc
     /// utility method to add a Python wrapper class for \a T
     template <class T>
     void defineClass() {python<T>(*this,"");}
+
   };
 
   /// convert a python list to a sequence type T

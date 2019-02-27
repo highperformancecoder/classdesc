@@ -119,6 +119,12 @@ struct FooBar1
   Foo f{0};
 };
 
+// extra class to test that argument types are automatically registered
+struct DD
+{
+  int a;
+};
+
 // root type
 struct Root
 {
@@ -130,6 +136,7 @@ struct Root
   }
   double fb1a() {return getFB1().f.a;}
   Root(): bar(3), bar1(2) {}
+  void dummy(DD& x) {}
 };
 
 #include "pythonExample.cd"
