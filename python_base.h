@@ -201,7 +201,7 @@ namespace classdesc
     {
       if (n>=size_t(c.size()))
         throw std::out_of_range("index out of bounds");
-      typename T::iterator i=c.begin();
+      auto i=c.begin();
       std::advance(i,n);
       return *i;
     }
@@ -551,7 +551,16 @@ namespace classdesc
 
     template <class F>
     struct DefineArgClasses<F,0> {
-      static void define(python_t&) {}
+      static void define(python_t& p) {
+        // define return type
+        p.defineClass<
+          typename remove_const<
+            typename remove_reference<
+              typename functional::Return<F>::T
+              >::type
+            >::type
+          >();
+      }
     };
     
     template <class T>
@@ -583,7 +592,6 @@ namespace classdesc
       boost::python::def(tail(d).c_str(),f);
       if (!scopeStack.empty())
         scopeStack.back().object.staticmethod(tail(d).c_str());
-      defineClass<typename remove_reference<typename functional::Return<F>::T>::type>();
       DefineArgClasses<F,functional::Arity<F>::value>::define(*this);
     }
 
@@ -604,7 +612,6 @@ namespace classdesc
       auto& c=getClass<C>();
       if (!c.completed)
           c.def(tail(d).c_str(),m);
-      defineClass<typename functional::Return<M>::T>();
       DefineArgClasses<M,functional::Arity<M>::value>::define(*this);
     }
     
@@ -617,7 +624,6 @@ namespace classdesc
       auto& c=getClass<C>();
       if (!c.completed)
         c.def(tail(d).c_str(),m,boost::python::return_internal_reference<>());
-      defineClass<typename remove_reference<typename functional::Return<M>::T>::type>();
       DefineArgClasses<M,functional::Arity<M>::value>::define(*this);
     }
     
