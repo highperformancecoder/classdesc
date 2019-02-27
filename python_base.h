@@ -363,7 +363,6 @@ namespace classdesc
           auto el=boost::python::extract<boost::python::list>(args[1]);
           if (el.check())
             assignList(x,el);
-          std::cout << "x.size()="<<x.size()<<std::endl;
         }
       return boost::python::object(); //ie None
     }
