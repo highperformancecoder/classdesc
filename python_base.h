@@ -713,7 +713,7 @@ namespace classdesc
   T convertListTo(const boost::python::list& y)
   {
     T x;
-    for (size_t i=0; i<boost::python::len(y); ++i)
+    for (int i=0; i<boost::python::len(y); ++i)
       x.push_back(boost::python::extract<typename T::value_type>(y[i]));
     return x;
   }
