@@ -258,7 +258,7 @@ namespace classdesc
     void setMapItem
     (T& x, const typename T::key_type& k, const typename T::mapped_type& v)
     {x[k]=v;}
-      
+
     /// exception to signal end of iteration
     struct StopIteration {};
     
@@ -354,6 +354,29 @@ namespace classdesc
     {
       static const bool value=false;
     };
+
+    template <class T>
+    boost::python::object rawInit(const boost::python::tuple& args, const boost::python::dict&) {
+      if (boost::python::len(args)>2)
+        {
+          auto& x=boost::python::extract<T&>(args[0])();
+          auto el=boost::python::extract<boost::python::list>(args[1]);
+          if (el.check())
+            assignList(x,el);
+          std::cout << "x.size()="<<x.size()<<std::endl;
+        }
+      return boost::python::object(); //ie None
+    }
+    
+//    template <class T>
+//    struct PyInitWrap: public boost::python::def_visitor<PyInitWrap<T>>
+//    {
+//      template <class U>
+//      void visit(U& c) const {
+//        c.def("__init__",&assignList<T>);
+//      }
+//    };
+    
   }
 
   class python_t
@@ -661,6 +684,35 @@ namespace classdesc
     void defineClass() {python<T>(*this,"");}
   };
 
+  /// convert a python list to a sequence type T
+  template <class T>
+  T convertListTo(const boost::python::list& y)
+  {
+    T x;
+    for (size_t i=0; i<boost::python::len(y); ++i)
+      x.push_back(boost::python::extract<typename T::value_type>(y[i]));
+    return x;
+  }
+  
+  template <class T>
+  void assignList(T& x, const boost::python::list& y)
+  {x=std::move(convertListTo<T>(y));}
+
+  template <class T>
+  boost::shared_ptr<T> constructFromList(const boost::python::list& y)
+  {
+    boost::shared_ptr<T> x(new T);
+    assignList(*x,y);
+    return x;
+  }
+//  template <class T>
+//  T constructFromList(const boost::python::list& y)
+//  {
+//    T x;
+//    assignList(x,y);
+//    return x;
+//  }
+  
   template <class C, class T=C>
   typename enable_if<is_sequence<T>,void>::T
   python(python_t& p, const string& ) {
@@ -668,8 +720,12 @@ namespace classdesc
     if (!c.completed)
       c.def("__len__", &pythonDetail::len<T>).
         def("__getitem__", &pythonDetail::getItem<T>, return_policy<typename T::value_type>()).
-        def("__setitem__", &pythonDetail::setItem<T>);
-   python<typename T::value_type>(p,"");
+        def("__setitem__", &pythonDetail::setItem<T>).
+        def("assign",assignList<T>).
+        def("__init__",boost::python::make_constructor(constructFromList<T>)).
+        def("constructor",boost::python::make_constructor(constructFromList<T>));
+    
+    python<typename T::value_type>(p,"");
     
     //  python<typename pythonDetail::DePythonRef<typename functional::Return<decltype(&pythonDetail::getItem<T>)>::T>::T>(p,"");
       python<typename functional::Return<decltype(&pythonDetail::getItem<T>)>::T>(p,"");

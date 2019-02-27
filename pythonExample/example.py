@@ -140,4 +140,8 @@ assert b.a==root.bar.a
 assert b.overloadExample().a==b.a
 assert b.overloadExample(1)==1
 assert b.overloadExample(1,2)==3
+
+v=example.__dict__['std::vector<int>']
+assert root.bar.seqLength(v([0,1])) == 2
+
 exit(0)

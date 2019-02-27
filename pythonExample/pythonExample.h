@@ -23,6 +23,15 @@ enum EnumFoo {ea, eb, ec=12, ed};
 
 string printHello() {return "hello";}
 
+//struct Vector: public std::vector<int>
+//{
+//  Vector() {}
+//  Vector(const boost::python::list& x) {
+//    pythonDetail::assignList(*this, x);
+//  }
+//};
+
+
 struct Foo
 {
   const static int csi=20;
@@ -64,6 +73,10 @@ struct Foo
   static string shello() {return "hello";}
   int getEF() {return ef;}
   string getc() {return c;}
+
+  size_t seqLength(const std::vector<int>& x) {
+    return x.size();
+  }
 };
 
 struct Bar: Foo
