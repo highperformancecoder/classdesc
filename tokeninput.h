@@ -160,7 +160,20 @@ public:
                 }           
               break;
 
-              /* consider the pair [] and () as single token, 
+            case '.':
+              // check for for up to a triple
+              if (c=='.')
+                {
+                  token+=c;
+                  getnextc();
+                  if (c=='.')
+                    {
+                      token+=c;
+                      getnextc();
+                    }
+                }
+              break;
+             /* consider the pair [] and () as single token, 
                  for use with operator */ 
               
             case '[':
