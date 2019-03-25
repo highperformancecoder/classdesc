@@ -1,5 +1,6 @@
 #include "pythonExample.h"
 #include "classdesc_epilogue.h"
+#include <Python.h>
 
 Root root;
 const int Foo::csi;
@@ -56,9 +57,6 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Bar_overloadExample1,overloadExample,1,2)
 //    };
 //  }
 //}
-
-
-
 
 BOOST_PYTHON_MODULE(example)
 {

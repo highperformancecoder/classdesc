@@ -527,6 +527,10 @@ namespace classdesc
       else return "";
     }
     std::string operator()(T val) const {return operator()(int(val));}
+
+    bool has(T val) const {return v2s.count(val);}
+    bool has(const std::string& s) const {return s2v.count(s);}
+    
     // use these to iterate of the enum's keys
     size_t size() const {return v2s.size();}
     typedef VSMap::const_iterator iterator;

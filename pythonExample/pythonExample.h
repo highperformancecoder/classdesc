@@ -79,8 +79,11 @@ struct Foo
   }
 };
 
+enum GlobE {ga,gb};
+
 struct Bar: Foo
 {
+  enum BarE {a, b};
   Bar(const Bar&)=delete;
   int f;
   EnumFoo barfoo;
@@ -95,6 +98,8 @@ struct Bar: Foo
   }
   Bar& overloadExample() {return *this;}
   int overloadExample(int x, int y=0) const {return x+y;}
+  BarE barE() const {return a;}
+  GlobE globE() const {return ga;}
   Bar() {}
   Bar(int i): Foo(i), f(20), barfoo(eb), vFoo(3,1) {}
 };

@@ -34,7 +34,7 @@ namespace classdesc
 
   template <class T>
   struct ClassdescEnabledPythonType:
-    public And<And<is_class<T>, Not<is_container<T> > >, Not<is_associative_container<T> > > {};
+    public And<And<And<is_class<T>, Not<is_container<T> > >, Not<is_associative_container<T> > >, Not<is_enum<T> > > {};
 
   /// types that have a primitive representation in Python
   template <class T>
@@ -48,9 +48,9 @@ namespace classdesc
   python(python_t& p, const string& d);
 
 
-  // anything that is not a class
+  // anything that is neither a class nor enum
   template <class T>
-  typename enable_if<Not<is_class<T> >,void>::T
+  typename enable_if<And<Not<is_class<T> >,Not<is_enum<T> > >,void>::T
   python(python_t&, const string&) {}
 
   namespace pythonDetail
@@ -284,6 +284,8 @@ namespace classdesc
     template <class T>
     Iterator<T> iter(const T& m) {return Iterator<T>(m.begin(), m.end());}
 
+
+    
   }
 
   template <class T, int rank> struct tn<pythonDetail::ArrayGet<T,rank>>
@@ -317,6 +319,7 @@ namespace boost {
 }
 
 #include "boost/python.hpp"
+#include <Python.h>
 #include <vector>
 
 namespace classdesc
@@ -367,6 +370,68 @@ namespace classdesc
       return boost::python::object(); //ie None
     }
     
+    // *** enum conversion to/from python string ***
+#if PY_MAJOR_VERSION < 3
+    inline const char* to_string(PyObject* x) {return PyString_AsString(x);}
+#else
+    inline const char* to_string(PyObject* x) {return PyUnicode_AsUTF8(x);}
+#endif    
+    template <class E>
+    struct EnumToStr
+    {
+      static PyObject* convert(E e)
+      {
+        return boost::python::incref
+          (boost::python::object
+           (classdesc::enum_keys<E>()(e)).ptr());
+      }
+    };
+
+    template <class E>
+    struct EnumFromStr
+    {
+      EnumFromStr()
+      {
+        boost::python::converter::registry::push_back
+          (&convertible, &construct,
+           boost::python::type_id<E>());
+      }
+
+      static void* convertible(PyObject* obj_ptr)
+      {
+        // Extract the character data from the python string
+        const char* value = to_string(obj_ptr);
+        if (!value || !classdesc::enum_keys<E>().has(value)) return 0;
+        return obj_ptr;
+      }
+ 
+      static void construct(
+                            PyObject* obj_ptr,
+                            boost::python::converter::rvalue_from_python_stage1_data* data)
+      {
+        // Extract the character data from the python string
+        const char* value = to_string(obj_ptr);
+ 
+        // Verify that obj_ptr is a string (should be ensured by convertible())
+        assert(value);
+ 
+        // Grab pointer to memory into which to construct the new QString
+        void* storage = (
+                         (boost::python::converter::rvalue_from_python_storage<E>*)
+                         data)->storage.bytes;
+ 
+        // in-place construct the new QString using the character data
+        // extraced from the python object
+        new (storage) E(classdesc::enum_keys<E>()(value));
+        
+        // Stash the memory chunk pointer for later use by boost.python
+        data->convertible = storage;
+      }
+
+    };
+
+    //*******
+
 //    template <class T>
 //    struct PyInitWrap: public boost::python::def_visitor<PyInitWrap<T>>
 //    {
@@ -966,6 +1031,13 @@ namespace classdesc
   template <> inline void python<boost::python::dict>(python_t&,const string&) {}
   template <> inline void python<boost::python::slice>(python_t&,const string&) {}
   template <> inline void python<boost::python::str>(python_t&,const string&) {}
+
+  template <class E>
+  typename enable_if<is_enum<E>, void>::T
+  python(python_t&,const string&) {
+    boost::python::to_python_converter<E,pythonDetail::EnumToStr<E> >();
+    pythonDetail::EnumFromStr<E>();
+  }
 }
 
 namespace classdesc_access
