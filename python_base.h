@@ -478,6 +478,31 @@ namespace classdesc
         return *this;
       }
       
+      template <class R, class... Args>
+      typename enable_if<is_reference<R>, Class&>::T
+      overload(const char* n, R (T::*m)(Args...) const) {
+        PyClass<T,copiable>::def(n,m,boost::python::return_internal_reference<>());
+        return *this;
+      }
+      template <class R, class... Args>
+      typename enable_if<Not<is_reference<R>>, Class&>::T
+      overload(const char* n, R (T::*m)(Args...) const) {
+        PyClass<T,copiable>::def(n,m);
+        return *this;
+      }
+      template <class R, class O,class... Args>
+      typename enable_if<is_reference<R>, Class&>::T
+      overload(const char* n, R (T::*m)(Args...) const,const O& o) {
+        PyClass<T,copiable>::def(n,m,o[boost::python::return_internal_reference<>()]);
+        return *this;
+      }
+      template <class R, class O, class... Args>
+      typename enable_if<Not<is_reference<R>>, Class&>::T
+      overload(const char* n, R (T::*m)(Args...) const, const O& o) {
+        PyClass<T,copiable>::def(n,m,o);
+        return *this;
+      }
+
     };
     
     // lazy instantiation pattern to avoid needing an object file, and

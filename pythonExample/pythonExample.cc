@@ -69,7 +69,7 @@ BOOST_PYTHON_MODULE(example)
   p.addObject("root",root);
   addPythonObject("root",root);
   Bar& (Bar::*o1)()=&Bar::overloadExample;
-  int (Bar::*o2)(int,int)=&Bar::overloadExample;
+  int (Bar::*o2)(int,int) const=&Bar::overloadExample;
   p.getClass<Bar>().overload("overloadExample",o1);
   //  p.getClass<Bar>().overload("overloadExample",o2,Bar_overloadExample1(args("x","y")));
   p.getClass<Bar>().overload("overloadExample",o2,Bar_overloadExample1());
