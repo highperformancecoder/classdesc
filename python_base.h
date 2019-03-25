@@ -285,7 +285,17 @@ namespace classdesc
     Iterator<T> iter(const T& m) {return Iterator<T>(m.begin(), m.end());}
 
 
-    
+    // a one shot switch that determines if a give type has already been defined
+    template <class T>
+    inline bool classDefStarted()
+    {
+      static bool value=false;
+      if (value) return true;
+      value=true;
+      return false;
+    }
+      
+
   }
 
   template <class T, int rank> struct tn<pythonDetail::ArrayGet<T,rank>>
@@ -468,7 +478,7 @@ namespace classdesc
     struct ClassBase
     {
       virtual ~ClassBase() {}
-      bool completed=false;
+      bool completed=false, started=false;
 
       template <class T, bool copiable> struct PyClass;
       template <class T> struct PyClass<T,true>: public boost::python::class_<T>
@@ -629,12 +639,13 @@ namespace classdesc
     template <class F, int N>
     struct DefineArgClasses {
       static void define(python_t& p) {
-        p.defineClass<
-          typename remove_const<
-            typename remove_reference<
-              typename functional::Arg<F,N>::T
-              >::type
-            >::type>();
+        typedef typename remove_const<
+          typename remove_reference<
+            typename functional::Arg<F,N>::T
+            >::type
+          >::type T;
+        if (!pythonDetail::classDefStarted<T>())
+          p.defineClass<T>();
         DefineArgClasses<F,N-1>::define(p);
       }
     };
@@ -642,14 +653,14 @@ namespace classdesc
     template <class F>
     struct DefineArgClasses<F,0> {
       static void define(python_t& p) {
-        // define return type
-        p.defineClass<
-          typename remove_const<
-            typename remove_reference<
-              typename functional::Return<F>::T
-              >::type
+        typedef typename remove_const<
+          typename remove_reference<
+            typename functional::Return<F>::T
             >::type
-          >();
+          >::type T;
+        if (!pythonDetail::classDefStarted<T>())
+          // define return type
+          p.defineClass<T>();
       }
     };
     

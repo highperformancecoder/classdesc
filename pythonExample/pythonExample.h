@@ -98,7 +98,7 @@ struct Bar: Foo
   }
   Bar& overloadExample() {return *this;}
   int overloadExample(int x, int y=0) const {return x+y;}
-  BarE barE() const {return a;}
+  BarE barE(BarE e) const {return e;}
   GlobE globE() const {return ga;}
   Bar() {}
   Bar(int i): Foo(i), f(20), barfoo(eb), vFoo(3,1) {}
@@ -117,6 +117,7 @@ struct Bar1
   Foo& fooRef() {return f;}
   Foo* foop() {return &f;} // should be ignored, as can't determine ownership
   static Foo* sfoop() {return nullptr;}// should be ignored, as can't determine ownership
+  Bar1& recursiveType(const Bar1&) {return *this;} // tests a recursive type definition bug
 };
 
 struct FooBar1
