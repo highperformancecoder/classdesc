@@ -563,12 +563,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 	  /* member functions require object passed as well*/
 	  if (isIdentifierStart(memname[0]))
 	    {
-
-	      if (!num_instances.count("."+memname))
-		num_instances["."+memname]=1;
-	      else
-		num_instances["."+memname]++;
-
+              num_instances["."+memname]++;
 
 	      if (is_virtual) virt_list.insert(memname);
 
