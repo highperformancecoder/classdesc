@@ -98,7 +98,9 @@ struct Bar: Foo
   }
   Bar& overloadExample() {return *this;}
   int overloadExample(int x, int y=0) const {return x+y;}
+  // test overloading
   BarE barE(BarE e) const {return e;}
+  BarE barE() const {return a;}
   GlobE globE() const {return ga;}
   Bar() {}
   Bar(int i): Foo(i), f(20), barfoo(eb), vFoo(3,1) {}

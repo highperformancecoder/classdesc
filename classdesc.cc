@@ -16,6 +16,7 @@
 #include <stack>
 #include <stdio.h>
 #include <iostream>
+#include <sstream>
 #include <ctype.h>
 using namespace std;
 #include "tokeninput.h"
@@ -28,6 +29,7 @@ bool typeName=false; // generate type and enum symbol tables
 bool onBase=false;
 bool use_mbr_pointers=false; // use member pointers for referencing member objects
 bool qt=false; // true for processing Qt MOC header files
+bool overloadingAllowed=false;
 
 // name of file being processed
 string inputFile="stdin";
@@ -40,6 +42,24 @@ inline bool isIdentifierStart(char x)
 // valid interior character of legal identifier
 inline bool isIdentifierChar(char x)
 {return x=='_'||isalnum(x);}
+
+template <class T> std::string str(T x) {
+  std::ostringstream s;
+  s<<x;
+  return s.str();
+}
+
+  // removes white space from beginning and end
+  inline std::string trimWS(const std::string& s)
+  {
+    int start=0, end=s.length()-1;
+    while (start<int(s.length()) && isspace(s[start])) ++start;
+    while (end>=0 && isspace(s[end])) --end;
+    if (end>=start)
+      return s.substr(start,end-start+1);
+    else
+      return "";
+  }
 
 /* store the action strings (arguments passed) for base classes and
    members, for each class parsed */
@@ -164,6 +184,20 @@ struct type_defined_t: hash_map<string,int>
 
 std::map<std::string, std::vector<std::string> > enum_keys;
 
+// overloaded member database
+struct MemberSig
+{
+  string declName, returnType, argList, prefix, name;
+  bool is_const=false;
+  string declare() {
+    return returnType+"("+prefix+"*"+declName+")("+argList+")"+
+      (is_const?" const ":"")+"=&"+prefix+name+";";
+  }
+};
+
+map<string, vector<MemberSig> > overloadTempVarDecls;
+
+
 // quick and dirty tokenizer
 set<string> token_set(const string& s)
 {
@@ -190,6 +224,7 @@ void assign_enum_action(tokeninput& input, string prefix)
       enumname+="class ";
     }
   enumname+=prefix + input.token;
+  string bareEnumName=input.token;
   input.nexttok();
 
   if (input.token==":") // type specification supplied, so skip it
@@ -198,6 +233,7 @@ void assign_enum_action(tokeninput& input, string prefix)
 
   if (input.token=="{") /* only assign action if definition, not declaration */
     {
+      nested[prefix].push_back(bareEnumName);
       //      gobble_delimited(input,"{","}");
       // load up the list of enum symbols
       for ( ; input.token != ";"; input.nexttok())
@@ -224,6 +260,29 @@ void parse_typedef(tokeninput& input, string prefix="");
 void assign_class_action(tokeninput& input, string prefix,
 			 string template_args, string classargs, 
                          bool is_private);
+
+// search and replace any shorn class types with fully qualified versions
+string replaceShornTypes(const string& input, const string& shornType, const string& fullType)
+{
+  string r;
+  for (size_t i=0, j=input.find(shornType); i!=string::npos; i=j, j=input.find(shornType,i))
+    {
+      r+=input.substr(i,j);
+      if (j!=string::npos)
+        {
+          j+=shornType.size();
+          size_t k=j;
+          // check if '<' is the next non white space character
+          while (k<input.size() && isspace(input[k])) ++k;
+          if (k>=input.size() || input[k]!='<')
+            r+=fullType;
+          else
+            r+=shornType;
+        }
+    }
+  return r;
+}
+
 
 class register_classname
 {
@@ -264,6 +323,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
   string               baseclass;
   string               argList;
   string               rType;
+  string returnType;
   set<string> usingNames;
 
   /* handle inheritance */
@@ -437,7 +497,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 	  else
 	    targs2=targs+targs1;
 	  input.nexttok();
-          if (!is_private) nested[prefix].push_back(input.token);
+          if (!is_private && !is_template) nested[prefix].push_back(input.token);
 	  /* handle new templated typename rules */
 	  if (targs.length()) input.lasttoken="typename";
 	  if (isIdentifierStart(input.token[0]))  /* named class */
@@ -464,7 +524,9 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 	  input.nexttok();
 	  if (!is_private && 
               isIdentifierStart(input.token[0]))  /* named enum */
-	    assign_enum_action(input,prefix);
+            {
+              assign_enum_action(input,prefix);
+            }
           else
             gobble_delimited(input,"","}");
 	}
@@ -529,7 +591,8 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
       if (input.token=="static") reg.is_static=true;
       if (input.token=="const") reg.is_const=true;
       if (input.token=="friend")  /* skip friend statement */
-	while (input.token!=";") input.nexttok();
+        while (input.token!=";")
+          input.nexttok();
 
       if (input.token[0]=='(') /* member functions, or function pointers */
 	{
@@ -551,14 +614,19 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 		  gobble_delimited(input,"(",")");
 		}
 	      else if (input.token!=")") /* skip fn args */
-              {  argList = gobble_delimited(input,"(",")");
-              }
+                argList = gobble_delimited(input,"(",")");
 	    }
           else argList.erase();
     
           rType = rType.substr(0, rType.find(memname));
 
-	  while (!strchr(";{",input.token[0])) input.nexttok();
+          // look ahead for const specification
+          bool is_const=false;
+	  while (!strchr(";{",input.token[0]))
+            {
+              input.nexttok();
+              if (input.token=="const") is_const=true;
+            }
 
 	  /* member functions require object passed as well*/
 	  if (isIdentifierStart(memname[0]))
@@ -582,14 +650,46 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 		  !is_template &&
 		  memname!="CLASSDESC_ACCESS" &&
 		  memname!="CLASSDESC_ACCESS_TEMPLATE")
-              {  string action = 
-                  "&"+ namespace_name + prefix + memname;
-                 if (objc) { action += ", \"" + rType + "\", " + "\"" + argList + "\""; }
-                 rType.erase();
-                 if (reg.is_static)
-                   reg.register_class(memname, "", action);
-                 else
-                   reg.register_class(memname, varname, action);
+              {
+                string action = (reg.is_static || !overloadingAllowed)?
+                  "&"+ namespace_name + prefix + memname:
+                  "TmpMemPtr_"+memname+str(num_instances["."+memname]);
+                // strip any default arguments from argList
+                string al;
+                int braceCnt=0;
+                bool include=true;
+                for (string::iterator i=argList.begin(); i!=argList.end(); ++i)
+                  switch (*i)
+                    {
+                    case '=': include=false; break;
+                    case '{': braceCnt++; break;
+                    case '}': braceCnt--; break;
+                    case ',': if (braceCnt==0) include=true;
+                      /*fallthrough*/
+                    default:
+                      if (include) al+=*i;
+                    }
+                
+                if (prefix.find("<")!=string::npos)
+                  {
+                    string fullType=prefix.substr(0,prefix.length()-2);
+                    // mentions this class type within templates are usually
+                    // shorn of template arguments. Reinstate them
+                    returnType=replaceShornTypes(returnType,sprefix,fullType);
+                    al=replaceShornTypes(al,sprefix,fullType);
+                  }
+
+                if (objc) { action += ", \"" + rType + "\", " + "\"" + argList + "\""; }
+                rType.erase();
+                if (reg.is_static)
+                  reg.register_class(memname, "", action);
+                else
+                  {
+                    reg.register_class(memname, varname, action);
+                    if (overloadingAllowed)
+                      overloadTempVarDecls[prefix].push_back
+                        (MemberSig{action,returnType,al,prefix,memname,is_const});
+                  }
               }
 	    }
 	  reg.is_static=reg.is_const=false;
@@ -631,24 +731,31 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 	}
 
       if (input.token=="{")  /* skip function/enum/whatever definitions */
-	    gobble_delimited(input,"{","}");
+        gobble_delimited(input,"{","}");
 
-    }
-
-  /* remove overloaded member functions */
-  actionlist_t copy_of_alist;
-  string name;
-  for (size_t i=0; i<actionlist.size(); i++)
-    {
-      name=actionlist[i].name;
-      if (!usingNames.count(name) && 
-          (!num_instances.count(name) || num_instances[name]==1))
-	copy_of_alist.push_back(actionlist[i]);
+      // capture member function return type for overload processing
+      if (strchr(":;{}()",input.lasttoken[0]) && input.lasttoken!="::")
+        returnType.clear();
+      else if (input.lasttoken!="virtual")
+        returnType+=" "+input.lasttoken;
     }
 
   virtualsdb[prefix]=virt_list;
-
-  return copy_of_alist;
+  if (!overloadingAllowed)
+    {
+      /* remove overloaded member functions */
+      actionlist_t copy_of_alist;
+      string name;
+      for (size_t i=0; i<actionlist.size(); i++)
+        {
+          name=actionlist[i].name;
+          if (!usingNames.count(name) && 
+              (!num_instances.count(name) || num_instances[name]==1))
+            copy_of_alist.push_back(actionlist[i]);
+        }
+      return copy_of_alist;
+    }
+  return actionlist;
 }
 
 
@@ -892,6 +999,26 @@ string without_type_qualifier(const string& type)
   return without_type_qualifier(type,type_qualifier(type));
 }
 
+void printNestedTypes(string scope, bool templ, set<string> avoid=set<string>())
+{
+  vector<string>& nestedTypes=nested[scope+"::"];
+  for (vector<string>::iterator j=nestedTypes.begin(); j!=nestedTypes.end(); j++)
+    {
+      printf("typedef %s %s::%s %s;\n",
+             templ? "typename": "",
+             scope.c_str(), j->c_str(), j->c_str());
+      avoid.insert(*j);
+    }
+  // recursively process next outer level
+  size_t p=scope.rfind("::");
+  if (p!=string::npos)
+    {
+      scope=scope.substr(0,p);
+      if (scope!="::")
+        printNestedTypes(scope,false,avoid);
+    }
+}
+
 int main(int argc, char* argv[])
 {
 
@@ -899,7 +1026,7 @@ int main(int argc, char* argv[])
 
   if (argc<2)
     {
-      printf("usage: %s [-workdir dir] [-objc] [-include header] [-nodef] [-respect_private] [-use_mbr_pointers] [-I classdesc_includes] [-typeName] [-qt] {descriptor name} <input >output\n",argv[0]);
+      printf("usage: %s [-workdir dir] [-objc] [-include header] [-nodef] [-respect_private] [-use_mbr_pointers] [-I classdesc_includes] [-typeName] [-qt] [-overload] {descriptor name} <input >output\n",argv[0]);
       return 0;
     }
 
@@ -919,6 +1046,11 @@ int main(int argc, char* argv[])
 	}
       if (argc>1 && strcmp(argv[1],"-objc")==0)     /* Generate Objective-C files */
 	{ objc = 1;
+	  argc--; argv++;
+	}
+      if (argc>1 && strcmp(argv[1],"-overload")==0)     /* Generate code supporting overloaded methods */
+	{
+          overloadingAllowed = true;
 	  argc--; argv++;
 	}
       if (argc>1 && strcmp(argv[1],"-include")==0) /* standard header for each output */
@@ -1320,21 +1452,12 @@ int main(int argc, char* argv[])
 
                 if (actions[i].namespace_name.size())
                   printf("using namespace %s;\n",actions[i].namespace_name.c_str());
-                string::size_type p=actions[i].type.rfind("::");
-                if (p!=string::npos)
-                  {
-                    string::size_type s=actions[i].type.rfind(" "); //strip leading words
-                    if (s==string::npos) 
-                      s=0;
-                    else
-                      s++;
-                    string prefix=actions[i].type.substr(s,p+2-s);
-                    for (size_t j=0; j<nested[prefix].size(); j++)
-                      printf("typedef %s %s%s %s;\n",
-                             actions[i].templ.empty()? "": "typename",
-                             prefix.c_str(),
-                             nested[prefix][j].c_str(),nested[prefix][j].c_str());
-                  }
+                string prefix=without_type_qualifier(actions[i].type);
+                printNestedTypes(prefix,!actions[i].templ.empty());
+                
+                vector<MemberSig>& tempVarDecls=overloadTempVarDecls[prefix+"::"];
+                for (size_t i=0; i<tempVarDecls.size(); ++i)
+                  printf("%s\n",tempVarDecls[i].declare().c_str());
                 for (size_t j=0; j<actions[i].actionlist.size(); j++)
                   {
                     string a=action[k];
@@ -1353,21 +1476,10 @@ int main(int argc, char* argv[])
                 printf("void type(classdesc::%s_t& targ, const classdesc::string& desc)\n{\n",action[k]);
                 if (actions[i].namespace_name.size())
                   printf("using namespace %s;\n",actions[i].namespace_name.c_str());
-                p=actions[i].type.rfind("::");
-                if (p!=string::npos)
-                  {
-                    string::size_type s=actions[i].type.rfind(" "); //strip leading words
-                    if (s==string::npos) 
-                      s=0;
-                    else
-                      s++;
-                    string prefix=actions[i].type.substr(s,p+2-s);
-                    for (size_t j=0; j<nested[prefix].size(); j++)
-                      printf("typedef %s %s%s %s;\n",
-                             actions[i].templ.empty()? "": "typename",
-                             prefix.c_str(),
-                             nested[prefix][j].c_str(),nested[prefix][j].c_str());
-                  }
+                printNestedTypes(prefix,!actions[i].templ.empty());
+                
+                for (size_t i=0; i<tempVarDecls.size(); ++i)
+                  printf("%s\n",tempVarDecls[i].declare().c_str());
                 for (size_t j=0; j<actions[i].actionlist.size(); j++)
                   {
                     const act_pair& aj=actions[i].actionlist[j];
@@ -1376,7 +1488,8 @@ int main(int argc, char* argv[])
                              action[k], aj.member.c_str(),
                              aj.name.c_str());
                     // only emit actions that are member pointers or base classes
-                    else if (aj.action[0]=='&' && aj.action.find("::"))
+                    else if (aj.action[0]=='&' && aj.action.find("::") ||
+                             aj.action.find("TmpMemPtr_")==0)
                       printf("::%s_type<_CD_TYPE,%s >(targ,desc+\"%s\",%s);\n",
                              action[k], type_arg_name.c_str(),
                              aj.name.c_str(),aj.action.c_str());

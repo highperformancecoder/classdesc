@@ -746,13 +746,12 @@ namespace classdesc
     typename enable_if<And<Not<is_Carray<typename pythonDetail::MemberType<M>::T> >, Not<functional::is_nonmember_function_ptr<M> > >,void>::T
     addMemberObject(const string& d, M m)
     {
-      // recursively register class pythonDetails for the member
-      //python<typename pythonDetail::DePythonRef<typename functional::Return<M>::T>::T>(*this,d);
-      python<typename functional::Return<M>::T>(*this,d);
       auto& c=getClass<C>();
       if (!c.completed)
         c.addProperty(tail(d),m);
-   }
+      // ensure member type is registered
+      DefineArgClasses<M,0>::define(*this);
+    }
     
     template <class C, class M>
     typename enable_if<is_Carray<typename pythonDetail::MemberType<M>::T>,void>::T

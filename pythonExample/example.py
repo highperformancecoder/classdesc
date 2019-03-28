@@ -144,7 +144,9 @@ assert b.overloadExample(1,2)==3
 v=example.__dict__['std::vector<int>']
 assert root.bar.seqLength(v([0,1])) == 2
 
+# checks automatic overloading
 assert r.bar.barE('b')=='b'
+assert r.bar.barE()=='a'
 assert r.bar.globE()=='ga'
 
 exit(0)

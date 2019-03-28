@@ -71,10 +71,12 @@ template < class T >  struct access_p<struct ::foo<T> > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
 {
+typedef typename foo<T>::bar bar;
 }
 template <class _CD_TYPE>
 void type(classdesc::p_t& targ, const classdesc::string& desc)
 {
+typedef typename foo<T>::bar bar;
 }
 };
 }
