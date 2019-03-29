@@ -188,10 +188,14 @@ std::map<std::string, std::vector<std::string> > enum_keys;
 struct MemberSig
 {
   string declName, returnType, argList, prefix, name;
-  bool is_const=false;
+  bool is_const=false, is_static=false;
   string declare() {
-    return returnType+"("+prefix+"*"+declName+")("+argList+")"+
+    if (is_static)
+      return returnType+"(*"+declName+")("+argList+")"+
       (is_const?" const ":"")+"=&"+prefix+name+";";
+    else
+      return returnType+"("+prefix+"*"+declName+")("+argList+")"+
+        (is_const?" const ":"")+"=&"+prefix+name+";";
   }
 };
 
@@ -653,9 +657,9 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 		  memname!="CLASSDESC_ACCESS" &&
 		  memname!="CLASSDESC_ACCESS_TEMPLATE")
               {
-                string action = (reg.is_static || !overloadingAllowed)?
-                  "&"+ namespace_name + prefix + memname:
-                  "TmpMemPtr_"+memname+str(num_instances["."+memname]);
+                string action = overloadingAllowed?
+                  "TmpMemPtr_"+memname+str(num_instances["."+memname]):
+                  "&"+ namespace_name + prefix + memname;
                 // strip any default arguments from argList
                 string al;
                 int braceCnt=0;
@@ -683,15 +687,13 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 
                 if (objc) { action += ", \"" + rType + "\", " + "\"" + argList + "\""; }
                 rType.erase();
+                if (overloadingAllowed)
+                  overloadTempVarDecls[prefix].push_back
+                    (MemberSig{action,returnType,al,prefix,memname,is_const,reg.is_static});
                 if (reg.is_static)
                   reg.register_class(memname, "", action);
                 else
-                  {
-                    reg.register_class(memname, varname, action);
-                    if (overloadingAllowed)
-                      overloadTempVarDecls[prefix].push_back
-                        (MemberSig{action,returnType,al,prefix,memname,is_const});
-                  }
+                  reg.register_class(memname, varname, action);
               }
 	    }
 	  reg.is_static=reg.is_const=false;
@@ -741,7 +743,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
         returnType += gobble_delimited(input,"<",">");
       else if (strchr(":;{}()",input.lasttoken[0]) && input.lasttoken!="::")
         returnType.clear();
-      else if (input.lasttoken!="virtual")
+      else if (input.lasttoken!="virtual" && input.lasttoken!="static")
         returnType+=" "+input.lasttoken;
       
     }
