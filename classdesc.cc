@@ -427,6 +427,8 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
               gobble_delimited(input,"(",")");
               continue;
             }
+          if (input.token=="signals")
+            is_private = true; //In Qt4, signals are protected
           if (input.token=="signals" || input.token=="slots") // these appear to be reserved words in MOC C++
             {
               gobble_delimited(input,"",":");
