@@ -77,6 +77,7 @@ struct Foo
   size_t seqLength(const std::vector<int>& x) {
     return x.size();
   }
+  std::vector<string> getVS() const {return vs;}
 };
 
 enum GlobE {ga,gb};

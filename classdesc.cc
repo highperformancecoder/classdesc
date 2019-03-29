@@ -531,8 +531,6 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
             gobble_delimited(input,"","}");
 	}
 
-      /* handle templated types */
-      if (input.token=="<") gobble_delimited(input,"<",">");
 
       /* handle unnamed unions as a special case */
       if (input.lasttoken=="union" && input.token=="{")
@@ -734,10 +732,14 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
         gobble_delimited(input,"{","}");
 
       // capture member function return type for overload processing
-      if (strchr(":;{}()",input.lasttoken[0]) && input.lasttoken!="::")
+      /* handle templated types */
+      if (input.token=="<")
+        returnType += gobble_delimited(input,"<",">");
+      else if (strchr(":;{}()",input.lasttoken[0]) && input.lasttoken!="::")
         returnType.clear();
       else if (input.lasttoken!="virtual")
         returnType+=" "+input.lasttoken;
+      
     }
 
   virtualsdb[prefix]=virt_list;
