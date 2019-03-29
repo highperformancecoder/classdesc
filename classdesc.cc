@@ -428,7 +428,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
               continue;
             }
           if (input.token=="signals")
-            is_private = true; //In Qt4, signals are protected
+            reg.is_private = is_private = true; //In Qt4, signals are protected
           if (input.token=="signals" || input.token=="slots") // these appear to be reserved words in MOC C++
             {
               gobble_delimited(input,"",":");
@@ -691,7 +691,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 
                 if (objc) { action += ", \"" + rType + "\", " + "\"" + argList + "\""; }
                 rType.erase();
-                if (overloadingAllowed)
+                if (overloadingAllowed && !reg.is_private)
                   overloadTempVarDecls[prefix].push_back
                     (MemberSig{action,returnType,al,prefix,memname,is_const,reg.is_static});
                 if (reg.is_static)

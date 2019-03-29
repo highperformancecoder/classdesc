@@ -810,7 +810,12 @@ namespace classdesc
 
     /// utility method to add a Python wrapper class for \a T
     template <class T>
-    void defineClass() {python<T>(*this,"");}
+    typename enable_if<Not<is_abstract<T> >, void>::T
+    defineClass() {python<T>(*this,"");}
+    
+    template <class T>
+    typename enable_if<is_abstract<T>, void>::T
+    defineClass() {}
 
   };
 
