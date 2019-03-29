@@ -605,11 +605,12 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 	  if (input.token!="()")
             {
               input.nexttok();
-              if (isIdentifierStart(input.token[0]) && /* possible member pointer */
-		  (input.nexttok(),input.token=="::"))
+              if (isIdentifierStart(input.token[0]))
                 {
-                  argList=input.lasttoken;
+                  argList=input.token;
                   input.nexttok();
+                  if (input.token=="::") /* possible member pointer */
+                    input.nexttok();
                 }
 	      if (input.token=="*" &&        /* member/function pointer */
 		  (input.lasttoken=="(" || input.lasttoken=="::"))
