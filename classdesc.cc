@@ -595,13 +595,18 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
       if (input.token[0]=='(') /* member functions, or function pointers */
 	{
 	  string memname=input.lasttoken;        // function name
+          argList.erase();
 
 	  /* check ahead for function pointers */
 	  if (input.token!="()")
             {
               input.nexttok();
               if (isIdentifierStart(input.token[0]) && /* possible member pointer */
-		  (input.nexttok(),input.token=="::")) input.nexttok();
+		  (input.nexttok(),input.token=="::"))
+                {
+                  argList=input.lasttoken;
+                  input.nexttok();
+                }
 	      if (input.token=="*" &&        /* member/function pointer */
 		  (input.lasttoken=="(" || input.lasttoken=="::"))
 		{
@@ -612,9 +617,8 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 		  gobble_delimited(input,"(",")");
 		}
 	      else if (input.token!=")") /* skip fn args */
-                argList = gobble_delimited(input,"(",")");
+                argList += gobble_delimited(input,"(",")");
 	    }
-          else argList.erase();
     
           rType = rType.substr(0, rType.find(memname));
 

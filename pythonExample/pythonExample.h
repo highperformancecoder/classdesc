@@ -121,6 +121,7 @@ struct Bar1
   Foo* foop() {return &f;} // should be ignored, as can't determine ownership
   static Foo* sfoop() {return nullptr;}// should be ignored, as can't determine ownership
   Bar1& recursiveType(const Bar1&) {return *this;} // tests a recursive type definition bug
+  Bar::BarE barE(Bar::BarE x) {return x;} // tests another parsing bug
 };
 
 struct FooBar1
