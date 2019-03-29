@@ -188,7 +188,7 @@ std::map<std::string, std::vector<std::string> > enum_keys;
 struct MemberSig
 {
   string declName, returnType, argList, prefix, name;
-  bool is_const=false, is_static=false;
+  bool is_const, is_static;
   string declare() {
     if (is_static)
       return returnType+"(*"+declName+")("+argList+")"+
