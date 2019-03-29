@@ -78,6 +78,9 @@ struct Foo
     return x.size();
   }
   std::vector<string> getVS() const {return vs;}
+  // function pointer member not yet supported
+//  int (Foo::* memPtrEx)(int);
+//  int (*ptrEx)(int);
 };
 
 enum GlobE {ga,gb};
@@ -122,6 +125,7 @@ struct Bar1
   static Foo* sfoop() {return nullptr;}// should be ignored, as can't determine ownership
   static Foo* sfoop(int) {return nullptr;}// should be ignored, as can't determine ownership
   Bar1& recursiveType(const Bar1&) {return *this;} // tests a recursive type definition bug
+  Bar1& recursiveType(const char* x) {return *this;} // tests another parsing bug
   Bar::BarE barE(Bar::BarE x) {return x;} // tests another parsing bug
 };
 

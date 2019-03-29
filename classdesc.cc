@@ -605,12 +605,11 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 	  if (input.token!="()")
             {
               input.nexttok();
-              if (isIdentifierStart(input.token[0]))
+              if (isIdentifierStart(input.token[0]) &&
+                  (input.nexttok(),input.token=="::")) /* possible member pointer */
                 {
-                  argList=input.token;
+                  argList=input.lasttoken;
                   input.nexttok();
-                  if (input.token=="::") /* possible member pointer */
-                    input.nexttok();
                 }
 	      if (input.token=="*" &&        /* member/function pointer */
 		  (input.lasttoken=="(" || input.lasttoken=="::"))
@@ -623,6 +622,8 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 		}
 	      else if (input.token!=")") /* skip fn args */
                 argList += gobble_delimited(input,"(",")");
+              else
+                argList += input.lasttoken;
 	    }
     
           rType = rType.substr(0, rType.find(memname));
