@@ -43,9 +43,6 @@ public:
     MyClass(QObject *parent = 0);
     ~MyClass();
 
-public signals:
-    void mySignal();
-
 public slots:
     void mySlot();
 signals:
@@ -74,17 +71,13 @@ template <> struct access_p<class ::foo > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
 {
-::p(targ,desc+".mySignal",arg,&foo::mySignal);
 ::p(targ,desc+".mySlot",arg,&foo::mySlot);
-::p(targ,desc+".mySignal1",arg,&foo::mySignal1);
 ::p(targ,desc+".mySlot2",arg,&foo::mySlot2);
 }
 template <class _CD_TYPE>
 void type(classdesc::p_t& targ, const classdesc::string& desc)
 {
-::p_type<_CD_TYPE,class ::foo >(targ,desc+".mySignal",&foo::mySignal);
 ::p_type<_CD_TYPE,class ::foo >(targ,desc+".mySlot",&foo::mySlot);
-::p_type<_CD_TYPE,class ::foo >(targ,desc+".mySignal1",&foo::mySignal1);
 ::p_type<_CD_TYPE,class ::foo >(targ,desc+".mySlot2",&foo::mySlot2);
 }
 };
