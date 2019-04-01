@@ -66,7 +66,7 @@ class tokeninput
   }
 public:
   struct eof {};  /* signal end of input */
-  string token, lasttoken;
+  string token, lasttoken, tokenBeforeLast;
   tokeninput(FILE* in, FILE* out=NULL) 
   {inputstream=in; outputstream=out; getnextc(); lineno=1;}
 
@@ -82,7 +82,8 @@ public:
   {
 
     token.swap(lasttoken); 
-
+    token.swap(tokenBeforeLast);
+    
   nexttok_again:
     token.erase();
     if (feof(inputstream)) throw eof();

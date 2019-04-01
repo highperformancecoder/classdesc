@@ -188,14 +188,21 @@ std::map<std::string, std::vector<std::string> > enum_keys;
 struct MemberSig
 {
   string declName, returnType, argList, prefix, name;
-  bool is_const, is_static;
+  enum Type {none, is_const, is_static, is_constructor};
+  Type type;
   string declare() {
-    if (is_static)
-      return returnType+"(*"+declName+")("+argList+")"+
-      (is_const?" const ":"")+"=&"+prefix+name+";";
-    else
-      return returnType+"("+prefix+"*"+declName+")("+argList+")"+
-        (is_const?" const ":"")+"=&"+prefix+name+";";
+    switch (type)
+      {
+      case none:
+        return returnType+"("+prefix+"*"+declName+")("+argList+")=&"+prefix+name+";";
+      case is_const:
+        return returnType+"("+prefix+"*"+declName+")("+argList+") const=&"+prefix+name+";";
+      case is_static:
+        return returnType+"(*"+declName+")("+argList+")=&"+prefix+name+";";
+      case is_constructor:
+        return "void (*"+declName+")("+argList+")=0;";
+      default: assert(false); return ""; // should never be executed, - statement to silence warning
+      }
   }
 };
 
@@ -300,16 +307,17 @@ public:
 
   void register_class(string name, string memberName, string action)
   {
+    if (!is_private) /* don't register private, if privates respected */
     // We need to treat static const members differently, as simple
     // ones do not have addresses
-    if (is_static && is_const)
-      actionlist.push_back(act_pair("."+name,"classdesc::is_const_static(),"+action));
-    else 
-      if (!is_private) /* don't register private, if privates respected */
-//        if (is_static && memberName.length()>0)
-//          // do emit type functions for static members
-//          actionlist.push_back(act_pair("."+name,memberName+"."+action));
-//        else
+      if (is_static)
+        {
+          if (is_const)
+            actionlist.push_back(act_pair("."+name,"classdesc::is_const_static(),"+action));
+          else
+            actionlist.push_back(act_pair("."+name,action,memberName,is_static));
+        }
+      else
         actionlist.push_back(act_pair("."+name,action,memberName,is_static));
     is_static=false;
   }
@@ -600,6 +608,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
       if (input.token[0]=='(') /* member functions, or function pointers */
 	{
 	  string memname=input.lasttoken;        // function name
+          bool is_destructor=input.tokenBeforeLast=="~";
           argList.erase();
 
 	  /* check ahead for function pointers */
@@ -629,12 +638,13 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
     
           rType = rType.substr(0, rType.find(memname));
 
-          // look ahead for const specification
-          bool is_const=false;
+          // look ahead for const or deleted specification
+          bool is_const=false, deleted=false;
 	  while (!strchr(";{",input.token[0]))
             {
               input.nexttok();
               if (input.token=="const") is_const=true;
+              if (input.token=="delete") deleted=true;
             }
 
 	  /* member functions require object passed as well*/
@@ -651,18 +661,30 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
 	      sprefix=sprefix.substr(0,sprefix.find('<'));
               string::size_type start=sprefix.rfind("::");
 	      if (start!=string::npos) sprefix=sprefix.substr(start+2);
-
+              MemberSig::Type type=MemberSig::none;
+              if (memname==sprefix && !is_destructor)
+                type=MemberSig::is_constructor;
+              else if (reg.is_static)
+                type=MemberSig::is_static;
+              else if (is_const)
+                type=MemberSig::is_const;
+              
 	      /* do not register constructors/destructors also do not
 		  register virtual members or inline members - g++ has
 		  trouble taking their addresses */
-	      if (memname!=sprefix && 
-		  !is_template &&
+	      if ((type!=MemberSig::is_constructor || overloadingAllowed) &&
+                  !is_destructor && !is_template && !deleted &&
 		  memname!="CLASSDESC_ACCESS" &&
 		  memname!="CLASSDESC_ACCESS_TEMPLATE")
               {
-                string action = overloadingAllowed?
-                  "TmpMemPtr_"+memname+str(num_instances["."+memname]):
-                  "&"+ namespace_name + prefix + memname;
+                string action;
+                string tempFnPtrDecl="TmpMemPtr_"+memname+str(num_instances["."+memname]);
+                if (type==MemberSig::is_constructor)
+                    action="classdesc::is_constructor(),";
+                if (overloadingAllowed)
+                  action+=tempFnPtrDecl;
+                else
+                  action+="&"+ namespace_name + prefix + memname;
                 // strip any default arguments from argList
                 string al;
                 int braceCnt=0;
@@ -692,8 +714,12 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
                 rType.erase();
                 if (overloadingAllowed && !reg.is_private)
                   overloadTempVarDecls[prefix].push_back
-                    (MemberSig{action,returnType,al,prefix,memname,is_const,reg.is_static});
+                    (MemberSig{tempFnPtrDecl,returnType,al,prefix,memname,type});
                 if (reg.is_static)
+                  // static member functions cannot be attched to an
+                  // object, however static object member pointers
+                  // cannot be distinguished from a regular pointer,
+                  // except by attaching it to an object. Go figure!
                   reg.register_class(memname, "", action);
                 else
                   reg.register_class(memname, varname, action);
@@ -1500,7 +1526,8 @@ int main(int argc, char* argv[])
                              aj.name.c_str());
                     // only emit actions that are member pointers or base classes
                     else if (aj.action[0]=='&' && aj.action.find("::") ||
-                             aj.action.find("TmpMemPtr_")==0)
+                             aj.action.find("TmpMemPtr_")==0 ||
+                             aj.action.find("classdesc::is_constructor")==0)
                       printf("::%s_type<_CD_TYPE,%s >(targ,desc+\"%s\",%s);\n",
                              action[k], type_arg_name.c_str(),
                              aj.name.c_str(),aj.action.c_str());

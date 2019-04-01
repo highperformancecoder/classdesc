@@ -442,18 +442,31 @@ namespace classdesc
 
     //*******
 
-//    template <class T>
-//    struct PyInitWrap: public boost::python::def_visitor<PyInitWrap<T>>
-//    {
-//      template <class U>
-//      void visit(U& c) const {
-//        c.def("__init__",&assignList<T>);
-//      }
-//    };
+    // generate an init expression with the same arguments as that of function pointer M
+    template <class M, int N=functional::Arity<M>::value> struct Init;
 
+    template <class... A> struct InitArgs;
+    //    {typedef boost::python::init<A...> T;};
+    
+    template <class A, class... B> struct InitArgs<InitArgs<B...>, A>
+      : public InitArgs<B...,A> {};
 
-  }
+    template <class M, int N, class... A> struct InitArgs<Init<M,N>, A...>
+      : public InitArgs<Init<M,N-1>,A..., typename functional::Arg<M,N>::T> {};
 
+    template <class M, class... A> struct InitArgs<Init<M,0>, A...>
+    {typedef boost::python::init<A...> T;};
+
+    
+    
+    template <class M, int N> struct Init: public InitArgs<Init<M, N>>
+    {};
+//    template <class M> struct Init<M,0>
+//    {typedef boost::python::init<> T;};
+    
+  }   
+
+    
   class python_t
   {
     struct Scope
@@ -801,6 +814,13 @@ namespace classdesc
     }
 
     template <class C, class M>
+    void addConstructor(M m) {
+      auto& c=getClass<C>();
+      if (!c.completed)
+        c.def(typename pythonDetail::Init<M>::T());
+    }
+    
+    template <class C, class M>
     void addEnum(const string& d, M m)
     {
       auto& c=getClass<C>();
@@ -962,6 +982,16 @@ namespace classdesc
   void python_type(python_t& p, const string& d, is_const_static, M m)
   {
     p.addStaticMember<C>(d,m);
+  }
+  
+  template <class T>
+  void python(python_t& p, const string& d, is_constructor, T* a)
+  {}
+  
+  template <class C, class T, class M>
+  void python_type(python_t& p, const string& d, is_constructor, M m)
+  {
+    p.addConstructor<C>(m);
   }
   
   template <class C, class B, class M>

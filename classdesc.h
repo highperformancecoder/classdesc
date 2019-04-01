@@ -651,6 +651,9 @@ namespace classdesc
   /** support for const static members (which needn't have references) */
   class is_const_static {};
 
+  /** support for constructor exposure */
+  class is_constructor {};
+  
   /** support for graph structures */
   class is_node {};
   class is_treenode: public is_node {};

@@ -23,15 +23,6 @@ enum EnumFoo {ea, eb, ec=12, ed};
 
 string printHello() {return "hello";}
 
-//struct Vector: public std::vector<int>
-//{
-//  Vector() {}
-//  Vector(const boost::python::list& x) {
-//    pythonDetail::assignList(*this, x);
-//  }
-//};
-
-
 struct Foo
 {
   const static int csi=20;
@@ -56,7 +47,7 @@ struct Foo
   //string (*hello)(); // still not working ...
   classdesc::StringKeyMap<int> sm;
   Foo() {}
-  Foo(int i): ch('M'), a(0.1), af(0.2), b(3), bf(false), bt(true),
+  Foo(int i): ch('M'), a(0.1), af(0.2), b(i), bf(false), bt(true),
               c("\r hello & 123 "), c1(2,"\r"), h(3,2), l(3,2), 
               llex(2,std::list<std::string>(2,"hello")),
               vs(2," hello"), ef(ea)//, hello(printHello)

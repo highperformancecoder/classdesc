@@ -149,4 +149,8 @@ assert r.bar.barE('b')=='b'
 assert r.bar.barE()=='a'
 assert r.bar.globE()=='ga'
 
+# test constructor with arguments
+assert example.Foo(1).b==1
+assert example.Foo(2).b==2
+
 exit(0)
