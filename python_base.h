@@ -425,12 +425,12 @@ namespace classdesc
         // Verify that obj_ptr is a string (should be ensured by convertible())
         assert(value);
  
-        // Grab pointer to memory into which to construct the new QString
+        // Grab pointer to memory into which to construct the new enum
         void* storage = (
                          (boost::python::converter::rvalue_from_python_storage<E>*)
                          data)->storage.bytes;
  
-        // in-place construct the new QString using the character data
+        // in-place construct the new enum using the character data
         // extraced from the python object
         new (storage) E(classdesc::enum_keys<E>()(value));
         
@@ -446,13 +446,12 @@ namespace classdesc
     template <class M, int N=functional::Arity<M>::value> struct Init;
 
     template <class... A> struct InitArgs;
-    //    {typedef boost::python::init<A...> T;};
     
     template <class A, class... B> struct InitArgs<InitArgs<B...>, A>
       : public InitArgs<B...,A> {};
 
     template <class M, int N, class... A> struct InitArgs<Init<M,N>, A...>
-      : public InitArgs<Init<M,N-1>,A..., typename functional::Arg<M,N>::T> {};
+      : public InitArgs<Init<M,N-1>,typename functional::Arg<M,N>::T,A...> {};
 
     template <class M, class... A> struct InitArgs<Init<M,0>, A...>
     {typedef boost::python::init<A...> T;};
@@ -461,8 +460,6 @@ namespace classdesc
     
     template <class M, int N> struct Init: public InitArgs<Init<M, N>>
     {};
-//    template <class M> struct Init<M,0>
-//    {typedef boost::python::init<> T;};
     
   }   
 
@@ -814,7 +811,7 @@ namespace classdesc
     }
 
     template <class C, class M>
-    void addConstructor(M m) {
+    void addConstructor(M) {
       auto& c=getClass<C>();
       if (!c.completed)
         c.def(typename pythonDetail::Init<M>::T());
@@ -989,11 +986,18 @@ namespace classdesc
   {}
   
   template <class C, class T, class M>
-  void python_type(python_t& p, const string& d, is_constructor, M m)
+  typename enable_if<Not<is_abstract<T> >, void>::T
+  python_type(python_t& p, const string&, is_constructor, M m)
   {
-    p.addConstructor<C>(m);
+    p.addConstructor<T>(m);
   }
   
+  template <class C, class T, class M>
+  typename enable_if<is_abstract<T>, void>::T
+  python_type(python_t&, const string&, is_constructor, M)
+  { }
+  
+ 
   template <class C, class B, class M>
   typename enable_if<Not<is_enum<typename pythonDetail::MemberType<M>::T> >,void>::T
   python_type(python_t& p, const string& d, M m)
