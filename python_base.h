@@ -294,8 +294,29 @@ namespace classdesc
       value=true;
       return false;
     }
-      
 
+    template <class T>
+    typename enable_if<And<has_equality_operator<T>,Not<is_container<T>>>, bool>::T
+    defaultEquality(const T& x, const T& y)
+    { return &x==&y || x==y;}
+
+    template <class T>
+    typename enable_if<And<is_container<T>, has_equality_operator<typename T::value_type>>, bool>::T
+    defaultEquality(const T& x, const T& y)
+    { return &x==&y || x==y;}
+    
+    template <class T>
+    typename enable_if<Not<has_equality_operator<T>>, bool>::T
+    defaultEquality(const T& x, const T& y)
+    {return &x==&y;} // no equality, just return whether two objects are identical
+
+    template <class T>
+    typename enable_if<And<is_container<T>,
+                           Not<has_equality_operator<typename T::value_type>>>, bool>::T
+    defaultEquality(const T& x, const T& y)
+    {return &x==&y;} // no equality, just return whether two objects are identical
+
+    
   }
 
   template <class T, int rank> struct tn<pythonDetail::ArrayGet<T,rank>>
@@ -310,7 +331,7 @@ namespace classdesc
     static string name() {return "classdesc::pythonDetail::Iterator<"+typeName<T>()+">";}
   };
 
-  
+ 
 }
 
 
@@ -615,6 +636,9 @@ namespace classdesc
           boost::python::scope scope(topScope);
           classes().push_back(shared_ptr<ClassBase>
                               (new C(typeName<T>())));
+          // define a default equality operator
+          dynamic_cast<C&>(*classes().back()).
+            def("__eq__",pythonDetail::defaultEquality<T>);
         }
       else if (id>classes().size())
         throw exception("classes registry no longer valid");

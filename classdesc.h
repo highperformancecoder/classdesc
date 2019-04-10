@@ -373,6 +373,20 @@ namespace classdesc
   };
 
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+  template <class Tp, class EqualTo>
+  struct has_equality_operator_impl
+  {
+    template <class U, class V>
+    static auto test(U*) -> decltype(std::declval<U>() == std::declval<V>());
+    template <typename, typename>
+    static auto test(...) -> std::false_type;
+    using type=typename std::is_same<bool, decltype(test<Tp, EqualTo>(0))>::type;
+  };
+  template <class T, class EqualTo=T>
+  struct has_equality_operator: public has_equality_operator_impl<T,EqualTo>::type {};
+#endif
+ 
   /*
     Support for typeName functionality
   */
