@@ -3,6 +3,22 @@
 
 namespace classdesc
 {
+  template <class Derived, class Base>
+  typename enable_if<And<Not<is_same<Base,Derived>>,is_base_of<Base, Derived>>, void>::T
+  registerBase()
+  {
+    // NB this is an undocumented function
+    boost::python::objects::register_base_of<Derived>()((Base*)0);
+  }
+
+  template <class Derived, class Base>
+  typename enable_if<Or<is_same<Base,Derived>,Not<is_base_of<Base, Derived>>>, void>::T
+  registerBase()
+  {
+  }
+
+  
+  
   template <class T, class Base>
   typename enable_if<ClassdescEnabledPythonType<Base>,void>::T
   python(python_t& p, const string& d)
@@ -10,6 +26,9 @@ namespace classdesc
     classdesc_access::access_python<Base>().template type<T>(p,d);
     if (is_same<T,Base>::value)
       p.getClass<T>().completed=true;
+    else
+      // register base class to enable correct virtual function handling
+      registerBase<T,Base>();
   }
 
   

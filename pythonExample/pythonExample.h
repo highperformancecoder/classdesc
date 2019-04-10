@@ -69,6 +69,7 @@ struct Foo
     return x.size();
   }
   std::vector<string> getVS() const {return vs;}
+  virtual std::string name() const {return "Foo";}
   // function pointer member not yet supported
 //  int (Foo::* memPtrEx)(int);
 //  int (*ptrEx)(int);
@@ -99,6 +100,9 @@ struct Bar: Foo
   GlobE globE() const {return ga;}
   Bar() {}
   Bar(int i): Foo(i), f(20), barfoo(eb), vFoo(3,1) {}
+
+  std::string name() const override {return "Bar";}
+  Foo& foo() {return *this;}
 };
 
 struct Bar1
