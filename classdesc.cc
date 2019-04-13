@@ -769,7 +769,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
       // capture member function return type for overload processing
       /* handle templated types */
       if (input.token=="<")
-        returnType += gobble_delimited(input,"<",">");
+        returnType += " "+gobble_delimited(input,"<",">");
       else if (strchr(":;{}()",input.lasttoken[0]) && input.lasttoken!="::")
         returnType.clear();
       else if (input.lasttoken!="virtual" && input.lasttoken!="static")
