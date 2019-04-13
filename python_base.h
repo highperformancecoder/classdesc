@@ -249,7 +249,6 @@ namespace classdesc
     
     template <class T>
     typename enable_if<Not<PythonBasicType<typename T::mapped_type> >,
-                       //PythonRef<typename T::mapped_type> >::T
                        typename T::mapped_type& >::T
     getMapItem(T& x, const typename T::key_type& k)
     {return basicGetMapItem(x,k);}
@@ -858,6 +857,9 @@ namespace classdesc
     typename enable_if<is_abstract<T>, void>::T
     defineClass() {}
 
+    template <class E>
+    void defineEnum();
+    
   };
 
   /// convert a python list to a sequence type T
@@ -881,13 +883,6 @@ namespace classdesc
     assignList(*x,y);
     return x;
   }
-//  template <class T>
-//  T constructFromList(const boost::python::list& y)
-//  {
-//    T x;
-//    assignList(x,y);
-//    return x;
-//  }
   
   template <class C, class T=C>
   typename enable_if<is_sequence<T>,void>::T
@@ -903,8 +898,7 @@ namespace classdesc
     
     python<typename T::value_type>(p,"");
     
-    //  python<typename pythonDetail::DePythonRef<typename functional::Return<decltype(&pythonDetail::getItem<T>)>::T>::T>(p,"");
-      python<typename functional::Return<decltype(&pythonDetail::getItem<T>)>::T>(p,"");
+    python<typename functional::Return<decltype(&pythonDetail::getItem<T>)>::T>(p,"");
   }
   
   template <class C, class T=C>
@@ -922,13 +916,17 @@ namespace classdesc
   }
 
   template <class T>
-  T& sharedPtrTargetGetter(const shared_ptr<T>& self)
+  T& sharedPtrTargetRefGetter(const shared_ptr<T>& self)
   {
     if (self)
       return *self;
     else
       throw std::runtime_error("null dereference");
   }
+  template <class T>
+  T sharedPtrTargetGetter(const shared_ptr<T>& self)
+  {return sharedPtrTargetRefGetter(self);}
+
   template <class T>
   typename enable_if<std::is_copy_assignable<T>, void>::T
   sharedPtrTargetSetter(const shared_ptr<T>& self,const T& v)
@@ -949,41 +947,25 @@ namespace classdesc
   }
 
   template <class T>
-  typename enable_if<Not<is_enum<T>>,void>::T
+  typename enable_if<And<Not<PythonBasicType<T>>,Not<is_enum<T>>>,void>::T
   pythonSharedPtr(python_t& p, const string& d)
   {
     auto& c=p.getClass<classdesc::shared_ptr<T> >();
     if (!c.completed)
       c.add_property("target",
-                     make_function(&sharedPtrTargetGetter<T>, return_policy<T>()),
+                     make_function(&sharedPtrTargetRefGetter<T>, boost::python::return_internal_reference<>()),
                      &sharedPtrTargetSetter<T>);
     python<T>(p,d);
   }
-
   template <class T>
-  string sharedPtrTargetEnumGetter(const shared_ptr<T>& self)
-  {
-    if (self)
-      return enum_keys<T>()(*self);
-    else
-      throw std::runtime_error("null dereference");
-  }
-  template <class T>
-  void sharedPtrTargetEnumSetter(const shared_ptr<T>& self,const string& v)
-  {
-    if (self)
-      *self=enum_keys<T>()(v);
-    else
-      throw std::runtime_error("null dereference");
-  }
-  
-  template <class T>
-  typename enable_if<is_enum<T>,void>::T
+  typename enable_if<Or<PythonBasicType<T>,is_enum<T>>,void>::T
   pythonSharedPtr(python_t& p, const string& d)
   {
     auto& c=p.getClass<classdesc::shared_ptr<T> >();
     if (!c.completed)
-      c.add_property("target", &sharedPtrTargetEnumGetter<T>, &sharedPtrTargetSetter<T>);
+      c.add_property("target",
+                     &sharedPtrTargetGetter<T>,
+                     &sharedPtrTargetSetter<T>);
     python<T>(p,d);
   }
 
@@ -1023,19 +1005,11 @@ namespace classdesc
   
  
   template <class C, class B, class M>
-  typename enable_if<Not<is_enum<typename pythonDetail::MemberType<M>::T> >,void>::T
-  python_type(python_t& p, const string& d, M m)
+  void python_type(python_t& p, const string& d, M m)
   {
     p.addMember<C>(d,m);
   }
 
-  template <class C, class B, class M>
-  typename enable_if<is_enum<typename pythonDetail::MemberType<M>::T>,void>::T
-  python_type(python_t& p, const string& d, M m) 
-  {
-    p.addEnum<C>(d,m);
-  }
-  
   template <class C, class T>
   void python_type(python_t& p, const string& d, Exclude<T> (C::*m))
   {
@@ -1107,9 +1081,8 @@ namespace classdesc
 
   template <class E>
   typename enable_if<is_enum<E>, void>::T
-  python(python_t&,const string&) {
-    boost::python::to_python_converter<E,pythonDetail::EnumToStr<E> >();
-    pythonDetail::EnumFromStr<E>();
+  python(python_t& p,const string&) {
+    p.defineEnum<E>();
   }
 }
 

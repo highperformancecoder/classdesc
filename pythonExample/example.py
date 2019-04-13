@@ -1,4 +1,5 @@
 import example
+from example import EnumFoo
 r=example.root
 assert r.bar.ch=='M'
 r.bar.ch='A'
@@ -67,9 +68,9 @@ for i in r.bar.vs:
 r.bar.vs[1]="world"
 assert r.bar.vs[1]=="world"
 
-assert r.bar.ef=="ea"
+assert r.bar.ef==EnumFoo.ea
 assert r.bar.getEF()==0
-r.bar.ef="ec"
+r.bar.ef=EnumFoo.ec
 assert r.bar.getEF()==12
 
 sm=r.bar.sm
@@ -145,9 +146,10 @@ v=example.__dict__['std::vector<int>']
 assert root.bar.seqLength(v([0,1])) == 2
 
 # checks automatic overloading
-assert r.bar.barE('b')=='b'
-assert r.bar.barE()=='a'
-assert r.bar.globE()=='ga'
+BarE=example.__dict__['Bar::BarE']
+assert r.bar.barE(BarE.b)==BarE.b
+assert r.bar.barE()==BarE.a
+assert r.bar.globE()==example.GlobE.ga
 
 # test constructor with arguments
 assert example.Foo(1).b==1

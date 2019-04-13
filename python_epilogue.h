@@ -45,6 +45,14 @@ namespace classdesc
       }
     ArrayGetRegisterClass<typename std::remove_extent<T>::type,rank-1>::registerClass(p);
   }
+
+  template <class E>
+  void python_t::defineEnum() {
+    boost::python::enum_<E> e(typeName<E>().c_str());
+    for (auto& i: enum_keysData<E>::keysData)
+      e.value(i.name,E(i.value));
+    e.export_values();
+  }
 }
 
 namespace classdesc_access
