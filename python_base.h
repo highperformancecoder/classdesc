@@ -500,16 +500,15 @@ namespace classdesc
     };
     std::vector<Scope> scopeStack; //push back current module onto stack
     boost::python::scope topScope;
-    std::map<string,Scope> namedScope;
+    std::map<string,shared_ptr<boost::python::object>> namedScope;
 
     struct ExtractClassNameAndSetScope
     {
-      string className;
+      string className, modName;
       boost::python::scope topScope;
       std::vector<std::shared_ptr<boost::python::scope>> scopeStack;
       ExtractClassNameAndSetScope(python_t& p, const string& qualifiedName)
       {
-        string modName;
         const char* b=qualifiedName.c_str(), *e;
         int nAngle=0; // template argument handling
         for (; *b==':'; b++); //strip any leading global namespace qualifier
@@ -522,8 +521,8 @@ namespace classdesc
                   if (!modName.empty()) modName+=".";
                   modName+=string(b,e);
                   if (!p.namedScope.count(modName))
-                    p.namedScope.emplace(modName,Scope(string(b,e))); // ensure exists
-                  scopeStack.emplace_back(new boost::python::scope(p.namedScope[modName].object));
+                    p.namedScope.emplace(modName, new Class<Scope::PythonDummy,true>(modName)); // ensure exists
+                  scopeStack.emplace_back(new boost::python::scope(*p.namedScope[modName]));
                   auto m=string(b,e);
                   e++;
                   b=e+1;
@@ -675,6 +674,11 @@ namespace classdesc
         {
           ExtractClassNameAndSetScope scope(*this,typeName<T>());
           classes().push_back(shared_ptr<ClassBase>(new C(scope.className)));
+          string pyQualName=scope.modName+"."+scope.className;
+          // insert a reference to this class object for handling class scoped names
+          if (!namedScope.count(pyQualName))
+            namedScope.emplace
+              (pyQualName, std::dynamic_pointer_cast<boost::python::object>(classes().back()));
         }
       else if (id>classes().size())
         throw exception("classes registry no longer valid");
