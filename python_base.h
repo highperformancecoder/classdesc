@@ -520,10 +520,10 @@ namespace classdesc
                 {
                   if (!modName.empty()) modName+=".";
                   modName+=string(b,e);
-                  if (!p.namedScope.count(modName))
-                    p.namedScope.emplace(modName, new Class<Scope::PythonDummy,true>(modName)); // ensure exists
-                  scopeStack.emplace_back(new boost::python::scope(*p.namedScope[modName]));
-                  auto m=string(b,e);
+                  auto i=p.namedScope.find(modName);
+                  if (i==p.namedScope.end())
+                    i=p.namedScope.emplace(modName, new Class<Scope::PythonDummy,true>(modName)).first; // ensure exists
+                  scopeStack.emplace_back(new boost::python::scope(*i->second));
                   e++;
                   b=e+1;
                 }
