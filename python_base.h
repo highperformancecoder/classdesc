@@ -674,7 +674,9 @@ namespace classdesc
         {
           ExtractClassNameAndSetScope scope(*this,typeName<T>());
           classes().push_back(shared_ptr<ClassBase>(new C(scope.className)));
-          string pyQualName=scope.modName+"."+scope.className;
+          string pyQualName;
+          if (!scope.modName.empty()) pyQualName=scope.modName+".";
+          pyQualName+=scope.className;
           // insert a reference to this class object for handling class scoped names
           if (!namedScope.count(pyQualName))
             namedScope.emplace
