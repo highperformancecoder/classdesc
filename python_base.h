@@ -500,7 +500,45 @@ namespace classdesc
     };
     std::vector<Scope> scopeStack; //push back current module onto stack
     boost::python::scope topScope;
-    
+    std::map<string,Scope> namedScope;
+
+    struct ExtractClassNameAndSetScope
+    {
+      string className;
+      boost::python::scope topScope;
+      std::vector<std::shared_ptr<boost::python::scope>> scopeStack;
+      ExtractClassNameAndSetScope(python_t& p, const string& qualifiedName)
+      {
+        string modName;
+        const char* b=qualifiedName.c_str(), *e;
+        int nAngle=0; // template argument handling
+        for (; *b==':'; b++); //strip any leading global namespace qualifier
+        for (e=b; *e; ++e)
+          switch (*e)
+            {
+            case ':':
+              if (nAngle==0 && *(e+1)==':')
+                {
+                  if (!modName.empty()) modName+=".";
+                  modName+=string(b,e);
+                  if (!p.namedScope.count(modName))
+                    p.namedScope.emplace(modName,Scope(string(b,e))); // ensure exists
+                  scopeStack.emplace_back(new boost::python::scope(p.namedScope[modName].object));
+                  auto m=string(b,e);
+                  e++;
+                  b=e+1;
+                }
+              break;
+            case '<':
+              nAngle++;
+              break;
+            case '>':
+              nAngle--;
+              break;
+            }
+        className=b;
+      }
+    };
   public:
 
     /// @{
@@ -631,10 +669,8 @@ namespace classdesc
       static size_t id=classes().size();
       if (id==classes().size())
         {
-          // for now, put everything in global scope
-          boost::python::scope scope(topScope);
-          classes().push_back(shared_ptr<ClassBase>
-                              (new C(typeName<T>())));
+          ExtractClassNameAndSetScope scope(*this,typeName<T>());
+          classes().push_back(shared_ptr<ClassBase>(new C(scope.className)));
           // define a default equality operator
           dynamic_cast<C&>(*classes().back()).
             def("__eq__",pythonDetail::defaultEquality<T>);

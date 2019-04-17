@@ -48,7 +48,8 @@ namespace classdesc
 
   template <class E>
   void python_t::defineEnum() {
-    boost::python::enum_<E> e(typeName<E>().c_str());
+    ExtractClassNameAndSetScope scope(*this,typeName<E>());
+    boost::python::enum_<E> e(scope.className.c_str());
     for (auto& i: enum_keysData<E>::keysData)
       e.value(i.name,E(i.value));
     e.export_values();

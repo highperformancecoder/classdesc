@@ -108,7 +108,7 @@ b1.fp=r.bar1.fp
 b1.fp.target.a=54
 assert r.bar1.fp.target.a==54
 
-nullRef=getattr(example,"classdesc::shared_ptr<Foo>")()
+nullRef=getattr(example.classdesc,"shared_ptr<Foo>")()
 try:
     nullRef.target
     assert False
@@ -142,11 +142,11 @@ assert b.overloadExample().a==b.a
 assert b.overloadExample(1)==1
 assert b.overloadExample(1,2)==3
 
-v=example.__dict__['std::vector<int>']
+v=example.std.__dict__['vector<int>']
 assert root.bar.seqLength(v([0,1])) == 2
 
 # checks automatic overloading
-BarE=example.__dict__['Bar::BarE']
+BarE=example.Bar.BarE
 assert r.bar.barE(BarE.b)==BarE.b
 assert r.bar.barE()==BarE.a
 assert r.bar.globE()==example.GlobE.ga
