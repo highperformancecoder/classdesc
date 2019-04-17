@@ -563,7 +563,11 @@ namespace classdesc
     template <class T, bool copiable> struct Class:
      public ClassBase, public ClassBase::PyClass<T,copiable>
     {
-      Class(const string& name): ClassBase::PyClass<T,copiable>(name.c_str()) {}
+      Class(const string& name): ClassBase::PyClass<T,copiable>(name.c_str())
+      {
+        // define a default equality operator
+        def("__eq__",pythonDetail::defaultEquality<T>);
+      }
       
       // distinguish between assignable and unassignable properties, which may be const, or may have assignment deleted
       template <class X>
@@ -671,9 +675,6 @@ namespace classdesc
         {
           ExtractClassNameAndSetScope scope(*this,typeName<T>());
           classes().push_back(shared_ptr<ClassBase>(new C(scope.className)));
-          // define a default equality operator
-          dynamic_cast<C&>(*classes().back()).
-            def("__eq__",pythonDetail::defaultEquality<T>);
         }
       else if (id>classes().size())
         throw exception("classes registry no longer valid");
