@@ -121,14 +121,17 @@ namespace classdesc
       pretty(d);
       *o << "<"<<tag<<">" << x << "</"<<tag<<">";
       endpretty();
+      if (!*o) throw std::runtime_error("failed to serialise");
     }
 
     /**
        pack an untagged simple type
     */
     template <class T>
-    void pack_notag(const string& d, const T&x) 
-    {/*pretty(d);*/ *o<<x; /*endpretty();*/}
+    void pack_notag(const string& d, const T&x) {
+      *o<<x;
+      if (!*o) throw std::runtime_error("failed to serialise");
+    }
 
   };
 
