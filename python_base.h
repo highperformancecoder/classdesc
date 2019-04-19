@@ -881,6 +881,7 @@ namespace classdesc
       auto& c=getClass<C>();
       if (!c.completed)
         c.def(typename pythonDetail::Init<M>::T());
+      DefineArgClasses<M,functional::Arity<M>::value>::define(*this);
     }
     
     template <class C, class M>
