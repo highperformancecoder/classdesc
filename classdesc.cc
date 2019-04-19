@@ -1505,8 +1505,8 @@ int main(int argc, char* argv[])
                   printf("using namespace %s;\n",actions[i].namespace_name.c_str());
                 printNestedTypes(prefix,!actions[i].templ.empty());
                 
-                for (size_t i=0; i<tempVarDecls.size(); ++i)
-                  printf("%s\n",tempVarDecls[i].declare().c_str());
+                for (size_t ii=0; ii<tempVarDecls.size(); ++ii)
+                  printf("%s\n",tempVarDecls[ii].declare().c_str());
                 for (size_t j=0; j<actions[i].actionlist.size(); j++)
                   {
                     const act_pair& aj=actions[i].actionlist[j];
