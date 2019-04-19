@@ -238,16 +238,16 @@ namespace classdesc
 
 }
 
-namespace classdesc_access
-{
-  template <class T> struct access_xml_pack;
-}
-
 #include "use_mbr_pointers.h"
 CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(xml_pack)
 CLASSDESC_FUNCTION_NOP(xml_pack)
 
 using classdesc::xml_pack;
 using classdesc::xml_pack_onbase;
+
+#ifndef XML_COMMON_CD
+#define XML_COMMON_CD
+#include "xml_common.cd"
+#endif
 
 #endif

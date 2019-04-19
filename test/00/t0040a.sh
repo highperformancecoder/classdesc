@@ -45,12 +45,12 @@ $here/test/testTypeName >log
 if test $? -ne 0; then fail; fi
 
 cat >dat <<EOF
-foo
-bar
-nn::dd
-nn::foo
-nn::bar<int>
-foobar<int>
+::foo
+::bar
+::nn::dd
+::nn::foo
+::nn::bar< int > 
+::foobar< int > 
 std::vector<double>
 std::deque<double>
 std::list<double>

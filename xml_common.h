@@ -36,5 +36,10 @@ namespace classdesc
 #pragma omit xml_unpack classdesc::CDATA
 #endif
 
-#include "xml_common.cd"
+namespace classdesc_access
+{
+  template <class T> struct access_xml_pack;
+  template <class T> struct access_xml_unpack;
+}
+
 #endif

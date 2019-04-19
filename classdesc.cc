@@ -163,7 +163,7 @@ map<string,vector<string> > nested;
 /* store a list of virtual functions here */
 typedef hash_set<string> virt_list_t;
 hash_map<string,virt_list_t> virtualsdb;
-string namespace_name;
+string namespace_name="::";
 
 /* type_defined[class]=1 if defined, else 0 if only declared */
 struct type_defined_t: hash_map<string,int>
@@ -190,6 +190,8 @@ struct MemberSig
   string declName, returnType, argList, prefix, name;
   enum Type {none, is_const, is_static, is_constructor};
   Type type;
+  MemberSig(string d, string r, string a, string p, string n, Type t):
+    declName(d), returnType(r), argList(a), prefix(p), name(n), type(t) {}
   string declare() {
     switch (type)
       {
@@ -245,7 +247,6 @@ void assign_enum_action(tokeninput& input, string prefix)
   if (input.token=="{") /* only assign action if definition, not declaration */
     {
       nested[prefix].push_back(bareEnumName);
-      //      gobble_delimited(input,"{","}");
       // load up the list of enum symbols
       for ( ; input.token != ";"; input.nexttok())
         {
@@ -308,22 +309,24 @@ public:
   void register_class(string name, string memberName, string action)
   {
     if (!is_private) /* don't register private, if privates respected */
-    // We need to treat static const members differently, as simple
-    // ones do not have addresses
-      if (is_static)
-        {
-          if (is_const)
+      {
+        // We need to treat static const members differently, as simple
+        // ones do not have addresses
+        if (is_static)
+          {
+            if (is_const)
             actionlist.push_back(act_pair("."+name,"classdesc::is_const_static(),"+action));
-          else
-            actionlist.push_back(act_pair("."+name,action,memberName,is_static));
-        }
-      else
-        actionlist.push_back(act_pair("."+name,action,memberName,is_static));
+            else
+              actionlist.push_back(act_pair("."+name,action,memberName,is_static));
+          }
+        else
+          actionlist.push_back(act_pair("."+name,action,memberName,is_static));
+      }
     is_static=false;
   }
 };
 
-actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", string targs="")
+actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="::", string targs="")
 {
   actionlist_t         actionlist;
   string               varname="arg", targs1;
@@ -444,7 +447,6 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
             
         }
       
-      // cout << "Token = [" << input.token << "]\n";
       rType += input.token + " ";
 
       /* skip public/private etc labels */
@@ -467,6 +469,8 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
               if (input.token=="{") gobble_delimited(input,"{","}");
               input.nexttok();
             }
+          string key=prefix;
+          if (key.empty()||key[0]!=':') key="::"+key;
           if (isIdentifierStart(input.lasttoken[0]) && !is_private) //ignore any strange function type typedefs
             nested[prefix].push_back(input.lasttoken);
           input=mark;
@@ -684,7 +688,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
                 if (overloadingAllowed)
                   action+=tempFnPtrDecl;
                 else
-                  action+="&"+ namespace_name + prefix + memname;
+                  action+="&"+ /*namespace_name +*/ prefix + memname;
                 // strip any default arguments from argList
                 string al;
                 int braceCnt=0;
@@ -713,8 +717,8 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="", str
                 if (objc) { action += ", \"" + rType + "\", " + "\"" + argList + "\""; }
                 rType.erase();
                 if (overloadingAllowed && !reg.is_private)
-                  overloadTempVarDecls[prefix].push_back
-                    (MemberSig{tempFnPtrDecl,returnType,al,prefix,memname,type});
+                  overloadTempVarDecls[/*namespace_name+*/prefix].push_back
+                    (MemberSig(tempFnPtrDecl,returnType,al,prefix,memname,type));
                 if (reg.is_static)
                   // static member functions cannot be attched to an
                   // object, however static object member pointers
@@ -992,17 +996,14 @@ string rm_space(string x)
 
 void output_treenode_or_graphnode(const char* action, size_t i, const char* node_type)
 {
-  // escape to global namespace
-  //  printf("}\n");
   /* now output treenode/graphnode definition */
   printf("template %s\n",
 	   actions[i].templ.size()? actions[i].templ.c_str(): "<>");
-  printf("struct access_%s<%s*>\n{\n", action, actions[i].type.c_str());
+  printf("struct access_%s< %s* >\n{\n", action, actions[i].type.c_str());
   printf("  template<class _CD_ARG_TYPE>\n");
   printf("  void operator()(classdesc::%s_t& targ, "
          "const classdesc::string& desc, _CD_ARG_TYPE& arg)\n", action);	
   printf("{%s(targ,desc,classdesc::%s,arg);}\n};\n\n",action,node_type);
-  //  printf("namespace classdesc_access{\n");
 }
 
 class PrintNameSpace
@@ -1041,9 +1042,10 @@ void printNestedTypes(string scope, bool templ, set<string> avoid=set<string>())
   vector<string>& nestedTypes=nested[scope+"::"];
   for (vector<string>::iterator j=nestedTypes.begin(); j!=nestedTypes.end(); j++)
     {
-      printf("typedef %s %s::%s %s;\n",
-             templ? "typename": "",
-             scope.c_str(), j->c_str(), j->c_str());
+      if (!avoid.count(*j))
+        printf("typedef %s %s::%s %s;\n",
+               templ? "typename": "",
+               scope.c_str(), j->c_str(), j->c_str());
       avoid.insert(*j);
     }
   // recursively process next outer level
@@ -1248,14 +1250,14 @@ int main(int argc, char* argv[])
 	    {
 	      input.nexttok();
 	      if (isIdentifierStart(input.token[0]))  /* named class */
-		assign_class_action(input,string(),targs,targs,false);
+		assign_class_action(input,namespace_name,targs,targs,false);
 	      targs.erase();
 	    }
 	  if (input.token=="enum")
 	    {
 	      input.nexttok();
 	      if (isIdentifierStart(input.token[0]))  /* named enum */
-		assign_enum_action(input,"");
+     		assign_enum_action(input,namespace_name);
               else
                 gobble_delimited(input,"{","}");
 	    }
@@ -1295,8 +1297,6 @@ int main(int argc, char* argv[])
       for (size_t i=0; i<nactions; ++i)
         {
           puts("template <class C,class M>");
-          //          puts("typename enable_if<Or<is_member_object_pointer<M>,is_member_function_pointer<M> >,void>::T\n");
-  
           printf("void %s_type(%s_t&,const string&,M);\n",action[i],action[i]);
         }
     }
@@ -1309,21 +1309,11 @@ int main(int argc, char* argv[])
       for (size_t i=0; i<actions.size(); i++)
         {
           // n is qualified by the namespace (if any).
-          string cn=actions[i].type, n;
+          string n=actions[i].type;
           
           /* remove leading type qualifer (if any) */
-          if (type_qualifier(cn)=="typename") continue;
-          cn=without_type_qualifier(cn);
-
-          if (!actions[i].namespace_name.empty()) 
-            {
-              if (cn.substr(0,actions[i].namespace_name.size())==
-                  actions[i].namespace_name) //strip leading ns
-                cn=cn.substr(actions[i].namespace_name.size()+2);
-              n=actions[i].namespace_name+"::"+cn;
-            }
-          else
-            n=cn;
+          if (type_qualifier(n)=="typename") continue;
+          n=without_type_qualifier(n);
 
           // add a guard macro around this code
           string guardMacro="CLASSDESC_TYPENAME_"+n;
@@ -1334,11 +1324,11 @@ int main(int argc, char* argv[])
           {
             PrintNameSpace cd("classdesc");
             if (actions[i].templ.empty())
-              printf("template <> inline std::string typeName<%s >()\n  {return \"%s\";}\n",
+              printf("template <> inline std::string typeName< %s >()\n  {return \"%s\";}\n",
                      n.c_str(), n.c_str());
             else
               {
-                printf("template %s struct tn<%s >\n{\n",actions[i].templ.c_str(), n.c_str());
+                printf("template %s struct tn< %s >\n{\n",actions[i].templ.c_str(), n.c_str());
                 size_t p=n.find('<');
                 string tnName=p!=string::npos? n.substr(0,p): n;
                 tnName+=actions[i].tnTempl;
@@ -1353,7 +1343,7 @@ int main(int argc, char* argv[])
                   PrintNameSpace anon(" ");
                   if (keys.size())
                     {
-                      printf("template <> EnumKey enum_keysData<%s>::keysData[]=\n {\n",n.c_str());
+                      printf("template <> EnumKey enum_keysData< %s >::keysData[]=\n {\n",n.c_str());
                       // enum constant qualifier - set blank if enum is global ns
                       string k;
                       if (leadeq(actions[i].type,"enum class"))
@@ -1370,17 +1360,17 @@ int main(int argc, char* argv[])
                             printf(",\n");
                         }
                       printf("\n };\n");
-                      printf("template <> EnumKeys<%s> enum_keysData<%s>::keys"
-                             "(enum_keysData<%s>::keysData,"
-                             "sizeof(enum_keysData<%s>::keysData)/"
-                             "sizeof(enum_keysData<%s>::keysData[0]));\n",
+                      printf("template <> EnumKeys< %s > enum_keysData< %s >::keys"
+                             "(enum_keysData< %s >::keysData,"
+                             "sizeof(enum_keysData< %s >::keysData)/"
+                             "sizeof(enum_keysData< %s >::keysData[0]));\n",
                              n.c_str(),n.c_str(),n.c_str(),n.c_str(),n.c_str());
                     }
-                  printf("template <> int enumKey<%s>(const std::string& x)"
-                         "{return int(enum_keysData<%s>::keys(x));}\n",
+                  printf("template <> int enumKey< %s >(const std::string& x)"
+                         "{return int(enum_keysData< %s >::keys(x));}\n",
                          n.c_str(),n.c_str());
-                  printf("template <> std::string enumKey<%s>(int x)"
-                         "{return enum_keysData<%s>::keys(x);}\n",
+                  printf("template <> std::string enumKey< %s >(int x)"
+                         "{return enum_keysData< %s >::keys(x);}\n",
                          n.c_str(),n.c_str());
                 }
               }
@@ -1427,12 +1417,12 @@ int main(int argc, char* argv[])
               /* strip out template arguments, collapse multiple spaces, 
                  remove trailing space */
               string n1;
-              if (actions[i].namespace_name.size()) 
-                n1=actions[i].namespace_name+"::";
               unsigned nangle=0;
               bool space=false;
+              
               for (unsigned j=0; j<n.length(); j++)
                 {
+                  if (j<2 && n[j]==':') continue; //skip leading ::
                   if (n[j]=='<') nangle++;
                   if (nangle==0) 
                     {
@@ -1476,11 +1466,11 @@ int main(int argc, char* argv[])
                 string type_arg_name;
                 type_arg_name = (type_qualifier(actions[i].type)=="enum class")?
                   "enum": type_qualifier(actions[i].type);
-                type_arg_name+=" ::"+actions[i].namespace_name+
-                  (actions[i].namespace_name.size()?"::":"") + 
+                type_arg_name+=" "+/*" ::"+actions[i].namespace_name+
+                                 (actions[i].namespace_name.size()?"::":"") +*/ 
                   without_type_qualifier(actions[i].type);
 
-                printf("template %s struct access_%s<%s > {\n",
+                printf("template %s struct access_%s< %s > {\n",
                        actions[i].templ.empty()? "<>": actions[i].templ.c_str(),
                        action[k], type_arg_name.c_str()); 
                 printf("template <class _CD_ARG_TYPE>\n");
@@ -1525,7 +1515,7 @@ int main(int argc, char* argv[])
                              action[k], aj.member.c_str(),
                              aj.name.c_str());
                     // only emit actions that are member pointers or base classes
-                    else if (aj.action[0]=='&' && aj.action.find("::") ||
+                    else if ((aj.action[0]=='&' && aj.action.find("::")) ||
                              aj.action.find("TmpMemPtr_")==0 ||
                              aj.action.find("classdesc::is_constructor")==0)
                       printf("::%s_type<_CD_TYPE,%s >(targ,desc+\"%s\",%s);\n",
@@ -1565,12 +1555,12 @@ int main(int argc, char* argv[])
 
                 // insert the namespace qualifier if needed
                 string type_arg_name;
-                type_arg_name=type_qualifier(actions[i].type)
-                  +" ::"+actions[i].namespace_name+
-                  (actions[i].namespace_name.size()?"::":"") + 
+                type_arg_name=type_qualifier(actions[i].type)+" "+
+                  /*+" ::"+actions[i].namespace_name+
+                    (actions[i].namespace_name.size()?"::":"") +*/ 
                   without_type_qualifier(actions[i].type);
               
-                printf("template %s struct access_%s<%s > {\n",
+                printf("template %s struct access_%s< %s > {\n",
                        actions[i].templ.empty()? "<>": actions[i].templ.c_str(),
                        action[k], type_arg_name.c_str()); 
                 printf("template <class _CD_ARG_TYPE>\n");
@@ -1578,7 +1568,7 @@ int main(int argc, char* argv[])
                        action[k]);
 
                 fprintf(o,"template <class _CD_ARG_TYPE>\n");
-                fprintf(o,"void classdesc_access::access_%s<%s >::",
+                fprintf(o,"void classdesc_access::access_%s< %s >::",
                         action[k], type_arg_name.c_str()); 
                 fprintf(o,"operator()(classdesc::%s_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)\n{\n",
                         action[k]);
@@ -1612,12 +1602,12 @@ int main(int argc, char* argv[])
                 fprintf(o,"};\n");
                 // explicit instantiation
                 fprintf(o,"template\n");
-                fprintf(o,"void classdesc_access::access_%s<%s >::",
+                fprintf(o,"void classdesc_access::access_%s< %s >::",
                         action[k], type_arg_name.c_str()); 
                 fprintf(o,"operator()(classdesc::%s_t& targ, const classdesc::string& desc,%s& arg);\n",
                         action[k], type_arg_name.c_str());
                 fprintf(o,"template\n");
-                fprintf(o,"void classdesc_access::access_%s<%s >::",
+                fprintf(o,"void classdesc_access::access_%s< %s >::",
                         action[k], type_arg_name.c_str()); 
                 fprintf(o,"operator()(classdesc::%s_t& targ, const classdesc::string& desc,const %s& arg);\n",
                         action[k], type_arg_name.c_str());

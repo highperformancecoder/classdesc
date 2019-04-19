@@ -64,7 +64,7 @@ void p_type(p_t&,const string&,M);
 }
 using classdesc::p_type;
 namespace classdesc_access {
-template <> struct access_p<struct ::FlowCounter > {
+template <> struct access_p< struct ::FlowCounter > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
 {

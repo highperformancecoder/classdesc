@@ -55,20 +55,20 @@ cat >test.cd.expected <<EOF
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #endif
-#ifndef CLASSDESC_TYPENAME_foo
-#define CLASSDESC_TYPENAME_foo
+#ifndef CLASSDESC_TYPENAME___foo
+#define CLASSDESC_TYPENAME___foo
 namespace classdesc {
-template <> inline std::string typeName<foo >()
-  {return "foo";}
+template <> inline std::string typeName< ::foo >()
+  {return "::foo";}
 namespace   {
-template <> EnumKey enum_keysData<foo>::keysData[]=
+template <> EnumKey enum_keysData< ::foo >::keysData[]=
  {
   {"bar",int(::bar)},
   {"foobar",int(::foobar)}
  };
-template <> EnumKeys<foo> enum_keysData<foo>::keys(enum_keysData<foo>::keysData,sizeof(enum_keysData<foo>::keysData)/sizeof(enum_keysData<foo>::keysData[0]));
-template <> int enumKey<foo>(const std::string& x){return int(enum_keysData<foo>::keys(x));}
-template <> std::string enumKey<foo>(int x){return enum_keysData<foo>::keys(x);}
+template <> EnumKeys< ::foo > enum_keysData< ::foo >::keys(enum_keysData< ::foo >::keysData,sizeof(enum_keysData< ::foo >::keysData)/sizeof(enum_keysData< ::foo >::keysData[0]));
+template <> int enumKey< ::foo >(const std::string& x){return int(enum_keysData< ::foo >::keys(x));}
+template <> std::string enumKey< ::foo >(int x){return enum_keysData< ::foo >::keys(x);}
 }
 }
 #endif

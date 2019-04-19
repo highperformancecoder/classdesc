@@ -108,7 +108,7 @@ b1.fp=r.bar1.fp
 b1.fp.target.a=54
 assert r.bar1.fp.target.a==54
 
-nullRef=getattr(example.classdesc,"shared_ptr<Foo>")()
+nullRef=getattr(example.classdesc,"shared_ptr<::Foo>")()
 try:
     nullRef.target
     assert False

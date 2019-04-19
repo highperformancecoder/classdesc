@@ -11,6 +11,10 @@ FLAGS+=-fprofile-arcs -ftest-coverage
 endif
 
 ifdef AEGIS
+TRAVIS=1
+endif
+
+ifdef TRAVIS
 FLAGS+=-Werror -Wall -Wno-unused-variable -std=c++98
 endif
 

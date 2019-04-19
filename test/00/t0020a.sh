@@ -67,16 +67,16 @@ void p_type(p_t&,const string&,M);
 }
 using classdesc::p_type;
 namespace classdesc_access {
-template < class T >  struct access_p<struct ::x<T> > {
+template < class T >  struct access_p< struct ::x<T> > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
 {
-typedef typename x<T>::y y;
+typedef typename ::x<T>::y y;
 }
 template <class _CD_TYPE>
 void type(classdesc::p_t& targ, const classdesc::string& desc)
 {
-typedef typename x<T>::y y;
+typedef typename ::x<T>::y y;
 }
 };
 }
