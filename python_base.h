@@ -481,6 +481,7 @@ namespace classdesc
     template <class M, int N> struct Init: public InitArgs<Init<M, N>>
     {};
     
+
   }   
 
     
@@ -550,20 +551,33 @@ namespace classdesc
       template <class T, bool copiable> struct PyClass;
       template <class T> struct PyClass<T,true>: public boost::python::class_<T>
       {
-        PyClass(const char* n): boost::python::class_<T>(n){}
+        PyClass(const char* n): boost::python::class_<T>(n,boost::python::no_init){}
       };
       template <class T> struct PyClass<T,false>: public boost::python::class_<T,boost::noncopyable>
       {
-        PyClass(const char* n): boost::python::class_<T,boost::noncopyable>(n){}
+        PyClass(const char* n): boost::python::class_<T,boost::noncopyable>(n,boost::python::no_init){}
       };
       
     };
+
+    /// @{
+    /// helper method to expose a default constructor if it exists in the underlying C++ type
+    template <class T,bool copiable>
+    static typename enable_if<is_default_constructible<T>,void>::T
+    addDefaultConstructor(ClassBase::PyClass<T,copiable>& c)
+    {c.def(boost::python::init<>());}
+
+    template <class T,bool copiable>
+    static typename enable_if<Not<is_default_constructible<T>>,void>::T
+    addDefaultConstructor(ClassBase::PyClass<T,copiable>& c)
+    {}
     
     template <class T, bool copiable> struct Class:
      public ClassBase, public ClassBase::PyClass<T,copiable>
     {
       Class(const string& name): ClassBase::PyClass<T,copiable>(name.c_str())
       {
+        python_t::addDefaultConstructor(*this);
         // define a default equality operator
         def("__eq__",pythonDetail::defaultEquality<T>);
       }

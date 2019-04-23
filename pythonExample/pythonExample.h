@@ -135,9 +135,24 @@ struct DD
   int a;
 };
 
+// abstract and default constructorless tests
+struct Abstract
+{
+  virtual int foo()=0;
+  int bar() const {return 2;}
+};
+
+struct Defaultless: public Abstract
+{
+  Defaultless(int) {}
+  int foo() override {return 0;}
+};
+
+
 // root type
 struct Root
 {
+  Defaultless defaultless{1};
   Bar bar;
   Bar1 bar1;
   FooBar1& getFB1() {
