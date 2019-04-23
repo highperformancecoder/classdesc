@@ -569,7 +569,7 @@ namespace classdesc
 
     template <class T,bool copiable>
     static typename enable_if<Not<is_default_constructible<T>>,void>::T
-    addDefaultConstructor(ClassBase::PyClass<T,copiable>& c)
+    addDefaultConstructor(ClassBase::PyClass<T,copiable>&)
     {}
     
     template <class T, bool copiable> struct Class:
