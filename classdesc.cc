@@ -776,7 +776,8 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="::", s
         returnType += " "+gobble_delimited(input,"<",">");
       else if (strchr(":;{}()",input.lasttoken[0]) && input.lasttoken!="::")
         returnType.clear();
-      else if (input.lasttoken!="virtual" && input.lasttoken!="static")
+      else if (input.lasttoken!="virtual" && input.lasttoken!="static"
+               && input.lasttoken!="inline")
         returnType+=" "+input.lasttoken;
       
     }
