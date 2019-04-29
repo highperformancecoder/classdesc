@@ -130,7 +130,7 @@ namespace classdesc
     template <class T, int rank>
     struct ArrayGet: public ArrayGetRegisterClass<T,rank>
     {
-      static_assert(rank==std::rank<T>::value);
+      static_assert(rank==std::rank<T>::value,"rank==std::rank<T>::value");
       T* x;
       ArrayGet(): x(0) {}
       ArrayGet(T& x): x(&x) {}
@@ -151,7 +151,7 @@ namespace classdesc
     {
       typedef typename MemberType<M>::T MT;
       static constexpr size_t rank=std::rank<MT>::value;
-      static_assert(rank>0);
+      static_assert(rank>0,"rank>0");
       M m;
       ArrayMemRef(M m): m(m) {}
       typedef ArrayGet<MT,rank> L; 
