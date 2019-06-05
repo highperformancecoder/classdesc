@@ -58,8 +58,8 @@ namespace classdesc
 
 namespace classdesc_access
 {
-  // define anything not yet defined to be the null descriptor
-  template <class T> struct access_python<T,void>: public classdesc::NullDescriptor<classdesc::python_t> {};
+  // string handling is already built into boost.python
+  template <class T> struct access_python<std::basic_string<T>,void>: public classdesc::NullDescriptor<classdesc::python_t> {};
 }
 
 #endif
