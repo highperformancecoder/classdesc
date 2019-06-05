@@ -1,6 +1,6 @@
 .SUFFIXES: .c .cc .o .d .h .cd
 OBJS=pythonExample.o
-CFLAGS=-g `pkg-config --cflags python3` -I.. -I. -fPIC -std=c++11 -pedantic
+CFLAGS=-g `pkg-config --cflags python3` -I.. -I. -fPIC -std=c++11
 VPATH=..
 
 example.so: $(OBJS)

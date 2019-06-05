@@ -349,6 +349,8 @@ namespace boost {
 }
 
 #include "boost/python.hpp"
+#include "boost/python/raw_function.hpp"
+#include "boost/python/slice.hpp"
 #include <Python.h>
 #include <vector>
 
@@ -523,7 +525,8 @@ namespace classdesc
                   modName+=string(b,e);
                   auto i=p.namedScope.find(modName);
                   if (i==p.namedScope.end())
-                    i=p.namedScope.emplace(modName, new Class<Scope::PythonDummy,true>(modName)).first; // ensure exists
+                    i=p.namedScope.emplace
+                      (modName, std::make_shared<Class<Scope::PythonDummy,true>>(modName)).first; // ensure exists
                   scopeStack.emplace_back(new boost::python::scope(*i->second));
                   e++;
                   b=e+1;
@@ -579,7 +582,7 @@ namespace classdesc
       {
         python_t::addDefaultConstructor(*this);
         // define a default equality operator
-        def("__eq__",pythonDetail::defaultEquality<T>);
+        defFn("__eq__",pythonDetail::defaultEquality<T>);
       }
       
       // distinguish between assignable and unassignable properties, which may be const, or may have assignment deleted
@@ -603,7 +606,7 @@ namespace classdesc
       // handle "raw" functions, enabling variable arguments and overload dispatch
       template <class F>
       typename enable_if<pythonDetail::is_rawFunction<F>, Class&>::T
-      def(const char* n, F f) {
+      defFn(const char* n, F f) {
         static_assert(Not<is_reference<typename functional::Return<F>::T>>::value,
                       "\nreference return of raw function not supported.\nUse boost::python::ptr instead");
         PyClass<T,copiable>::def(n,boost::python::raw_function(f));
@@ -611,7 +614,7 @@ namespace classdesc
       }
       template <class F>
       typename enable_if<Not<pythonDetail::is_rawFunction<F>>, Class&>::T
-      def(const char* n, F f) {PyClass<T,copiable>::def(n,f); return *this;}
+      defFn(const char* n, F f) {PyClass<T,copiable>::def(n,f); return *this;}
 
       template <class R, class... Args>
       typename enable_if<is_reference<R>, Class&>::T
@@ -802,7 +805,7 @@ namespace classdesc
     {
       auto& c=getClass<C>();
       if (!c.completed)
-          c.def(tail(d).c_str(),m);
+          c.defFn(tail(d).c_str(),m);
       DefineArgClasses<M,functional::Arity<M>::value>::define(*this);
     }
     
@@ -829,7 +832,7 @@ namespace classdesc
     {
       auto& c=getClass<C>();
       if (!c.completed)
-        c.def(tail(d).c_str(),m);
+        c.defFn(tail(d).c_str(),m);
     }
 
     template <class C, class M>
@@ -871,7 +874,7 @@ namespace classdesc
     addMember(const string& d, M m) {
       auto& c=getClass<C>();
       if (!c.completed)
-          c.def(tail(d).c_str(),m);
+          c.defFn(tail(d).c_str(),m);
     }
     
     // ignore pointer returns
@@ -964,10 +967,10 @@ namespace classdesc
   python(python_t& p, const string& ) {
     auto& c=p.getClass<C>();
     if (!c.completed)
-      c.def("__len__", &pythonDetail::len<C>).
-        def("__getitem__", &pythonDetail::getMapItem<C>).
-        def("__setitem__", &pythonDetail::setMapItem<C>).
-        def("__iter__", &pythonDetail::iter<C>);
+      c.defFn("__len__", &pythonDetail::len<C>).
+        defFn("__getitem__", &pythonDetail::getMapItem<C>).
+        defFn("__setitem__", &pythonDetail::setMapItem<C>).
+        defFn("__iter__", &pythonDetail::iter<C>);
     python<typename T::mapped_type>(p,"");
     python<typename T::key_type>(p,"");
     pythonDetail::Iterator<C>::registerClass(p);
@@ -1089,7 +1092,7 @@ namespace classdesc
       auto& c=p.getClass<Iterator<T>>();
       if (!c.completed)
         {
-          c.def("__next__",&Iterator<T>::next);
+          c.defFn("__next__",&Iterator<T>::next);
           c.completed=true;
         }
     }
