@@ -807,11 +807,11 @@ namespace classdesc
 
   template <class T>
   std::ptrdiff_t operator-(const T* x, const Exclude<T*> y)
-  {return -(y-x);}
+  {return x-static_cast<T*>(y);}
 
   template <class T>
   std::ptrdiff_t operator-(T* x, const Exclude<T*> y)
-  {return -(y-x);}
+  {return x-static_cast<T*>(y);}
 
   template <class T, class U> T mod(T x, U y) {return x%y;}
   template <class U> float mod(float x, U y) {return std::fmod(x,y);}
