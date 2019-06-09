@@ -95,27 +95,6 @@ namespace classdesc
     void apply_void_fn(F f, const Args& args, Fdummy<F> dum=0);
     */
 
-    template <class C, class M> 
-    struct Arity<bound_method<C,M> >
-    {
-      static const int V=Arity<M>::V;
-      static const int value=V;
-    };
-
-    template <class C, class M> 
-    struct Return<bound_method<C,M> >
-    {
-      typedef typename Return<M>::T T;
-      typedef T type;
-    };
-
-    template <class C, class M, size_t i> 
-    struct Arg<bound_method<C,M>,i>
-    {
-      typedef typename Arg<M,i>::T T;
-      typedef T type;
-    };
-
 #if defined(__cplusplus) && __cplusplus>=201103L
     //#if 0
     template <class... Args> struct ArityArgs;
@@ -334,16 +313,10 @@ namespace classdesc
       void operator()(Args... args) const {(obj.*method)(args...);}
     };
 
-    template <class C, class M, template<class> class Pred,
-              int arity> struct AllArgs<bound_method<C,M>,Pred,arity>
+    template <class C, class F> struct FunctionalHelperFor<bound_method<C,F>>
     {
-      static const bool value=AllArgs<M,Pred,arity>::value;
+      typedef typename FunctionalHelperFor<F>::T T;
     };
-    
-//    template <class C, class F> struct FunctionalHelperFor<bound_method<C,F>>
-//    {
-//      typedef typename FunctionalHelperFor<F>::T T;
-//    };
 
     template <class F, template<class> class P, int N> /*N not actually used anywhere...*/
     struct AllArgs
@@ -447,6 +420,27 @@ namespace classdesc
     /// overloaded for member object pointers
     template <class R, class C> struct Return<R (C::*)>
     {typedef R T; typedef R type;};
+
+    template <class C, class M> 
+    struct Arity<bound_method<C,M> >
+    {
+      static const int V=Arity<M>::V;
+      static const int value=V;
+    };
+
+    template <class C, class M> 
+    struct Return<bound_method<C,M> >
+    {
+      typedef typename Return<M>::T T;
+      typedef T type;
+    };
+
+    template <class C, class M, size_t i> 
+    struct Arg<bound_method<C,M>,i>
+    {
+      typedef typename Arg<M,i>::T T;
+      typedef T type;
+    };
 
 #include "functiondb.h"
 #endif
