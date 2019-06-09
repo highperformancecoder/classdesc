@@ -126,6 +126,9 @@ namespace classdesc
 #if __cplusplus < 201103L
     pack_t operator=(const pack_t&){return *this;}
     pack_t(const pack_t&){}
+#else
+    pack_t operator=(const pack_t&)=delete;
+    pack_t(const pack_t&)=delete;
 #endif
   protected:
     FILE *f;

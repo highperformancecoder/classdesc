@@ -207,7 +207,10 @@ namespace classdesc_access
   {
     template <class U>
     void operator()(classdesc::pack_t& targ, const classdesc::string& desc, U& arg) 
-    {targ<<arg.size(); targ.packraw(arg.data(),arg.size());}
+    {
+      targ<<arg.size();
+      targ.packraw((const char*)arg.data(), sizeof(cT)*arg.size());
+    }
   };
 
   template <class cT, class t, class A>
@@ -226,7 +229,7 @@ namespace classdesc_access
     {
       typename string::size_type size; targ>>size;
       std::vector<cT> buf(size+1); //ensure buf[0] exists
-      targ.unpackraw(&buf[0],size);
+      targ.unpackraw(&buf[0],sizeof(cT)*size);
       asg(arg, buf);
     }
   };
