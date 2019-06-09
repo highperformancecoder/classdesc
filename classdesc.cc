@@ -979,10 +979,31 @@ void assign_class_action(tokeninput& input, string prefix, string targs, string 
       //only register action if class is public do not register nested
       // classes of templates, as that causes a partial specialisation
       // error
-      if (!is_private && prefix.find("<")==string::npos &&
-          (classname.find("<")==string::npos || classname.rfind("::")==string::npos||
-           classname.find("<")>classname.rfind("::"))) 
-        actions.push_back(action);
+      if (!is_private && prefix.find("<")==string::npos)
+        {
+          //check to see if template arguments appear before a scope
+          //operator. Note that we may be dealing with scope qualified
+          //template arguments, so we must do this for each scope
+          //chunk
+          vector<bool> templateSeen(1,false);
+          for (const char* c=classname.c_str(); *c!='\0'; ++c)
+            switch (*c)
+              {
+              case '<':
+                templateSeen.back()=true;
+                templateSeen.push_back(false);
+                break;
+              case '>':
+                templateSeen.pop_back();
+                break;
+              case ':':
+                if (*(c+1)==':' && templateSeen.back())
+                  goto nestedInTemplate;
+                break;
+              }
+          actions.push_back(action);
+        nestedInTemplate:;
+        }
       type_defined.defined(classname);
     }
   else  type_defined.declared(classname);
@@ -1339,7 +1360,7 @@ int main(int argc, char* argv[])
 //                if (p!=string::npos)
 //                  printf("template %s struct tn<typename %s >\n{\n",actions[i].templ.c_str(),                       n.c_str());
 //                else
-                if (p==string::npos)
+//                if (p==string::npos)
                   {
                     printf("template %s struct tn< %s >\n{\n",actions[i].templ.c_str(),
                            n.c_str());
