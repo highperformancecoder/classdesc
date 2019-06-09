@@ -15,3 +15,15 @@ struct foo::bar
 {
 int a;
 };
+
+template <class F>
+struct barT
+{
+  struct foo;
+};
+
+template <class F>
+struct barT<F>::foo
+{
+  int a;
+};

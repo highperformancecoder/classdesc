@@ -961,15 +961,16 @@ void assign_class_action(tokeninput& input, string prefix, string targs, string 
      object/function declarations */
   string classtok=input.lasttoken + " ";
   string classname = prefix + input.token;
-  for (input.nexttok(); input.token=="::"; input.nexttok())
-    {
-      input.nexttok();
-      classname+="::"+input.token;
-    }
+  input.nexttok();
   if (input.token=="<") /* template specialisation */
     classname += get_template_args(input);
   else
     classname += extract_targs(classargs);
+  for (; input.token=="::"; input.nexttok())
+    {
+      input.nexttok();
+      classname+="::"+input.token;
+    }
   if (strchr(":{",input.token[0]))
     {
       action_t action(classtok+classname,
@@ -978,7 +979,9 @@ void assign_class_action(tokeninput& input, string prefix, string targs, string 
       //only register action if class is public do not register nested
       // classes of templates, as that causes a partial specialisation
       // error
-      if (!is_private && prefix.find("<")==string::npos) 
+      if (!is_private && prefix.find("<")==string::npos &&
+          (classname.find("<")==string::npos || classname.rfind("::")==string::npos||
+           classname.find("<")>classname.rfind("::"))) 
         actions.push_back(action);
       type_defined.defined(classname);
     }
@@ -1251,6 +1254,7 @@ int main(int argc, char* argv[])
 	    {
 	      input.nexttok();
 	      if (isIdentifierStart(input.token[0]))  /* named class */
+                
 		assign_class_action(input,namespace_name,targs,targs,false);
 	      targs.erase();
 	    }
@@ -1329,11 +1333,20 @@ int main(int argc, char* argv[])
                      n.c_str(), n.c_str());
             else
               {
-                printf("template %s struct tn< %s >\n{\n",actions[i].templ.c_str(), n.c_str());
                 size_t p=n.find('<');
-                string tnName=p!=string::npos? n.substr(0,p): n;
-                tnName+=actions[i].tnTempl;
-                printf("static std::string name()\n  {return \"%s\";}\n};\n",tnName.c_str());
+                // the following code generates a
+                // "template parameters not deducible in partial specialization" error
+//                if (p!=string::npos)
+//                  printf("template %s struct tn<typename %s >\n{\n",actions[i].templ.c_str(),                       n.c_str());
+//                else
+                if (p==string::npos)
+                  {
+                    printf("template %s struct tn< %s >\n{\n",actions[i].templ.c_str(),
+                           n.c_str());
+                    string tnName=p!=string::npos? n.substr(0,p): n;
+                    tnName+=actions[i].tnTempl;
+                    printf("static std::string name()\n  {return \"%s\";}\n};\n",tnName.c_str());
+                  }
               }
             
             /* For enums, print out a value name table */
