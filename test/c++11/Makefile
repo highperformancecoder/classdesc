@@ -3,7 +3,7 @@
 #define NOGUI if X-windows not installed
 NOGUI=
 
-EXES=c++Features type_traits_check moveOperators
+EXES=c++Features type_traits_check moveOperators testArray
 OBJS=
 
 # note the internal type example cannot be correctly linked with g++ or icc!

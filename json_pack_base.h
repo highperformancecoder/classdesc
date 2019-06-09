@@ -330,13 +330,12 @@ namespace classdesc
         else
           {
             const json_spirit::mArray& arr=val.get_array();
-            a.clear();
-            for (size_t i=0; i<arr.size(); ++i)
+            resize(a, arr.size());
+            size_t i=0;
+            for (typename T::iterator j=a.begin(); i<arr.size() && j!=a.end(); ++i, ++j)
               {
-                typename T::value_type v;
-                json_unpack_t j(arr[i]);
-                json_unpack(j,"",v);
-                a.push_back(v);
+                json_unpack_t jp(arr[i]);
+                json_unpack(jp,"",*j);
               }
           }
       }

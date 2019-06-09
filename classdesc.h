@@ -316,6 +316,8 @@ namespace classdesc
   template <class K, class H, class P, class A> 
   struct is_associative_container<std::unordered_multiset<K,H,P,A> > {
     static const bool value=true;};
+  template <class T, std::size_t N>
+  struct is_sequence<std::array<T,N>> {static const bool value=true;};
 #endif
   template <class T> struct is_associative_container<const T>: public is_associative_container<T> {};
 
@@ -332,13 +334,23 @@ namespace classdesc
 
   template <class A, class B> struct And
   {static const bool value=A::value && B::value;};
-
+  
   template <class A, class B> struct Or
   {static const bool value=A::value || B::value;};
 
   template <int X, int Y> struct Eq
   {static const bool value=X==Y;};
 
+
+  // handle resize on nonresizable containers such as std::array
+  template <class T>
+  typename enable_if<is_sequence<T>,void>::T
+  resize(T& x, std::size_t n) {x.resize(n);}
+#if defined(__cplusplus) && __cplusplus>=201103L
+  template <class T, std::size_t N>
+  void resize(std::array<T,N>& x, std::size_t n) {}
+#endif
+  
   ///@}
 
   /// has default constructor, and is copiable 
@@ -464,6 +476,12 @@ namespace classdesc
   {
     static std::string name()
     {return "std::unique_ptr<"+typeName<T>()+">";}
+  };
+
+  template <class T, std::size_t N> struct tn<std::array<T,N> >
+  {
+    static std::string name()
+    {return "std::array<"+typeName<T>()+","+std::to_string(N)+">";}
   };
 #endif
   

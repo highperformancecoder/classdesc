@@ -106,7 +106,7 @@ namespace classdesc
   random_initp(random_init_t& r, const string& d, T& a, dummy<1> dum=0)
   {
     // randomly fill up to 10 elements
-    a.resize(10*r.rand());
+    resize(a, 10*r.rand());
     for (typename T::iterator i=a.begin(); i!=a.end(); ++i)
       random_init(r,d,*i);
   }

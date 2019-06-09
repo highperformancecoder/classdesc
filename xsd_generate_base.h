@@ -371,6 +371,33 @@ namespace classdesc
     processExtraClass(g, d+transformTypeName(typeName<typename T::value_type>()), typename T::value_type());
   }
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+  template <class T, std::size_t N>
+  void xsd_generate(xsd_generate_t& g, const string& d, const std::array<T,N>& e)
+   {    
+    std::ostringstream os;
+    // element name is given by the type name
+    string eName=typeName<T>().c_str();
+    eName=eName.substr(0,eName.find('<')); //trim off any template args
+    // strip leading namespace and qualifiers
+    const char *el=eName.c_str()+eName.length();
+    while (el!=eName.c_str() && *(el-1)!=' ' && *(el-1)!=':') el--;
+
+    string type=transformTypeName(typeName<std::array<T,N>>());
+    os << "  <xs:complexType name=\"" << type << "\">\n";
+    os << "    <xs:sequence minOccurs=\""<<N<<"\" maxOccurs=\""<<N<<"\">\n";
+    os << "      <xs:element name=\""<<el<<
+      "\" type=\""<<xsd_typeName<T>()<<"\"/>\n";
+    os << "    </xs:sequence>\n";
+    os << "  </xs:complexType>\n";
+    g.addMember(tail(d), xsd_typeName<std::array<T,N>>());
+    g.defineType(type, os.str());
+    g.addDependency(type, xsd_typeName<T>());
+    // ensure that the value type as a definition also
+    processExtraClass(g, d+transformTypeName(typeName<T>()), T());
+  }
+#endif
+  
   // support for maps
   template <class T, class U>
   void xsd_generate(xsd_generate_t& g, const string& d, const std::pair<T,U>& a)

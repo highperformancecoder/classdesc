@@ -122,9 +122,11 @@ namespace classdesc_access
     void operator()(classdesc::pack_t& b, const classdesc::string& d, U& a)
     {
       typename T::size_type sz;
-      b >> sz; a.resize(sz);
-      for (typename T::iterator i=a.begin(); i!=a.end(); ++i)
-        b >> *i;
+      b >> sz;
+      classdesc::resize(a, sz);
+      size_t i=0;
+      for (typename T::iterator j=a.begin(); i<sz && j!=a.end(); ++i, ++j)
+        b >> *j;
     }
     template <class U>
     void operator()(classdesc::pack_t& b, const classdesc::string& d, const U& a)

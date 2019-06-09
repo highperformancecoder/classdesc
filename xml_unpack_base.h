@@ -538,13 +538,11 @@ namespace classdesc
     const char *e=eName.c_str()+eName.length();
     while (e!=eName.c_str() && *(e-1)!=' ' && *(e-1)!=':') e--;
 
-    arg.clear();
-    for (size_t i=0; i<x.count(d+"."+e); ++i) 
-      {
-        typename T::value_type v;
-        xml_unpack(x,idx(d+"."+e,i),v);
-        arg.push_back(v);
-      }
+    size_t cnt=x.count(d+"."+e);
+    resize(arg,cnt);
+    size_t i=0;
+    for (typename T::iterator j=arg.begin(); i<cnt && j!=arg.end(); ++i, ++j) 
+      xml_unpack(x,idx(d+"."+e,i),*j);
   }
 
   template <class T> typename
