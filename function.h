@@ -32,12 +32,10 @@ namespace classdesc
     /// \c Return::T (or ::type) is the return type of \a F
     template <class F> struct Return;
 
-    /// overloaded for member object pointers
-    template <class R, class C> struct Return<R (C::*)>
-    {typedef R T; typedef R type;};
+
     
     /** \c Arg<F,i> is the type of argument \a i of \a F, i=1..Arity<F> */
-    template <class F, int> struct Arg;
+    template <class F, size_t> struct Arg;
 
     /** \c ClassOf<F> returns the class type that F is a member function of. Returns F if F is not a class */
     template <class F> struct ClassOf
@@ -111,39 +109,348 @@ namespace classdesc
       typedef T type;
     };
 
-    template <class C, class M, int i> 
+    template <class C, class M, size_t i> 
     struct Arg<bound_method<C,M>,i>
     {
       typedef typename Arg<M,i>::T T;
       typedef T type;
     };
 
-#include "functiondb.h"
-
-#if defined(__cplusplus) && __cplusplus>=201103L 
-//    // for generic function objects
-//    template <class F> 
-//    struct Arity
-//    {
-//      static const int V=Arity<decltype(&F::operator())>::V;
-//      static const int value=V;
-//    };
-//
-//    template <class F> 
-//    struct Return
-//    {
-//      typedef typename Return<decltype(&F::operator())>::T T;
-//      typedef T type;
-//    };
-//
-//    template <class F, int i> 
-//    struct Arg
-//    {
-//      typedef typename Arg<decltype(&F::operator()),i>::T T;
-//      typedef T type;
-//    };
-#endif
+#if defined(__cplusplus) && __cplusplus>=201103L
+    //#if 0
+    template <class... Args> struct ArityArgs;
     
+    template <class A, class... Args>
+    struct ArityArgs<A, Args...>
+    {
+      static const size_t value=ArityArgs<Args...>::value+1;
+    };
+
+    template <>
+    struct ArityArgs<>
+    {
+      static const size_t value=0;
+    };
+
+    template <size_t N, class A, class... Args>
+    struct ArgOf
+    {
+      typedef typename ArgOf<N-1,Args...>::T T;
+    };
+
+    template <class A, class... Args>
+    struct ArgOf<1,A,Args...>
+    {
+      typedef A T;
+    };
+
+    template <template<class> class P, class... Args> struct AllArgsHelper;
+    template <template<class> class P, class A, class... Args> struct AllArgsHelper<P,A,Args...>
+    {
+      static const bool value=P<A>::value && AllArgsHelper<P,Args...>::value;
+    };
+
+    template <template<class> class P> struct AllArgsHelper<P>
+    {
+      static const bool value=true;
+    };
+    
+    template <class R, class... Args> struct FunctionalHelper
+    {
+      static const size_t arity=ArityArgs<Args...>::value;
+      typedef R Return;
+      template <size_t N> struct Arg
+      {
+        typedef typename ArgOf<N,Args...>::T T;
+      };
+      template <template<class> class P> struct AllArgs
+      {
+        typedef AllArgsHelper<P,Args...> T;
+      };
+    };
+
+    template <class F> struct FunctionalHelperFor;
+    // function pointers
+    template <class R, class... Args> struct FunctionalHelperFor<R(*)(Args...)>
+    {
+      typedef FunctionalHelper<R,Args...> T;
+    };
+    // method pointers
+    template <class R, class C, class... Args> struct FunctionalHelperFor<R(C::*)(Args...)>
+    {
+      typedef FunctionalHelper<R,Args...> T;
+    };
+    template <class R, class C, class... Args> struct FunctionalHelperFor<R(*C::*)(Args...)>
+    {
+      typedef FunctionalHelper<R,Args...> T;
+    };
+    template <class R, class C, class... Args> struct FunctionalHelperFor<R(C::*)(Args...) const>
+    {
+      typedef FunctionalHelper<R,Args...> T;
+    };
+    /// member object pointers
+    template <class R, class C> struct FunctionalHelperFor<R(C::*)>
+    {
+      typedef FunctionalHelper<R> T;
+    };
+
+    // doesn't seem to work, alas...
+    //    template <class F> struct FunctionalHelperFor:
+    //      public FunctionalHelperFor<decltype(F::operator())> {};
+    
+      
+
+    // lambdas
+//    template <class R, class... Args> struct FunctionalHelperFor<decltype([](Args...)->R)>
+//    {
+//      typedef typename FunctionalHelper<R,Args...>::T T;
+//    };
+
+    template <class F> struct Arity {
+      typedef typename FunctionalHelperFor<F>::T Helper;
+      static const size_t V=Helper::arity;
+      static const size_t value=Helper::arity;
+    };
+
+    template <class F> struct Return
+    {
+      typedef typename FunctionalHelperFor<F>::T Helper;
+      typedef typename Helper::Return T;
+      typedef T type;
+    };
+    template <class F, size_t N> struct Arg
+    {
+      typedef typename FunctionalHelperFor<F>::T Helper;
+      typedef typename Helper::template Arg<N>::T T;
+      typedef T type;
+    };
+
+    template <class R, class C, class... Args>
+    struct ClassOf<R (C::*)(Args...)>
+    {
+      typedef C T;
+      typedef C type;
+    };
+
+    template <class R, class C, class... Args>
+    struct ClassOf<R (*C::*)(Args...)>
+    {
+      typedef C T;
+      typedef C type;
+    };
+
+    template <class R, class C, class... Args>
+    struct ClassOf<R (C::*)(Args...) const>
+    {
+      typedef C T;
+      typedef C type;
+    };
+
+    template <class C, class R, class... Args> 
+    struct is_member_function_ptr<R (C::*)(Args...)>
+    {
+      static const bool value=true;
+    };
+
+    template <class C, class R, class... Args> 
+    struct is_member_function_ptr<R (C::*)(Args...) const>
+    {
+      static const bool value=true;
+    };
+
+    template <class C, class R, class... Args> 
+    struct is_const_method<R (C::*)(Args...) const>
+    {
+      static const bool value=true;
+    };
+
+    template <class R, class... Args> 
+    struct is_nonmember_function_ptr<R (*)(Args...)>
+    {
+      static const bool value=true;
+    };
+
+    template <class C, class R, class... Args> 
+    struct is_nonmember_function_ptr<R (*C::*)(Args...)>
+    {
+      static const bool value=true;
+    };
+
+    template <class C, class D, class R, class... Args>
+    class bound_method<C, R (D::*)(Args...)>
+    {
+      typedef R (D::*M)(Args...);
+      C* obj;
+      M method;
+    public:
+      static const int arity=0;
+      typedef R Ret;
+      template <int i> struct Arg: public functional::Arg<M,i> {};
+      bound_method(C& obj, M method): obj(&obj), method(method) {}
+      R operator()(Args... args) const {return (obj->*method)(args...);}
+      void rebind(C& newObj) {obj=&newObj;}
+    };
+
+    template <class C, class D, class... Args>
+    class bound_method<C, void (D::*)(Args...)>
+    {
+      typedef void (D::*M)();
+      C* obj;
+      M method;
+    public:
+      static const int arity=0;
+      typedef void Ret;
+      template <int i> struct Arg: public functional::Arg<M,i> {};
+      bound_method(C& obj, M method): obj(&obj), method(method) {}
+      void operator()(Args... args) const {(obj->*method)(args...);}
+      void rebind(C& newObj) {obj=&newObj;}
+    };
+
+    template <class C, class D, class R, class... Args>
+    class bound_method<C, R (D::*)(Args...) const>
+    {
+      typedef R (D::*M)() const;
+      C& obj;
+      M method;
+    public:
+      static const int arity=0;
+      typedef R Ret;
+      template <int i> struct Arg: public functional::Arg<M,i> {};
+      bound_method(C& obj, M method): obj(obj), method(method) {}
+      R operator()(Args... args) const {return (obj.*method)(args...);}
+    };
+
+    template <class C, class D, class... Args>
+    class bound_method<C, void (D::*)(Args...) const>
+    {
+      typedef void (D::*M)() const;
+      C& obj;
+      M method;
+    public:
+      static const int arity=0;
+      typedef void Ret;
+      template <int i> struct Arg: public functional::Arg<M,i> {};
+      bound_method(C& obj, M method): obj(obj), method(method) {}
+      void operator()(Args... args) const {(obj.*method)(args...);}
+    };
+
+    template <class C, class M, template<class> class Pred,
+              int arity> struct AllArgs<bound_method<C,M>,Pred,arity>
+    {
+      static const bool value=AllArgs<M,Pred,arity>::value;
+    };
+    
+//    template <class C, class F> struct FunctionalHelperFor<bound_method<C,F>>
+//    {
+//      typedef typename FunctionalHelperFor<F>::T T;
+//    };
+
+    template <class F, template<class> class P, int N> /*N not actually used anywhere...*/
+    struct AllArgs
+    {
+      typedef typename FunctionalHelperFor<F>::T Helper;
+      typedef typename Helper::template AllArgs<P>::T AllArgsHelper;
+      static const bool value=AllArgsHelper::value;
+    };
+    
+    template <class F, class ArgVector, size_t N=Arity<F>::value>
+    struct CurryLastNonVoid;
+
+    template <class F, class ArgVector, size_t N>
+    struct CurryLastNonVoid
+    {
+      F f;
+      ArgVector& a;
+      CurryLastNonVoid(F f, ArgVector& a): f(f), a(a) {} 
+      template <class... Args>
+      typename Return<F>::T operator()(Args... args) const {
+        return f(args...,a[Arity<F>::value-1]);
+      }
+      
+      typename Return<F>::T apply()
+      {return CurryLastNonVoid<CurryLastNonVoid, ArgVector>(*this, a).apply();}
+    };
+      
+    template <class F, class ArgVector>
+    struct CurryLastNonVoid<F,ArgVector,0>
+    {
+      F f;
+      ArgVector& a;
+      CurryLastNonVoid(F f, ArgVector& a): f(f), a(a) {} 
+      typename Return<F>::T operator()() const {return f();}
+      typename Return<F>::T apply() const {return f();}
+    };
+      
+    template <class F, class ArgVector,size_t N>
+    struct Return<CurryLastNonVoid<F,ArgVector,N>>
+    {
+      typedef typename Return<F>::T T;
+    };
+    
+    template <class F, class ArgVector, size_t N>
+    struct Arity<CurryLastNonVoid<F,ArgVector,N>>
+    {
+      static const size_t value=Arity<F>::value-1;
+    };
+    
+    template <class F, class ArgVector, size_t N=Arity<F>::value>
+    struct CurryLastVoid
+    {
+      F f;
+      ArgVector& a;
+      CurryLastVoid(F f, ArgVector& a): f(f), a(a) {} 
+      template <class... Args>
+      void operator()(Args... args) const {
+        f(args...,a[Arity<F>::value-1]);
+      }
+      
+      void apply()
+      {CurryLastVoid<CurryLastVoid, ArgVector>(*this, a).apply();}
+    };
+      
+    template <class F, class ArgVector>
+    struct CurryLastVoid<F,ArgVector,0>
+    {
+      F f;
+      ArgVector& a;
+      CurryLastVoid(F f, ArgVector& a): f(f), a(a) {} 
+      void operator()() const {f();}
+      void apply() const {f();}
+    };
+      
+    template <class F, class ArgVector>
+    struct Arity<CurryLastVoid<F,ArgVector>>
+    {
+      static const size_t value=Arity<F>::value-1;
+    };
+    
+    template <class F, class Args> 
+    //typename enable_if<AllArgs<F, is_rvalue>, typename Return<F>::T>::T
+    int apply_nonvoid_fn(F f, Args& a)
+    {
+      return CurryLastNonVoid<F,Args>(f,a).apply();
+    }
+
+
+    template <class F, class Args> 
+    typename enable_if<AllArgs<F, is_rvalue>, typename Return<F>::T>::T
+    apply_void_fn(F f, Args& a)
+    {
+      CurryLastVoid<F,Args>(f,a).apply();
+    }
+
+
+    
+#else
+    /// legacy code supporting pre-modern C++ compilers.
+    
+    /// overloaded for member object pointers
+    template <class R, class C> struct Return<R (C::*)>
+    {typedef R T; typedef R type;};
+
+#include "functiondb.h"
+#endif
+        
     template <class O, class M>
     bound_method<O,M> bindMethod(O& o, M m)
     {return bound_method<O,M>(o,m);}

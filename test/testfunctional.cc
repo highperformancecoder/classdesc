@@ -8,8 +8,8 @@
 
 #include <string>
 
-#include "javaClassDescriptor.h"
 #include "function.h"
+#include "javaClassDescriptor.h"
 #include "classdesc_epilogue.h"
 #include <assert.h>
 #include <iostream>
