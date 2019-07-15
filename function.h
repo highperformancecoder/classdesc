@@ -164,7 +164,7 @@ namespace classdesc
       };
       template <template<class> class P> struct AllArgs
       {
-        static const bool value=true;
+        typedef AllArgsHelper<P> T;
       };
     };
 
