@@ -64,7 +64,7 @@ all: $(EXES)
 $(EXES): %: %.o  $(OBJS)
 	$(LINK) $(CFLAGS) -o $@  $< $(OBJS) $(LIBS)
 	echo "testing $@"
-	$@
+	./$@
 
 $(MPIEXES): %: %.o  $(OBJS)
 	mpicxx $(CFLAGS) -o $@  $< $(OBJS) $(LIBS)
