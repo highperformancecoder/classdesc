@@ -129,13 +129,17 @@ namespace classdesc
   using std::remove_pointer;
   using std::add_pointer;
 
-
   using std::shared_ptr;
   using std::weak_ptr;
 
   using std::is_default_constructible;
   using std::is_copy_constructible;
   using std::is_assignable;
+
+  // missing from std, so supply here in classdesc
+  template <class T, class... Args>
+  std::unique_ptr<T> make_unique(Args... args)
+  {return std::unique_ptr<T>(new T(args...));}
 }
 
 // long long is now part of the standard language

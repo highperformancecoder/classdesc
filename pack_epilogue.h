@@ -41,7 +41,7 @@ namespace classdesc_access
                  cd::dummy<1> dum=0)
   {access_pack<cd::associative_container<T> >()(buf,desc,arg);}
   
-
+#ifdef PACK_STL_H
   // handle containers from the generic access_ classes
   template <class T>
   struct access_pack
@@ -70,7 +70,8 @@ namespace classdesc_access
     void operator()(cd::pack_t& buf,const cd::string& desc, U& arg)
     {unpack_container(buf,desc,arg);}
   };
-
+#endif
+  
   // support for polymorphic types, if loaded
 //#ifdef NEW_POLY_H
 //  template <class T> struct access_pack<cd::PolyBase<T> >: 

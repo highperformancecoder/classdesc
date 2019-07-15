@@ -75,7 +75,12 @@ namespace classdesc
 //    };
    /// @}
 
-    template <class C, class M> class bound_method;
+    template <class C, class M, class R=typename Return<M>::T> class bound_method;
+
+    template <class O, class M>
+    bound_method<O,M> bindMethod(O& o, M m)
+    {return bound_method<O,M>(o,m);}
+
 
     template <class T> struct Fdummy {Fdummy(int) {} };
 
@@ -148,7 +153,27 @@ namespace classdesc
       };
     };
 
+    /// argumentless specialisation
+    template <class R> struct FunctionalHelper<R>
+    {
+      static const size_t arity=0;
+      typedef R Return;
+      template <size_t N> struct Arg
+      {
+        typedef void T;
+      };
+      template <template<class> class P> struct AllArgs
+      {
+        static const bool value=true;
+      };
+    };
+
     template <class F> struct FunctionalHelperFor;
+    // raw functions
+    template <class R, class... Args> struct FunctionalHelperFor<R(Args...)>
+    {
+      typedef FunctionalHelper<R,Args...> T;
+    };
     // function pointers
     template <class R, class... Args> struct FunctionalHelperFor<R(*)(Args...)>
     {
@@ -255,10 +280,9 @@ namespace classdesc
       static const bool value=true;
     };
 
-    template <class C, class D, class R, class... Args>
-    class bound_method<C, R (D::*)(Args...)>
+    template <class C, class M, class R>
+    class bound_method
     {
-      typedef R (D::*M)(Args...);
       C* obj;
       M method;
     public:
@@ -266,14 +290,14 @@ namespace classdesc
       typedef R Ret;
       template <int i> struct Arg: public functional::Arg<M,i> {};
       bound_method(C& obj, M method): obj(&obj), method(method) {}
+      template <class... Args>
       R operator()(Args... args) const {return (obj->*method)(args...);}
       void rebind(C& newObj) {obj=&newObj;}
     };
 
-    template <class C, class D, class... Args>
-    class bound_method<C, void (D::*)(Args...)>
+    template <class C, class M>
+    class bound_method<C, M, void>
     {
-      typedef void (D::*M)();
       C* obj;
       M method;
     public:
@@ -281,6 +305,7 @@ namespace classdesc
       typedef void Ret;
       template <int i> struct Arg: public functional::Arg<M,i> {};
       bound_method(C& obj, M method): obj(&obj), method(method) {}
+      template <class... Args>
       void operator()(Args... args) const {(obj->*method)(args...);}
       void rebind(C& newObj) {obj=&newObj;}
     };
@@ -412,7 +437,269 @@ namespace classdesc
       CurryLastVoid<F,Args>(f,a).apply();
     }
 
+    /** 
+        helper classes to serialise/deserialise a function call to
+        assist with command patterns 
 
+        Use like
+        pack_t buf;
+        PackFunctor(buf)(a, b);
+        ...
+        Functor object;
+        UnpackAndCall(buf)(object); 
+
+*/
+    template <class F, class R=typename Return<F>::T, class A=typename Arg<F,1>::T>
+    class CurryFirst;
+
+    template <class F, class R, class A>
+    class CurryFirst
+    {
+      F f;
+      A& a;
+    public:
+      CurryFirst(F f, A& a): f(f), a(a) {}
+      template <class A1, class... Args>
+      R operator()(A1 a, Args... args) {
+        return CurryFirst<CurryFirst,R,A1>(*this,a)(args...);
+      }
+      R operator()() {return f(a);}
+    };
+
+    template <class F, class A>
+    class CurryFirst<F,void,A>
+    {
+      F f;
+      A& a;
+    public:
+      CurryFirst(F f, A& a): f(f), a(a) {}
+      template </*class A1,*/ class... Args>
+      void operator()(/*A1 a1,*/ Args... args) {
+        f(a,args...);
+        //        CurryFirst<CurryFirst,void,A>(*this,a1)(args...);
+      }
+      void operator()() {f(a);}
+    };
+
+    template <class F, class R, class A>
+    struct FunctionalHelperFor<CurryFirst<F,R,A>>:
+      public FunctionalHelperFor<F>
+    {
+      template <size_t N> struct Arg: public functional::Arg<F,N+1> {};
+    };
+
+    /// polymorphic type representing the result of functor call
+    template <class R> struct Result;
+    struct ResultBase
+    {
+      virtual ~ResultBase() {}
+      template <class R>
+      R getResult() const {
+        if (is_void<R>::value)
+          throw std::runtime_error("void result");          
+        if (auto s=dynamic_cast<const Result<R>*>(this))
+          return **s;
+        else
+          throw std::runtime_error("Incorrect result type");
+      }
+        
+    };
+    template <class R> struct Result: public ResultBase
+    {
+      R r;
+      Result(R r): r(r) {}
+      R operator*() const {return r;}
+    };
+    template <> struct Result<void>: public ResultBase
+    {};
+
+    template <class Buffer, class F, class R=typename Return<F>::T,
+              int N=Arity<F>::value> class CallOnBuffer;
+    
+    template <class Buffer, class F, class R, int N>
+    class CallOnBuffer
+    {
+      Buffer& buffer;
+      F f;
+    public:
+      CallOnBuffer(Buffer& buffer, F f): buffer(buffer), f(f) {}
+      Result<R> operator()() {
+        typename Arg<F,1>::T a; buffer>>a;
+        return CallOnBuffer<Buffer, CurryFirst<F>, R, N-1>
+          (buffer, CurryFirst<F>(f,a))();
+      }
+    };
+
+    template <class Buffer, class F, class R>
+    class CallOnBuffer<Buffer,F,R,0>
+    {
+      F f;
+    public:
+      CallOnBuffer(Buffer& buffer, F f): f(f) {}
+      Result<R> operator()() {return f();}
+    };
+
+    template <class Buffer, class F, int N>
+    class CallOnBuffer<Buffer,F,void,N>
+    {
+      Buffer& buffer;
+      F f;
+    public:
+      CallOnBuffer(Buffer& buffer, F f): buffer(buffer), f(f) {}
+      Result<void> operator()() {
+        typename Arg<F,1>::T a; buffer>>a;
+        CallOnBuffer<Buffer, CurryFirst<F>, void, N-1>
+          (buffer, CurryFirst<F>(f,a))();
+        return Result<void>();
+      }
+    };
+
+    template <class Buffer, class F>
+    class CallOnBuffer<Buffer,F,void,1>
+    {
+      Buffer& buffer;
+      F f;
+    public:
+      CallOnBuffer(Buffer& buffer, F f): buffer(buffer), f(f) {}
+      Result<void> operator()() {
+        typename Arg<F,1>::T a; buffer>>a;
+        f(a);
+        return Result<void>();
+      }
+    };
+
+    template <class Buffer, class F>
+    class CallOnBuffer<Buffer,F,void,0>
+    {
+      F f;
+    public:
+      CallOnBuffer(Buffer& buffer, F f): f(f) {}
+      Result<void> operator()() {
+        f();
+        return Result<void>();        
+      }
+    };
+
+    template <class Buffer>
+    class PackFunctor: public Buffer
+    {
+    public:
+      /// a Buffer needs to support << operations for arbitrary rhs types
+      template <class... Args> PackFunctor(Args... args): Buffer(std::forward(args)...) {}
+
+      template <class F, class... Args>
+      void pack(Args... args)
+      {packArg<F,1>(args...);}
+      /// overload that accepts argument list as is, rather than casting to a signature
+      template <class... Args>
+      void pack(Args... args)
+      {packArg<void(Args...),1>(args...);}
+      template <class F, int N, class A, class... Args>
+      void packArg(A a, Args... args)
+      {
+        (*this) << typename Arg<F,N>::T(a);
+        packArg<F,N+1>(args...);
+      }
+      template <class F, int N>
+      void packArg() {}
+
+      template <class F>
+      typename enable_if<Not<is_void<typename Return<F>::T>>,
+                         typename Return<F>::T>::T
+      call(F f) {
+        return *CallOnBuffer<Buffer, F>(*this,f)();
+      }
+      
+      template <class F>
+      typename enable_if<is_void<typename Return<F>::T>,void>::T
+      call(F f) {
+        CallOnBuffer<Buffer, F>(*this,f)();
+      }
+      
+    };
+
+    template <class Class, class Buffer>
+    class CallMethodOnBufferBase
+    {
+    public:
+      virtual std::unique_ptr<ResultBase> call(Buffer&, Class&)=0;
+      template <class M> static
+      std::unique_ptr<CallMethodOnBufferBase> makeCallMethodOnBuffer(M m);
+    };
+
+    template <class Class, class Buffer, class M>
+    class CallMethodOnBuffer: public CallMethodOnBufferBase<Class,Buffer>
+    {
+      M m;
+      typedef typename Return<M>::T R;
+    public:
+      CallMethodOnBuffer(M m): m(m) {}
+      std::unique_ptr<ResultBase> call(Buffer& buf, Class& o) {
+        auto bm=bindMethod(o,m);
+        return make_unique<Result<R>>(CallOnBuffer<Buffer,decltype(bm)>(buf,bm)());
+      }
+    };
+    
+    template <class Class, class Buffer, class M> static
+    std::unique_ptr<CallMethodOnBufferBase<Class,Buffer>>
+    makeCallMethodOnBuffer(M m)
+    {return new CallMethodOnBuffer<Class,Buffer,M>(m);}
+
+    /// return a binary array object that represents a method pointer
+    typedef void (is_array::*MethodPtrExemplar)();
+    typedef std::array<char,sizeof(MethodPtrExemplar)> MethodBin;
+    template <class M>
+    MethodBin& methodBin(M& m) {
+      static_assert(sizeof(MethodBin)==sizeof(M));
+      return reinterpret_cast<MethodBin&>(m);
+    }
+    
+    template <class Class, class Buffer>
+    class CallMethods: public std::vector<std::unique_ptr<CallMethodOnBufferBase<Class,Buffer>>>
+    {
+      std::map<MethodBin,size_t> indexMap;
+      template <class M, class... Args>
+      void init(M m, Args... args) {
+        indexMap.emplace(methodBin(m),this->size());
+        this->emplace_back(new CallMethodOnBuffer<Class,Buffer,M>(m));
+        init(args...);
+      }
+      void init() {}
+    public:
+      template <class A, class... Args>
+      CallMethods(A a, Args... args)  {init(a,args...);}
+      template <class M>
+      size_t indexOf(M m) {
+        auto i=indexMap.find(methodBin(m));
+        if (i==indexMap.end())
+          { //TODO should we be adding this, or just throwing?
+            i=indexMap.emplace(methodBin(m),this->size()).first;
+            this->emplace_back(new CallMethodOnBuffer<Class,Buffer,M>(m));
+          }
+        return i->second;
+      }
+    };
+
+    template <class Class, class Buffer>
+    struct MethodPackFunctor: public PackFunctor<Buffer>
+    {
+      CallMethods<Class,Buffer> methods;
+      template <class... Args>
+      MethodPackFunctor(Args... args): methods(args...) {}
+      template <class M, class... Args>
+      void operator()(M m, Args... args) {
+        (*this)<<methods.indexOf(m);
+        this->template pack<M,Args...>(args...);
+      }
+      std::unique_ptr<ResultBase> invoke(Class& object)
+      {
+        size_t methodIdx;
+        (*this)>>methodIdx;
+        if (methodIdx>=methods.size())
+          throw std::runtime_error("invalid method");
+        return methods[methodIdx]->call(*this,object);
+      }
+    };
     
 #else
     /// legacy code supporting pre-modern C++ compilers.
@@ -445,10 +732,6 @@ namespace classdesc
 #include "functiondb.h"
 #endif
         
-    template <class O, class M>
-    bound_method<O,M> bindMethod(O& o, M m)
-    {return bound_method<O,M>(o,m);}
-
     template <class F, class Args>
     typename enable_if< 
       Not<is_void<typename Return<F>::T> >,
