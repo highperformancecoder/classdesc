@@ -650,7 +650,7 @@ namespace classdesc
     typedef std::array<char,sizeof(MethodPtrExemplar)> MethodBin;
     template <class M>
     MethodBin& methodBin(M& m) {
-      static_assert(sizeof(MethodBin)==sizeof(M));
+      static_assert(sizeof(MethodBin)==sizeof(M),"");
       return reinterpret_cast<MethodBin&>(m);
     }
     
