@@ -311,9 +311,9 @@ namespace classdesc
     };
 
     template <class C, class D, class R, class... Args>
-    class bound_method<C, R (D::*)(Args...) const>
+    class bound_method<C, R (D::*)(Args...) const, R>
     {
-      typedef R (D::*M)() const;
+      typedef R (D::*M)(Args...) const;
       C& obj;
       M method;
     public:
@@ -325,9 +325,9 @@ namespace classdesc
     };
 
     template <class C, class D, class... Args>
-    class bound_method<C, void (D::*)(Args...) const>
+    class bound_method<C, void (D::*)(Args...) const, void>
     {
-      typedef void (D::*M)() const;
+      typedef void (D::*M)(Args...) const;
       C& obj;
       M method;
     public:
@@ -423,8 +423,8 @@ namespace classdesc
     };
     
     template <class F, class Args> 
-    //typename enable_if<AllArgs<F, is_rvalue>, typename Return<F>::T>::T
-    int apply_nonvoid_fn(F f, Args& a)
+    typename enable_if<AllArgs<F, is_rvalue>, typename Return<F>::T>::T
+    apply_nonvoid_fn(F f, Args& a)
     {
       return CurryLastNonVoid<F,Args>(f,a).apply();
     }
