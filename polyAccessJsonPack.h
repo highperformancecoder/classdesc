@@ -77,7 +77,7 @@ namespace classdesc
   template<class T>
   typename enable_if<
     And<
-      Not<is_poly_constructible<T>>, is_default_constructible<typename T::element_type>>,
+      Not<is_poly_constructible<T> >, is_default_constructible<typename T::element_type> >,
     void>::T
   json_unpack_smart_ptr(json_pack_t& x, const string& d, T& a,
                            dummy<1> dum=0)
@@ -97,7 +97,7 @@ namespace classdesc
   template<class T>
   typename enable_if<
     And<
-      Not<is_poly_constructible<T>>, Not<is_default_constructible<typename T::element_type>>
+      Not<is_poly_constructible<T> >, Not<is_default_constructible<typename T::element_type> >
       >, void>::T
   json_unpack_smart_ptr(json_pack_t& x, const string& d, T& a,
                         dummy<2> dum=0)
