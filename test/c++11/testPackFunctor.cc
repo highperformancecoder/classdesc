@@ -9,6 +9,7 @@ int getX() {return x[0];}
 int getXi(int i) {return x[i];}
 void setX(int y) {x[0]=y;}
 void setXi(int i, int y) {x[i]=y;}
+void setXii(int i, int y, int z) {x[i]=y*z;}
 void clearX() {x.clear();}
 
 // vector methods factory
@@ -33,6 +34,12 @@ int main()
   assert(x[1]==3);
   pf.pack<decltype(getXi)>(1);
   assert(pf.call(getXi)==3);
+
+  pf.clear();
+  pf.pack<decltype(setXii)>(1,3,4);
+  x[1]=0;
+  pf.call(setXii);
+  assert(x[1]==12);
 
   pf.call(clearX);
   assert(x.empty());

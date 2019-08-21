@@ -449,7 +449,8 @@ namespace classdesc
         UnpackAndCall(buf)(object); 
 
 */
-    template <class F, class R=typename Return<F>::T, class A=typename Arg<F,1>::T>
+    template <class F, class R=typename Return<F>::T,
+              class A=typename Arg<F,1>::T>
     class CurryFirst;
 
     template <class F, class R, class A>
@@ -459,11 +460,10 @@ namespace classdesc
       A& a;
     public:
       CurryFirst(F f, A& a): f(f), a(a) {}
-      template <class A1, class... Args>
-      R operator()(A1 a, Args... args) {
-        return CurryFirst<CurryFirst,R,A1>(*this,a)(args...);
+      template <class... Args>
+      R operator()(Args... args) {
+        return f(std::forward<A>(a),std::forward<Args>(args)...);
       }
-      R operator()() {return f(a);}
     };
 
     template <class F, class A>
@@ -473,12 +473,10 @@ namespace classdesc
       A& a;
     public:
       CurryFirst(F f, A& a): f(f), a(a) {}
-      template </*class A1,*/ class... Args>
-      void operator()(/*A1 a1,*/ Args... args) {
-        f(a,args...);
-        //        CurryFirst<CurryFirst,void,A>(*this,a1)(args...);
+      template <class... Args>
+      void operator()(Args... args) {
+        f(std::forward<A>(a),std::forward<Args>(args)...);
       }
-      void operator()() {f(a);}
     };
 
     template <class F, class R, class A>
@@ -507,28 +505,63 @@ namespace classdesc
     template <class R> struct Result: public ResultBase
     {
       R r;
-      Result(R r): r(r) {}
-      R operator*() const {return r;}
+      Result(const R& r): r(r) {}
+      const R& operator*() const {return r;}
+      R&& move() {return std::move(r);}
     };
     template <> struct Result<void>: public ResultBase
     {};
 
     template <class Buffer, class F, class R=typename Return<F>::T,
               int N=Arity<F>::value> class CallOnBuffer;
+
+    /// extract an argument from buffer \a b, and run functional f on it 
+    template <class F, class A, class R, class B>
+    typename enable_if<is_default_constructible<A>, R>::T
+    eval(F f, B& b)
+    {
+      A a;
+      b>>a;
+      return f(a);
+    }
+    
+    template <class F, class A, class R, class B>
+    typename enable_if<Not<is_default_constructible<A>>, R>::T
+    eval(F f, B& b)
+    {
+      throw std::runtime_error("unable to unpack into "+typeName<A>());
+    }
+
+    template <class F, class A, class B>
+    typename enable_if<is_default_constructible<A>, void>::T
+    evalVoid(F f, B& b)
+    {
+      A a;
+      b>>a;
+      f(a);
+    }
+    
+    template <class F, class A, class B>
+    typename enable_if<Not<is_default_constructible<A>>, void>::T
+    evalVoid(F f, B& b)
+    {eval<F,A,void,B>(f,b);}
     
     template <class Buffer, class F, class R, int N>
     class CallOnBuffer
     {
       Buffer& buffer;
       F f;
+      typedef typename remove_const
+          <typename remove_reference
+           <typename Arg<F,1>::T>::type>::type A1;
     public:
       CallOnBuffer(Buffer& buffer, F f): buffer(buffer), f(f) {}
       Result<R> operator()() {
-        typename Arg<F,1>::T a; buffer>>a;
-        return CallOnBuffer<Buffer, CurryFirst<F>, R, N-1>
-          (buffer, CurryFirst<F>(f,a))();
-      }
-    };
+        auto ff=[&](A1& a){return CallOnBuffer<Buffer, CurryFirst<F>, R, N-1>
+            (buffer, CurryFirst<F>(f,a))();};
+        return std::move(eval<decltype(ff),A1,Result<R>,Buffer>(ff, buffer));
+       }
+     };
 
     template <class Buffer, class F, class R>
     class CallOnBuffer<Buffer,F,R,0>
@@ -539,18 +572,24 @@ namespace classdesc
       Result<R> operator()() {return f();}
     };
 
+
+    
     template <class Buffer, class F, int N>
     class CallOnBuffer<Buffer,F,void,N>
     {
       Buffer& buffer;
       F f;
+      typedef typename remove_const
+          <typename remove_reference
+           <typename Arg<F,1>::T>::type>::type A1;
     public:
       CallOnBuffer(Buffer& buffer, F f): buffer(buffer), f(f) {}
       Result<void> operator()() {
-        typename Arg<F,1>::T a; buffer>>a;
-        CallOnBuffer<Buffer, CurryFirst<F>, void, N-1>
-          (buffer, CurryFirst<F>(f,a))();
-        return Result<void>();
+        auto ff=[&](A1& a)
+                {CallOnBuffer<Buffer, CurryFirst<F>, void, N-1>
+                    (buffer, CurryFirst<F>(f,a))();};
+        evalVoid<decltype(ff),A1,Buffer>(ff,buffer);
+        return {};
       }
     };
 
@@ -559,12 +598,14 @@ namespace classdesc
     {
       Buffer& buffer;
       F f;
+      typedef typename remove_const
+          <typename remove_reference
+           <typename Arg<F,1>::T>::type>::type A1;
     public:
       CallOnBuffer(Buffer& buffer, F f): buffer(buffer), f(f) {}
       Result<void> operator()() {
-        typename Arg<F,1>::T a; buffer>>a;
-        f(a);
-        return Result<void>();
+        evalVoid<F,A1,Buffer>(f, buffer);
+        return {};
       }
     };
 
@@ -585,7 +626,8 @@ namespace classdesc
     {
     public:
       /// a Buffer needs to support << operations for arbitrary rhs types
-      template <class... Args> PackFunctor(Args... args): Buffer(std::forward(args)...) {}
+      template <class... Args> PackFunctor(Args... args):
+        Buffer(std::forward<Args>(args)...) {}
 
       template <class F, class... Args>
       void pack(Args... args)
@@ -605,9 +647,9 @@ namespace classdesc
 
       template <class F>
       typename enable_if<Not<is_void<typename Return<F>::T>>,
-                         typename Return<F>::T>::T
+                         typename remove_reference<typename Return<F>::T>::type>::T
       call(F f) {
-        return *CallOnBuffer<Buffer, F>(*this,f)();
+        return CallOnBuffer<Buffer, F>(*this,f)().move();
       }
       
       template <class F>

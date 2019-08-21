@@ -59,12 +59,13 @@ LIBS+=-ldl
 endif
 
 
-all: $(EXES)
+all: sure
 
 $(EXES): %: %.o  $(OBJS)
 	$(LINK) $(CFLAGS) -o $@  $< $(OBJS) $(LIBS)
-	echo "testing $@"
-	./$@
+
+sure: $(EXES)
+	sh runtests.sh $(EXES) 
 
 $(MPIEXES): %: %.o  $(OBJS)
 	mpicxx $(CFLAGS) -o $@  $< $(OBJS) $(LIBS)

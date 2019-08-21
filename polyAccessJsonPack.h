@@ -48,10 +48,17 @@ namespace classdesc
   }
 
 #ifdef POLYJSONBASE_H
+  template <class T>
+  struct is_poly_constructible:
+    public is_base_of<PolyJsonBase, typename T::element_type> {};
+#else
+  template <class T>
+  struct is_poly_constructible: public false_type {};
+#endif
+  
     // polymorphic version
   template <class T>
-  typename enable_if<is_base_of<PolyJsonBase, typename T::element_type>, 
-                     void>::T
+  typename enable_if<is_poly_constructible<T>,void>::T
   json_unpack_smart_ptr(json_unpack_t& x, const string& d, T& a,
                          dummy<0> dum=0)
   {
@@ -68,12 +75,10 @@ namespace classdesc
 
   // non polymorphic version
   template<class T>
-  typename enable_if<Not<is_base_of<PolyJsonBase, typename T::element_type> >, 
-                     void>::T
-#else
-  template<class T>
-  void
-#endif
+  typename enable_if<
+    And<
+      Not<is_poly_constructible<T>>, is_default_constructible<typename T::element_type>>,
+    void>::T
   json_unpack_smart_ptr(json_pack_t& x, const string& d, T& a,
                            dummy<1> dum=0)
   {
@@ -84,12 +89,22 @@ namespace classdesc
         ::json_unpack(x,d,*a);
       }
     catch (const std::exception&)
-        {
-          a.reset(); // data wasn't there
-        }
+      {
+        a.reset(); // data wasn't there
+      }
   }
   
-
+  template<class T>
+  typename enable_if<
+    And<
+      Not<is_poly_constructible<T>>, Not<is_default_constructible<typename T::element_type>>
+      >, void>::T
+  json_unpack_smart_ptr(json_pack_t& x, const string& d, T& a,
+                        dummy<2> dum=0)
+  {
+    a.reset(); // cannot unpack
+  }
+  
 }
 
 namespace classdesc_access

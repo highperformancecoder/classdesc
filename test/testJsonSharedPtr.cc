@@ -64,12 +64,13 @@ int main()
   testPtr<shared_ptr<base>,pack_t>();
   testPtr<shared_ptr<base>,xml_packunpack>();
   testPtr<shared_ptr<base>,json_pack_t>();
-  testPtr<std::auto_ptr<base>,pack_t>();
-  testPtr<std::auto_ptr<base>,xml_packunpack>();
-  testPtr<std::auto_ptr<base>,json_pack_t>();
 #if defined(__cplusplus) && __cplusplus>=201103L
   testPtr<std::unique_ptr<base>,pack_t>();
   testPtr<std::unique_ptr<base>,xml_packunpack>();
   testPtr<std::unique_ptr<base>,json_pack_t>();
+#else
+  testPtr<std::auto_ptr<base>,pack_t>();
+  testPtr<std::auto_ptr<base>,xml_packunpack>();
+  testPtr<std::auto_ptr<base>,json_pack_t>();
 #endif
 }

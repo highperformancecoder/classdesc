@@ -487,6 +487,11 @@ namespace classdesc
     static std::string name()
     {return "std::array<"+typeName<T>()+","+std::to_string(N)+">";}
   };
+  template <class T> struct tn<weak_ptr<T> >
+  {
+    static std::string name()
+    {return "std::weak_ptr<"+typeName<T>()+">";}
+  };
 #endif
   
  template <class T,class A> struct tn<std::vector<T,A> >
