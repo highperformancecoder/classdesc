@@ -286,9 +286,6 @@ namespace classdesc
       C* obj;
       M method;
     public:
-      static const int arity=0;
-      typedef R Ret;
-      template <int i> struct Arg: public functional::Arg<M,i> {};
       bound_method(C& obj, M method): obj(&obj), method(method) {}
       template <class... Args>
       R operator()(Args... args) const {return (obj->*method)(args...);}
@@ -301,41 +298,10 @@ namespace classdesc
       C* obj;
       M method;
     public:
-      static const int arity=0;
-      typedef void Ret;
-      template <int i> struct Arg: public functional::Arg<M,i> {};
       bound_method(C& obj, M method): obj(&obj), method(method) {}
       template <class... Args>
       void operator()(Args... args) const {(obj->*method)(args...);}
       void rebind(C& newObj) {obj=&newObj;}
-    };
-
-    template <class C, class D, class R, class... Args>
-    class bound_method<C, R (D::*)(Args...) const, R>
-    {
-      typedef R (D::*M)(Args...) const;
-      C& obj;
-      M method;
-    public:
-      static const int arity=0;
-      typedef R Ret;
-      template <int i> struct Arg: public functional::Arg<M,i> {};
-      bound_method(C& obj, M method): obj(obj), method(method) {}
-      R operator()(Args... args) const {return (obj.*method)(args...);}
-    };
-
-    template <class C, class D, class... Args>
-    class bound_method<C, void (D::*)(Args...) const, void>
-    {
-      typedef void (D::*M)(Args...) const;
-      C& obj;
-      M method;
-    public:
-      static const int arity=0;
-      typedef void Ret;
-      template <int i> struct Arg: public functional::Arg<M,i> {};
-      bound_method(C& obj, M method): obj(obj), method(method) {}
-      void operator()(Args... args) const {(obj.*method)(args...);}
     };
 
     template <class C, class F> struct FunctionalHelperFor<bound_method<C,F>>
@@ -453,6 +419,28 @@ namespace classdesc
               class A=typename Arg<F,1>::T>
     class CurryFirst;
 
+    template <class F, class R, class A, size_t I>
+    struct Arg<CurryFirst<F,R,A>,I>
+    {
+      typedef typename Arg<F,I+1>::T T;
+      typedef T type;
+    };
+
+    template <class F, class R, class A>
+    struct Return<CurryFirst<F,R,A> >
+    {
+      typedef R T;
+      typedef T type;
+    };
+    
+    template <class F, class R, class A>
+    struct Arity<CurryFirst<F,R,A> >
+    {
+      const int V=Arity<F>::V-1;
+      const int value=V;
+    };
+
+    
     template <class F, class R, class A>
     class CurryFirst
     {
