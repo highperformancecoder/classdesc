@@ -495,7 +495,6 @@ namespace classdesc
       R r;
       Result(const R& r): r(r) {}
       const R& operator*() const {return r;}
-      R&& move() {return std::move(r);}
     };
     template <> struct Result<void>: public ResultBase
     {};
@@ -637,7 +636,7 @@ namespace classdesc
       typename enable_if<Not<is_void<typename Return<F>::T>>,
                          typename remove_reference<typename Return<F>::T>::type>::T
       call(F f) {
-        return CallOnBuffer<Buffer, F>(*this,f)().move();
+        return *CallOnBuffer<Buffer, F>(*this,f)();
       }
       
       template <class F>

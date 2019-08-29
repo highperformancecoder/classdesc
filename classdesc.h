@@ -416,6 +416,7 @@ namespace classdesc
 #endif
   
  ///@{ a string representation of the type
+  template <> inline std::string typeName<void>()    {return "void";}
   template <> inline std::string typeName<bool>()    {return "bool";}
   template <> inline std::string typeName<char>()    {return "char";}
   template <> inline std::string typeName<short>() {return "short";}
@@ -452,6 +453,12 @@ namespace classdesc
   {
     static std::string name()
     {return typeName<T>()+"*";}
+  };
+
+  template <class T> struct tn<T&>
+  {
+    static std::string name()
+    {return typeName<T>()+"&";}
   };
 
   template <class T> struct tn<shared_ptr<T> >
