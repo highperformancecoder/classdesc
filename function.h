@@ -507,7 +507,7 @@ namespace classdesc
     typename enable_if<is_default_constructible<A>, R>::T
     eval(F f, B& b)
     {
-      A a;
+      A a{};
       b>>a;
       return f(a);
     }
@@ -523,7 +523,7 @@ namespace classdesc
     typename enable_if<is_default_constructible<A>, void>::T
     evalVoid(F f, B& b)
     {
-      A a;
+      A a{};
       b>>a;
       f(a);
     }
