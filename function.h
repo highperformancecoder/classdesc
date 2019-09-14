@@ -63,9 +63,6 @@ namespace classdesc
       is_nonmember_function_ptr<F>::value;
     };
 
-
-    
-
     /// @{ apply metaprogramming predicate to all arguments of a
     /// functional, and reduce by && or ||
     template <class F, template<class> class Pred, int arity=Arity<F>::value> struct AllArgs;

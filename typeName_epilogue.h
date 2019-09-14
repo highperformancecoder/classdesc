@@ -38,7 +38,9 @@ namespace classdesc
   enable_if<is_const<T>,std::string>::T
   typeNamep() {return "const "+typeName<typename remove_const<T>::type>();}
 
-  template <class T> std::string typeName() {return typeNamep<T>();}
+  template <class T>
+  typename enable_if<Not<is_function<T> >,  std::string>::T
+  typeName() {return typeNamep<T>();}
 
 //  template <class T>
 //  struct tn<const T>

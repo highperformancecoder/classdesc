@@ -407,7 +407,9 @@ namespace classdesc
     Support for typeName functionality
   */
   template <class T> struct tn;  //for partial specialisation support
-  template <class T> std::string typeName();
+  template <class T>
+  typename enable_if<Not<is_function<T> >, std::string>::T
+  typeName();
 
 #if defined(__cplusplus) && __cplusplus>=201103L
   // handle variadic arguments
@@ -449,6 +451,10 @@ namespace classdesc
   template <> inline std::string typeName<char32_t>()    {return "char32_t";}
 #endif
 
+  template <class F>
+  typename enable_if<is_function<F>,string>::T
+  inline typeName() {return "<function>";}
+  
   template <class T> struct tn<T*>
   {
     static std::string name()
