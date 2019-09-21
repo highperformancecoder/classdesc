@@ -301,6 +301,8 @@ namespace classdesc
 
   typedef pack_t unpack_t;
 
+  template <> inline string typeName<pack_t>() {return "classdesc::pack_t";}
+  
 #ifdef XDR_PACK
   const int BUFCHUNK=1024;  
   
@@ -337,6 +339,7 @@ namespace classdesc
       std::swap(input,xdr_other->output);
     }
   };
+  template <> inline string typeName<xdr_pack>() {return "classdesc::xdr_pack";}
 #else
   typedef pack_t xdr_pack;
 #endif

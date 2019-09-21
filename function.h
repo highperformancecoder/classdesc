@@ -496,12 +496,16 @@ namespace classdesc
     template <> struct Result<void>: public ResultBase
     {};
 
+    template <class T>
+    struct is_default_and_copy_constructible:
+      And<is_default_constructible<T>,is_copy_constructible<T>> {};
+    
     template <class Buffer, class F, class R=typename Return<F>::T,
               int N=Arity<F>::value> class CallOnBuffer;
 
     /// extract an argument from buffer \a b, and run functional f on it 
     template <class F, class A, class R, class B>
-    typename enable_if<is_default_constructible<A>, R>::T
+    typename enable_if<is_default_and_copy_constructible<A>, R>::T
     eval(F f, B& b)
     {
       A a{};
@@ -510,14 +514,14 @@ namespace classdesc
     }
     
     template <class F, class A, class R, class B>
-    typename enable_if<Not<is_default_constructible<A>>, R>::T
+    typename enable_if<Not<is_default_and_copy_constructible<A>>, R>::T
     eval(F f, B& b)
     {
       throw std::runtime_error("unable to unpack into "+typeName<A>());
     }
 
     template <class F, class A, class B>
-    typename enable_if<is_default_constructible<A>, void>::T
+    typename enable_if<is_default_and_copy_constructible<A>, void>::T
     evalVoid(F f, B& b)
     {
       A a{};
@@ -526,7 +530,7 @@ namespace classdesc
     }
     
     template <class F, class A, class B>
-    typename enable_if<Not<is_default_constructible<A>>, void>::T
+    typename enable_if<Not<is_default_and_copy_constructible<A>>, void>::T
     evalVoid(F f, B& b)
     {eval<F,A,void,B>(f,b);}
     
@@ -541,7 +545,7 @@ namespace classdesc
     public:
       CallOnBuffer(Buffer& buffer, F f): buffer(buffer), f(f) {}
       Result<R> operator()() {
-        auto ff=[&](A1& a){return CallOnBuffer<Buffer, CurryFirst<F>, R, N-1>
+        auto ff=[&](typename Arg<F,1>::T a){return CallOnBuffer<Buffer, CurryFirst<F>, R, N-1>
             (buffer, CurryFirst<F>(f,a))();};
         return std::move(eval<decltype(ff),A1,Result<R>,Buffer>(ff, buffer));
        }

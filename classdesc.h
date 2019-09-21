@@ -69,6 +69,8 @@ namespace std
 #include <unordered_set>
 
 #include <type_traits>
+#include <functional>
+
 namespace classdesc
 {
   using std::true_type;
@@ -454,7 +456,14 @@ namespace classdesc
   template <class F>
   typename enable_if<is_function<F>,string>::T
   inline typeName() {return "<function>";}
-  
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+  template <class F> struct tn<std::function<F>>
+  {
+    static string name() {return "std::function<"+typeName<F>()+">";}
+  };
+#endif
+
   template <class T> struct tn<T*>
   {
     static std::string name()
