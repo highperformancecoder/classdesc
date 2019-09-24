@@ -14,6 +14,7 @@
 #define FUNCTION_H
 #include "classdesc.h"
 #include <string>
+#include <array>
 
 namespace classdesc
 {
