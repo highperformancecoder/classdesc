@@ -14,7 +14,10 @@
 #define FUNCTION_H
 #include "classdesc.h"
 #include <string>
+
+#if defined(__cplusplus) && __cplusplus>=201103L
 #include <array>
+#endif
 
 namespace classdesc
 {
