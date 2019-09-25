@@ -113,17 +113,39 @@ namespace classdesc_access
   template <class T>
   struct access_json_pack<cd::shared_ptr<T> >
   {
-    void operator()(cd::json_pack_t& x, const cd::string& d, 
-                    cd::shared_ptr<T>& a)
+    template <class U>
+    void operator()(cd::json_pack_t& x, const cd::string& d, U& a)
     {json_pack_smart_ptr(x,d,a);}
   };
 
   template <class T>
   struct access_json_unpack<cd::shared_ptr<T> >
   {
-    void operator()(cd::json_unpack_t& x, const cd::string& d, 
-                    cd::shared_ptr<T>& a)
+    template <class U>
+    void operator()(cd::json_unpack_t& x, const cd::string& d, U& a)
     {json_unpack_smart_ptr(x,d,a);}
+  };
+  
+  template <class T>
+  struct access_json_pack<cd::weak_ptr<T> >
+  {
+    template <class U>
+    void operator()(cd::json_pack_t& x, const cd::string& d, U& a)
+    {
+      if (cd::shared_ptr<T> sp=a.lock())
+        json_pack_smart_ptr(x,d,sp);
+    }
+  };
+
+  template <class T>
+  struct access_json_unpack<cd::weak_ptr<T> >
+  {
+    template <class U>
+    void operator()(cd::json_unpack_t& x, const cd::string& d, U& a)
+    {
+      if (cd::shared_ptr<T> sp=a.lock())
+        json_unpack_smart_ptr(x,d,sp);
+    }
   };
 
 #if defined(__cplusplus) && __cplusplus<=201402
