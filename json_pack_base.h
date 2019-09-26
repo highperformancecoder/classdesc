@@ -435,6 +435,10 @@ namespace classdesc
   {}
 
   template <class T>
+  typename enable_if<is_object<T>, void>::T
+  json_unpack(json_unpack_t& targ, const string& desc, T*) {}
+  
+  template <class T>
   void json_unpack(json_unpack_t& targ, const string& desc, const T& arg) {}
 
   template <class T>
