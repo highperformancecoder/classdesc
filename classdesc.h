@@ -214,6 +214,7 @@ namespace classdesc
   // until then, this bit of ugly hackery is required.
 #if (!defined(__ICC) || __ICC > 1100)
   using std::tr1::shared_ptr;
+  using std::tr1::weak_ptr;
 #endif
 
   // fake these using TR1 counterparts (which are conservative)
