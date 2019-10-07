@@ -415,7 +415,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="::", s
           if (dbl_colon>=0)
             for (set<string>::iterator i=args_in_base.begin(); 
                  i!=args_in_base.end(); ++i)
-              if (baseclass.find(*i)<dbl_colon)
+              if (int(baseclass.find(*i))<dbl_colon)
                 {
                   typename_needed=true;
                   break;
