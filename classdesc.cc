@@ -378,6 +378,26 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="::", s
 	}
       if (strchr(",{", input.token[0]) && baseclass.length())
 	{
+//          // strip template arguments
+//          string baseclassTemplateArgsStripped;
+//          int angleCount=0;
+//          for (size_t i=0; i<baseclass.size(); ++i)
+//            switch (baseclass[i])
+//              {
+//              case '<':
+//                angleCount++;
+//                break;
+//              case '>':
+//                angleCount--;
+//                if (angleCount==0)
+//                  baseclassTemplateArgsStripped+=' ';
+//                break;
+//              default:
+//                if (angleCount==0)
+//                  baseclassTemplateArgsStripped+=baseclass[i];
+//                break;
+//              }
+              
           // work out whether a typename qualifier is needed. Check
           // whether any component of baseclass is contained in the
           // parameter list of the template arguments
@@ -390,9 +410,29 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="::", s
             if (arg_toks.count(*i))
               args_in_base.insert(*i);
 
-          string::size_type dbl_colon=baseclass.rfind("::");
+          // find last :: that is not in a template argument
+          int dbl_colon=int(baseclass.size())-2;
+          int numAngle=baseclass[dbl_colon+1]=='>';
+          for (; dbl_colon>=0; dbl_colon--)
+            {
+              switch (baseclass[dbl_colon])
+                {
+                case '>':
+                  numAngle++;
+                  break;
+                case '<':
+                  numAngle--;
+                  break;
+                case ':':
+                  if (numAngle==0 && baseclass[dbl_colon+1]==':')
+                    goto dbl_colon_found;
+                  break;
+                }
+            }
+        dbl_colon_found:
+          
           bool typename_needed=false;
-          if (dbl_colon!=string::npos)
+          if (dbl_colon>=0)
             for (set<string>::iterator i=args_in_base.begin(); 
                  i!=args_in_base.end(); ++i)
               if (baseclass.find(*i)<dbl_colon)
