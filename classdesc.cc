@@ -378,26 +378,6 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="::", s
 	}
       if (strchr(",{", input.token[0]) && baseclass.length())
 	{
-//          // strip template arguments
-//          string baseclassTemplateArgsStripped;
-//          int angleCount=0;
-//          for (size_t i=0; i<baseclass.size(); ++i)
-//            switch (baseclass[i])
-//              {
-//              case '<':
-//                angleCount++;
-//                break;
-//              case '>':
-//                angleCount--;
-//                if (angleCount==0)
-//                  baseclassTemplateArgsStripped+=' ';
-//                break;
-//              default:
-//                if (angleCount==0)
-//                  baseclassTemplateArgsStripped+=baseclass[i];
-//                break;
-//              }
-              
           // work out whether a typename qualifier is needed. Check
           // whether any component of baseclass is contained in the
           // parameter list of the template arguments
