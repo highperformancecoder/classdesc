@@ -3,7 +3,7 @@
   @author Russell Standish
   This file is part of Classdesc
 
-  Open source licensed under the MIT license. See LICENSE for pythonDetails.
+  Open source licensed under the MIT license. See LICENSE for details.
 */
 
 #ifndef PYTHON_BASE_H

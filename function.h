@@ -14,6 +14,7 @@
 #define FUNCTION_H
 #include "classdesc.h"
 #include <string>
+#include <utility>
 
 #if defined(__cplusplus) && __cplusplus>=201103L
 #include <array>
@@ -305,6 +306,34 @@ namespace classdesc
       void rebind(C& newObj) {obj=&newObj;}
     };
 
+    template <class C, class D, class R, class... Args>
+    class bound_method<C, R (D::*)(Args...) const>
+    {
+      typedef R (D::*M)(Args...) const;
+      C& obj;
+      M method;
+    public:
+      static const int arity=0;
+      typedef R Ret;
+      template <int i> struct Arg: public functional::Arg<M,i> {};
+      bound_method(C& obj, M method): obj(obj), method(method) {}
+      R operator()(Args... args) const {return (obj.*method)(args...);}
+    };
+
+    template <class C, class D, class... Args>
+    class bound_method<C, void (D::*)(Args...) const>
+    {
+      typedef void (D::*M)() const;
+      C& obj;
+      M method;
+    public:
+      static const int arity=0;
+      typedef void Ret;
+      template <int i> struct Arg: public functional::Arg<M,i> {};
+      bound_method(C& obj, M method): obj(obj), method(method) {}
+      void operator()(Args... args) const {(obj.*method)(args...);}
+    };
+
     template <class C, class F> struct FunctionalHelperFor<bound_method<C,F>>
     {
       typedef typename FunctionalHelperFor<F>::T T;
@@ -357,7 +386,13 @@ namespace classdesc
     {
       static const size_t value=Arity<F>::value-1;
     };
-    
+
+    /// type trait for determining if an argument is acceptable for function mapping
+    template <class A>
+    struct ArgAcceptable:
+      public And<is_default_constructible<typename remove_reference<A>::type>,
+                 is_copy_constructible<typename remove_reference<A>::type>> {};
+
     template <class F, class ArgVector, size_t N=Arity<F>::value>
     struct CurryLastVoid
     {
@@ -497,19 +532,21 @@ namespace classdesc
       Result(const R& r): r(r) {}
       const R& operator*() const {return r;}
     };
+    template <class R> struct Result<R&>: public ResultBase
+    {
+      R& r;
+      Result(R& r): r(r) {}
+      R& operator*() const {return r;}
+    };
     template <> struct Result<void>: public ResultBase
     {};
 
-    template <class T>
-    struct is_default_and_copy_constructible:
-      And<is_default_constructible<T>,is_copy_constructible<T>> {};
-    
     template <class Buffer, class F, class R=typename Return<F>::T,
               int N=Arity<F>::value> class CallOnBuffer;
 
     /// extract an argument from buffer \a b, and run functional f on it 
     template <class F, class A, class R, class B>
-    typename enable_if<is_default_and_copy_constructible<A>, R>::T
+    typename enable_if<ArgAcceptable<A>, R>::T
     eval(F f, B& b)
     {
       A a{};
@@ -518,14 +555,14 @@ namespace classdesc
     }
     
     template <class F, class A, class R, class B>
-    typename enable_if<Not<is_default_and_copy_constructible<A>>, R>::T
+    typename enable_if<Not<ArgAcceptable<A>>, R>::T
     eval(F f, B& b)
     {
       throw std::runtime_error("unable to unpack into "+typeName<A>());
     }
 
     template <class F, class A, class B>
-    typename enable_if<is_default_and_copy_constructible<A>, void>::T
+    typename enable_if<ArgAcceptable<A>, void>::T
     evalVoid(F f, B& b)
     {
       A a{};
@@ -534,7 +571,7 @@ namespace classdesc
     }
     
     template <class F, class A, class B>
-    typename enable_if<Not<is_default_and_copy_constructible<A>>, void>::T
+    typename enable_if<Not<ArgAcceptable<A>>, void>::T
     evalVoid(F f, B& b)
     {eval<F,A,void,B>(f,b);}
     
@@ -612,7 +649,7 @@ namespace classdesc
         return Result<void>();        
       }
     };
-
+  
     template <class Buffer>
     class PackFunctor: public Buffer
     {
@@ -638,8 +675,7 @@ namespace classdesc
       void packArg() {}
 
       template <class F>
-      typename enable_if<Not<is_void<typename Return<F>::T>>,
-                         typename remove_reference<typename Return<F>::T>::type>::T
+      typename enable_if<Not<is_void<typename Return<F>::T>>, typename Return<F>::T>::T
       call(F f) {
         return *CallOnBuffer<Buffer, F>(*this,f)();
       }
