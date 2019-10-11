@@ -368,7 +368,7 @@ namespace classdesc
   resize(T& x, size_t n) {x.resize(n);} 
 
   template <class T>
-  typename enable_if<Not<has_member_resize<T,void (T::*)(size_t)>>, void>::T
+  typename enable_if<Not<has_member_resize<T,void (T::*)(size_t)> >, void>::T
   resize(T& x, size_t n) {} 
   
 //  template <class T>
