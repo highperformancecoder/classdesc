@@ -106,6 +106,7 @@ aegis-all: build latex-docs
 	if which javac; then cd java && $(MAKE) && cd ../javaExamples && $(MAKE); fi
 	cd test && $(MAKE)
 	cd test/c++11 && $(MAKE)
+	cd RESTProcessExample && $(MAKE)
 #	-cd objc-examples && $(MAKE)
 
 $(EXES): %: %.cc tokeninput.h
@@ -127,6 +128,7 @@ clean:
 	cd java && $(MAKE) clean
 	cd javaExamples && $(MAKE) clean
 	cd pythonExample && $(MAKE) clean
+	cd RESTProcessExample && $(MAKE) clean
 	cd test && $(MAKE) clean
 	cd test/c++11 && $(MAKE) clean
 	cd doc && rm -f *~ *.aux *.dvi *.log *.blg *.toc *.lof
