@@ -347,28 +347,35 @@ namespace classdesc
 
   template <int X, int Y> struct Eq
   {static const bool value=X==Y;};
+  ///@}
 
   /// utility macro for declaring if a type has a particular member of
   /// type \a Sig
-#define CLASSDESC_HAS_MEMBER(mem)                                \
-  template <class T, class Sig>                                  \
-  struct has_member_##mem                                        \
-  {                                                              \
-    template <class U, Sig> struct SFINAE {};                    \
-    template <class U> static char test(SFINAE<U,&U::mem>*);     \
-    template <class U> static int test(...);                     \
-    const static bool value=sizeof(test<T>(0))==sizeof(char);   \
+#define CLASSDESC_HAS_MEMBER(mem)                                 \
+  template <class T, class Sig>                                   \
+  struct has_member_##mem                                         \
+  {                                                               \
+    template <class U, Sig> struct SFINAE {};                     \
+    template <class U> static char test(SFINAE<U,&U::mem>*);      \
+    template <class U> static int test(...);                      \
+    const static bool value=sizeof(test<T>(0))==sizeof(char);     \
   };
 
   // handle resize on nonresizable containers such as std::array
   CLASSDESC_HAS_MEMBER(resize);
 
   template <class T>
-  typename enable_if<has_member_resize<T,void (T::*)(size_t)>, void>::T
-  resize(T& x, size_t n) {x.resize(n);} 
-
+  struct has_resize:
+    public Or<has_member_resize<T,void (T::*)(typename T::size_type)>,
+              has_member_resize
+              <T,void (T::*)(typename T::size_type, typename T::value_type)> > {};
+    
   template <class T>
-  typename enable_if<Not<has_member_resize<T,void (T::*)(size_t)> >, void>::T
+  typename enable_if<has_resize<T>, void>::T
+  resize(T& x, size_t n) {x.resize(n);}
+  
+  template <class T>
+  typename enable_if<Not<has_resize<T> >, void>::T
   resize(T& x, size_t n) {} 
   
 //  template <class T>
@@ -379,7 +386,6 @@ namespace classdesc
 //  void resize(std::array<T,N>& x, std::size_t n) {}
 //#endif
   
-  ///@}
 
   /// has default constructor, and is copiable 
 

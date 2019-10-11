@@ -41,6 +41,8 @@ namespace classdesc
     }
 
   public:
+    typedef MultiArray<T,Rank-1> value_type;
+    typedef size_t size_type;
     /// Create a MultiArray given data and dimensions passed as arguments
     /// 
     template <class... Args>
@@ -113,7 +115,8 @@ namespace classdesc
     friend void advance<T,1>(MultiArray<T,1>&,std::ptrdiff_t);
     
   public:
-    using value_type=T;
+    typedef T value_type;
+    typedef size_t size_type;
     static const int rank=1;
     MultiArray<T, 1>(T* data, size_t size): m_data(data), m_size(size) {}
     MultiArray<T, 1>(T* data, const size_t size[]): m_data(data), m_size(size[0]) {}

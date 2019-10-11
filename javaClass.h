@@ -18,11 +18,13 @@
 #pragma omit pack classdesc::u8
 #pragma omit pack classdesc::cp_info
 #pragma omit pack classdesc::attribute_info
+#pragma omit pack classdesc::ConstantPoolVector
 #pragma omit unpack classdesc::u2
 #pragma omit unpack classdesc::u4
 #pragma omit unpack classdesc::u8
 #pragma omit unpack classdesc::cp_info
 #pragma omit unpack classdesc::attribute_info
+#pragma omit unpack classdesc::ConstantPoolVector
 #pragma omit dump classdesc::u2
 #pragma omit dump classdesc::u4
 #pragma omit dump classdesc::u8
@@ -53,6 +55,7 @@ namespace classdesc
     short operator|=(short x) {return v|=x;}
     short operator&=(short x) {return v&=x;}
     bool operator==(const u2& x)  const {return v==x.v;}
+    u2 operator++() {v++; return *this;}
   };
 
   struct u4
@@ -74,6 +77,16 @@ namespace classdesc
     unsigned operator=(unsigned x) {return v=x;}
     bool operator==(const u8& x)  const {return v==x.v;}
   };
+
+  // a variant of vector that serialises the size to a 2 byte field
+  template <class T> struct JavaClassVector: public std::vector<T>
+  {
+    typedef u2 size_type;
+    JavaClassVector(size_t sz=0): std::vector<T>(sz) {}
+    size_type size() const {return std::vector<T>::size();}
+  };
+
+  template <class T> struct is_sequence<classdesc::JavaClassVector<T> >: public true_type {};
 
   // constants imported from jdk: classfile_constants
 
@@ -641,10 +654,18 @@ enum {
     bool operator==(const cp_info& x) const; //definition in javaClass_serialisation.h
   };
 
+  // specialised serialisers provided for these 2 cases
+  struct ConstantPoolVector: public std::vector<cp_info>
+  {
+    ConstantPoolVector(size_t sz=0): std::vector<cp_info>(sz) {}
+  };
+  
+  struct InfoVector: public std::vector<u1> {};
+
   struct attribute_info 
   {
     u2 attribute_name_index;
-    std::vector<u1> info; //[attribute_length];
+    InfoVector info; //[attribute_length];
     bool operator==(const attribute_info& x)  const {
       return attribute_name_index==x.attribute_name_index && info == x.info;
     }
@@ -655,7 +676,7 @@ enum {
     u2 access_flags;
     u2 name_index;
     u2 descriptor_index;
-    std::vector<attribute_info> attributes; //[attributes_count];
+    JavaClassVector<attribute_info> attributes; //[attributes_count];
     bool operator==(const method_info& x) const {
       return access_flags==x.access_flags && name_index==x.name_index &&
         descriptor_index == x.descriptor_index && attributes==x.attributes;
@@ -667,7 +688,7 @@ enum {
     u2 access_flags;
     u2 name_index;
     u2 descriptor_index;
-    std::vector<attribute_info> attributes; //[attributes_count];
+    JavaClassVector<attribute_info> attributes; //[attributes_count];
     bool operator==(const field_info& x) const {
       return access_flags==x.access_flags && name_index==x.name_index &&
         descriptor_index==x.descriptor_index && attributes==x.attributes;
@@ -679,14 +700,14 @@ enum {
     u4 magic;
     u2 minor_version;
     u2 major_version;
-    std::vector<cp_info> constant_pool; //[constant_pool_count-1];
+    ConstantPoolVector constant_pool; //[constant_pool_count-1];
     u2 access_flags;
     u2 this_class;
     u2 super_class;
-    std::vector<u2> interfaces; //[interfaces_count];
-    std::vector<field_info> fields; //[fields_count];
-    std::vector<method_info> methods; //[methods_count];
-    std::vector<attribute_info> attributes; //[attributes_count];
+    JavaClassVector<u2> interfaces; //[interfaces_count];
+    JavaClassVector<field_info> fields; //[fields_count];
+    JavaClassVector<method_info> methods; //[methods_count];
+    JavaClassVector<attribute_info> attributes; //[attributes_count];
     ClassFile(): constant_pool(1) {} //add a zeroth (ignorable) element
     bool operator==(const ClassFile& x) const {
       return magic==x.magic && minor_version==x.minor_version &&

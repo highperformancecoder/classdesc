@@ -29,47 +29,47 @@ namespace classdesc_access
     {access_unpack<T>()(buf,desc,arg);}
   };
 
-  template <class T> typename 
-  cd::enable_if<cd::is_sequence<T>,void>::T
-  pack_container(cd::pack_t& buf,const cd::string& desc, T& arg,
-                 cd::dummy<0> dum=0)
-  {access_pack<cd::sequence<T> >()(buf,desc,arg);}
-
-  template <class T> typename 
-  cd::enable_if<cd::is_associative_container<T>,void>::T
-  pack_container(cd::pack_t& buf,const cd::string& desc, T& arg,
-                 cd::dummy<1> dum=0)
-  {access_pack<cd::associative_container<T> >()(buf,desc,arg);}
+//  template <class T> typename 
+//  cd::enable_if<cd::is_sequence<T>,void>::T
+//  pack_container(cd::pack_t& buf,const cd::string& desc, T& arg,
+//                 cd::dummy<0> dum=0)
+//  {access_pack<cd::sequence<T> >()(buf,desc,arg);}
+//
+//  template <class T> typename 
+//  cd::enable_if<cd::is_associative_container<T>,void>::T
+//  pack_container(cd::pack_t& buf,const cd::string& desc, T& arg,
+//                 cd::dummy<1> dum=0)
+//  {access_pack<cd::associative_container<T> >()(buf,desc,arg);}
   
 #ifdef PACK_STL_H
   // handle containers from the generic access_ classes
-  template <class T>
-  struct access_pack
-  {
-    template <class U>
-    void operator()(cd::pack_t& buf,const cd::string& desc, U& arg)
-    {pack_container(buf,desc,arg);}
-  };
-
-  template <class T> typename 
-  cd::enable_if<classdesc::is_sequence<T>,void>::T
-  unpack_container(cd::pack_t& buf,const cd::string& desc, T& arg,
-                   cd::dummy<0> dum=0)
-  {access_unpack<classdesc::sequence<T> >()(buf,desc,arg);}
-
-  template <class T> typename 
-  cd::enable_if<classdesc::is_associative_container<T>,void>::T
-  unpack_container(cd::pack_t& buf,const cd::string& desc, T& arg,
-                   cd::dummy<1> dum=0)
-  {access_unpack<classdesc::associative_container<T> >()(buf,desc,arg);}
-  
-  template <class T>
-  struct access_unpack
-  {
-    template <class U>
-    void operator()(cd::pack_t& buf,const cd::string& desc, U& arg)
-    {unpack_container(buf,desc,arg);}
-  };
+//  template <class T>
+//  struct access_pack
+//  {
+//    template <class U>
+//    void operator()(cd::pack_t& buf,const cd::string& desc, U& arg)
+//    {pack_container(buf,desc,arg);}
+//  };
+//
+//  template <class T> typename 
+//  cd::enable_if<classdesc::is_sequence<T>,void>::T
+//  unpack_container(cd::pack_t& buf,const cd::string& desc, T& arg,
+//                   cd::dummy<0> dum=0)
+//  {access_unpack<classdesc::sequence<T> >()(buf,desc,arg);}
+//
+//  template <class T> typename 
+//  cd::enable_if<classdesc::is_associative_container<T>,void>::T
+//  unpack_container(cd::pack_t& buf,const cd::string& desc, T& arg,
+//                   cd::dummy<1> dum=0)
+//  {access_unpack<classdesc::associative_container<T> >()(buf,desc,arg);}
+//  
+//  template <class T>
+//  struct access_unpack
+//  {
+//    template <class U>
+//    void operator()(cd::pack_t& buf,const cd::string& desc, U& arg)
+//    {unpack_container(buf,desc,arg);}
+//  };
 #endif
   
   // support for polymorphic types, if loaded

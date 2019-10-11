@@ -29,6 +29,7 @@ namespace classdesc
   {dump(buf,d,a.v);}
   template <> void dump(dump_t& buf, const string& d, const u1& a)
   {buf << std::hex << int(a);}
+
 }
  
 
@@ -61,33 +62,6 @@ namespace classdesc_access
       buf.unpackraw(s,length);
       a=std::string(s,length);
       delete [] s;
-    }
-  };
-
-  template <class T>
-  struct access_pack<std::vector<T> >
-  {
-    template <class U>
-    void operator()(classdesc::pack_t& buf, const classdesc::string& d, U& a)
-    {
-      classdesc::u2 length=a.size(); 
-      pack(buf,d,length);
-      for (int i=0; i<length; i++)
-        pack(buf,d,a[i]);
-    }
-  };
-
-  template <class T>
-  struct access_unpack<std::vector<T> >
-  {
-    template <class U>
-    void operator()(classdesc::unpack_t& buf, const classdesc::string& d, U& a)
-    {
-      classdesc::u2 length; 
-      unpack(buf,d,length);
-      a.resize(length);
-      for (int i=0; i<length; i++)
-        unpack(buf,d,a[i]);
     }
   };
 
@@ -238,7 +212,7 @@ namespace classdesc_access
 
   // The zeroth element is not serialised in the constant_pool
   template <>
-  struct access_pack<std::vector<classdesc::cp_info> >
+  struct access_pack<classdesc::ConstantPoolVector>
   {
     template <class U>
     void operator()(classdesc::pack_t& buf, const classdesc::string& d, U& a)
@@ -252,7 +226,7 @@ namespace classdesc_access
 
   // The zeroth element is not serialised in the constant_pool
   template <>
-  struct access_unpack<std::vector<classdesc::cp_info> >
+  struct access_unpack<classdesc::ConstantPoolVector>
   {
     void operator()(classdesc::pack_t& buf, const classdesc::string& d, std::vector<classdesc::cp_info>& a)
     {

@@ -71,10 +71,6 @@ namespace classdesc
     /// @{ apply metaprogramming predicate to all arguments of a
     /// functional, and reduce by && or ||
     template <class F, template<class> class Pred, int arity=Arity<F>::value> struct AllArgs;
-//    template <class F, template<class> class Pred> struct AnyArg
-//    {
-//      static const bool value=!AllArgs<F,Not<Pred> >::value;
-//    };
    /// @}
 
     template <class C, class M, class R=typename Return<M>::T> class bound_method;
@@ -103,7 +99,6 @@ namespace classdesc
     */
 
 #if defined(__cplusplus) && __cplusplus>=201103L
-    //#if 0
     template <class... Args> struct ArityArgs;
     
     template <class A, class... Args>
@@ -304,34 +299,6 @@ namespace classdesc
       template <class... Args>
       void operator()(Args... args) const {(obj->*method)(args...);}
       void rebind(C& newObj) {obj=&newObj;}
-    };
-
-    template <class C, class D, class R, class... Args>
-    class bound_method<C, R (D::*)(Args...) const>
-    {
-      typedef R (D::*M)(Args...) const;
-      C& obj;
-      M method;
-    public:
-      static const int arity=0;
-      typedef R Ret;
-      template <int i> struct Arg: public functional::Arg<M,i> {};
-      bound_method(C& obj, M method): obj(obj), method(method) {}
-      R operator()(Args... args) const {return (obj.*method)(args...);}
-    };
-
-    template <class C, class D, class... Args>
-    class bound_method<C, void (D::*)(Args...) const>
-    {
-      typedef void (D::*M)() const;
-      C& obj;
-      M method;
-    public:
-      static const int arity=0;
-      typedef void Ret;
-      template <int i> struct Arg: public functional::Arg<M,i> {};
-      bound_method(C& obj, M method): obj(obj), method(method) {}
-      void operator()(Args... args) const {(obj.*method)(args...);}
     };
 
     template <class C, class F> struct FunctionalHelperFor<bound_method<C,F>>

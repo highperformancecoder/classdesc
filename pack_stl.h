@@ -22,9 +22,9 @@
 
 namespace classdesc
 {
-  // utility types for marking sequences and associative containers
-  template <class T> struct sequence {};
-  template <class T> struct associative_container {};
+//  // utility types for marking sequences and associative containers
+//  template <class T> struct sequence {};
+//  template <class T> struct associative_container {};
 
   // map<K,V>::value_type is pair<const K,V>, which causes problems
   template <class C> struct Value_Type 
@@ -98,70 +98,81 @@ namespace classdesc
     return *this;
   }
 
-}
+//#if defined(__GNUC__) && !defined(__ICC)
+//#pragma GCC diagnostic push
+//#pragma GCC diagnostic ignored "-Wunused-value"
+//#endif
+
+  template <class T>
+  typename enable_if<is_container<T>, void>::T
+  pack(classdesc::pack_t& b, const classdesc::string&, const T& a)
+  {
+    b << a.size();
+    for (typename T::const_iterator i=a.begin(); i!=a.end(); ++i)
+      b << *i;
+  }
+  template <class T>
+  typename enable_if<is_sequence<T>, void>::T
+  unpack(classdesc::pack_t& b, const classdesc::string& d, T& a)
+  {
+    typename T::size_type sz, i=0;
+    b >> sz;
+    classdesc::resize(a, sz);
+    for (typename T::iterator j=a.begin(); i<sz && j!=a.end(); ++i, ++j)
+      b >> *j;
+  }
+  template <class T>
+  typename enable_if<is_sequence<T>, void>::T
+  unpack(classdesc::pack_t& b, const classdesc::string&, const T& a)
+  {
+    typename T::size_type sz;
+    b >> sz; 
+    typename T::value_type x;
+    for (typename T::size_type i=0; i<sz; ++i) b>>x;
+  }
+
+//#if defined(__GNUC__) && !defined(__ICC)
+//#pragma GCC diagnostic pop
+//#endif
+
+//  template <class T> 
+//  struct access_pack<classdesc::associative_container<T> >: 
+//    access_pack<classdesc::sequence<T> > {};
+
+  template <class T>
+  typename enable_if<is_associative_container<T>, void>::T
+  unpack(classdesc::pack_t& b, const classdesc::string&, T& a)
+  {
+    typename T::size_type sz;
+    b >> sz;
+    a.clear();
+    for (typename T::size_type i=0; i<sz; ++i)
+      {
+        typename classdesc::Value_Type<T>::value_type e;
+        b >> e;
+        a.insert(e);
+      }
+  }
+
+  template <class T>
+  typename enable_if<is_associative_container<T>, void>::T
+  unpack(classdesc::pack_t& b, const classdesc::string&, const T& a)
+  {
+    typename T::size_type sz;
+    b >> sz;
+    for (typename T::size_type i=0; i<sz; ++i)
+      {
+        typename classdesc::Value_Type<T>::value_type e;
+        b >> e;
+      }
+  }
+
+} 
+using classdesc::pack;
+using classdesc::unpack;
 
 namespace classdesc_access
 {
-  template <class T> struct access_pack<classdesc::sequence<T> >
-  {
-    template <class U>
-    void operator()(classdesc::pack_t& b, const classdesc::string& d, U& a)
-    {
-      b << a.size();
-      for (typename T::const_iterator i=a.begin(); i!=a.end(); ++i)
-        b << *i;
-    }
-  };
-#if defined(__GNUC__) && !defined(__ICC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-value"
-#endif
-  template <class T> struct access_unpack<classdesc::sequence<T> >
-  {
-    template <class U>
-    void operator()(classdesc::pack_t& b, const classdesc::string& d, U& a)
-    {
-      typename T::size_type sz;
-      b >> sz;
-      classdesc::resize(a, sz);
-      size_t i=0;
-      for (typename T::iterator j=a.begin(); i<sz && j!=a.end(); ++i, ++j)
-        b >> *j;
-    }
-    template <class U>
-    void operator()(classdesc::pack_t& b, const classdesc::string& d, const U& a)
-    {
-      typename T::size_type sz;
-      b >> sz; 
-      typename T::value_type x;
-      for (unsigned i=0; i<sz; ++i) b>>x;
-    }
-  };
-#if defined(__GNUC__) && !defined(__ICC)
-#pragma GCC diagnostic pop
-#endif
-
-  template <class T> 
-  struct access_pack<classdesc::associative_container<T> >: 
-    access_pack<classdesc::sequence<T> > {};
-
-  template <class T> struct access_unpack<classdesc::associative_container<T> >
-  {
-    template <class U>
-    void operator()(classdesc::pack_t& b, const classdesc::string& d, U& a)
-    {
-      typename T::size_type sz;
-      b >> sz;
-      a.clear();
-      for (typename T::size_type i=0; i<sz; ++i)
-        {
-          typename classdesc::Value_Type<T>::value_type e;
-          b >> e;
-          a.insert(e);
-        }
-    }
-  };
-
 
   template <class T>
   struct access_pack<classdesc::Iterator<T> >
@@ -348,8 +359,5 @@ template <class C> typename
 classdesc::enable_if<classdesc::is_container<C> >::T
 unpack(classdesc::pack_t& b, const classdesc::string& d, typename C::iterator& a) 
 {}
-
-using classdesc::pack;
-using classdesc::unpack;
 
 #endif /* PACK_STL_H */
