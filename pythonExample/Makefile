@@ -15,7 +15,9 @@ example.so: $(OBJS)
 .cc.d: 
 	gcc $(CFLAGS) -w -MM -MG $< >$@
 
+ifneq ($(MAKECMDGOALS),clean)
 include $(OBJS:.o=.d) $(EXES:=.d)
+endif
 
 clean: 
 	rm -f *.o  *~ "\#*\#" core *.exh *.exc *.d *.cd *,D 
