@@ -66,7 +66,9 @@ endif
 depend: $(OBJS:.o=.d) $(EXES:=.d) $(DLLS:lib%.so=%.d)
 	cat *.d >depend
 
+ifneq ($(MAKECMDGOALS),clean)
 include depend
+endif
 
 .cc.o:
 	$(CPLUSPLUS) $(CFLAGS) -c -o $@ $<
