@@ -22,10 +22,6 @@
 
 namespace classdesc
 {
-//  // utility types for marking sequences and associative containers
-//  template <class T> struct sequence {};
-//  template <class T> struct associative_container {};
-
   // map<K,V>::value_type is pair<const K,V>, which causes problems
   template <class C> struct Value_Type 
   {typedef typename C::value_type value_type;};
@@ -98,10 +94,6 @@ namespace classdesc
     return *this;
   }
 
-//#if defined(__GNUC__) && !defined(__ICC)
-//#pragma GCC diagnostic push
-//#pragma GCC diagnostic ignored "-Wunused-value"
-//#endif
 
   template <class T>
   typename enable_if<is_container<T>, void>::T
@@ -111,6 +103,10 @@ namespace classdesc
     for (typename T::const_iterator i=a.begin(); i!=a.end(); ++i)
       b << *i;
   }
+#if defined(__GNUC__) && !defined(__ICC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-value"
+#endif
   template <class T>
   typename enable_if<is_sequence<T>, void>::T
   unpack(classdesc::pack_t& b, const classdesc::string& d, T& a)
@@ -131,13 +127,9 @@ namespace classdesc
     for (typename T::size_type i=0; i<sz; ++i) b>>x;
   }
 
-//#if defined(__GNUC__) && !defined(__ICC)
-//#pragma GCC diagnostic pop
-//#endif
-
-//  template <class T> 
-//  struct access_pack<classdesc::associative_container<T> >: 
-//    access_pack<classdesc::sequence<T> > {};
+#if defined(__GNUC__) && !defined(__ICC)
+#pragma GCC diagnostic pop
+#endif
 
   template <class T>
   typename enable_if<is_associative_container<T>, void>::T
