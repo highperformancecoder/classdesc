@@ -437,11 +437,30 @@ namespace classdesc
   {repo.add(d,new RESTProcessObject<const char*>(a));}
 
   template <class E>
+  class RESTProcessEnum: public RESTProcessBase
+  {
+    E& e;
+  public:
+    RESTProcessEnum(E& e): e(e) {}
+    virtual json_pack_t process(const string& remainder, const json_pack_t& arguments) override
+    {
+      json_pack_t r;
+      if (remainder=="@type")
+        return r<<typeName<E>();
+      else if (remainder=="@signature")
+        return signature();
+      else if (arguments.type()==json_spirit::str_type)
+        e=enum_keys<E>()(arguments.get_str());
+      return r<<enum_keys<E>()(e);
+    }
+    json_pack_t signature() const override;
+  };
+  
+  template <class E>
   typename enable_if<is_enum<E>, void>::T
   RESTProcessp(RESTProcess_t& repo, const string& d, E& e)
   {
-    // TODO
-    //repo.add(d, new RESTProcessEnum<E>(e);
+    repo.add(d, new RESTProcessEnum<E>(e));
   }
 
   template <class T>

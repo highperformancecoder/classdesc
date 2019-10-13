@@ -111,7 +111,14 @@ namespace classdesc
     return r<<signature;
   }
 
-  
+  template <class E> 
+  json_pack_t RESTProcessEnum<E>::signature() const
+  {
+    json_pack_t r;
+    std::vector<Signature> signature
+      {{"std::string",{}},{"std::string",{"std::string"}}};
+    return r<<signature;
+  }
   
   template <class F, int N=functional::Arity<F>::value >
   struct Args: public std::vector<string>

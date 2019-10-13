@@ -34,7 +34,8 @@ int main()
   while (getline(cin,cmd))
     {
       //      string cmd=c;
-      cout << cmd << endl;
+      //cout << cmd << endl;
+      if (cmd[0]=='#') continue; //ignore comments
       if (cmd[0]!='/')
         cerr << cmd << "command doesn't starts with /"<<endl;
       else if (cmd=="/list")

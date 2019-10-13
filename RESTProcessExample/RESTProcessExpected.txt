@@ -1,0 +1,69 @@
+{"bar":{"barfoo":"eb","base___Foo":{"a":0.10000000000000001,"af":0.20000000298023224,"b":3,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":77,"d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]},"f":20,"vFoo":[{"a":0.10000000000000001,"af":0.20000000298023224,"b":1,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":77,"d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]},{"a":0.10000000000000001,"af":0.20000000298023224,"b":1,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":77,"d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]},{"a":0.10000000000000001,"af":0.20000000298023224,"b":1,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":77,"d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]}]},"bar1":{"barfoo":"ec","f":{"a":0.10000000000000001,"af":0.20000000298023224,"b":2,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":77,"d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]},"fp":{"a":0,"af":0,"b":0,"bf":false,"bt":false,"c":"","c1":[],"ch":0,"d":[0,0,0],"d1":[[0,0],[0,0],[0,0]],"ef":"ea","h":[],"l":[],"llex":[],"m":[],"sef":{},"sm":{},"vs":[]},"g":2,"vFoo":[{"a":0.10000000000000001,"af":0.20000000298023224,"b":1,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":77,"d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]},{"a":0.10000000000000001,"af":0.20000000298023224,"b":1,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":77,"d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]}]},"defaultless":{"base___Abstract":{}}}
+Exception: attempt to alter a const variable
+Exception: attempt to alter a const variable
+77
+0.10000000000000001
+0.20000000000000001
+0.20000000000000001
+[{"args":[],"ret":"double"},{"args":["double"],"ret":"double"}]
+0.20000000298023224
+0.30000001192092896
+0.30000001192092896
+[{"args":[],"ret":"float"},{"args":["float"],"ret":"float"}]
+3
+1
+1
+[{"args":[],"ret":"int"},{"args":["int"],"ret":"int"}]
+"a"
+{"args":[],"ret":"::Bar::BarE"}
+false
+true
+true
+[{"args":[],"ret":"bool"},{"args":["bool"],"ret":"bool"}]
+true
+false
+false
+"\r hello & 123 "
+"hello world"
+"hello world"
+["\r","\r"]
+"\r"
+"x"
+["x","\r"]
+[0,1,2]
+1
+5
+[0,5,2]
+[[0,1,2],[3,4,5]]
+[3,4,5]
+[6,7,8]
+[[0,1,2],[6,7,8]]
+[2,2,2]
+2
+3
+[2,3,2]
+[2,2,2,2]
+Exception: Command not found
+[{"args":[],"ret":"std::map<int,int>"},{"args":["std::map<int,int>"],"ret":"std::map<int,int>"}]
+[["hello","hello"],["hello","hello"]]
+["baa","baa","blacksheep"]
+[["hello","hello"],["baa","baa","blacksheep"]]
+[{"args":[],"ret":"std::list<std::list<std::string>>"},{"args":["std::list<std::list<std::string>>"],"ret":"std::list<std::list<std::string>>"}]
+Exception: Command not found
+{}
+{"args":[],"ret":"std::string"}
+" hello"
+"hello"
+0
+"Bar"
+"Foo"
+[{"a":0.10000000000000001,"af":0.20000000298023224,"b":1,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":77,"d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]},{"a":0.10000000000000001,"af":0.20000000298023224,"b":1,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":77,"d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]}]
+{"a":0.10000000000000001,"af":0.20000000298023224,"b":1,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":77,"d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]}
+Exception: idx out of bounds
+Exception: Command not found
+{"a":0.10000000000000001,"af":0.20000000298023224,"b":2,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":77,"d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]}
+{"a":0.10000000000000001,"af":0.20000000298023224,"b":2,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":77,"d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]}
+Exception: get_value< integer > called on null Value
+0
+2
+{"f":{"a":0.10000000000000001,"af":0.20000000298023224,"b":0,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":77,"d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]}}

@@ -1,10 +1,20 @@
 /root
 
+# TODO should be able to read, not write
+/root/bar/csi
+
+/root/bar/csi
+100
+#TODO ch should return string, not int
+/root/bar/ch
+
 /root/bar/a
 
 /root/bar/a
 0.2
 /root/bar/a
+
+/root/bar/a/@signature
 
 /root/bar/af
 
@@ -12,9 +22,153 @@
 0.3
 /root/bar/af
 
+/root/bar/af/@signature
+
 /root/bar/b
 
 /root/bar/b
 1
 /root/bar/b
 
+/root/bar/b/@signature
+
+/root/bar/barE
+
+#TODO overloading
+/root/bar/barE/@signature
+
+/root/bar/bf
+
+/root/bar/bf
+true
+/root/bar/bf
+
+/root/bar/bf/@signature
+
+/root/bar/bt
+
+/root/bar/bt
+false
+/root/bar/bt
+
+/root/bar/c
+
+/root/bar/c
+"hello world"
+/root/bar/c
+
+/root/bar/c1
+
+/root/bar/c1/@elem/0
+
+/root/bar/c1/@elem/0
+"x"
+/root/bar/c1
+
+#TODO @size
+/root/bar/d
+
+/root/bar/d/@elem/1
+
+/root/bar/d/@elem/1
+5
+/root/bar/d
+
+/root/bar/d1
+
+/root/bar/d1/@elem/1
+
+/root/bar/d1/@elem/1
+[6,7,8]
+/root/bar/d1
+
+# TODO - command fails
+#/root/bar/d1/@elem/1/@elem/2
+#10
+/root/bar/l
+
+/root/bar/l/@elem/1
+
+/root/bar/l/@elem/1
+3
+/root/bar/l
+
+/root/bar/l
+[2,2,2,2]
+/root/bar/m   
+
+/root/bar/m/@signature
+
+#TODO doesn't work
+#/root/bar/m/@elem/3
+#
+/root/bar/llex
+
+/root/bar/llex/@elem/1
+["baa","baa","blacksheep"]
+/root/bar/llex
+
+/root/bar/llex/@signature
+
+# TODO - command fails
+#/root/bar/llex/@elem/1/@elem/1
+#
+# Should fail
+/root/bar/iex
+
+# TODO shared pointer tests?
+/root/bar/sef
+
+/root/bar/vs0/@signature
+
+/root/bar/vs0/
+
+/root/bar/shello
+
+# TODO - should return 3
+/root/bar/seqLength
+[1,2,3]
+/root/bar/name
+
+/root/bar1/f/name
+
+/root/bar1/vFoo
+
+/root/bar1/vFoo/@elem/1
+
+/root/bar1/vFoo/@elem/10
+
+#TODO overloading not working
+#/root/bar1/overloadExample
+#
+#/root/bar1/barE
+#
+/root/bar1/barE 
+"a"
+# TODO not working
+#/root/bar1/globE
+#
+/root/bar1/foo
+
+/root/bar1/fooRef/b
+
+# TODO - doesn't work
+#/root/bar1/foo/b 
+#3
+# TODO - doesn't work
+#/root/bar1/fooRef/b
+#3
+/root/bar1/sfoop
+
+# TODO
+#/root/bar/recursiveType
+#
+/root/defaultless/foo
+
+/root/defaultless/bar
+
+/root/getFB1
+
+#TODO - doesn't work
+#/root/getFB1/b
+#
