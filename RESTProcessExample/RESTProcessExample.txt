@@ -1,10 +1,18 @@
 /root
 
-# TODO should be able to read, not write
 /root/bar/csi
 
+# should throw
 /root/bar/csi
 100
+/root/bar/si
+
+/root/bar/si
+10
+/root/bar/si
+
+/root/bar1/f/si
+
 /root/bar/ch
 
 /root/bar/a

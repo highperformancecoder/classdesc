@@ -176,7 +176,8 @@ namespace classdesc
         return signature();
       else if (remainder.empty())
         {
-          convert(obj, arguments);
+          if (!arguments.is_null())
+            convert(obj, arguments);
           return r<<obj;
         }
       return mapAndProcess(remainder, arguments, obj);
