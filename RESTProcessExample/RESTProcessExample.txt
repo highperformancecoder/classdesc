@@ -5,7 +5,6 @@
 
 /root/bar/csi
 100
-#TODO ch should return string, not int
 /root/bar/ch
 
 /root/bar/a

@@ -107,9 +107,9 @@ namespace classdesc
   {return x.get_value<int>();}
 
   inline json_spirit::mValue valueof(char a)  
-  {return json_spirit::mValue(int(a));}
+  {return json_spirit::mValue(string()+a);}
   template <> inline char getValue(const json_spirit::mValue& x) 
-  {return x.get_value<int>();}
+  {return x.get_value<string>()[0];}
 
   inline json_spirit::mValue valueof(unsigned short a)  
   {return json_spirit::mValue(int(a));}

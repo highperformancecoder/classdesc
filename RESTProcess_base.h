@@ -30,7 +30,13 @@ namespace classdesc
   };
 
   //  template <> inline string typeName<RESTProcessBase>() {return "RESTProcessBase";}
-  
+  void convert(char& y, const string& x)
+  {
+    if (x.size()!=1)
+      throw std::runtime_error("can only assign a single character string to a character variable");
+    y=x[0];
+  }
+    
   template <class X, class Y>
   typename enable_if<And<is_convertible<X,Y>,Not<is_const<Y>>>, void>::T
   convert(Y& y, const X& x)
