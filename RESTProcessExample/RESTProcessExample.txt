@@ -41,7 +41,6 @@
 
 /root/bar/barE
 
-#TODO overloading
 /root/bar/barE/@signature
 
 /root/bar/bf
@@ -137,6 +136,18 @@ false
 [1,2,3]
 /root/bar/name
 
+/root/bar/overloadExample
+
+/root/bar/barE
+
+/root/bar/barE 
+"b"
+/root/bar/globE
+
+/root/bar1/foo
+
+/root/bar1/fooRef/b
+
 /root/bar1/f/name
 
 /root/bar1/vFoo
@@ -144,20 +155,6 @@ false
 /root/bar1/vFoo/@elem/1
 
 /root/bar1/vFoo/@elem/10
-
-#TODO overloading not working
-#/root/bar1/overloadExample
-#
-#/root/bar1/barE
-#
-/root/bar1/barE 
-"a"
-# TODO not working
-#/root/bar1/globE
-#
-/root/bar1/foo
-
-/root/bar1/fooRef/b
 
 # TODO - doesn't work
 #/root/bar1/foo/b 

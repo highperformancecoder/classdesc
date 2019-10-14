@@ -29,6 +29,18 @@ namespace classdesc
     template <class F> json_pack_t functionSignature() const;
   };
 
+  // used to mark function types that can be overloaded 
+  class RESTProcessFunctionBase: public RESTProcessBase
+  {
+  public:
+    // match score if argument match impossible
+    static const unsigned maxMatchScore=1000000;
+
+    virtual ~RESTProcessFunctionBase() {}
+    /// returns how good the match is with arguments, less is best
+    virtual unsigned matchScore(const json_pack_t& arguments) const=0;
+  };
+
   //  template <> inline string typeName<RESTProcessBase>() {return "RESTProcessBase";}
   void convert(char& y, const string& x)
   {
@@ -105,17 +117,27 @@ namespace classdesc
   void convert(const X* x, const json_pack_t& j)
   {}
 
+
+  
   /// REST processor registry 
-  struct RESTProcess_t: public std::map<std::string, std::unique_ptr<RESTProcessBase> >
+  struct RESTProcess_t: public std::multimap<std::string, std::unique_ptr<RESTProcessBase> >
   {
     /// ownership of \a rp is passed
     void add(string d, RESTProcessBase* rp)
     {
       std::replace(d.begin(),d.end(),'.','/');
-      auto& i=(*this)[d];
-      i.reset(rp);
+      // for objects, ensure any previous entries of this key are deleted
+      erase(d);
+      emplace(d,rp);
     }
-
+    /// ownership of \a rp is passed
+    void add(string d, RESTProcessFunctionBase* rp)
+    {
+      std::replace(d.begin(),d.end(),'.','/');
+      // for overloadable functions, allow multiple entries for this key
+      emplace(d,rp);
+    }
+  
     json_pack_t process(const std::string& query, const json_pack_t& jin)
     {
       if (query[0]!='/') return {};
@@ -124,20 +146,57 @@ namespace classdesc
       for (auto cmdEnd=query.length(); cmdEnd>0;
            cmdEnd=cmd.rfind('/'), cmd=cmd.substr(0,cmdEnd))
         {
-          auto r=find(cmd);
-          if (r!=end())
+          auto tail=query.substr(cmdEnd);
+          switch (count(cmd))
             {
-              auto tail=query.substr(cmdEnd);
-              if (tail=="/@signature")
-                return r->second->signature();
-              else
-                return r->second->process(tail, jin);
+            case 0:
+              break;
+            case 1: // simple object or non overloaded function
+              {
+                auto r=find(cmd);
+                if (tail=="/@signature")
+                  return r->second->signature();
+                else
+                  return r->second->process(tail, jin);
+              }
+            default:
+              {
+                auto r=equal_range(cmd);
+                if (tail=="/@signature")
+                  {
+                    json_spirit::mArray array;
+                    for (; r.first!=r.second; ++r.first)
+                      array.push_back(r.first->second->signature());
+                    return json_pack_t(array);
+                  }
+                else
+                  {
+                    // sort function overloads by best match
+                    auto cmp=[&](RESTProcessFunctionBase*x, RESTProcessFunctionBase*y)
+                             {return x->matchScore(jin)<y->matchScore(jin);};
+                    std::set<RESTProcessFunctionBase*, decltype(cmp)> sortedOverloads{cmp};
+                    for (auto i=r.first; i!=r.second; ++i)
+                      if (auto j=dynamic_cast<RESTProcessFunctionBase*>(i->second.get()))
+                        sortedOverloads.insert(j);
+                    auto& bestOverload=*sortedOverloads.begin();
+                    if (bestOverload->matchScore(jin) >=
+                        RESTProcessFunctionBase::maxMatchScore)
+                      throw std::runtime_error("No suitable matching overload found");
+                    if (sortedOverloads.size()>1)
+                      { // ambiguous overload detection
+                        auto i=sortedOverloads.begin(); i++;
+                        if ((*i)->matchScore(jin)==bestOverload->matchScore(jin))
+                          throw std::runtime_error("Ambiguous resolution of overloaded function");
+                      }
+                    return bestOverload->process(tail, jin);
+                  }
+                }
             }
         }
       throw std::runtime_error("Command not found");
     }
   };
-  
+
   template <class T>
   inline json_pack_t mapAndProcess(const string& query, const json_pack_t& arguments, T& a)
   {
@@ -378,10 +437,190 @@ namespace classdesc
   template <class F>
   typename enable_if<Not<functional::AllArgs<F, functional::ArgAcceptable>>, json_pack_t>::T
   callFunction(const string& remainder, const json_pack_t& arguments, F f) {return {};}
+  
+  /// @{
+  /// return whether \a arg matches a C++ type T for a function call argument
+  //template <class T> bool matches(const json_spirit::mValue& arg);
+  
+  template <class T>
+  typename enable_if<is_same<T,bool>,bool>::T
+  matches(const json_spirit::mValue& x)
+  {return x.type()==json_spirit::bool_type;}
+
+  template <class T>
+  typename enable_if<is_same<T,string>,bool>::T matches(const json_spirit::mValue& x)
+  {return x.type()==json_spirit::str_type;}
+
+  template <class T>
+  typename enable_if<is_same<T,const char*>, bool>::T
+  matches(const json_spirit::mValue& x)
+  {return x.type()==json_spirit::str_type;}
+
+  template <class T>
+  typename enable_if<is_integral<T>, bool>::T matches(const json_spirit::mValue& x)
+  {return x.type()==json_spirit::int_type;}
+
+  template <class T>
+  typename enable_if<is_floating_point<T>, bool>::T matches(const json_spirit::mValue& x)
+  {return x.type()==json_spirit::real_type;}
+  
+  template <class T>
+  typename enable_if<is_enum<T>, bool>::T matches(const json_spirit::mValue& x)
+  {return x.type()==json_spirit::str_type;}
+  
+  template <class T>
+  typename enable_if<is_container<T>, bool>::T matches(const json_spirit::mValue& x)
+  {
+    if (x.type()==json_spirit::array_type)
+      {
+        auto& arr=x.get_array();
+        bool r;
+        for (auto& i: arr) r &= matches<typename T::value_type>(i);
+        return r;
+      }
+    return matches<typename T::value_type>(x); // treat a single json object as a single element sequence
+  }
+  
+  template <class T>
+  typename enable_if<And<is_class<T>, is_default_constructible<T> >, bool>::T
+  matches(const json_spirit::mValue& x)
+  {
+    if (!x.type()==json_spirit::obj_type) return false;
+    try // to convert the json object to a T
+      {
+        T test;
+        x>>test;
+      }
+    catch(std::exception)
+      {return false;}
+    return true;
+  }
+  
+  template <class T>
+  typename enable_if<And<is_object<T>, Not<is_default_constructible<T> > >, bool>::T
+  matches(const json_spirit::mValue& x)
+  {return false;}
+
+  template <class T>
+  struct isNoMatch
+  {
+    static const bool value = !is_integral<T>::value && !is_floating_point<T>::value &&
+      !is_container<T>::value && !is_object<T>::value;
+  };
+
+  template <class T>
+  typename enable_if<isNoMatch<T>, bool>::T matches(const json_spirit::mValue&) {return false;}
+
+  /// @{ testing for not quite so good matches between json type and C++ type
+  //template <class T> bool partiallyMatchable(const json_spirit::mValue& x);
+
+  template <class T>
+  typename enable_if<is_floating_point<T>, bool>::T partiallyMatchable(const json_spirit::mValue& x)
+  {return x.type()==json_spirit::int_type||x.type()==json_spirit::real_type;}
+
+  template <class T>
+  typename enable_if<is_container<T>, bool>::T partiallyMatchable(const json_spirit::mValue& x)
+  {
+    if (x.type()==json_spirit::array_type)
+      {
+        auto& arr=x.get_array();
+        bool r;
+        for (auto& i: arr) r &= partiallyMatchable<typename T::value_type>(i);
+        return r;
+      }
+    return partiallyMatchable<typename T::value_type>(x); // treat a single json object as a single element sequence
+  }
+
+  template <class T>
+  typename enable_if<And<Not<is_floating_point<T> >, Not<is_container<T> > >, bool>::T
+                       partiallyMatchable(const json_spirit::mValue& x)
+  {return matches<T>(x);}
+
+
+  template <class T> unsigned argMatchScore(const json_spirit::mValue& x)
+  {
+    if (matches<T>(x)) return 0;
+    if (partiallyMatchable<T>(x)) return 1;
+    return RESTProcessFunctionBase::maxMatchScore;
+  }
+  
+  
+  template <class F, int N>
+  struct MatchScore
+  {
+    static unsigned score(const json_spirit::mValue& x)
+    {
+      if (x.type()!=json_spirit::array_type) return RESTProcessFunctionBase::maxMatchScore;
+      auto& arr=x.get_array();
+      if (arr.size()<N) return RESTProcessFunctionBase::maxMatchScore;
+      return  argMatchScore<typename functional::Arg<F,N>::T>(arr[N-1]) +
+        MatchScore<F,N-1>::score(x);
+    }
+  };
+  
+  template <class F>
+  struct MatchScore<F,2>
+  {
+    static unsigned score(const json_spirit::mValue& x)
+    {
+      if (x.type()!=json_spirit::array_type) return RESTProcessFunctionBase::maxMatchScore;
+      auto& arr=x.get_array();
+      if (arr.size()<2) return RESTProcessFunctionBase::maxMatchScore;
+      return argMatchScore<typename functional::Arg<F,1>::T>(arr[0]) +
+        argMatchScore<typename functional::Arg<F,2>::T>(arr[1])+
+        10*(arr.size()-1); // penalize for supplying more arguments than needed
+    }
+  };
+
+  template <class F>
+  struct MatchScore<F,1>
+  {
+    static unsigned score(const json_spirit::mValue& x)
+    {
+      switch (x.type())
+        {
+        case json_spirit::null_type:
+          return RESTProcessFunctionBase::maxMatchScore;
+        case json_spirit::array_type:
+          {
+            auto& arr=x.get_array();
+            if (arr.empty()) return RESTProcessFunctionBase::maxMatchScore;
+            return argMatchScore<typename functional::Arg<F,1>::T>(arr[0])+
+              10*(arr.size()-1); // penalize for supplying more arguments than needed
+          }
+        default:
+          return argMatchScore<typename functional::Arg<F,1>::T>(x);
+        }
+    }
+  };
+  
+  template <class F>
+  struct MatchScore<F,0>
+  {
+    static unsigned score(const json_spirit::mValue& x)
+    {
+      switch (x.type())
+        {
+        case json_spirit::null_type:
+          return 0;
+        case json_spirit::array_type:
+          {
+            auto& arr=x.get_array();
+            return 10*arr.size(); // penalize for supplying more arguments than needed
+          }
+        default:
+          return 10; // penalize for supplying more arguments than needed
+        }
+    }
+  };
+  
+  template <class F, int N=functional::Arity<F>::value>
+  unsigned matchScore(const json_spirit::mValue& x)
+  {return MatchScore<F,N>::score(x);}
 
   // member functions
   template <class F, class R=typename functional::Return<F>::T>
-  class RESTProcessFunction: public RESTProcessBase
+  class RESTProcessFunction: public RESTProcessFunctionBase
   {
     F f;
   public:
@@ -392,10 +631,12 @@ namespace classdesc
     {return callFunction(remainder, arguments, f);}
     
     json_pack_t signature() const override {return functionSignature<F>();}
+    unsigned matchScore(const json_pack_t& arguments) const override
+    {return classdesc::matchScore<F>(arguments);}
   };
 
   template <class F, class R>
-  class RESTProcessFunction<F, std::unique_ptr<R>>: public RESTProcessBase
+  class RESTProcessFunction<F, std::unique_ptr<R>>: public RESTProcessFunctionBase
   {
     F f;
   public:
@@ -405,8 +646,11 @@ namespace classdesc
       throw std::runtime_error("currently unable to call functions returning unique_ptr");
     }
     json_pack_t signature() const override {return functionSignature<F>();}
+    unsigned matchScore(const json_pack_t& arguments) const override
+    {return classdesc::matchScore<F>(arguments);}
   };
 
+  
  
   
 //  template <class F>
