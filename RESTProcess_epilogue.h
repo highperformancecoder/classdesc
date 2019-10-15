@@ -142,8 +142,8 @@ namespace classdesc
   typename enable_if<is_classdescGenerated<T>, void>::T
   RESTProcessp(RESTProcess_t& repo, string d, T& obj)
   {
-    repo.add(d, new RESTProcessObject<T>(obj));
     classdesc_access::access_RESTProcess<typename remove_const<T>::type>()(repo,d,obj);
+    repo.add(d, new RESTProcessObject<T>(obj));
   }
   
 

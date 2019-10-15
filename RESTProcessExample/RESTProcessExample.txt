@@ -23,6 +23,10 @@
 
 /root/bar/a/@signature
 
+/root/bar/a/@type
+
+/root/bar/a/@list
+
 /root/bar/af
 
 /root/bar/af
@@ -71,6 +75,20 @@ false
 "x"
 /root/bar/c1
 
+/root/bar/ef
+
+/root/bar/ef
+"eb"
+/root/bar/ef
+
+/root/bar/ef
+"foo"
+/root/bar/ef
+
+/root/bar/ef/@type
+
+/root/bar/ef/@list
+
 /root/bar/d
 
 /root/bar/d/@size
@@ -106,6 +124,10 @@ false
 
 /root/bar/h
 [2,2,2,2]
+/root/bar/h/@type
+
+/root/bar/h/@list
+
 /root/bar/l
 
 /root/bar/l/@elem/1
@@ -138,6 +160,10 @@ false
 /root/bar/m/@insert
 {"first":1,"second":2}
 /root/bar/m/@elem/1
+
+/root/bar/m/@type
+
+/root/bar/m/@list
 
 /root/bar/um/@insert
 {"first":1,"second":3}

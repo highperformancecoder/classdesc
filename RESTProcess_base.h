@@ -23,8 +23,14 @@ namespace classdesc
   {
   public:
     virtual ~RESTProcessBase() {}
+    /// perform the REST operation, with \a remainder being the query string and \a arguments as body text
     virtual json_pack_t process(const string& remainder, const json_pack_t& arguments)=0;
+    /// return signature(s) of the operations
     virtual json_pack_t signature() const=0;
+    /// return list of subcommands to this
+    virtual json_pack_t list() const=0;
+    /// return type name of this
+    virtual json_pack_t type() const=0;
     /// return signature for a function type F
     template <class F> json_pack_t functionSignature() const;
   };
@@ -156,6 +162,10 @@ namespace classdesc
                 auto r=find(cmd);
                 if (tail=="/@signature")
                   return r->second->signature();
+                else if (tail=="/@list")
+                  return r->second->list();
+                else if (tail=="/@type")
+                  return r->second->type();
                 else
                   return r->second->process(tail, jin);
               }
@@ -169,6 +179,10 @@ namespace classdesc
                       array.push_back(r.first->second->signature());
                     return json_pack_t(array);
                   }
+                else if (tail=="/@list")
+                  return json_pack_t(json_spirit::mArray());
+                else if (tail=="/@type")
+                  return json_pack_t("overloaded function");
                 else
                   {
                     // sort function overloads by best match
@@ -200,13 +214,6 @@ namespace classdesc
   template <class T>
   inline json_pack_t mapAndProcess(const string& query, const json_pack_t& arguments, T& a)
   {
-//    if (query.empty())
-//      {
-//        convert(a, arguments); // set object if some args provided
-////        json_pack_t r;
-////        return r<<a;
-//      }
-
     RESTProcess_t map;
     RESTProcess(map,"",a);
     if (query.empty())
@@ -229,11 +236,7 @@ namespace classdesc
     json_pack_t process(const string& remainder, const json_pack_t& arguments) override
     {
       json_pack_t r;
-      if (remainder=="@type")
-        return r<<typeName<T>();
-      else if (remainder=="@signature")
-        return signature();
-      else if (remainder.empty())
+      if (remainder.empty())
         {
           if (!arguments.is_null())
             convert(obj, arguments);
@@ -242,6 +245,16 @@ namespace classdesc
       return mapAndProcess(remainder, arguments, obj);
     }
     json_pack_t signature() const override;
+    json_pack_t list() const override {
+      RESTProcess_t map;
+      RESTProcess(map,"",obj);
+      json_spirit::mArray array;
+      for (auto& i:map)
+        if (!i.first.empty())
+          array.emplace_back(i.first);
+      return json_pack_t(array);
+    }
+    json_pack_t type() const override {return json_pack_t(typeName<T>());}
   };
 
   template <class T>
@@ -323,6 +336,11 @@ namespace classdesc
       return r<<obj;
     }
     json_pack_t signature() const override;
+    json_pack_t list() const override {
+      json_spirit::mArray array{"/@elem","/@insert","/@size"};
+      return json_pack_t(array);
+    }
+    json_pack_t type() const override {return json_pack_t(typeName<T>());}
   };
 
   template <class T>
@@ -406,6 +424,11 @@ namespace classdesc
       return r<<obj;
     }
     json_pack_t signature() const override;
+    json_pack_t list() const override {
+      json_spirit::mArray array{"/@elem","/@insert","/@size"};
+      return json_pack_t(array);
+    }
+    json_pack_t type() const override {return json_pack_t(typeName<T>());}
   };
 
   template <class T>
@@ -431,6 +454,11 @@ namespace classdesc
         return {};
     }
     json_pack_t signature() const override;
+    json_pack_t list() const override {
+      if (ptr) return RESTProcessObject<typename T::element_type>(*ptr).list();
+      else return json_pack_t(json_spirit::mArray());
+    }
+    json_pack_t type() const override {return json_pack_t(typeName<T>());}
   };
 
   template <class T>
@@ -446,7 +474,13 @@ namespace classdesc
         return {};
     }
     json_pack_t signature() const override;
-  };
+    json_pack_t list() const override {
+      if (auto p=ptr.lock())
+        return RESTProcessObject<typename T::element_type>(*p).list();
+      else return json_pack_t(json_spirit::mArray());
+    }
+    json_pack_t type() const override {return typeName<std::weak_ptr<T> >();}
+ };
 
   
 
@@ -700,6 +734,8 @@ namespace classdesc
     json_pack_t signature() const override {return functionSignature<F>();}
     unsigned matchScore(const json_pack_t& arguments) const override
     {return classdesc::matchScore<F>(arguments);}
+    json_pack_t list() const override {return json_pack_t(json_spirit::mArray());}
+    json_pack_t type() const override {return json_pack_t("function");}
   };
 
   template <class F, class R>
@@ -715,25 +751,9 @@ namespace classdesc
     json_pack_t signature() const override {return functionSignature<F>();}
     unsigned matchScore(const json_pack_t& arguments) const override
     {return classdesc::matchScore<F>(arguments);}
-  };
-
-  
- 
-  
-//  template <class F>
-//  class RESTProcessFunction<F,void>: public RESTProcessBase
-//  {
-//    F f;
-//  public:
-//    RESTProcessFunction(F f): f(f) {}
-//    json_pack_t process(const string& remainder, const json_pack_t& arguments) override
-//    {
-//      functional::PackFunctor<JSONBuffer> argBuf(arguments);
-//      argBuf.call(f);
-//      return {};
-//    }
-//    json_pack_t signature() const override {return functionSignature<F>();}
-//  };
+    json_pack_t list() const override {return json_pack_t(json_spirit::mArray());}
+    json_pack_t type() const override {return typeName<F>();}
+ };
 
   template <class T, class F>
   typename enable_if<functional::is_member_function_ptr<F>, void>::T
@@ -772,6 +792,8 @@ namespace classdesc
       return r<<enum_keys<E>()(e);
     }
     json_pack_t signature() const override;
+    json_pack_t list() const override {return json_pack_t(json_spirit::mArray());}
+    json_pack_t type() const override {return json_pack_t(typeName<E>());}
   };
   
   template <class E>
