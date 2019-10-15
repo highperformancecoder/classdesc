@@ -304,6 +304,10 @@ namespace classdesc
   {repo.add(d, new RESTProcessObject<T>(a));}
 
   template <class T>
+  void RESTProcessp(RESTProcess_t& repo, const string& d, T* a)
+  {/* pointers ignored */}
+
+  template <class T>
   void RESTProcess(RESTProcess_t& repo, const string& d, is_const_static, T& a)
   {RESTProcess(repo,d,a);}
 
@@ -544,8 +548,17 @@ namespace classdesc
   callFunction(const string& remainder, const json_pack_t& arguments, F f)
   {
     functional::PackFunctor<JSONBuffer> argBuf(arguments);
-    json_pack_t r;
-    return r<<argBuf.call(f);
+    typename functional::Return<F>::T r=argBuf.call(f);
+    if (remainder.empty())
+      {
+        if (arguments.type()!=json_spirit::null_type)
+          convert(r,arguments);
+        json_pack_t rj;
+        return rj<<r;
+      }
+    RESTProcess_t map;
+    RESTProcess(map,"",r);
+    return map.process(remainder, arguments);
   }
 
   template <class F>

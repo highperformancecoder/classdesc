@@ -222,12 +222,20 @@ false
 
 /root/bar1/vFoo/@elem/10
 
-# TODO - doesn't work
-#/root/bar1/foo/b 
-#3
-# TODO - doesn't work
-#/root/bar1/fooRef/b
-#3
+/root/bar1/foo/b
+3
+/root/bar1/foo/b
+
+/root/bar1/fooRef/b
+3
+/root/bar1/fooRef/b
+
+/root/bar1/foo/b
+
+/root/bar1/foo/
+
+/root/bar1/foo/
+
 /root/bar1/sfoop
 
 # TODO
