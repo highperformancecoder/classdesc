@@ -107,9 +107,8 @@ false
 [6,7,8]
 /root/bar/d1
 
-# TODO - command fails
-#/root/bar/d1/@elem/1/@elem/2
-#10
+/root/bar/d1/@elem/1/@elem/2
+10
 /root/bar/h
 
 /root/bar/h/@elem/1
@@ -181,9 +180,8 @@ false
 
 /root/bar/llex/@signature
 
-# TODO - command fails
-#/root/bar/llex/@elem/1/@elem/1
-#
+/root/bar/llex/@elem/1/@elem/1
+
 # Should fail
 /root/bar/iex
 

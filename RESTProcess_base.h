@@ -35,6 +35,9 @@ namespace classdesc
     template <class F> json_pack_t functionSignature() const;
   };
 
+  /// marker for containers
+  class RESTProcessContainerBase: public RESTProcessBase {};
+  
   // used to mark function types that can be overloaded 
   class RESTProcessFunctionBase: public RESTProcessBase
   {
@@ -207,6 +210,11 @@ namespace classdesc
                 }
             }
         }
+      // last ditch effort - see if there is an "" object in the map
+      auto i=find("");
+      if (i!=end())
+        if (auto j=dynamic_cast<RESTProcessContainerBase*>(i->second.get()))
+          return j->process(query, jin);
       throw std::runtime_error("Command not found");
     }
   };
@@ -288,7 +296,7 @@ namespace classdesc
   {return x.size()>=prefix.size() && equal(prefix.begin(), prefix.end(), x.begin());}
 
   // sequences
-  template <class T> class RESTProcessSequence: public RESTProcessBase
+  template <class T> class RESTProcessSequence: public RESTProcessContainerBase
   {
     T& obj;
 
@@ -361,7 +369,7 @@ namespace classdesc
     typedef std::pair<K, V> type;
   };
   
-  template <class T> class RESTProcessAssociativeContainer: public RESTProcessBase
+  template <class T> class RESTProcessAssociativeContainer: public RESTProcessContainerBase
   {
     T& obj;
 
