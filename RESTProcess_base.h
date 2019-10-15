@@ -337,6 +337,13 @@ namespace classdesc
       x>>v;
       m[k]=v;
     }
+    template <class K, class V, class C, class A>
+    void assignIfMap(std::unordered_map<K,V,C,A>& m, const K& k, const json_pack_t& x)
+    {
+      V v;
+      x>>v;
+      m[k]=v;
+    }
     template <class U, class K> void assignIfMap(U&,const K&,const json_pack_t&) {}
     
   public:

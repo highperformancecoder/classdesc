@@ -572,6 +572,18 @@ namespace classdesc
     static std::string name()
     {return "std::map<"+typeName<K>()+","+typeName<V>()+">";}
   };
+  
+  template <class T, class C, class A> struct tn<std::multiset<T,C,A> >
+  {
+    static std::string name()
+    {return "std::multiset<"+typeName<T>()+">";}
+  };
+
+  template <class K, class V, class C, class A> struct tn<std::multimap<K,V,C,A> >
+  {
+    static std::string name()
+    {return "std::multimap<"+typeName<K>()+","+typeName<V>()+">";}
+  };
 
   template <class K, class V> struct tn<std::pair<K,V> >
   {
@@ -579,6 +591,29 @@ namespace classdesc
     {return "std::pair<"+typeName<K>()+","+typeName<V>()+">";}
   };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+  template <class K, class C, class A> struct tn<std::unordered_set<K,C,A> >
+  {
+    static std::string name()
+    {return "std::unordered_set<"+typeName<K>()+">";}
+  };
+  template <class K, class C, class A> struct tn<std::unordered_multiset<K,C,A> >
+  {
+    static std::string name()
+    {return "std::unordered_multiset<"+typeName<K>()+">";}
+  };
+  template <class K, class V, class C, class A> struct tn<std::unordered_map<K,V,C,A> >
+  {
+    static std::string name()
+    {return "std::unordered_map<"+typeName<K>()+","+typeName<V>()+">";}
+  };
+  template <class K, class V, class C, class A> struct tn<std::unordered_multimap<K,V,C,A> >
+  {
+    static std::string name()
+    {return "std::unordered_multimap<"+typeName<K>()+","+typeName<V>()+">";}
+  };
+
+#endif
 
 
   /// enum symbol handling

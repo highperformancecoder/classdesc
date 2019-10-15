@@ -121,6 +121,14 @@ false
 {"first":1,"second":2}
 /root/bar/m/@elem/1
 
+/root/bar/um/@insert
+{"first":1,"second":3}
+/root/bar/um
+
+/root/bar/um/@elem/1
+5
+/root/bar/um/@elem/1
+
 /root/bar/llex
 
 /root/bar/llex/@elem/1
