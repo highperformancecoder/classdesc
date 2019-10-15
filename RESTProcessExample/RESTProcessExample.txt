@@ -238,15 +238,13 @@ false
 
 /root/bar1/sfoop
 
-# TODO
-#/root/bar/recursiveType
-#
+/root/bar1/recursiveType
+"hello"
 /root/defaultless/foo
 
 /root/defaultless/bar
 
 /root/getFB1
 
-#TODO - doesn't work
-#/root/getFB1/b
-#
+/root/getFB1/f/b
+

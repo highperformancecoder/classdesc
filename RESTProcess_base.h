@@ -551,8 +551,23 @@ namespace classdesc
     typename functional::Return<F>::T r=argBuf.call(f);
     if (remainder.empty())
       {
-        if (arguments.type()!=json_spirit::null_type)
-          convert(r,arguments);
+        // if there are arguments left over, assign the first of the
+        // remaining arguments to the result
+        switch (arguments.type())
+          {
+          case json_spirit::null_type: break;
+          case json_spirit::array_type:
+            {
+              auto& arr=arguments.get_array();
+              if (arr.size()>functional::Arity<F>::value)
+                convert(r,json_pack_t(arr[functional::Arity<F>::value]));
+              break;
+            }
+          default:
+            if (functional::Arity<F>::value==0)
+                convert(r,arguments);
+            break;
+          }
         json_pack_t rj;
         return rj<<r;
       }
@@ -626,7 +641,7 @@ namespace classdesc
   typename enable_if<And<is_class<T>, is_default_constructible<T> >, bool>::T
   matches(const json_spirit::mValue& x)
   {
-    if (!x.type()==json_spirit::obj_type) return false;
+    if (x.type()!=json_spirit::obj_type) return false;
     try // to convert the json object to a T
       {
         T test;

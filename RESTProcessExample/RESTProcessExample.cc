@@ -50,6 +50,7 @@ int main()
               getline(cin,t);
               if (!t.empty())
                 read(t,jin);
+              cout << cmd <<"=>";
               write(registry.process(cmd, jin),cout);
               cout << endl;
             }
