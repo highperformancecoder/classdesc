@@ -185,7 +185,10 @@ false
 # Should fail
 /root/bar/iex
 
-# TODO shared pointer tests?
+/root/bar/sef
+
+/root/bar/sef
+"eb"
 /root/bar/sef
 
 /root/bar/vs0/@signature

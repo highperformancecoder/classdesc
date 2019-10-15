@@ -64,7 +64,7 @@ namespace classdesc
   {y=x;}
 
   template <class X, class Y>
-  typename enable_if<And<Not<is_convertible<X,Y>>,Not<is_const<Y>>>, void>::T
+  typename enable_if<And<And<Not<is_convertible<X,Y>>,Not<is_const<Y>>>,Not<is_enum<Y>>>, void>::T
   convert(Y& y, const X& x)
   {throw std::runtime_error(typeName<X>()+" cannot be converted to "+typeName<Y>());}
 
@@ -73,7 +73,7 @@ namespace classdesc
   {throw std::runtime_error("attempt to alter a const variable");}
   
   template <class X>
-  typename enable_if<And<Not<is_sequence<X>>,Not<is_const<X>>>, void>::T
+  typename enable_if<And<And<Not<is_sequence<X>>,Not<is_const<X>>>,Not<is_enum<X>>>, void>::T
   convert(X& x, const json_pack_t& j)
   {
       switch (j.type())
@@ -120,6 +120,25 @@ namespace classdesc
             ai >> *xi++;
           }
       }
+  }
+
+  template <class X>
+  void convert(std::shared_ptr<X>& x, const json_pack_t& j)
+  {
+    if (x) convert(*x,j);
+  }
+
+  template <class X>
+  void convert(std::weak_ptr<X>& x, const json_pack_t& j)
+  {
+    if (auto s=x.lock()) convert(*s,j);
+  }
+  
+  template <class E>
+  typename enable_if<is_enum<E>,void>::T
+  convert(E& x, const json_pack_t& j)
+  {
+    x=enum_keys<E>()(j.get_str());
   }
   
   template <class X>

@@ -51,7 +51,7 @@ struct Foo
   Foo(int i): ch('M'), a(0.1), af(0.2), b(i), bf(false), bt(true),
               c("\r hello & 123 "), c1(2,"\r"), h(3,2), l(3,2), 
               llex(2,std::list<std::string>(2,"hello")),
-              vs(2," hello"), ef(ea)//, hello(printHello)
+              vs(2," hello"), ef(ea), sef(new EnumFoo(ea))//, hello(printHello)
   {
     for (int i=0; i<3; i++) 
       {
