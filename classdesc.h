@@ -377,6 +377,9 @@ namespace classdesc
   template <class T>
   typename enable_if<Not<has_resize<T> >, void>::T
   resize(T& x, size_t n) {} 
+
+  CLASSDESC_HAS_MEMBER(push_back);
+
   
 //  template <class T>
 //  typename enable_if<is_sequence<T>,void>::T

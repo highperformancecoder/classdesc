@@ -273,11 +273,27 @@ namespace classdesc
     
   inline bool startsWith(const std::string& x, const std::string& prefix)
   {return x.size()>=prefix.size() && equal(prefix.begin(), prefix.end(), x.begin());}
-  
+
   // sequences
   template <class T> class RESTProcessSequence: public RESTProcessBase
   {
     T& obj;
+
+    template <class U>
+    struct Insertable: public And<has_member_push_back<T,void (T::*)(const typename T::value_type&)>,
+                                  is_default_constructible<typename T::value_type>> {};
+    
+    template <class U>
+    typename enable_if<Insertable<U>, void>::T
+    insert(U& o, const json_pack_t& j) {
+      typename U::value_type v;
+      j>>v;
+      o.push_back(v);
+    }
+
+    template <class U>
+    typename enable_if<Not<Insertable<U> >, void>::T insert(U&, const json_pack_t&) {}
+  
   public:
     RESTProcessSequence(T& obj): obj(obj) {}
     json_pack_t process(const string& remainder, const json_pack_t& arguments) override
@@ -300,6 +316,8 @@ namespace classdesc
           std::advance(i, idx);
           return mapAndProcess(string(idxEnd,remainder.end()), arguments, *i);
         }
+      else if (startsWith(remainder,"/@insert"))
+        insert(obj, arguments);
       else if (startsWith(remainder,"/@size"))
         return r<<obj.size();
       return r<<obj;
