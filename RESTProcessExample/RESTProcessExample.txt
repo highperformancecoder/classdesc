@@ -197,9 +197,8 @@ false
 
 /root/bar/shello
 
-# TODO - should return 3
 /root/bar/seqLength
-[1,2,3]
+[[1,2,3]]
 /root/bar/name
 
 /root/bar/overloadExample
