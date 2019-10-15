@@ -300,6 +300,8 @@ namespace classdesc
           std::advance(i, idx);
           return mapAndProcess(string(idxEnd,remainder.end()), arguments, *i);
         }
+      else if (startsWith(remainder,"/@size"))
+        return r<<obj.size();
       return r<<obj;
     }
     json_pack_t signature() const override;
@@ -317,6 +319,7 @@ namespace classdesc
     RESTProcessAssociativeContainer(T& obj): obj(obj) {}
     json_pack_t process(const string& remainder, const json_pack_t& arguments) override
     {
+      json_pack_t r;
       if (remainder.empty())
         convert(obj, arguments);
       else if (startsWith(remainder,"/@elem"))
@@ -335,7 +338,8 @@ namespace classdesc
                 return mapAndProcess(string(keyEnd,remainder.end()), arguments, *i);
             }
         }
-      json_pack_t r;
+      else if (startsWith(remainder,"/@size"))
+        return r<<obj.size();
       return r<<obj;
     }
     json_pack_t signature() const override;
