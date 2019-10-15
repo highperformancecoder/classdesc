@@ -312,9 +312,33 @@ namespace classdesc
   RESTProcessp(RESTProcess_t& repo, const string& d, T& a)
   {repo.add(d, new RESTProcessSequence<T>(a));}
 
+  /// used for removing const attributes of an associative container's value_type
+  template <class T>
+  struct MutableValueType
+  {
+    typedef typename std::remove_const<T>::type type;
+  };
+  
+  template <class K, class V>
+  struct MutableValueType<std::pair<const K, V> >
+  {
+    typedef std::pair<K, V> type;
+  };
+  
   template <class T> class RESTProcessAssociativeContainer: public RESTProcessBase
   {
     T& obj;
+
+    /// assign \a x if T is a map
+    template <class K, class V, class C, class A>
+    void assignIfMap(std::map<K,V,C,A>& m, const K& k, const json_pack_t& x)
+    {
+      V v;
+      x>>v;
+      m[k]=v;
+    }
+    template <class U, class K> void assignIfMap(U&,const K&,const json_pack_t&) {}
+    
   public:
     RESTProcessAssociativeContainer(T& obj): obj(obj) {}
     json_pack_t process(const string& remainder, const json_pack_t& arguments) override
@@ -330,13 +354,27 @@ namespace classdesc
             {
               auto keyEnd=find(keyStart+1, remainder.end(), '/');
               typename T::key_type key;
-              convert(key, string(keyStart+1, keyEnd));
+              std::istringstream is(string(keyStart+1, keyEnd));
+              is>>key;
+              string tail(keyEnd,remainder.end());
+              if (tail.empty() && arguments.type()!=json_spirit::null_type)
+                assignIfMap(obj, key, arguments);
               auto i=obj.find(key);
               if (i==obj.end())
                 throw std::runtime_error("key "+string(keyStart+1, keyEnd)+" not found");
+              else if (tail.empty())
+                return r<<*i;
               else
-                return mapAndProcess(string(keyEnd,remainder.end()), arguments, *i);
+                return mapAndProcess(tail, arguments, *i);
             }
+        }
+      else if (startsWith(remainder,"/@insert"))
+        {
+          typename MutableValueType<typename T::value_type>::type v;
+          arguments>>v;
+          if (!obj.insert(v).second)
+            throw std::runtime_error("key already exists, not inserted");
+          return r;
         }
       else if (startsWith(remainder,"/@size"))
         return r<<obj.size();

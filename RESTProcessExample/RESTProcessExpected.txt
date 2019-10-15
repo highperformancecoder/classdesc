@@ -51,6 +51,12 @@ false
 Exception: Command not found
 2
 [{"args":[],"ret":"std::map<int,int>"},{"args":["std::map<int,int>"],"ret":"std::map<int,int>"}]
+{"first":3,"second":2}
+{"first":3,"second":5}
+{"first":3,"second":5}
+Exception: key 1 not found
+{}
+{"first":1,"second":2}
 [["hello","hello"],["hello","hello"]]
 ["baa","baa","blacksheep"]
 [["hello","hello"],["baa","baa","blacksheep"]]
@@ -62,7 +68,7 @@ Exception: Command not found
 "hello"
 0
 "Bar"
-{"barfoo":"eb","base___Foo":{"a":0.20000000000000001,"af":0.30000001192092896,"b":1,"bf":true,"bt":false,"c":"hello world","c1":["x","\r"],"ch":"M","d":[0,5,2],"d1":[[0,1],[2,6],[7,8]],"ef":"ea","h":[2,2,2],"l":[2,2,2,2],"llex":[["hello","hello"],["baa","baa","blacksheep"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]},"f":20,"vFoo":[{"a":0.10000000000000001,"af":0.20000000298023224,"b":1,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":"M","d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]},{"a":0.10000000000000001,"af":0.20000000298023224,"b":1,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":"M","d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]},{"a":0.10000000000000001,"af":0.20000000298023224,"b":1,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":"M","d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]}]}
+{"barfoo":"eb","base___Foo":{"a":0.20000000000000001,"af":0.30000001192092896,"b":1,"bf":true,"bt":false,"c":"hello world","c1":["x","\r"],"ch":"M","d":[0,5,2],"d1":[[0,1],[2,6],[7,8]],"ef":"ea","h":[2,2,2],"l":[2,2,2,2],"llex":[["hello","hello"],["baa","baa","blacksheep"]],"m":[{"first":0,"second":5},{"first":1,"second":2},{"first":3,"second":5}],"sef":{},"sm":{},"vs":[" hello"," hello"]},"f":20,"vFoo":[{"a":0.10000000000000001,"af":0.20000000298023224,"b":1,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":"M","d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]},{"a":0.10000000000000001,"af":0.20000000298023224,"b":1,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":"M","d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]},{"a":0.10000000000000001,"af":0.20000000298023224,"b":1,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":"M","d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":{},"sm":{},"vs":[" hello"," hello"]}]}
 "a"
 Exception: Command not found
 "ga"

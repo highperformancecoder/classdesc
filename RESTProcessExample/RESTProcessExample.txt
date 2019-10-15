@@ -108,9 +108,19 @@ false
 
 /root/bar/m/@signature
 
-#TODO doesn't work
-#/root/bar/m/@elem/3
-#
+/root/bar/m/@elem/3
+
+/root/bar/m/@elem/3
+5
+/root/bar/m/@elem/3
+
+# should throw
+/root/bar/m/@elem/1
+
+/root/bar/m/@insert
+{"first":1,"second":2}
+/root/bar/m/@elem/1
+
 /root/bar/llex
 
 /root/bar/llex/@elem/1
