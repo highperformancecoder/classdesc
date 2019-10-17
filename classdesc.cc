@@ -587,10 +587,10 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="::", s
 	{ rType.erase();
 	  if (isIdentifierStart(input.lasttoken[0]))
             {
-              // taking a reference to a const static member can cause
-              // problems, as they may be optimised away and have no
-              // address
-              if (/*!(reg.is_static && reg.is_const) &&*/ use_mbr_pointers)
+              // One cannot create a member pointer of a reference
+              // member, so we need to use old style methods to access
+              // it
+              if (use_mbr_pointers && input.tokenBeforeLast!="&")
                 reg.register_class(input.lasttoken,
                                    varname,"&"+prefix+input.lasttoken);
               else
