@@ -73,7 +73,8 @@ namespace classdesc
     template <class F, template<class> class Pred, int arity=Arity<F>::value> struct AllArgs;
    /// @}
 
-    template <class C, class M, class R=typename Return<M>::T> class bound_method;
+    template <class C, class M, class R=typename Return<M>::T, class Enable=void>
+    class bound_method;
 
     template <class O, class M>
     bound_method<O,M> bindMethod(O& o, M m)
@@ -277,8 +278,17 @@ namespace classdesc
       static const bool value=true;
     };
 
+    /// type trait for determining if an argument is acceptable for function mapping
+    template <class A>
+    struct ArgAcceptable:
+      public And<
+      And<is_default_constructible<typename remove_reference<A>::type>,
+          is_copy_constructible<typename remove_reference<A>::type>>,
+      Not<std::is_rvalue_reference<A>>
+      >{};
+
     template <class C, class M, class R>
-    class bound_method
+    class bound_method<C,M,R,typename enable_if<AllArgs<M,ArgAcceptable>,void>::T>
     {
       C* obj;
       M method;
@@ -289,8 +299,32 @@ namespace classdesc
       void rebind(C& newObj) {obj=&newObj;}
     };
 
+    template <class C, class M, class R>
+    class bound_method<C,M,R,typename enable_if<Not<AllArgs<M,ArgAcceptable>>,void>::T>
+    {
+      C* obj;
+      M method;
+    public:
+      bound_method(C& obj, M method): obj(&obj), method(method) {}
+      template <class... Args>
+      R operator()(Args... args) const {return {};} // can't call, argument unacceptable
+      void rebind(C& newObj) {obj=&newObj;}
+    };
+
     template <class C, class M>
-    class bound_method<C, M, void>
+    class bound_method<C, M, void,typename enable_if<AllArgs<M,ArgAcceptable>,void>::T>
+    {
+      C* obj;
+      M method;
+    public:
+      bound_method(C& obj, M method): obj(&obj), method(method) {}
+      template <class... Args>
+      void operator()(Args... args) const {(obj->*method)(args...);}
+      void rebind(C& newObj) {obj=&newObj;}
+    };
+
+    template <class C, class M>
+    class bound_method<C, M, void,typename enable_if<Not<AllArgs<M,ArgAcceptable>>,void>::T>
     {
       C* obj;
       M method;
@@ -353,12 +387,6 @@ namespace classdesc
     {
       static const size_t value=Arity<F>::value-1;
     };
-
-    /// type trait for determining if an argument is acceptable for function mapping
-    template <class A>
-    struct ArgAcceptable:
-      public And<is_default_constructible<typename remove_reference<A>::type>,
-                 is_copy_constructible<typename remove_reference<A>::type>> {};
 
     template <class F, class ArgVector, size_t N=Arity<F>::value>
     struct CurryLastVoid

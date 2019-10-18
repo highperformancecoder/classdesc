@@ -102,6 +102,10 @@ struct Bar: Foo
   Bar() {}
   Bar(int i): Foo(i), f(20), barfoo(eb), vFoo(3,1) {}
 
+  // overload triggers bug
+  void rvalueRef(Foo&& f) {}
+  void rvalueRef() {}
+
   std::string name() const override {return "Bar";}
   Foo& foo() {return *this;}
 };

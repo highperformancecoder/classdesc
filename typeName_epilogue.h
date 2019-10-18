@@ -42,10 +42,13 @@ namespace classdesc
   typename enable_if<Not<is_function<T> >,  std::string>::T
   typeName() {return typeNamep<T>();}
 
-//  template <class T>
-//  struct tn<const T>
-//  {
-//    static std::string name() {return "const "+typeName<T>();}
-//  };
+  
+#if defined(__cplusplus) && __cplusplus>=201103L
+  template <class T>
+  struct tn<T&&>
+  {
+    static std::string name() {return typeName<T>();}
+  };
+#endif
 }
 #endif
