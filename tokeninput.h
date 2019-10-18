@@ -50,7 +50,7 @@ class tokeninput
         if (c=='[') // attribute leadin - discard attribute
           {
             char lc=c;
-            while ((c=fgetc(inputstream)) != ']' && lc!=']') lc=c;
+            while ((c=fgetc(inputstream)) != ']' || lc!=']') lc=c;
             getnextc();
           }
         else
