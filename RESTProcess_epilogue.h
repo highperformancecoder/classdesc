@@ -159,8 +159,6 @@ namespace classdesc_access
     {r.add(d, new cd::RESTProcessFunction<std::function<F>>(a));}
   };
 #endif
-
-  template <> struct access_RESTProcess<ecolab::CairoSurface>: public cd::NullDescriptor<cd::RESTProcess_t> {};
 }
     
 #endif

@@ -292,8 +292,17 @@ namespace classdesc
       Not<is_pointer<A>>
       >{};
 
+    // true if C is non const, or M is a const member function or static
+    template <class C, class M>
+    struct ConstCorrect: public
+    Or< Not<is_const<C>>,
+        Or<is_pointer<M>, is_const_method<M>>> {};
+    
     template <class C, class M, class R>
-    class bound_method<C,M,R,typename enable_if<AllArgs<M,ArgAcceptable>,void>::T>
+    class bound_method<C,M,R,
+                       typename enable_if<
+                         And<ConstCorrect<C,M>, AllArgs<M,ArgAcceptable>>,
+                         void>::T>
     {
       C* obj;
       M method;
@@ -305,7 +314,10 @@ namespace classdesc
     };
 
     template <class C, class M, class R>
-    class bound_method<C,M,R,typename enable_if<Not<AllArgs<M,ArgAcceptable>>,void>::T>
+    class bound_method<C,M,R,
+                       typename enable_if<
+                         Not<And<ConstCorrect<C,M>, AllArgs<M,ArgAcceptable>>>,
+                         void>::T>
     {
       C* obj;
       M method;
@@ -317,7 +329,10 @@ namespace classdesc
     };
 
     template <class C, class M>
-    class bound_method<C, M, void,typename enable_if<AllArgs<M,ArgAcceptable>,void>::T>
+    class bound_method<C, M, void,
+                       typename enable_if<
+                         And<ConstCorrect<C,M>, AllArgs<M,ArgAcceptable>>,
+                         void>::T>
     {
       C* obj;
       M method;
@@ -329,14 +344,17 @@ namespace classdesc
     };
 
     template <class C, class M>
-    class bound_method<C, M, void,typename enable_if<Not<AllArgs<M,ArgAcceptable>>,void>::T>
+    class bound_method<C, M, void,
+                       typename enable_if<
+                         Not<And<ConstCorrect<C,M>, AllArgs<M,ArgAcceptable>>>,
+                         void>::T>
     {
       C* obj;
       M method;
     public:
       bound_method(C& obj, M method): obj(&obj), method(method) {}
       template <class... Args>
-      void operator()(Args... args) const {(obj->*method)(args...);}
+      void operator()(Args... args) const {}
       void rebind(C& newObj) {obj=&newObj;}
     };
 

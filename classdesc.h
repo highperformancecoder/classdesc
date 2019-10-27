@@ -440,8 +440,9 @@ namespace classdesc
   */
   template <class T, class Enable=void> struct tn;  //for partial specialisation support
   template <class T>
-  typename enable_if<Not<is_function<T> >, std::string>::T
-  typeName();
+  typename enable_if<
+    And<Not<is_function<T> >, Not<is_member_function_pointer<T> > >,
+        std::string>::T  typeName();
 
 #if defined(__cplusplus) && __cplusplus>=201103L
   // handle variadic arguments
