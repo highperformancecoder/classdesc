@@ -487,6 +487,10 @@ namespace classdesc
   typename enable_if<is_function<F>,string>::T
   inline typeName() {return "<function>";}
 
+  template <class F>
+  typename enable_if<is_member_function_pointer<F>,string>::T
+  inline typeName() {return "<function>";}
+
 #if defined(__cplusplus) && __cplusplus>=201103L
   template <class F> struct tn<std::function<F>>
   {

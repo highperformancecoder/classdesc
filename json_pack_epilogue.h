@@ -88,6 +88,25 @@ namespace classdesc_access
     }
   };
 
+#if defined(__cplusplus) && __cplusplus>=201103L 
+  template <class T>
+  struct access_json_pack<std::function<T>>
+  {
+  public:
+    void operator()(cd::json_unpack_t& b, const cd::string& d, 
+                    std::function<T>& a)
+    {b<<cd::typeName<T>();}
+  };
+  template <class T>
+  struct access_json_unpack<std::function<T>>
+  {
+  public:
+    void operator()(cd::json_unpack_t& b, const cd::string& d, 
+                    std::function<T>& a)
+    {}
+  };
+#endif
+
   template <> struct access_json_pack<cd::json_pack_t>
   {
     template <class U>

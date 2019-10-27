@@ -447,6 +447,12 @@ namespace classdesc
   template <class T>
   void json_unpack(json_unpack_t& targ, const string& desc, Exclude<T>& arg) {} 
 
+  template <class T, class U>
+  void json_pack(json_pack_t& targ, const string& desc, T, is_constructor, U) {}
+
+  template <class T, class U>
+  void json_unpack(json_unpack_t& targ, const string& desc, T, is_constructor, U) {} 
+
   /// produce json string equivalent of object \a x
   template <class T> string json(const T& x) 
   {

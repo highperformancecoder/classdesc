@@ -196,6 +196,9 @@ namespace classdesc
       typedef FunctionalHelper<R> T;
     };
 
+    template <class F> struct FunctionalHelperFor<std::function<F>>:
+      public FunctionalHelperFor<F> {};
+    
     // doesn't seem to work, alas...
     //    template <class F> struct FunctionalHelperFor:
     //      public FunctionalHelperFor<decltype(F::operator())> {};
@@ -282,9 +285,11 @@ namespace classdesc
     template <class A>
     struct ArgAcceptable:
       public And<
-      And<is_default_constructible<typename remove_reference<A>::type>,
+      And<
+        And<is_default_constructible<typename remove_reference<A>::type>,
           is_copy_constructible<typename remove_reference<A>::type>>,
-      Not<std::is_rvalue_reference<A>>
+        Not<std::is_rvalue_reference<A>>>,
+      Not<is_pointer<A>>
       >{};
 
     template <class C, class M, class R>
@@ -811,5 +816,11 @@ namespace classdesc
     {apply_void_fn(f,args);}
   }
 
+  template <class C, class M, class R, class E>
+  struct tn<functional::bound_method<C,M,R,E> >
+  {
+    static string name() {return "classdesc::bound_method<"+typeName<C>()+","+typeName<M>()+">";}
+  };
+    
 }
 #endif

@@ -145,8 +145,22 @@ namespace classdesc
     classdesc_access::access_RESTProcess<typename remove_const<T>::type>()(repo,d,obj);
     repo.add(d, new RESTProcessObject<T>(obj));
   }
-  
 
 }
 
+namespace classdesc_access
+{
+  namespace cd=classdesc;
+#if defined(__cplusplus) && __cplusplus>=201103L
+  template <class F>
+  struct access_RESTProcess<std::function<F>>
+  {
+    void operator()(cd::RESTProcess_t& r, const cd::string& d, const std::function<F>& a)
+    {r.add(d, new cd::RESTProcessFunction<std::function<F>>(a));}
+  };
+#endif
+
+  template <> struct access_RESTProcess<ecolab::CairoSurface>: public cd::NullDescriptor<cd::RESTProcess_t> {};
+}
+    
 #endif

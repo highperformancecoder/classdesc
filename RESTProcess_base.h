@@ -324,8 +324,12 @@ namespace classdesc
     T& obj;
 
     template <class U>
-    struct Insertable: public And<has_member_push_back<T,void (T::*)(const typename T::value_type&)>,
-                                  is_default_constructible<typename T::value_type>> {};
+    struct Insertable: public
+    And<
+      And<
+      has_member_push_back<T,void (T::*)(const typename T::value_type&)>,
+        is_default_constructible<typename T::value_type>>,
+      Not<is_const<U>>> {};
     
     template <class U>
     typename enable_if<Insertable<U>, void>::T
@@ -599,6 +603,11 @@ namespace classdesc
   //template <class T> bool matches(const json_spirit::mValue& arg);
   
   template <class T>
+  typename enable_if<And<is_pointer<T>, Not<is_same<T,const char*> > >,bool>::T
+  matches(const json_spirit::mValue& x)
+  {return false;}
+
+  template <class T>
   typename enable_if<is_same<T,bool>,bool>::T
   matches(const json_spirit::mValue& x)
   {return x.type()==json_spirit::bool_type;}
@@ -613,7 +622,7 @@ namespace classdesc
   {return x.type()==json_spirit::str_type;}
 
   template <class T>
-  typename enable_if<is_integral<T>, bool>::T matches(const json_spirit::mValue& x)
+  typename enable_if<And<is_integral<T>,Not<is_same<T,bool>>>, bool>::T matches(const json_spirit::mValue& x)
   {return x.type()==json_spirit::int_type;}
 
   template <class T>
@@ -661,7 +670,7 @@ namespace classdesc
   struct isNoMatch
   {
     static const bool value = !is_integral<T>::value && !is_floating_point<T>::value &&
-      !is_container<T>::value && !is_object<T>::value;
+      !is_container<T>::value && !is_object<T>::value && !is_pointer<T>::value;
   };
 
   template <class T>
@@ -807,7 +816,7 @@ namespace classdesc
     unsigned matchScore(const json_pack_t& arguments) const override
     {return classdesc::matchScore<F>(arguments);}
     json_pack_t list() const override {return json_pack_t(json_spirit::mArray());}
-    json_pack_t type() const override {return typeName<F>();}
+    json_pack_t type() const override {return json_spirit::mValue(typeName<F>());}
  };
 
   template <class T, class F>
@@ -896,6 +905,10 @@ namespace classdesc
   {
     r.add(d, new RESTProcessMultiArray<T,Args...>(&a, args...));
   }
+
+  template <class T>
+  void RESTProcess(RESTProcess_t& r, const string& d, is_constructor, T& a)  {}
+
 }
 
 namespace classdesc_access

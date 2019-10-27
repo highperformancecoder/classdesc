@@ -31,7 +31,7 @@ namespace classdesc
   typeNamep() {return integralTypeName<T>();}
 
   template <class T> typename
-  enable_if<And<Not<is_const<T> >,Not<is_integral<T> > >,std::string>::T
+  enable_if<And<And<Not<is_const<T> >,Not<is_integral<T> > >,Not<is_function<T>>>,std::string>::T
   typeNamep() {return tn<T>::name();}
 
   template <class T> typename
@@ -39,7 +39,7 @@ namespace classdesc
   typeNamep() {return "const "+typeName<typename remove_const<T>::type>();}
 
   template <class T>
-  typename enable_if<Not<is_function<T> >,  std::string>::T
+  typename enable_if<And<Not<is_function<T> >, Not<is_member_function_pointer<T> > >,  std::string>::T
   typeName() {return typeNamep<T>();}
 
   

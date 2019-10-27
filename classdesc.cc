@@ -1549,7 +1549,7 @@ int main(int argc, char* argv[])
                     if (aj.member.length() && !aj.base && aj.action.find("classdesc::is_array")!=0)
                       printf("::%s(targ,desc+\"%s\",%s,%s);\n",a.c_str(),
                              aj.name.c_str(),aj.member.c_str(),aj.action.c_str());
-                    else
+                    else if (aj.action.find("classdesc::is_constructor")==string::npos)
                       printf("::%s(targ,desc+\"%s\",%s);\n",a.c_str(),
                              aj.name.c_str(),aj.action.c_str());
                   }
