@@ -85,14 +85,6 @@ struct Bar: Foo
   int f;
   EnumFoo barfoo;
   std::vector<Foo> vFoo;
-//  static tuple varArgExample(tuple args, dict kw) {
-//    Bar& self=extract<Bar&>(args[0]);
-//    std::cout << self.f << std::endl;
-//    return make_tuple(args,kw);
-//  }
-//  static pointer_wrapper<Bar*> self(const tuple& args, const dict& kw) {
-//    return ptr(&extract<Bar&>(args[0])());
-//  }
   Bar& overloadExample() {return *this;}
   int overloadExample(int x, int y=0) const {return x+y;}
   // test overloading
@@ -108,6 +100,10 @@ struct Bar: Foo
 
   std::string name() const override {return "Bar";}
   Foo& foo() {return *this;}
+
+  // issue with template return args - see ticket #68
+  // std::vector<std::vector<Foo>> templateReturnIssue() {return {};};
+  std::vector<std::vector<Foo> > templateReturnIssue() {return {};};
 };
 
 struct Bar1
