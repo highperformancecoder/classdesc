@@ -717,7 +717,7 @@ namespace classdesc
     template <class T> std::string enumKey(int);
   }
 
-  template <class T> const EnumKeys<typename std::remove_const<T>::type>&
+  template <class T> const EnumKeys<typename remove_const<T>::type>&
   enum_keys() {return enum_keysData<T>::keys;}
 
   template <class T>

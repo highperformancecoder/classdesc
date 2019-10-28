@@ -22,16 +22,16 @@ namespace classdesc
     return (is_unsigned<T>::value?"unsigned int":"int")+os.str()+"_t";
   }
 
-//  template <class T> typename 
-//  enable_if< is_const<T>, std::string>::T  integralTypeName() 
-//  {return "const "+integralTypeName<typename std::remove_const<T>::type>();}
-
   template <class T> typename
   enable_if<And<Not<is_const<T> >,is_integral<T> >,std::string>::T
   typeNamep() {return integralTypeName<T>();}
 
   template <class T> typename
-  enable_if<And<And<Not<is_const<T> >,Not<is_integral<T> > >,Not<is_function<T>>>,std::string>::T
+  enable_if<
+    And<
+      And<Not<is_const<T> >,Not<is_integral<T> > >,
+      Not<is_function<T> >
+      >,std::string>::T
   typeNamep() {return tn<T>::name();}
 
   template <class T> typename
