@@ -50,8 +50,7 @@ namespace classdesc
     virtual unsigned matchScore(const json_pack_t& arguments) const=0;
   };
 
-  //  template <> inline string typeName<RESTProcessBase>() {return "RESTProcessBase";}
-  void convert(char& y, const string& x)
+  inline void convert(char& y, const string& x)
   {
     if (x.size()!=1)
       throw std::runtime_error("can only assign a single character string to a character variable");
@@ -526,10 +525,10 @@ namespace classdesc
     json_pack_t signature() const override;
     json_pack_t list() const override {
       if (auto p=ptr.lock())
-        return RESTProcessObject<typename T::element_type>(*p).list();
+        return RESTProcessObject<T>(*p).list();
       else return json_pack_t(json_spirit::mArray());
     }
-    json_pack_t type() const override {return typeName<std::weak_ptr<T> >();}
+    json_pack_t type() const override {return json_spirit::mValue(typeName<std::weak_ptr<T> >());}
  };
 
   
@@ -662,7 +661,11 @@ namespace classdesc
   }
   
   template <class T>
-  typename enable_if<And<is_class<T>, is_default_constructible<T> >, bool>::T
+  typename enable_if<
+    And<
+      And<is_class<T>, is_default_constructible<T> >,
+      Not<is_same<T,string>>
+      >, bool>::T
   matches(const json_spirit::mValue& x)
   {
     if (x.type()!=json_spirit::obj_type) return false;
@@ -867,7 +870,7 @@ namespace classdesc
       else if (remainder=="@signature")
         return signature();
       else if (arguments.type()==json_spirit::str_type)
-        e=enum_keys<E>()(arguments.get_str());
+        convert(e, enum_keys<E>()(arguments.get_str()));
       return r<<enum_keys<E>()(e);
     }
     json_pack_t signature() const override;

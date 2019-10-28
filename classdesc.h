@@ -709,11 +709,15 @@ namespace classdesc
       static EnumKeys<T> keys;
     };
 
+    // handle const case
+    template <class T> struct enum_keysData<const T>: public enum_keysData<T> {};
+
+    
     template <class T> int enumKey(const std::string&);
     template <class T> std::string enumKey(int);
   }
 
-  template <class T> const EnumKeys<T>&
+  template <class T> const EnumKeys<typename std::remove_const<T>::type>&
   enum_keys() {return enum_keysData<T>::keys;}
 
   template <class T>
