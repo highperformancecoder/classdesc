@@ -289,7 +289,7 @@ namespace classdesc
         And<is_default_constructible<typename remove_reference<A>::type>,
           is_copy_constructible<typename remove_reference<A>::type>>,
         Not<std::is_rvalue_reference<A>>>,
-      Not<is_pointer<A>>
+      Or<Not<is_pointer<A>>, is_same<A,const char*>>
       >{};
 
     // true if C is non const, or M is a const member function or static
