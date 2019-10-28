@@ -396,6 +396,23 @@ namespace classdesc
     typedef std::pair<K, V> type;
   };
   
+  /// insert element into an associative container
+  template <class T> 
+  void RPAC_insert(T& obj, const json_pack_t& arguments)
+  {
+    typename MutableValueType<typename T::value_type>::type v;
+    arguments>>v;
+    if (!obj.insert(v).second)
+      throw std::runtime_error("key already exists, not inserted");
+  }
+
+  /// insert element into map
+  template <class T>
+  void RPAC_insert(const T&, const json_pack_t& argument)
+  {
+    throw std::runtime_error("cannot insert data into a constant container");
+  }
+
   template <class T> class RESTProcessAssociativeContainer: public RESTProcessContainerBase
   {
     T& obj;
@@ -416,6 +433,7 @@ namespace classdesc
       m[k]=v;
     }
     template <class U, class K> void assignIfMap(U&,const K&,const json_pack_t&) {}
+
     
   public:
     RESTProcessAssociativeContainer(T& obj): obj(obj) {}
@@ -448,10 +466,7 @@ namespace classdesc
         }
       else if (startsWith(remainder,"/@insert"))
         {
-          typename MutableValueType<typename T::value_type>::type v;
-          arguments>>v;
-          if (!obj.insert(v).second)
-            throw std::runtime_error("key already exists, not inserted");
+          RPAC_insert(obj,arguments);
           return r;
         }
       else if (startsWith(remainder,"/@size"))

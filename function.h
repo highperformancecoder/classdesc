@@ -324,7 +324,11 @@ namespace classdesc
     public:
       bound_method(C& obj, M method): obj(&obj), method(method) {}
       template <class... Args>
-      R operator()(Args... args) const {return {};} // can't call, argument unacceptable
+      R operator()(Args... args) const
+      {
+        // can't call, argument unacceptable
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+      } 
       void rebind(C& newObj) {obj=&newObj;}
     };
 
@@ -343,20 +347,20 @@ namespace classdesc
       void rebind(C& newObj) {obj=&newObj;}
     };
 
-    template <class C, class M>
-    class bound_method<C, M, void,
-                       typename enable_if<
-                         Not<And<ConstCorrect<C,M>, AllArgs<M,ArgAcceptable>>>,
-                         void>::T>
-    {
-      C* obj;
-      M method;
-    public:
-      bound_method(C& obj, M method): obj(&obj), method(method) {}
-      template <class... Args>
-      void operator()(Args... args) const {}
-      void rebind(C& newObj) {obj=&newObj;}
-    };
+//    template <class C, class M>
+//    class bound_method<C, M, void,
+//                       typename enable_if<
+//                         Not<And<ConstCorrect<C,M>, AllArgs<M,ArgAcceptable>>>,
+//                         void>::T>
+//    {
+//      C* obj;
+//      M method;
+//    public:
+//      bound_method(C& obj, M method): obj(&obj), method(method) {}
+//      template <class... Args>
+//      void operator()(Args... args) const {}
+//      void rebind(C& newObj) {obj=&newObj;}
+//    };
 
     template <class C, class F> struct FunctionalHelperFor<bound_method<C,F>>
     {
