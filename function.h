@@ -288,7 +288,11 @@ namespace classdesc
       And<
         And<is_default_constructible<typename remove_reference<A>::type>,
           is_copy_constructible<typename remove_reference<A>::type>>,
-        Not<std::is_rvalue_reference<A>>>,
+       And<
+         Not<std::is_rvalue_reference<A>>,
+         Or<Not<is_reference<A>>, is_const<typename remove_reference<A>::type>>
+         >
+        >,
       Or<Not<is_pointer<A>>, is_same<A,const char*>>
       >{};
 

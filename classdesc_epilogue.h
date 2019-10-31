@@ -54,4 +54,8 @@ namespace
 #include "python_epilogue.h"
 #endif
 
+#ifdef RESTPROCESS_H
+#include "RESTProcess_epilogue.h"
+#endif
+
 #endif

@@ -610,7 +610,8 @@ namespace classdesc
   // don't do anything if we cannot create or copy an argument
   template <class F>
   typename enable_if<Not<functional::AllArgs<F, functional::ArgAcceptable>>, json_pack_t>::T
-  callFunction(const string& remainder, const json_pack_t& arguments, F f) {return {};}
+  callFunction(const string& remainder, const json_pack_t& arguments, F f)
+  {throw std::runtime_error("cannot call this function");}
   
   /// @{
   /// return whether \a arg matches a C++ type T for a function call argument
