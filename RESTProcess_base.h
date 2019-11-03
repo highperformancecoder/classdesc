@@ -675,7 +675,7 @@ namespace classdesc
         T test;
         x>>test;
       }
-    catch(std::exception)
+    catch(const std::exception&)
       {return false;}
     return true;
   }
