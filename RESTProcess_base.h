@@ -285,7 +285,13 @@ namespace classdesc
 
   template <class T>
   struct is_classdescGenerated:
-    public And<is_class<T>, Not<is_container<T>>> {};
+    public And<
+    And<
+      is_class<T>,
+      Not<is_container<T>>
+      >,
+    Not<is_smart_ptr<T>>
+    > {};
   
   /// descriptor for generating building REST processing registry
   template <class T>
@@ -346,7 +352,6 @@ namespace classdesc
     json_pack_t process(const string& remainder, const json_pack_t& arguments) override
     {
       json_pack_t r;
-      // TODO @elem selector in remainder
       if (remainder.empty())
         convert(obj, arguments);
       else if (startsWith(remainder,"/@elem"))
@@ -928,6 +933,10 @@ namespace classdesc
   template <class T>
   void RESTProcess(RESTProcess_t& r, const string& d, is_constructor, T& a)  {}
 
+  template <class T>
+  typename enable_if<is_smart_ptr<T>, void>::T 
+  RESTProcessp(RESTProcess_t& repo, const std::string& d, T& a)
+  {repo.add(d, new RESTProcessPtr<T>(a));}
 }
 
 namespace classdesc_access

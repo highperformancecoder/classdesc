@@ -19,22 +19,6 @@ namespace classdesc_access
   template <class T>
   struct access_RESTProcess<cd::Exclude<T>>: public cd::NullDescriptor<cd::RESTProcess_t> {};
 
-  template <class T>
-  struct access_RESTProcess<cd::shared_ptr<T>>
-  {
-    template <class U>
-    void operator()(cd::RESTProcess_t& repo, const std::string& d, U& a)
-    {repo.add(d, new cd::RESTProcessPtr<U>(a));}
-  };
-
-  template <class T>
-  struct access_RESTProcess<cd::weak_ptr<T>>
-  {
-    template <class U>
-    void operator()(cd::RESTProcess_t& repo, const std::string& d, U& a)
-    {repo.add(d, new cd::RESTProcessPtr<U>(a));}
-  };
-
   template <>
   struct access_RESTProcess<cd::string>
   {

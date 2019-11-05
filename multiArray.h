@@ -8,6 +8,7 @@
 
 #ifndef MULTIARRAY_H
 #define MULTIARRAY_H
+#include <assert.h>
 
 namespace classdesc
 {

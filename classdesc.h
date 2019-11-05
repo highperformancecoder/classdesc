@@ -334,6 +334,18 @@ namespace classdesc
     is_sequence<T>::value||is_associative_container<T>::value;
   };
 
+  /// @{ type trait for the smart pointer concept
+  template <class T> struct is_smart_ptr: public false_type {};
+  template <class T> struct is_smart_ptr<shared_ptr<T> >: public true_type {};
+  template <class T> struct is_smart_ptr<weak_ptr<T> >: public true_type {};
+  template <class T> struct is_smart_ptr<const shared_ptr<T> >: public true_type {};
+  template <class T> struct is_smart_ptr<const weak_ptr<T> >: public true_type {};
+#if defined(__cplusplus) && __cplusplus>=201103L
+  template <class T> struct is_smart_ptr<std::unique_ptr<T>>: public true_type {};
+  template <class T> struct is_smart_ptr<const std::unique_ptr<T>>: public true_type {};
+#endif
+  /// @}
+  
   ///  boolean arithmetic on is_ structs 
   ///@{
   template <class T> struct Not
