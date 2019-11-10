@@ -9,7 +9,6 @@
 #ifndef FACTORY_H
 #define FACTORY_H
 #include "classdesc.h"
-#include "error.h"
 #include <sstream>
 
 namespace classdesc
