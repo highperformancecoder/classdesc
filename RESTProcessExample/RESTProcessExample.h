@@ -10,6 +10,7 @@
 #define RESTPROCESSEXAMPLE_H
 #include <classdesc.h>
 #include <stringKeyMap.h>
+#include <polyRESTProcess.h>
 using namespace classdesc;
 
 #include <string>
@@ -149,6 +150,13 @@ struct Defaultless: public Abstract
   int foo() override {return 0;}
 };
 
+// test of polymorphic types
+struct IPoly: public PolyRESTProcess<IPoly> {};
+
+struct Poly: public PolyRESTProcess<Poly, IPoly>
+{
+  int a;
+};
 
 // root type
 struct Root
@@ -156,6 +164,10 @@ struct Root
   Defaultless defaultless{1};
   Bar bar;
   Bar1 bar1;
+
+  std::shared_ptr<IPoly> spoly{new Poly};
+  std::shared_ptr<Bar> sbar{new Bar};
+  
   FooBar1& getFB1() {
     static FooBar1 m;
     return m;

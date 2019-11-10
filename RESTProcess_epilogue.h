@@ -11,6 +11,7 @@
 #include "signature.h"
 #include "multiArray.h"
 #include "polyPackBase.h"
+#include "polyRESTProcess.h"
 
 namespace classdesc_access
 {
@@ -128,6 +129,28 @@ namespace classdesc
   {
     classdesc_access::access_RESTProcess<typename remove_const<T>::type>()(repo,d,obj);
     repo.add(d, new RESTProcessObject<T>(obj));
+  }
+
+  template <class T>
+  json_pack_t RESTProcessPtr<T>::process(const string& remainder, const json_pack_t& arguments)
+  {
+    if (ptr)
+      if (remainder.empty())
+        return rProcess(*ptr, remainder, arguments);
+      else
+        return mapAndProcess(remainder,arguments,*ptr);
+    else
+      return {};
+  }
+
+  template <class T>
+  json_pack_t RESTProcessPtr<std::weak_ptr<T>>::process
+  (const string& remainder, const json_pack_t& arguments)
+  {
+    if (auto p=ptr.lock())
+      return rProcess(*p, remainder, arguments);
+    else
+      return {};
   }
 
 }

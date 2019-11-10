@@ -12,7 +12,6 @@
 #include "function.h"
 #include "multiArray.h"
 #include "json_pack_base.h"
-
 #include <map>
 #include <stdexcept>
 
@@ -497,16 +496,7 @@ namespace classdesc
   {
     T& ptr;
     RESTProcessPtr(T& ptr): ptr(ptr) {}
-    json_pack_t process(const string& remainder, const json_pack_t& arguments) override
-    {
-      if (ptr)
-        if (remainder.empty())
-          return RESTProcessObject<typename T::element_type>(*ptr).process(remainder, arguments);
-        else
-          return mapAndProcess(remainder,arguments,*ptr);
-      else
-        return {};
-    }
+    json_pack_t process(const string& remainder, const json_pack_t& arguments) override;
     json_pack_t signature() const override;
     json_pack_t list() const override {
       if (ptr) return RESTProcessObject<typename T::element_type>(*ptr).list();
@@ -520,13 +510,7 @@ namespace classdesc
   {
     std::weak_ptr<T>& ptr;
     RESTProcessPtr(std::weak_ptr<T>& ptr): ptr(ptr) {}
-    json_pack_t process(const string& remainder, const json_pack_t& arguments) override
-    {
-      if (auto p=ptr.lock())
-        return RESTProcessObject<T>(*p).process(remainder, arguments);
-      else
-        return {};
-    }
+    json_pack_t process(const string& remainder, const json_pack_t& arguments) override;
     json_pack_t signature() const override;
     json_pack_t list() const override {
       if (auto p=ptr.lock())

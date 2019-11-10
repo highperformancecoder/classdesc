@@ -8,7 +8,7 @@ RESTProcess: $(OBJS)
 	g++  $^ $(LIBS) -o $@
 
 .h.cd:
-	../classdesc -I .. -nodef -typeName -use_mbr_pointers -onbase -respect_private json_pack json_unpack <$< >$@
+	../classdesc -I .. -nodef -typeName -use_mbr_pointers -respect_private json_pack json_unpack <$< >$@
 	../classdesc -I .. -nodef -use_mbr_pointers -onbase -overload -respect_private RESTProcess  <$< >>$@
 
 .cc.o:
