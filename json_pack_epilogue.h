@@ -13,6 +13,12 @@
 
 namespace classdesc
 {
+  template <>
+  struct tn<json_pack_t>
+  {
+    string name() {return "classdesc::json_pack_t";}
+  };
+  
   template <class T>
   struct AllOtherJsonPackpTypes:
     public Not< Or< Or< Or<is_fundamental<T>,is_string<T> >, is_sequence<T> >, 

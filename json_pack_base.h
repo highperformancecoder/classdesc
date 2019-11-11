@@ -475,7 +475,6 @@ namespace classdesc
   void json_unpack_onbase(json_unpack_t& x,const string& d,T& a)
   {json_unpack(x,d+basename<T>(),a);}
 
-
 }
 
 namespace classdesc_access
