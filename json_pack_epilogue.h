@@ -16,7 +16,7 @@ namespace classdesc
   template <>
   struct tn<json_pack_t>
   {
-    string name() {return "classdesc::json_pack_t";}
+    static string name() {return "classdesc::json_pack_t";}
   };
   
   template <class T>
