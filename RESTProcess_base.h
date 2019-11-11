@@ -34,8 +34,8 @@ namespace classdesc
     template <class F> json_pack_t functionSignature() const;
   };
 
-  /// marker for containers
-  class RESTProcessContainerBase: public RESTProcessBase {};
+  /// marker for containers and pointers that wrap
+  class RESTProcessWrapperBase: public RESTProcessBase {};
   
   // used to mark function types that can be overloaded 
   class RESTProcessFunctionBase: public RESTProcessBase
@@ -194,7 +194,7 @@ namespace classdesc
                   return r->second->list();
                 else if (tail=="/@type")
                   return r->second->type();
-                else if (cmdEnd || dynamic_cast<RESTProcessContainerBase*>(r->second.get()))
+                else if (cmdEnd || dynamic_cast<RESTProcessWrapperBase*>(r->second.get()))
                   return r->second->process(tail, jin);
                 else
                   throw std::runtime_error("Command not found");
@@ -327,7 +327,7 @@ namespace classdesc
   {return x.size()>=prefix.size() && equal(prefix.begin(), prefix.end(), x.begin());}
 
   // sequences
-  template <class T> class RESTProcessSequence: public RESTProcessContainerBase
+  template <class T> class RESTProcessSequence: public RESTProcessWrapperBase
   {
     T& obj;
 
@@ -420,7 +420,7 @@ namespace classdesc
     throw std::runtime_error("cannot insert data into a constant container");
   }
 
-  template <class T> class RESTProcessAssociativeContainer: public RESTProcessContainerBase
+  template <class T> class RESTProcessAssociativeContainer: public RESTProcessWrapperBase
   {
     T& obj;
 
@@ -496,7 +496,7 @@ namespace classdesc
   }
 
   template <class T>
-  struct RESTProcessPtr: public RESTProcessBase
+  struct RESTProcessPtr: public RESTProcessWrapperBase
   {
     T& ptr;
     RESTProcessPtr(T& ptr): ptr(ptr) {}
@@ -510,7 +510,7 @@ namespace classdesc
   };
 
   template <class T>
-  struct RESTProcessPtr<std::weak_ptr<T>>: public RESTProcessBase
+  struct RESTProcessPtr<std::weak_ptr<T>>: public RESTProcessWrapperBase
   {
     std::weak_ptr<T>& ptr;
     RESTProcessPtr(std::weak_ptr<T>& ptr): ptr(ptr) {}
