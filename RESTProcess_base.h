@@ -163,20 +163,28 @@ namespace classdesc
       // for overloadable functions, allow multiple entries for this key
       emplace(d,rp);
     }
-  
+
     json_pack_t process(const std::string& query, const json_pack_t& jin)
     {
       if (query[0]!='/') return {};
       string cmd=query;
       
-      for (auto cmdEnd=query.length(); cmdEnd>0;
+      for (auto cmdEnd=query.length(); ;
            cmdEnd=cmd.rfind('/'), cmd=cmd.substr(0,cmdEnd))
         {
+          if (cmdEnd==string::npos)
+            {
+              cmdEnd=0;
+              cmd="";
+            }
           auto tail=query.substr(cmdEnd);
           switch (count(cmd))
             {
             case 0:
-              break;
+              if (cmdEnd)
+                continue; // try next split
+              else
+                throw std::runtime_error("Command not found");
             case 1: // simple object or non overloaded function
               {
                 auto r=find(cmd);
@@ -186,8 +194,10 @@ namespace classdesc
                   return r->second->list();
                 else if (tail=="/@type")
                   return r->second->type();
-                else
+                else if (cmdEnd || dynamic_cast<RESTProcessContainerBase*>(r->second.get()))
                   return r->second->process(tail, jin);
+                else
+                  throw std::runtime_error("Command not found");
               }
             default:
               {
@@ -227,12 +237,6 @@ namespace classdesc
                 }
             }
         }
-      // last ditch effort - see if there is an "" object in the map
-      auto i=find("");
-      if (i!=end())
-        if (auto j=dynamic_cast<RESTProcessContainerBase*>(i->second.get()))
-          return j->process(query, jin);
-      throw std::runtime_error("Command not found");
     }
   };
 

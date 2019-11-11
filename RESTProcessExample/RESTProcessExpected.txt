@@ -69,8 +69,8 @@
 /root/bar/l/@insert=>[2,3,2,5]
 /root/bar/l=>[2,3,2,5]
 /root/bar/l=>[2,2,2,2]
-/root/bar/m   =>Exception: Command not found
-/root/bar/m/@size   =>2
+/root/bar/m=>[{"first":0,"second":5},{"first":3,"second":2}]
+/root/bar/m/@size=>2
 /root/bar/m/@signature=>[{"args":[],"ret":"std::map<int,int>"},{"args":["std::map<int,int>"],"ret":"std::map<int,int>"}]
 /root/bar/m/@elem/3=>{"first":3,"second":2}
 /root/bar/m/@elem/3=>{"first":3,"second":5}
@@ -100,7 +100,7 @@
 /root/bar/name=>"Bar"
 /root/bar/overloadExample=>{"a":0.20000000000000001,"af":0.30000001192092896,"b":1,"barfoo":"eb","bf":true,"bt":false,"c":"hello world","c1":["x","\r"],"ch":"M","d":[0,5,2],"d1":[[0,1],[2,6],[7,10]],"ef":"ea","f":20,"h":[2,2,2,2],"l":[2,2,2,2],"llex":[["hello","hello"],["baa","baa","blacksheep"]],"m":[{"first":0,"second":5},{"first":1,"second":2},{"first":3,"second":5}],"sef":"eb","sm":{},"um":[{"first":1,"second":5}],"vFoo":[{"a":0.10000000000000001,"af":0.20000000298023224,"b":1,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":"M","d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":"ea","sm":{},"um":[],"vs":[" hello"," hello"]},{"a":0.10000000000000001,"af":0.20000000298023224,"b":1,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":"M","d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":"ea","sm":{},"um":[],"vs":[" hello"," hello"]},{"a":0.10000000000000001,"af":0.20000000298023224,"b":1,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":"M","d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":"ea","sm":{},"um":[],"vs":[" hello"," hello"]}],"vs":[" hello"," hello"]}
 /root/bar/barE=>"a"
-/root/bar/barE =>Exception: Command not found
+/root/bar/barE=>"b"
 /root/bar/globE=>"ga"
 /root/bar1/foo=>{"a":0.10000000000000001,"af":0.20000000298023224,"b":2,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":"M","d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":"ea","sm":{},"um":[],"vs":[" hello"," hello"]}
 /root/bar1/fooRef/b=>2

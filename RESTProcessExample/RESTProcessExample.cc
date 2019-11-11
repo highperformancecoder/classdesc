@@ -43,6 +43,10 @@ int main()
           cout << i.first << endl;
       else
         {
+          // trim any trailing whitespace
+          int i=cmd.length()-1;
+          for (; i>=0 && isspace(cmd[i]); --i);
+          cmd=cmd.substr(0,i+1);
           try
             {
               json_pack_t jin(json_spirit::mValue::null);
