@@ -67,6 +67,8 @@ namespace classdesc
 namespace classdesc_access
 {
   namespace cd=classdesc;
+
+#ifndef JSON_PACK_NO_FALL_THROUGH_TO_STREAMING
   // fall through to streaming operators
   template <class T>
   struct access_json_pack
@@ -93,7 +95,8 @@ namespace classdesc_access
       i>>a;
     }
   };
-
+#endif
+  
 #if defined(__cplusplus) && __cplusplus>=201103L 
   template <class T>
   struct access_json_pack<std::function<T>>

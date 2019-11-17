@@ -49,6 +49,19 @@ namespace classdesc
                    throw_on_error(false)  {}
     json_pack_t(const json_spirit::mValue& x): 
       json_spirit::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
+
+    template <class T,
+              typename enable_if<Not<is_base_of<json_spirit::mValue,T>>, void>::T>
+    json_pack_t(const T& x);
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+    template <class T>
+    json_pack_t(const std::initializer_list<T>& x): json_spirit::mValue(json_spirit::mArray())
+    {
+      auto& arr=get_array();
+      for (auto& i: x) arr.emplace_back(i);
+    }
+#endif
   };
 
 
@@ -68,6 +81,11 @@ namespace classdesc
   template <class T> const json_unpack_t& operator>>(const json_unpack_t& j, T& a) 
   {json_unpack(const_cast<json_unpack_t&>(j),"",a); return j;}
 
+  template <class T, typename enable_if<Not<is_base_of<json_spirit::mValue,T>>, void>::T>
+  json_pack_t::json_pack_t(const T& x):
+    throw_on_error(false), throw_on_not_found(false)
+  {(*this)<<x;}
+  
   /// find an object named by \a name within the json object x
   inline json_spirit::mValue& 
   json_find(json_spirit::mValue& x, std::string name)
