@@ -51,7 +51,7 @@ namespace classdesc
       json_spirit::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
 
     template <class T,
-              typename enable_if<Not<is_base_of<json_spirit::mValue,T>>, void>::T>
+              typename enable_if<Not<is_base_of<json_spirit::mValue,T> >, void>::T>
     json_pack_t(const T& x);
 
     json_pack_t(const char* x):
