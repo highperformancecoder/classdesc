@@ -83,7 +83,7 @@ namespace classdesc
   template <class T> const json_unpack_t& operator>>(const json_unpack_t& j, T& a) 
   {json_unpack(const_cast<json_unpack_t&>(j),"",a); return j;}
 
-  template <class T, typename enable_if<Not<is_base_of<json_spirit::mValue,T>>, void>::T>
+  template <class T, typename enable_if<Not<is_base_of<json_spirit::mValue,T> >, void>::T>
   json_pack_t::json_pack_t(const T& x):
     throw_on_error(false), throw_on_not_found(false)
   {(*this)<<x;}
