@@ -21,8 +21,8 @@ namespace classdesc
   
   template <class T>
   struct AllOtherJsonPackpTypes:
-    public Not< Or< Or< Or<is_fundamental<T>,is_string<T> >, is_sequence<T> >, 
-                    is_associative_container<T> > >
+    public Not< Or< Or< Or< Or<is_fundamental<T>,is_string<T> >, is_sequence<T> >, 
+                        is_associative_container<T> >, is_pointer<T> > >
   {};
 
   template <class T> typename 
@@ -62,6 +62,11 @@ namespace classdesc
   template <class T> void json_unpack(json_unpack_t& o, const string& d, T& a)
   {json_unpackp(o,d,a);}
 
+  template <class T> void json_packp(json_pack_t& o, const string& d, T* a)
+  {}
+  
+  template <class T> void json_packp(json_pack_t& o, const string& d, const char* a)
+  {o=json_spirit::mValue(a);}
 }
 
 namespace classdesc_access

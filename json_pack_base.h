@@ -46,7 +46,7 @@ namespace classdesc
     bool throw_on_error; ///< enable exceptions on error conditions
     bool throw_on_not_found; ///< enable exceptions if element not present in JSON stream
     json_pack_t(): json_spirit::mValue(json_spirit::mObject()), 
-                   throw_on_error(false)  {}
+                   throw_on_error(false), throw_on_not_found(false)  {}
     json_pack_t(const json_spirit::mValue& x): 
       json_spirit::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
 
@@ -54,6 +54,8 @@ namespace classdesc
               typename enable_if<Not<is_base_of<json_spirit::mValue,T>>, void>::T>
     json_pack_t(const T& x);
 
+    json_pack_t(const char* x):
+      json_spirit::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
 #if defined(__cplusplus) && __cplusplus>=201103L
     template <class T>
     json_pack_t(const std::initializer_list<T>& x): json_spirit::mValue(json_spirit::mArray())
