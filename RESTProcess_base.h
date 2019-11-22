@@ -32,6 +32,8 @@ namespace classdesc
     virtual json_pack_t type() const=0;
     /// return signature for a function type F
     template <class F> json_pack_t functionSignature() const;
+    /// returns a pointer to the underlying object if it is one of type T, otherwise null
+    template <class T> T* getObject();
   };
 
   /// marker for containers and pointers that wrap
@@ -257,10 +259,9 @@ namespace classdesc
   }
   
   /// handle setting and getting of objects
-  template <class T> class RESTProcessObject: public RESTProcessBase
+  template <class T> struct RESTProcessObject: public RESTProcessBase
   {
     T& obj;
-  public:
     RESTProcessObject(T& obj): obj(obj) {}
     json_pack_t process(const string& remainder, const json_pack_t& arguments) override
     {
@@ -285,6 +286,14 @@ namespace classdesc
     }
     json_pack_t type() const override {return json_pack_t(typeName<T>());}
   };
+
+  template <class T> T* RESTProcessBase::getObject()
+  {
+    if (auto p=dynamic_cast<RESTProcessObject<T>*>(this))
+      return &p->obj;
+    else
+      return nullptr;
+  }
 
   template <class T>
   struct is_classdescGenerated:
