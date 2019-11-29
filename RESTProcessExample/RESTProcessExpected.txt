@@ -121,3 +121,7 @@
 /root/defaultless/bar=>2
 /root/getFB1=>{"f":{"a":0.10000000000000001,"af":0.20000000298023224,"b":0,"bf":false,"bt":true,"c":"\r hello & 123 ","c1":["\r","\r"],"ch":"M","d":[0,1,2],"d1":[[0,1],[2,3],[4,5]],"ef":"ea","h":[2,2,2],"l":[2,2,2],"llex":[["hello","hello"],["hello","hello"]],"m":[{"first":0,"second":5},{"first":3,"second":2}],"sef":"ea","sm":{},"um":[],"vs":[" hello"," hello"]}}
 /root/getFB1/f/b=>0
+/@enum/@list=>["/@enum/::Bar::BarE","/@enum/::EnumFoo","/@enum/::GlobE"]
+/@enum/::EnumFoo=>["ea","eb","ec","ed"]
+/@enum/::GlobE=>["ga","gb"]
+/@enum/::Bar::BarE=>["a","b"]

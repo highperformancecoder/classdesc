@@ -247,3 +247,12 @@ false
 
 /root/getFB1/f/b
 
+# enum enumerator listing
+/@enum/@list
+
+/@enum/::EnumFoo
+
+/@enum/::GlobE
+
+/@enum/::Bar::BarE
+

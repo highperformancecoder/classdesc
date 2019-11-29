@@ -145,8 +145,8 @@ namespace classdesc
   void convert(const X* x, const json_pack_t& j)
   {}
 
+  template <class F, int N> struct DefineFunctionArgTypes;
 
-  
   /// REST processor registry 
   struct RESTProcess_t: public std::multimap<std::string, std::unique_ptr<RESTProcessBase> >
   {
@@ -170,6 +170,15 @@ namespace classdesc
     {
       if (query[0]!='/') return {};
       string cmd=query;
+
+      if (cmd=="/@enum/@list")
+        {
+          json_spirit::mArray r;
+          for (auto& i: *this)
+            if (i.first.find("/@enum")==0)
+              r.push_back(i.first);
+          return json_spirit::mValue(r);
+        }
       
       for (auto cmdEnd=query.length(); ;
            cmdEnd=cmd.rfind('/'), cmd=cmd.substr(0,cmdEnd))
@@ -240,9 +249,16 @@ namespace classdesc
             }
         }
     }
+
+    /// define all arguments of \a F
+    template <class F> void defineFunctionArgTypes()
+    {
+      DefineFunctionArgTypes<F,functional::Arity<F>::value>::define(*this);
+    }
   };
 
-  template <class T>
+  
+ template <class T>
   inline json_pack_t mapAndProcess(const string& query, const json_pack_t& arguments, T& a)
   {
     RESTProcess_t map;
@@ -846,6 +862,7 @@ namespace classdesc
   {
     auto bm=functional::bindMethod(obj,f);
     repo.add(d, new RESTProcessFunction<decltype(bm)>(bm));
+    repo.defineFunctionArgTypes<F>();
   }
 
   template <class F>
@@ -853,6 +870,7 @@ namespace classdesc
   RESTProcessp(RESTProcess_t& repo, const string& d, F f)
   {
     repo.add(d, new RESTProcessFunction<F>(f));
+    repo.defineFunctionArgTypes<F>();
   }
 
   template <>
@@ -865,7 +883,7 @@ namespace classdesc
     E& e;
   public:
     RESTProcessEnum(E& e): e(e) {}
-    virtual json_pack_t process(const string& remainder, const json_pack_t& arguments) override
+    json_pack_t process(const string& remainder, const json_pack_t& arguments) override
     {
       json_pack_t r;
       if (remainder=="@type")
@@ -880,12 +898,58 @@ namespace classdesc
     json_pack_t list() const override {return json_pack_t(json_spirit::mArray());}
     json_pack_t type() const override {return json_pack_t(typeName<E>());}
   };
-  
+
   template <class E>
+  class EnumerateEnumerators: public RESTProcessBase
+  {
+    json_pack_t process(const string& remainder, const json_pack_t& arguments) override
+    {
+      json_spirit::mArray r;
+      auto& enumerators=enum_keys<E>();
+      for (auto i=enumerators.sbegin(); i!=enumerators.send(); ++i)
+        r.push_back(*i);
+      return json_spirit::mValue(r);
+    }
+    json_pack_t signature() const override {return "{ret: \"vector<string>\", args: []}";}
+    json_pack_t list() const override {return json_pack_t(json_spirit::mArray());}
+    json_pack_t type() const override {return "function";}
+  };
+
+  /// @{ define type dependent information in repository
+  template <class E>
+  typename enable_if<is_enum<E>, void>::T
+  defineType(RESTProcess_t& r)
+  {r.add("/@enum/"+typeName<E>(), new EnumerateEnumerators<E>());}
+
+  template <class T>
+  typename enable_if<Not<is_enum<T>>, void>::T
+  defineType(RESTProcess_t&)
+  {/* for now, we don't do anything with regular types */}
+  /// @}
+  
+  template <class F, int N> struct DefineFunctionArgTypes
+  {
+    static void define(RESTProcess_t& r)
+    {
+      defineType<typename functional::Arg<F,N>::type>(r);
+      DefineFunctionArgTypes<F,N-1>::define(r);
+    }
+  };
+
+  template <class F> struct DefineFunctionArgTypes<F,0>
+  {
+    static void define(RESTProcess_t& r)
+    {
+      defineType<typename functional::Return<F>::type>(r);
+    }
+  };
+  
+   template <class E>
   typename enable_if<is_enum<E>, void>::T
   RESTProcessp(RESTProcess_t& repo, const string& d, E& e)
   {
     repo.add(d, new RESTProcessEnum<E>(e));
+    defineType<E>(repo);
   }
 
   template <class T>
