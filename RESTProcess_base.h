@@ -156,14 +156,14 @@ namespace classdesc
       std::replace(d.begin(),d.end(),'.','/');
       // for objects, ensure any previous entries of this key are deleted
       erase(d);
-      emplace(d,rp);
+      emplace(d,std::unique_ptr<RESTProcessBase>(rp));
     }
     /// ownership of \a rp is passed
     void add(string d, RESTProcessFunctionBase* rp)
     {
       std::replace(d.begin(),d.end(),'.','/');
       // for overloadable functions, allow multiple entries for this key
-      emplace(d,rp);
+      emplace(d,std::unique_ptr<RESTProcessBase>(rp));
     }
 
     json_pack_t process(const std::string& query, const json_pack_t& jin)
