@@ -8,6 +8,7 @@
 
 #ifndef PYTHON_BASE_H
 #define PYTHON_BASE_H
+#include <boost/python/detail/wrap_python.hpp>
 #include "classdesc.h"
 
 #include "function.h"
@@ -348,10 +349,9 @@ namespace boost {
   }
 }
 
-#include "boost/python.hpp"
-#include "boost/python/raw_function.hpp"
-#include "boost/python/slice.hpp"
-#include <Python.h>
+#include <boost/python.hpp>
+#include <boost/python/raw_function.hpp>
+#include <boost/python/slice.hpp>
 #include <vector>
 
 namespace classdesc
