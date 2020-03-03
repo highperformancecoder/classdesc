@@ -828,7 +828,7 @@ class is_ptr {};
 
 string get_typedef_name(tokeninput& input)
 {
-  int ptr;
+  bool ptr=false;
   for (; input.token!=";"; input.nexttok())
     {
       if (input.token=="{") gobble_delimited(input,"{","}");
@@ -1143,9 +1143,9 @@ int main(int argc, char* argv[])
 	  stdinclude=argv[2];
 	  argc-=2; argv+=2;
 	}
-      if (argc>1 && strcmp(argv[1],"-nodef")==0) /* don't provide definitions for */
+       if (argc>1 && strcmp(argv[1],"-nodef")==0) /* don't provide definitions for */
 	{                              /* undefined types */
-	  def=0;
+	  def=0; //NOLINT - yes it is read!
 	  argc--; argv++;
 	}
       if (argc>1 && strcmp(argv[1],"-respect_private")==0) /* don't describe private */
@@ -1200,8 +1200,8 @@ int main(int argc, char* argv[])
       
   tokeninput input(inputStream);
 
-  char **action=argv+1;
-  unsigned nactions=argc-1;
+  char **action=argv+1; //NOLINT - yes it is read!
+  unsigned nactions=argc-1; //NOLINT - yes it is read!
   string basename;
   FILE *basef;
   char tname[1024];
