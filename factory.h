@@ -20,6 +20,7 @@ namespace classdesc
   {
     struct CreatorBase
     {
+      virtual ~CreatorBase() {}
       virtual B* create() const=0;
     };
     typedef std::map<Type, shared_ptr<CreatorBase> > Fmap;
