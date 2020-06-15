@@ -22,6 +22,8 @@
 
 namespace classdesc
 {
+  typedef unsigned long long uint64;
+  
   // map<K,V>::value_type is pair<const K,V>, which causes problems
   template <class C> struct Value_Type 
   {typedef typename C::value_type value_type;};
@@ -76,7 +78,7 @@ namespace classdesc
   template <class T, class A>
   BinStream& BinStream::operator<<(const std::vector<T,A>& x)
   {
-    (*this) << x.size();
+    (*this) << uint64(x.size());
     if (!x.empty())
       packer.packraw(reinterpret_cast<const char*>(&x[0]), 
                      x.size()*sizeof(x[0]));
@@ -85,8 +87,10 @@ namespace classdesc
   template <class T, class A>
   BinStream& BinStream::operator>>(std::vector<T,A>& x)
   {
-    size_t sz;
+    uint64 sz;
     (*this) >> sz;
+    if (uint64(packer.size()-packer.pos())<sz*sizeof(T))
+      throw pack_error("invalid size for data available");
     x.resize(sz);
     if (sz)
       packer.unpackraw(reinterpret_cast<char*>(&x[0]), 
@@ -99,7 +103,7 @@ namespace classdesc
   typename enable_if<is_container<T>, void>::T
   pack(classdesc::pack_t& b, const classdesc::string&, const T& a)
   {
-    b << a.size();
+    b << uint64(a.size());
     for (typename T::const_iterator i=a.begin(); i!=a.end(); ++i)
       b << *i;
   }
@@ -111,7 +115,7 @@ namespace classdesc
   typename enable_if<is_sequence<T>, void>::T
   unpack(classdesc::pack_t& b, const classdesc::string& d, T& a)
   {
-    typename T::size_type sz, i=0;
+    uint64 sz, i=0;
     b >> sz;
     classdesc::resize(a, sz);
     for (typename T::iterator j=a.begin(); i<sz && j!=a.end(); ++i, ++j)
@@ -121,7 +125,7 @@ namespace classdesc
   typename enable_if<is_sequence<T>, void>::T
   unpack(classdesc::pack_t& b, const classdesc::string&, const T& a)
   {
-    typename T::size_type sz;
+    uint64 sz;
     b >> sz; 
     typename T::value_type x;
     for (typename T::size_type i=0; i<sz; ++i) b>>x;
@@ -135,7 +139,7 @@ namespace classdesc
   typename enable_if<is_associative_container<T>, void>::T
   unpack(classdesc::pack_t& b, const classdesc::string&, T& a)
   {
-    typename T::size_type sz;
+    uint64 sz;
     b >> sz;
     a.clear();
     for (typename T::size_type i=0; i<sz; ++i)
@@ -150,7 +154,7 @@ namespace classdesc
   typename enable_if<is_associative_container<T>, void>::T
   unpack(classdesc::pack_t& b, const classdesc::string&, const T& a)
   {
-    typename T::size_type sz;
+    uint64 sz;
     b >> sz;
     for (typename T::size_type i=0; i<sz; ++i)
       {
@@ -213,7 +217,7 @@ namespace classdesc_access
     template <class U>
     void operator()(classdesc::pack_t& targ, const classdesc::string& desc, U& arg) 
     {
-      targ<<arg.size();
+      targ<<classdesc::uint64(arg.size());
       targ.packraw((const char*)arg.data(), sizeof(cT)*arg.size());
     }
   };
@@ -232,7 +236,7 @@ namespace classdesc_access
     template <class U>
     void operator()(classdesc::pack_t& targ, const classdesc::string& desc, U& arg) 
     {
-      typename string::size_type size; targ>>size;
+      classdesc::uint64 size; targ>>size;
       std::vector<cT> buf(size+1); //ensure buf[0] exists
       targ.unpackraw(&buf[0],sizeof(cT)*size);
       asg(arg, buf);
