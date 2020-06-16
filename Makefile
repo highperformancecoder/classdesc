@@ -103,7 +103,8 @@ aegis-all: build latex-docs
 	cd examples && $(MAKE) NOGUI=1
 	cd pythonExample && $(MAKE) 
 #NB if these builds fail, check for jni.h and jni_md.h in the standard include path
-	if which javac; then cd java && $(MAKE) && cd ../javaExamples && $(MAKE); fi
+# This is now broken, as of OpenJDK 15. Not worth supporting. 
+#	if which javac; then cd java && $(MAKE) && cd ../javaExamples && $(MAKE); fi
 	cd test && $(MAKE)
 	cd test/c++11 && $(MAKE)
 	cd RESTProcessExample && $(MAKE)
