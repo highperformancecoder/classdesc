@@ -113,9 +113,13 @@ namespace classdesc
   {
     typename T::size_type sz, i=0;
     b >> sz;
-    classdesc::resize(a, sz);
-    for (typename T::iterator j=a.begin(); i<sz && j!=a.end(); ++i, ++j)
-      b >> *j;
+    resize(a,0);
+    for (typename T::iterator j=a.begin(); i<sz; ++i, ++j)
+      {
+        typename T::value_type x;
+        b >> x;
+        classdesc::push_back(a, x);
+      }
   }
   template <class T>
   typename enable_if<is_sequence<T>, void>::T

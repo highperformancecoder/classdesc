@@ -392,6 +392,22 @@ namespace classdesc
 
   CLASSDESC_HAS_MEMBER(push_back);
 
+  template <class T>
+  struct has_push_back:
+    public Or<has_member_push_back<T,void (T::*)(typename T::value_type)>,
+              has_member_push_back
+              <T,void (T::*)(const typename T::value_type&)> > {};
+  
+  template <class T>
+  typename enable_if<has_push_back<T>, void>::T
+  push_back(T& x, const typename T::value_type& v) {x.push_back(v);}
+  
+  template <class T>
+  typename enable_if<Not<has_push_back<T> >, void>::T
+  push_back(T& x, const typename T::value_type& v) {} 
+
+  
+
   
 //  template <class T>
 //  typename enable_if<is_sequence<T>,void>::T
