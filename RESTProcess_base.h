@@ -373,8 +373,41 @@ namespace classdesc
     }
 
     template <class U>
-    typename enable_if<Not<Insertable<U> >, void>::T insert(U&, const json_pack_t&) {}
-  
+    typename enable_if<Not<Insertable<U> >, void>::T insert(U&, const json_pack_t&)
+    {
+      throw std::runtime_error("cannot insert into this sequence");
+    }
+
+    template <class U>
+    struct Erasable: public
+    And<
+      Or<
+        has_member_erase<T,typename T::iterator (T::*)(typename T::iterator)>,
+        has_member_erase<T,typename T::iterator (T::*)(typename T::const_iterator)>
+        >,
+      Not<is_const<U>>> {};
+
+    
+    template <class U>
+    typename enable_if<Erasable<U>,void>::T
+    erase(U& seq, const json_pack_t& j)
+    {
+      size_t idx; j>>idx;
+      if (idx<seq.size())
+        {
+          auto i=seq.begin();
+          std::advance(i, idx);
+          seq.erase(i);
+        }
+    }
+    
+    template <class U>
+    typename enable_if<Not<Erasable<U>>,void>::T
+    erase(U& seq, const json_pack_t& j)
+    {
+      throw std::runtime_error("cannot erase from this sequence");
+    }
+    
   public:
     RESTProcessSequence(T& obj): obj(obj) {}
     json_pack_t process(const string& remainder, const json_pack_t& arguments) override
@@ -398,13 +431,15 @@ namespace classdesc
         }
       else if (startsWith(remainder,"/@insert"))
         insert(obj, arguments);
+      else if (startsWith(remainder,"/@erase"))
+        erase(obj, arguments);
       else if (startsWith(remainder,"/@size"))
         return r<<obj.size();
       return r<<obj;
     }
     json_pack_t signature() const override;
     json_pack_t list() const override {
-      json_spirit::mArray array{"/@elem","/@insert","/@size"};
+      json_spirit::mArray array{"/@elem","/@insert","/@erase","/@size"};
       return json_pack_t(array);
     }
     json_pack_t type() const override {return json_pack_t(typeName<T>());}
@@ -443,6 +478,21 @@ namespace classdesc
   void RPAC_insert(const T&, const json_pack_t& argument)
   {
     throw std::runtime_error("cannot insert data into a constant container");
+  }
+
+  template <class T> 
+  void RPAC_erase(T& obj, const json_pack_t& arguments)
+  {
+    typename T::key_type k;
+    arguments>>k;
+    obj.erase(k);
+  }
+
+  /// insert element into map
+  template <class T>
+  void RPAC_erase(const T&, const json_pack_t& argument)
+  {
+    throw std::runtime_error("cannot erase data from a constant container");
   }
 
   template <class T> class RESTProcessAssociativeContainer: public RESTProcessWrapperBase
@@ -501,13 +551,18 @@ namespace classdesc
           RPAC_insert(obj,arguments);
           return r;
         }
+      else if (startsWith(remainder,"/@erase"))
+        {
+          RPAC_erase(obj,arguments);
+          return r;
+        }
       else if (startsWith(remainder,"/@size"))
         return r<<obj.size();
       return r<<obj;
     }
     json_pack_t signature() const override;
     json_pack_t list() const override {
-      json_spirit::mArray array{"/@elem","/@insert","/@size"};
+      json_spirit::mArray array{"/@elem","/@insert","/@erase","/@size"};
       return json_pack_t(array);
     }
     json_pack_t type() const override {return json_pack_t(typeName<T>());}

@@ -121,6 +121,10 @@ false
 5
 /root/bar/h
 
+/root/bar/h/@erase
+1
+/root/bar/h
+
 /root/bar/h
 [2,2,2,2]
 /root/bar/h/@type
@@ -163,6 +167,10 @@ false
 /root/bar/m/@type
 
 /root/bar/m/@list
+
+/root/bar/m/@erase
+1
+/root/bar/m/
 
 /root/bar/um/@insert
 {"first":1,"second":3}

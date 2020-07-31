@@ -391,6 +391,7 @@ namespace classdesc
   resize(T& x, size_t n) {} 
 
   CLASSDESC_HAS_MEMBER(push_back);
+  CLASSDESC_HAS_MEMBER(erase);
 
   template <class T>
   struct has_push_back:
