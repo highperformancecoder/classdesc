@@ -119,10 +119,11 @@ namespace classdesc
     {
       if (isnan(x))
         return o<<"NaN";
-      else if (isinf(x)<0)
-        return o<<"-INF";
-      else if (isinf(x)>0)
-        return o<<"INF";
+      else if (isinf(x))
+        if (x<0)
+          return o<<"-INF";
+        else
+          return o<<"INF";
       else
         return o<<x;
     }
