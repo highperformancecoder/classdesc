@@ -323,8 +323,8 @@ namespace classdesc
   
   /// descriptor for generating building REST processing registry
   template <class T>
-  //typename enable_if<is_classdescGenerated<T>, void>::T
-  void RESTProcess(RESTProcess_t& r, const string& d, T& a) {RESTProcessp(r,d,a);}
+  typename enable_if<Not<functional::is_nonmember_function_ptr<T>>, void>::T
+  RESTProcess(RESTProcess_t& r, const string& d, T& a) {RESTProcessp(r,d,a);}
 
   
   template <class T>
