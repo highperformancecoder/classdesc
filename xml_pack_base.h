@@ -18,6 +18,7 @@
 #include <string>
 #include <assert.h>
 #include <stdarg.h>
+#include <math.h>
 
 #include <classdesc.h>
 #include <xml_common.h>
@@ -111,6 +112,29 @@ namespace classdesc
       ~Tag() {if (t) t->endtag(d);}
     };
 
+    // handle peculiar case sensitivity of floating point special values in XML
+    template <class T>
+    typename enable_if<is_floating_point<T>, std::ostream&>::T
+    put(std::ostream& o, T x)
+    {
+      if (isnan(x))
+        return o<<"NaN";
+      else if (isinf(x)<0)
+        return o<<"-INF";
+      else if (isinf(x)>0)
+        return o<<"INF";
+      else
+        return o<<x;
+    }
+        
+    template <class T>
+    typename enable_if<Not<is_floating_point<T> >, std::ostream&>::T
+    put(std::ostream& o, const T& x)
+    {
+      return o<<x;
+    }
+
+    
     /**
        pack simple type
     */
@@ -119,7 +143,8 @@ namespace classdesc
     {
       std::string tag=tail(d);
       pretty(d);
-      *o << "<"<<tag<<">" << x << "</"<<tag<<">";
+      *o << "<"<<tag<<">";
+      put(*o,x) << "</"<<tag<<">";
       endpretty();
       if (!*o) throw std::runtime_error("failed to serialise");
     }

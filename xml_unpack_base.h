@@ -367,14 +367,33 @@ namespace classdesc
            i!=tokenCount.end(); i++)
         std::cout << "Count["<<i->first<<"]="<<i->second<<std::endl;
     }
+
+    // specialise floating point processing to handle special values (NaN, Inf etc).
+    // fallback to regular iostream processing
+    template <class T> void istoT(const std::string& s, T& x)
+    {
+      std::istringstream is(s);  
+      is>>x;
+    }
+#if defined(__cplusplus) && __cplusplus>=201103L
+    void stoT(const std::string& s, float& x)
+      try {x=std::stof(s);}
+      catch(...){istoT(s,x);}
+    void stoT(const std::string& s, double& x)
+      try {x=std::stod(s);}
+      catch(...){istoT(s,x);}
+    void stoT(const std::string& s, long double& x)
+      try {x=std::stold(s);}
+      catch(...){istoT(s,x);}    
+#endif
+    template <class T> void stoT(const std::string& s, T& x)
+    {istoT(s,x);}
+    
     ///simple data type deserialisation
     template <class T> void unpack(std::string key, T& var) {
       key=addHashNoughts(key); checkKey(key); 
       std::map<std::string,std::string>::const_iterator it=contentMap.find(key);
-      if (it != contentMap.end()) {
-          std::istringstream s(it->second);  
-          s>>var;
-        }
+      if (it != contentMap.end()) stoT(it->second, var);
     }
     // specialisation to handle boolean values
     void unpack(std::string key, bool& var) {
