@@ -12,13 +12,13 @@
 
 #ifndef XML_PACK_BASE_H
 #define XML_PACK_BASE_H
+#include <cmath>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <string>
 #include <assert.h>
 #include <stdarg.h>
-#include <math.h>
 
 #include <classdesc.h>
 #include <xml_common.h>
@@ -117,9 +117,9 @@ namespace classdesc
     typename enable_if<is_floating_point<T>, std::ostream&>::T
     put(std::ostream& o, T x)
     {
-      if (isnan(x))
+      if (std::isnan(x))
         return o<<"NaN";
-      else if (isinf(x))
+      else if (std::isinf(x))
         if (x<0)
           return o<<"-INF";
         else
