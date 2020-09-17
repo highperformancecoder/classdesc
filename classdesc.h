@@ -749,10 +749,14 @@ namespace classdesc
   template <class T> const EnumKeys<typename remove_const<T>::type>&
   enum_keys() {return enum_keysData<T>::keys;}
 
+  template <class E>
+  typename enable_if<is_enum<E>, std::string>::T to_string(E e)
+  {return enum_keys<E>()(e);}
+  
   template <class T>
   typename enable_if<is_enum<T>, std::ostream&>::T
   operator<<(std::ostream& o, T x)
-  {return o<<enum_keys<T>()(x);}
+  {return o<<to_string(x);}
   
   /**
      Enum_handle is a wrapper class that performs serialisation
