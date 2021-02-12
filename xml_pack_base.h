@@ -169,6 +169,9 @@ namespace classdesc
   template <> inline void xml_packp(xml_pack_t& x,const string& d, bool& a)
   {x.pack(d, a? "true": "false");}
 
+  template <> inline void xml_packp(xml_pack_t& x,const string& d, char& a)
+  {x.pack(d,classdesc::xml_quote(a));}
+
   /**
      handle enums
   */
