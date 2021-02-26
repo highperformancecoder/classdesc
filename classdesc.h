@@ -259,7 +259,8 @@ namespace classdesc
   */
   template <class Cond, class T=void> struct enable_if: 
     public enable_if_c<Cond::value,T> {};
-      
+
+  #undef True
   // NB - implementation of C++11 std::conditional
   template <bool C, class True, class F>
   struct conditional
