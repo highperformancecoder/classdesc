@@ -14,6 +14,7 @@
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
+#include <stdarg.h>
 
 namespace classdesc
 {
