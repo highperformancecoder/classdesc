@@ -54,6 +54,18 @@ namespace
 #include "python_epilogue.h"
 #endif
 
+#ifdef JS_BASE_H
+#include "js_epilogue.h"
+#endif
+
+#ifdef JS_BASE_H
+#include "js_epilogue.h"
+#endif
+
+#ifdef JS_BASE_H
+#include "js_epilogue.h"
+#endif
+
 #ifdef RESTPROCESS_H
 #include "RESTProcess_epilogue.h"
 #endif

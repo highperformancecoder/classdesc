@@ -108,6 +108,12 @@ namespace classdesc
       static const size_t value=ArityArgs<Args...>::value+1;
     };
 
+    template <class A>
+    struct ArityArgs<A>
+    {
+      static const size_t value=1;
+    };
+
     template <>
     struct ArityArgs<>
     {
@@ -120,6 +126,12 @@ namespace classdesc
       typedef typename ArgOf<N-1,Args...>::T T;
     };
 
+    template <class A, class B, class... Args>
+    struct ArgOf<2,A,B,Args...>
+    {
+      typedef B T;
+    };
+
     template <class A, class... Args>
     struct ArgOf<1,A,Args...>
     {
@@ -130,6 +142,11 @@ namespace classdesc
     template <template<class> class P, class A, class... Args> struct AllArgsHelper<P,A,Args...>
     {
       static const bool value=P<A>::value && AllArgsHelper<P,Args...>::value;
+    };
+
+    template <template<class> class P, class A> struct AllArgsHelper<P,A>
+    {
+      static const bool value=P<A>::value;
     };
 
     template <template<class> class P> struct AllArgsHelper<P>
@@ -435,6 +452,21 @@ namespace classdesc
     };
       
     template <class F, class ArgVector>
+    struct CurryLastVoid<F,ArgVector,1>
+    {
+      F f;
+      ArgVector& a;
+      CurryLastVoid(F f, ArgVector& a): f(f), a(a) {} 
+      template <class A>
+      void operator()() const {
+        f(a[0]);
+      }
+      
+      void apply()
+      {CurryLastVoid<CurryLastVoid, ArgVector>(*this, a).apply();}
+    };
+      
+    template <class F, class ArgVector>
     struct CurryLastVoid<F,ArgVector,0>
     {
       F f;
@@ -697,6 +729,12 @@ namespace classdesc
         (*this) << typename Arg<F,N>::T(a);
         packArg<F,N+1>(args...);
       }
+      template <class F, int N, class A>
+      void packArg(A a)
+      {
+        (*this) << typename Arg<F,N>::T(a);
+        packArg<F,N+1>();
+      }
       template <class F, int N>
       void packArg() {}
 
@@ -759,6 +797,11 @@ namespace classdesc
         indexMap.emplace(methodBin(m),this->size());
         this->emplace_back(new CallMethodOnBuffer<Class,Buffer,M>(m));
         init(args...);
+      }
+      template <class M>
+      void init(M m) {
+        indexMap.emplace(methodBin(m),this->size());
+        this->emplace_back(new CallMethodOnBuffer<Class,Buffer,M>(m));
       }
       void init() {}
     public:
