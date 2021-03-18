@@ -107,6 +107,11 @@ namespace classdesc
     {
       static const size_t value=ArityArgs<Args...>::value+1;
     };
+    template <class A, class B>
+    struct ArityArgs<A, B>
+    {
+      static const size_t value=2;
+    };
 
     template <class A>
     struct ArityArgs<A>
@@ -126,6 +131,12 @@ namespace classdesc
       typedef typename ArgOf<N-1,Args...>::T T;
     };
 
+    template <class A, class B, class C, class... Args>
+    struct ArgOf<3,A,B,C,Args...>
+    {
+      typedef C T;
+    };
+
     template <class A, class B, class... Args>
     struct ArgOf<2,A,B,Args...>
     {
@@ -142,6 +153,11 @@ namespace classdesc
     template <template<class> class P, class A, class... Args> struct AllArgsHelper<P,A,Args...>
     {
       static const bool value=P<A>::value && AllArgsHelper<P,Args...>::value;
+    };
+
+    template <template<class> class P, class A, class B> struct AllArgsHelper<P,A,B>
+    {
+      static const bool value=P<A>::value && P<B>::value;
     };
 
     template <template<class> class P, class A> struct AllArgsHelper<P,A>
@@ -446,6 +462,14 @@ namespace classdesc
       void operator()(Args... args) const {
         f(args...,a[Arity<F>::value-1]);
       }
+      template <class A, class B>
+      void operator()(A aa, B bb) const {
+        f(aa,bb,a[Arity<F>::value-1]);
+      }
+      template <class A>
+      void operator()(A aa) const {
+        f(aa,a[Arity<F>::value-1]);
+      }
       
       void apply()
       {CurryLastVoid<CurryLastVoid, ArgVector>(*this, a).apply();}
@@ -457,7 +481,6 @@ namespace classdesc
       F f;
       ArgVector& a;
       CurryLastVoid(F f, ArgVector& a): f(f), a(a) {} 
-      template <class A>
       void operator()() const {
         f(a[0]);
       }
@@ -546,6 +569,14 @@ namespace classdesc
       R operator()(Args... args) {
         return f(std::forward<A>(a),std::forward<Args>(args)...);
       }
+      template <class AA>
+      R operator()(AA aa) {
+        return f(std::forward<A>(a),std::forward<AA>(aa));
+      }
+      template <class AA, class BB>
+      R operator()(AA aa,BB bb) {
+        return f(std::forward<A>(a),std::forward<AA>(aa),std::forward<BB>(bb));
+      }
     };
 
     template <class F, class A>
@@ -558,6 +589,14 @@ namespace classdesc
       template <class... Args>
       void operator()(Args... args) {
         f(std::forward<A>(a),std::forward<Args>(args)...);
+      }
+      template <class AA>
+      void operator()(AA aa) {
+        f(std::forward<A>(a),std::forward<AA>(aa));
+      }
+      template <class AA, class BB>
+      void operator()(AA aa, BB bb) {
+        f(std::forward<A>(a),std::forward<AA>(aa),std::forward<BB>(bb));
       }
     };
 
@@ -729,11 +768,15 @@ namespace classdesc
         (*this) << typename Arg<F,N>::T(a);
         packArg<F,N+1>(args...);
       }
+      template <class F, int N, class A, class B>
+      void packArg(A a, B b)
+      {
+        (*this) << typename Arg<F,N>::T(a) << typename Arg<F,N+1>::T(b);
+      }
       template <class F, int N, class A>
       void packArg(A a)
       {
         (*this) << typename Arg<F,N>::T(a);
-        packArg<F,N+1>();
       }
       template <class F, int N>
       void packArg() {}
@@ -797,6 +840,13 @@ namespace classdesc
         indexMap.emplace(methodBin(m),this->size());
         this->emplace_back(new CallMethodOnBuffer<Class,Buffer,M>(m));
         init(args...);
+      }
+      template <class M1, class M2>
+      void init(M1 m1, M2 m2) {
+        indexMap.emplace(methodBin(m1),this->size());
+        this->emplace_back(new CallMethodOnBuffer<Class,Buffer,M1>(m1));
+        indexMap.emplace(methodBin(m2),this->size());
+        this->emplace_back(new CallMethodOnBuffer<Class,Buffer,M2>(m2));
       }
       template <class M>
       void init(M m) {
