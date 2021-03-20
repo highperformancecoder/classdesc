@@ -99,7 +99,9 @@ namespace classdesc
   public:
     string schema; 
     bool prettyPrint; /// if true, the layout XML in more human friendly form
-
+    volatile bool abort=false; /// set to true to cancel packing from another thread
+    struct PackAborted: public std::exception {};
+    
     xml_pack_t(std::ostream& o, const string& schema=""): 
       o(&o), taglevel(0), schema(schema), prettyPrint(false) {}
 
@@ -142,6 +144,7 @@ namespace classdesc
     template <class T>
     void pack(const string& d, const T&x)
     {
+      if (abort) throw PackAborted();
       std::string tag=tail(d);
       pretty(d);
       *o << "<"<<tag<<">";
@@ -155,6 +158,7 @@ namespace classdesc
     */
     template <class T>
     void pack_notag(const string& d, const T&x) {
+      if (abort) throw PackAborted();
       *o<<x;
       if (!*o) throw std::runtime_error("failed to serialise");
     }
@@ -192,7 +196,7 @@ namespace classdesc
   inline void xml_pack(xml_pack_t& x,const string& d, std::string& a) 
   {
     std::string tmp;
-    for (std::string::size_type i=0; i<a.length(); i++) tmp+=classdesc::xml_quote(a[i]);
+    for (std::string::size_type i=0; i<a.length() && !x.abort; i++) tmp+=classdesc::xml_quote(a[i]);
     x.pack(d,tmp);
   }
 
