@@ -572,12 +572,22 @@ namespace classdesc
 
     /// extract an argument from buffer \a b, and run functional f on it 
     template <class F, class A, class R, class B>
-    typename enable_if<ArgAcceptable<A>, R>::T
+    typename enable_if<And<ArgAcceptable<A>,Not<is_same<A,const char*>>>, R>::T
     eval(F f, B& b)
     {
       A a{};
       b>>a;
       return f(a);
+    }
+    
+    template <class F, class A, class R, class B>
+    typename enable_if<And<ArgAcceptable<A>,is_same<A,const char*>>, R>::T
+    eval(F f, B& b)
+    {
+      std::string a{};
+      b>>a;
+      const char* tmp=a.c_str();
+      return f(tmp);
     }
     
     template <class F, class A, class R, class B>
@@ -588,12 +598,22 @@ namespace classdesc
     }
 
     template <class F, class A, class B>
-    typename enable_if<ArgAcceptable<A>, void>::T
+    typename enable_if<And<ArgAcceptable<A>,Not<is_same<A,const char*>>>, void>::T
     evalVoid(F f, B& b)
     {
       A a{};
       b>>a;
       f(a);
+    }
+    
+    template <class F, class A, class B>
+    typename enable_if<And<ArgAcceptable<A>,is_same<A,const char*>>, void>::T
+    evalVoid(F f, B& b)
+    {
+      std::string a{};
+      b>>a;
+      const char* tmp=a.c_str();
+      f(tmp);
     }
     
     template <class F, class A, class B>
