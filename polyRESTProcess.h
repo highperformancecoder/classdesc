@@ -9,16 +9,11 @@
 #ifndef POLYRESTPROCESS_H
 #define POLYRESTPROCESS_H
 #include "RESTProcess_base.h"
+#include "polyRESTProcessBase.h"
+#include "polyRESTProcessBase.cd"
 
 namespace classdesc
 {
-  struct PolyRESTProcessBase
-  {
-    virtual void RESTProcess(RESTProcess_t&, const string&) const=0;
-    virtual void RESTProcess(RESTProcess_t&, const string&)=0;
-    virtual ~PolyRESTProcessBase() {}
-  };
-
   template <class T, class Base=PolyRESTProcessBase>
   struct PolyRESTProcess: public Base
   {
