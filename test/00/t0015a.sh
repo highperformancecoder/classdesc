@@ -44,7 +44,7 @@ PATH=$here:$PATH
 
 if [ $BL = $here ]; then fail; fi
 
-classdesc p >testout <<EOF
+cat >input <<EOF
 class foo /* foo crops up a lot these days */
 {
   int a;
@@ -59,6 +59,7 @@ namespace bar
 };
 EOF
 
+classdesc p >testout <input
 if test $? -ne 0; then fail; fi
 
 cat >testout1 <<EOF
