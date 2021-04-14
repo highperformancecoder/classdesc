@@ -583,8 +583,10 @@ namespace classdesc
     json_pack_t process(const string& remainder, const json_pack_t& arguments) override;
     json_pack_t signature() const override;
     json_pack_t list() const override {
-      if (ptr) return RESTProcessObject<typename T::element_type>(*ptr).list();
-      else return json_pack_t(json_spirit::mArray());
+      if (ptr)
+        return const_cast<RESTProcessPtr<T>*>(this)->process("/@list",{});
+      else
+        return json_pack_t(json_spirit::mArray());
     }
     json_pack_t type() const override {return json_pack_t(typeName<T>());}
   };

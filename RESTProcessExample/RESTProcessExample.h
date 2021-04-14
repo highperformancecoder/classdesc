@@ -86,6 +86,7 @@ struct Bar: Foo
   int f;
   EnumFoo barfoo;
   std::vector<Foo> vFoo;
+  std::map<std::string,Foo> mFoo;
   Bar& overloadExample() {return *this;}
   int overloadExample(int x, int y=0) const {return x+y;}
   // test overloading
@@ -93,7 +94,7 @@ struct Bar: Foo
   BarE barE() const {return a;}
   GlobE globE() const {return ga;}
   Bar() {}
-  Bar(int i): Foo(i), f(20), barfoo(eb), vFoo(3,1) {}
+  Bar(int i): Foo(i), f(20), barfoo(eb), vFoo(3,1) {mFoo["foo"]=Foo(2);}
 
   // overload triggers bug
   void rvalueRef(Foo&& f) {}

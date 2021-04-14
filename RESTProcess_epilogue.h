@@ -135,10 +135,7 @@ namespace classdesc
   json_pack_t RESTProcessPtr<T>::process(const string& remainder, const json_pack_t& arguments)
   {
     if (ptr)
-      if (remainder.empty())
-        return rProcess(*ptr, remainder, arguments);
-      else
-        return mapAndProcess(remainder,arguments,*ptr);
+      return rProcess(*ptr, remainder, arguments);
     else
       return {};
   }
