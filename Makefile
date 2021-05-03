@@ -171,6 +171,7 @@ travis-test: build
 	cd examples && $(MAKE) NOGUI=1
 	cd test && $(MAKE)
 	cd test/c++11 && $(MAKE)
+	cd RESTProcessExample && $(MAKE)
 	sh runtests "g++ $(GCOV_FLAGS)" `ls test/00/*.sh|grep -v t0002a|grep -v t0003a|grep -v t0041a|grep -v t0051a`
 
 VERSION=$(shell git describe)
