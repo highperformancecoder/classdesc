@@ -724,23 +724,13 @@ namespace classdesc
   {return x.type()==json_spirit::str_type;}
   
   template <class T>
-  typename enable_if<is_container<T>, bool>::T matches(const json_spirit::mValue& x)
-  {
-    if (x.type()==json_spirit::array_type)
-      {
-        auto& arr=x.get_array();
-        bool r;
-        for (auto& i: arr) r &= matches<typename T::value_type>(i);
-        return r;
-      }
-    return matches<typename T::value_type>(x); // treat a single json object as a single element sequence
-  }
-  
-  template <class T>
   typename enable_if<
     And<
-      And<is_class<T>, is_default_constructible<T> >,
-      Not<is_same<T,string>>
+      And<
+        And<is_class<T>, is_default_constructible<T> >,
+        Not<is_same<T,string>>
+        >,
+      Not<is_container<T>>
       >, bool>::T
   matches(const json_spirit::mValue& x)
   {
@@ -754,9 +744,41 @@ namespace classdesc
       {return false;}
     return true;
   }
+
+  template <class T>
+  typename enable_if<is_container<T>, bool>::T matches(const json_spirit::mValue& x)
+  {
+    if (x.type()==json_spirit::array_type)
+      {
+        auto& arr=x.get_array();
+        bool r;
+        for (auto& i: arr) r &= matches<typename T::value_type>(i);
+        return r;
+      }
+    return matches<typename T::value_type>(x); // treat a single json object as a single element sequence
+  }
+  
+  template <class T> struct remove_const_ref
+  {
+    using type=typename remove_const<typename remove_reference<T>::type>::type;
+  };
   
   template <class T>
-  typename enable_if<And<is_object<T>, Not<is_default_constructible<T> > >, bool>::T
+  typename enable_if<is_abstract<T>, bool>::T
+  matches(const json_spirit::mValue&) {return false;}
+
+  template <class T>
+  typename enable_if<
+    And<is_const<typename remove_reference<T>::type>, is_reference<T>>, bool>::T
+  matches(const json_spirit::mValue& x)
+  {return matches<typename remove_const_ref<T>::type>(x);}
+
+  template <class T>
+  typename enable_if<
+    And<
+      is_object<T>,
+      Not<is_default_constructible<typename remove_reference<T>::type>>
+      >, bool>::T
   matches(const json_spirit::mValue& x)
   {return false;}
 
@@ -768,7 +790,12 @@ namespace classdesc
   };
 
   template <class T>
-  typename enable_if<isNoMatch<T>, bool>::T matches(const json_spirit::mValue&) {return false;}
+  typename enable_if<And<Not<is_reference<T>>,isNoMatch<typename remove_const<T>::type>>, bool>::T
+  matches(const json_spirit::mValue&) {return false;}
+
+  template <class T>
+  typename enable_if<And<is_reference<T>, Not<is_const<typename remove_reference<T>::type>>>, bool>::T
+  matches(const json_spirit::mValue&) {return false;}
 
   /// @{ testing for not quite so good matches between json type and C++ type
   //template <class T> bool partiallyMatchable(const json_spirit::mValue& x);
