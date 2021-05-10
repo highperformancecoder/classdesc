@@ -315,6 +315,7 @@ namespace classdesc
       template <class... Args>
       R operator()(Args... args) const {return (obj->*method)(args...);}
       void rebind(C& newObj) {obj=&newObj;}
+      static const bool is_const=is_const_method<M>::value;
     };
 
     template <class C, class M, class R>
@@ -334,6 +335,7 @@ namespace classdesc
         throw std::runtime_error("cannot call method, inappropriate argument type");
       } 
       void rebind(C& newObj) {obj=&newObj;}
+      static const bool is_const=is_const_method<M>::value;
     };
 
     template <class C, class M>
@@ -349,6 +351,7 @@ namespace classdesc
       template <class... Args>
       void operator()(Args... args) const {(obj->*method)(args...);}
       void rebind(C& newObj) {obj=&newObj;}
+      static const bool is_const=is_const_method<M>::value;
     };
 
 //    template <class C, class M>
@@ -364,6 +367,7 @@ namespace classdesc
 //      template <class... Args>
 //      void operator()(Args... args) const {}
 //      void rebind(C& newObj) {obj=&newObj;}
+//      static bool is_const=is_const_method<M>::value;
 //    };
 
     template <class C, class F> struct FunctionalHelperFor<bound_method<C,F>>
