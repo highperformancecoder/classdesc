@@ -34,6 +34,10 @@ namespace classdesc
     template <class F> json_pack_t functionSignature() const;
     /// returns a pointer to the underlying object if it is one of type T, otherwise null
     template <class T> T* getObject();
+    /// true if this is an object, not a function
+    virtual bool isObject() const {return false;}
+    /// true if this is a const object, a const member function or static/free function
+    virtual bool isConst() const {return false;}
   };
 
   /// marker for containers and pointers that wrap
@@ -301,6 +305,8 @@ namespace classdesc
       return json_pack_t(array);
     }
     json_pack_t type() const override {return json_pack_t(typeName<T>());}
+    bool isObject() const override {return true;}
+    bool isConst() const override {return std::is_const<T>::value;}
   };
 
   template <class T> T* RESTProcessBase::getObject()
@@ -877,6 +883,13 @@ namespace classdesc
   unsigned matchScore(const json_spirit::mValue& x)
   {return MatchScore<F,N>::score(x);}
 
+  // static and free functions are const
+  template <class F> struct FunctionalIsConst {static const bool value=true;};
+  // only const bounrd methods are const
+  template <class O, class M, class R>
+  struct FunctionalIsConst<classdesc::functional::bound_method<O,M,R>>
+  {static const bool value=functional::bound_method<O,M,R>::is_const;};
+  
   // member functions
   template <class F, class R=typename functional::Return<F>::T>
   class RESTProcessFunction: public RESTProcessFunctionBase
@@ -894,6 +907,8 @@ namespace classdesc
     {return classdesc::matchScore<F>(arguments);}
     json_pack_t list() const override {return json_pack_t(json_spirit::mArray());}
     json_pack_t type() const override {return json_pack_t("function");}
+    bool isObject() const override {return false;}
+    bool isConst() const override {return FunctionalIsConst<F>::value;}
   };
 
   template <class F, class R>
