@@ -38,6 +38,8 @@ namespace classdesc
     virtual bool isObject() const {return false;}
     /// true if this is a const object, a const member function or static/free function
     virtual bool isConst() const {return false;}
+    /// arity if this is a function, 0 otherwise
+    virtual unsigned arity() const {return 0;}
   };
 
   /// marker for containers and pointers that wrap
@@ -936,6 +938,7 @@ namespace classdesc
     json_pack_t type() const override {return json_pack_t("function");}
     bool isObject() const override {return false;}
     bool isConst() const override {return FunctionalIsConst<F>::value;}
+    unsigned arity() const override {return functional::Arity<F>::value;}
   };
 
   template <class F, class R>
