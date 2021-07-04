@@ -759,7 +759,7 @@ namespace classdesc
     if (x.type()==json_spirit::array_type)
       {
         auto& arr=x.get_array();
-        bool r;
+        bool r=true;
         for (auto& i: arr) r &= matches<typename T::value_type>(i);
         return r;
       }
