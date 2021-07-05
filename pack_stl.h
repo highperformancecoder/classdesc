@@ -240,7 +240,7 @@ namespace classdesc_access
     template <class U>
     void operator()(classdesc::pack_t& targ, const classdesc::string& desc, U& arg) 
     {
-      classdesc::uint64 size; targ>>size;
+      classdesc::uint64 size=0; targ>>size;
       std::vector<cT> buf(size+1); //ensure buf[0] exists
       targ.unpackraw(&buf[0],sizeof(cT)*size);
       asg(arg, buf);
