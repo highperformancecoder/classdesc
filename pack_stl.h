@@ -115,7 +115,7 @@ namespace classdesc
   typename enable_if<is_sequence<T>, void>::T
   unpack(classdesc::pack_t& b, const classdesc::string& d, T& a)
   {
-    uint64 sz, i=0;
+    uint64 sz=0, i=0;
     b >> sz;
     resize(a,0);
     for (typename T::iterator j=a.begin(); i<sz; ++i, ++j)
