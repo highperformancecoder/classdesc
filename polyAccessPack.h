@@ -115,7 +115,13 @@ namespace classdesc_access
   {
     template <class U>
     void operator()(cd::unpack_t& x, const cd::string& d, U& a)
-    {unpack_smart_ptr(x,d,a.lock());}
+    {
+      // cannot deserialise to a weak reference, but need to process stream
+      cd::shared_ptr<T> tmp;
+      unpack_smart_ptr(x,d,tmp);
+      if (auto target=a.lock())
+        *target=*tmp;   // best effort, polymorphism not supported
+    }
   };
 
 
