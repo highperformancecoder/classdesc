@@ -102,7 +102,23 @@ namespace classdesc_access
     {unpack_smart_ptr(x,d,a);}
   };
 
-  
+  template <class T>
+  struct access_pack<cd::weak_ptr<T> >
+  {
+    template <class U>
+    void operator()(cd::pack_t& x, const cd::string& d, U& a)
+    {pack_smart_ptr(x,d,a.lock());}
+  };
+
+  template <class T>
+  struct access_unpack<cd::weak_ptr<T> >
+  {
+    template <class U>
+    void operator()(cd::unpack_t& x, const cd::string& d, U& a)
+    {unpack_smart_ptr(x,d,a.lock());}
+  };
+
+
 #if defined(__cplusplus) && __cplusplus<=201402
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic push
