@@ -119,7 +119,7 @@ namespace classdesc_access
       // cannot deserialise to a weak reference, but need to process stream
       cd::shared_ptr<T> tmp;
       unpack_smart_ptr(x,d,tmp);
-      if (auto target=a.lock())
+      if (cd::shared_ptr<T> target=a.lock())
         *target=*tmp;   // best effort, polymorphism not supported
     }
   };
