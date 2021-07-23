@@ -570,7 +570,7 @@ namespace classdesc
         {
           std::vector<typename T::key_type> keys;
           for (auto& i: obj)
-            keys.push_back(i.first);
+            keys.push_back(keyOf(i));
           return r<<keys;
         }
       return r<<obj;
