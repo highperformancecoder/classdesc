@@ -566,6 +566,13 @@ namespace classdesc
         }
       else if (startsWith(remainder,"/@size"))
         return r<<obj.size();
+      else if (startsWith(remainder,"/@keys"))
+        {
+          std::vector<typename T::key_type> keys;
+          for (auto& i: obj)
+            keys.push_back(i.first);
+          return r<<keys;
+        }
       return r<<obj;
     }
     json_pack_t signature() const override;
