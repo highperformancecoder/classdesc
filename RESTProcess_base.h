@@ -582,7 +582,7 @@ namespace classdesc
   {
     repo.add(d, new RESTProcessAssociativeContainer<T>(a));
   }
-
+  
   template <class T>
   struct RESTProcessPtr: public RESTProcessWrapperBase
   {

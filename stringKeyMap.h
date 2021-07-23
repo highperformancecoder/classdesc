@@ -24,6 +24,19 @@ namespace classdesc
   struct StringKeyMap: public std::map<std::string, T> {};
 
   template <class T>
+  struct is_associative_container<classdesc::StringKeyMap<T>>: public true_type {};
+
+  template <class T> struct is_stringKeyMap<classdesc::StringKeyMap<T>>: public true_type {};
+
+}
+
+namespace classdesc
+{
+  template <class T>
+  void convert(StringKeyMap<T>& map,  const json_pack_t& j)
+  {j>>map;}
+
+  template <class T>
   void json_pack_stringKeyMap(json_pack_t& j,const string& d, const StringKeyMap<T>& a)
   {
     try
@@ -55,6 +68,7 @@ namespace classdesc
         else
           {
             const json_spirit::mObject& arr=val.get_obj();
+            a.clear();
             for (json_spirit::mObject::const_iterator i=arr.begin(); i!=arr.end(); ++i)
               json_unpack(j,d+"."+i->first,a[i->first]);
           }

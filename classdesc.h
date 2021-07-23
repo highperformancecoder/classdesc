@@ -335,6 +335,9 @@ namespace classdesc
     is_sequence<T>::value||is_associative_container<T>::value;
   };
 
+  /// true_type if T is a StringKeyMap
+  template <class T> struct is_stringKeyMap: public false_type {};
+  
   /// @{ type trait for the smart pointer concept
   template <class T> struct is_smart_ptr: public false_type {};
   template <class T> struct is_smart_ptr<shared_ptr<T> >: public true_type {};

@@ -615,7 +615,7 @@ namespace classdesc
   typename enable_if<is_fundamental<T>, void>::T
   unpack(unpack_t& targ, const string&, const T&)
   { /* const vars cannot be unpacked */
-    T dum(0); Basic_Type<T> b(dum);
+    T dum; Basic_Type<T> b(dum);
     targ.popoff(b);
   }
   
