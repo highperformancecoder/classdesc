@@ -256,7 +256,11 @@ namespace classdesc
     virtual void unpackraw(char *x, size_t s) 
     {
       if (mode==buf)
-        memcpy(x,m_data+m_pos,s);
+        {
+          if (s>m_size-m_pos)
+            throw pack_error("premature end of buffered data");
+          memcpy(x,m_data+m_pos,s);
+        }
       else
         if (fread(x,s,1,f)!=1)
           throw pack_error("premature end of stream");
