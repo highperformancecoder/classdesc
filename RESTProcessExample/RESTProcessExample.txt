@@ -172,6 +172,8 @@ false
 1
 /root/bar/m/
 
+/root/bar/m/@keys
+
 /root/bar/um/@insert
 {"first":1,"second":3}
 /root/bar/um
@@ -263,4 +265,22 @@ false
 /@enum/::GlobE
 
 /@enum/::Bar::BarE
+
+# StringKeyMap
+/root/bar/sm
+
+/root/bar/sm
+{"foo":1,"bar":2}
+/root/bar/sm
+
+/root/bar/sm
+{"foo":1,"foobar":3}
+/root/bar/sm/@elem/foo
+
+/root/bar/sm/@erase
+"foobar"
+/root/bar/sm/@insert
+{"first":"bar","second":1}
+/root/bar/sm/@keys
+
 

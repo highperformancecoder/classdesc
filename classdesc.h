@@ -335,6 +335,9 @@ namespace classdesc
     is_sequence<T>::value||is_associative_container<T>::value;
   };
 
+  /// true_type if T is a StringKeyMap
+  template <class T> struct is_stringKeyMap: public false_type {};
+  
   /// @{ type trait for the smart pointer concept
   template <class T> struct is_smart_ptr: public false_type {};
   template <class T> struct is_smart_ptr<shared_ptr<T> >: public true_type {};
@@ -429,6 +432,9 @@ namespace classdesc
   template <class T> struct is_dca: 
     public And<is_default_constructible<T>, is_copy_constructible<T> > {};
 
+  /// utility key extraction function for associative containers
+  template <class T> const T& keyOf(const T& x) {return x;}
+  template <class F, class S> const F& keyOf(const std::pair<F,S>& x) {return x.first;}
 
   /// @{can a temporary of type T be constructed and passed to an argument
   template <class T> struct is_rvalue

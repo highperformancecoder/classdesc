@@ -84,6 +84,7 @@
 /root/bar/m/@list=>["/@elem","/@insert","/@erase","/@size"]
 /root/bar/m/@erase=>{}
 /root/bar/m/=>[{"first":0,"second":5},{"first":3,"second":5}]
+/root/bar/m/@keys=>[0,3]
 /root/bar/um/@insert=>{}
 /root/bar/um=>[{"first":1,"second":3}]
 /root/bar/um/@elem/1=>{"first":1,"second":5}
@@ -129,3 +130,12 @@
 /@enum/::EnumFoo=>["ea","eb","ec","ed"]
 /@enum/::GlobE=>["ga","gb"]
 /@enum/::Bar::BarE=>["a","b"]
+/root/bar/sm=>{}
+/root/bar/sm=>{"bar":2,"foo":1}
+/root/bar/sm=>{"bar":2,"foo":1}
+/root/bar/sm=>{"foo":1,"foobar":3}
+/root/bar/sm/@elem/foo=>{"first":"foo","second":1}
+/root/bar/sm/@erase=>{}
+/root/bar/sm/@insert=>{}
+/root/bar/sm/@keys=>["bar","foo"]
+command doesn't starts with /

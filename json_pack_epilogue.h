@@ -22,7 +22,7 @@ namespace classdesc
   template <class T>
   struct AllOtherJsonPackpTypes:
     public Not< Or< Or< Or< Or<is_fundamental<T>,is_string<T> >, is_sequence<T> >, 
-                        is_associative_container<T> >, is_pointer<T> > >
+                        And<is_associative_container<T>,Not<is_stringKeyMap<T> > > >, is_pointer<T> > >
   {};
 
   template <class T> typename 

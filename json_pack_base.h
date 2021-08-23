@@ -414,7 +414,7 @@ namespace classdesc
   }
 
   template <class T> typename
-  enable_if<is_associative_container<T>, void>::T
+  enable_if<And<is_associative_container<T>, Not<is_stringKeyMap<T> > >, void>::T
   json_unpackp(json_unpack_t& o, const string& d, T& a, dummy<2> dum=0)
   {
     try
