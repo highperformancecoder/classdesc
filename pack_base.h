@@ -217,8 +217,8 @@ namespace classdesc
     virtual ~pack_t() {realloc(0); if (f) fclose(f);}
 
 #if __cplusplus >= 201103L
-    pack_t(pack_t&& x): f(nullptr), m_data(nullptr) {swap(x);}
-    pack_t& operator=(pack_t&& x) {swap(x); return *this;}
+    pack_t(pack_t&& x): f(nullptr), m_data(nullptr) {swap_base(x);}
+    pack_t& operator=(pack_t&& x) {swap_base(x); return *this;}
 #endif
 
     virtual operator bool() {return m_pos<m_size;}
