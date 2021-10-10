@@ -197,7 +197,8 @@ class bound_method<C, R (D::*)($arg_types)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()($arg_decl) const {return (obj->*method)($args);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)($arg_types)> >, R>::T
+    operator()($arg_decl) const {return (obj->*method)($args);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };

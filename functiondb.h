@@ -123,7 +123,8 @@ class bound_method<C, R (D::*)()>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()() const {return (obj->*method)();}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)()> >, R>::T
+    operator()() const {return (obj->*method)();}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -356,7 +357,8 @@ class bound_method<C, R (D::*)(A1)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1) const {return (obj->*method)(a1);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1)> >, R>::T
+    operator()(A1 a1) const {return (obj->*method)(a1);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -615,7 +617,8 @@ class bound_method<C, R (D::*)(A1,A2)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2) const {return (obj->*method)(a1,a2);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2)> >, R>::T
+    operator()(A1 a1,A2 a2) const {return (obj->*method)(a1,a2);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -902,7 +905,8 @@ class bound_method<C, R (D::*)(A1,A2,A3)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3) const {return (obj->*method)(a1,a2,a3);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3) const {return (obj->*method)(a1,a2,a3);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -1217,7 +1221,8 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3,A4 a4) const {return (obj->*method)(a1,a2,a3,a4);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4) const {return (obj->*method)(a1,a2,a3,a4);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -1560,7 +1565,8 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) const {return (obj->*method)(a1,a2,a3,a4,a5);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) const {return (obj->*method)(a1,a2,a3,a4,a5);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -1931,7 +1937,8 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6) const {return (obj->*method)(a1,a2,a3,a4,a5,a6);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6) const {return (obj->*method)(a1,a2,a3,a4,a5,a6);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -2330,7 +2337,8 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -2757,7 +2765,8 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -3212,7 +3221,8 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -3695,7 +3705,8 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -4206,7 +4217,8 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -4745,7 +4757,8 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -5312,7 +5325,8 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -5907,7 +5921,8 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -6530,7 +6545,8 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -7181,7 +7197,8 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -7860,7 +7877,8 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -8567,7 +8585,8 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -9302,7 +9321,8 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -10065,7 +10085,8 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20);}
+    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20)> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
