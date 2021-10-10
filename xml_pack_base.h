@@ -99,11 +99,11 @@ namespace classdesc
   public:
     string schema; 
     bool prettyPrint; /// if true, the layout XML in more human friendly form
-    volatile bool abort=false; /// set to true to cancel packing from another thread
+    volatile bool abort; /// set to true to cancel packing from another thread
     struct PackAborted: public std::exception {};
     
     xml_pack_t(std::ostream& o, const string& schema=""): 
-      o(&o), taglevel(0), schema(schema), prettyPrint(false) {}
+      o(&o), taglevel(0), schema(schema), prettyPrint(false), abort(false) {}
 
     class Tag  ///<utility structure for handling tag/endtag
     {

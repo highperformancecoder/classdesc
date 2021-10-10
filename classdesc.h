@@ -9,6 +9,14 @@
 #ifndef CLASSDESC_H
 #define CLASSDESC_H
 
+// given this is a header-only library, there shouldn't be an issue of
+// differing standards for name mangling between caller and callee
+#if defined(__GNUC__) && !defined(__ICC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnoexcept-type"
+#endif
+
+
 // ensure link time failure if classdesc_epilogue.h not included
 namespace
 {
@@ -1024,4 +1032,10 @@ namespace classdesc
     return r;
   }
 }
+
+
+#if defined(__GNUC__) && !defined(__ICC)
+#pragma GCC diagnostic pop
+#endif
+    
 #endif

@@ -49,15 +49,24 @@ while [ $arity -le $max_arity ]; do
 cat <<EOF
 template <class R$template_args> 
 struct Arg<R (*)($arg_types), $arg> 
-{typedef A$arg T;};
+{
+  typedef A$arg T;
+  typedef T type;
+};
 
 template <class C, class R$template_args> 
 struct Arg<R (C::*)($arg_types), $arg> 
-{typedef A$arg T;};
+{
+  typedef A$arg T;
+  typedef T type;
+};
 
 template <class C, class R$template_args> 
 struct Arg<R (C::*)($arg_types) const, $arg> 
-{typedef A$arg T;};
+{
+  typedef A$arg T;
+  typedef T type;
+};
 EOF
     j=$[arg++]
     done
@@ -190,6 +199,7 @@ class bound_method<C, R (D::*)($arg_types)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()($arg_decl) const {return (obj->*method)($args);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D$template_args>
@@ -205,6 +215,7 @@ class bound_method<C, void (D::*)($arg_types)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()($arg_decl) const {(obj->*method)($args);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R$template_args>
@@ -219,6 +230,7 @@ class bound_method<C, R (D::*)($arg_types) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()($arg_decl) const {return (obj.*method)($args);}
+    static const bool is_const=true;
 };
 
 template <class C, class D$template_args>
@@ -233,6 +245,7 @@ class bound_method<C, void (D::*)($arg_types) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()($arg_decl) const {(obj.*method)($args);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -257,6 +270,57 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f($vec_args);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, $arity>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+EOF
+    arg=1
+    while [ $arg -le $arity ]; do
+        cat <<EOF
+  typename remove_const<typename remove_reference<typename Arg<F,$arg>::T>::type>::type a$arg;
+  buffer>>a$arg;
+EOF
+        let $[arg++]
+    done
+    echo "  return f("
+    arg=1
+    while [ $arg -le $arity ]; do
+        if [ $arg -gt 1 ]; then
+            echo ","
+        fi
+        echo "a$arg"
+        let $[arg++]
+    done
+    cat <<EOF
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, $arity>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+EOF
+    arg=1
+    while [ $arg -le $arity ]; do
+        cat <<EOF
+  typename remove_const<typename remove_reference<typename Arg<F,$arg>::T>::type>::type a$arg;
+  buffer>>a$arg;
+EOF
+        let $[arg++]
+    done
+    echo "  f("
+    arg=1
+    while [ $arg -le $arity ]; do
+        if [ $arg -gt 1 ]; then
+            echo ","
+        fi
+        echo "a$arg"
+        let $[arg++]
+    done
+    cat <<EOF
+  );
+}
 EOF
     j=$[arity++]
 done

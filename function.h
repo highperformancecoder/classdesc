@@ -20,6 +20,13 @@
 #include <array>
 #endif
 
+// given this is a header-only library, there shouldn't be an issue of
+// differing standards for name mangling between caller and callee
+#if defined(__GNUC__) && !defined(__ICC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnoexcept-type"
+#endif
+
 namespace classdesc
 {
 
@@ -99,7 +106,26 @@ namespace classdesc
     void apply_void_fn(F f, const Args& args, Fdummy<F> dum=0);
     */
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201103L    /// type trait for determining if an argument is acceptable for function mapping
+    template <class A>
+    struct ArgAcceptable:
+      public And<
+      And<
+        And<is_default_constructible<typename remove_reference<A>::type>,
+          is_copy_constructible<typename remove_reference<A>::type>>,
+       And<
+         Not<std::is_rvalue_reference<A>>,
+         Or<Not<is_reference<A>>, is_const<typename remove_reference<A>::type>>
+         >
+        >,
+      Or<Not<is_pointer<A>>, is_same<A,const char*>>
+      >{};
+
+#endif
+
+
+    // USE_UNROLLED means use the functiondb.sh unrolled definitions instead of recursively expanded variadic templates
+#if defined(__cplusplus) && __cplusplus>=201103L && !defined(USE_UNROLLED)
     template <class... Args> struct ArityArgs;
     
     template <class A, class... Args>
@@ -280,21 +306,6 @@ namespace classdesc
     {
       static const bool value=true;
     };
-
-    /// type trait for determining if an argument is acceptable for function mapping
-    template <class A>
-    struct ArgAcceptable:
-      public And<
-      And<
-        And<is_default_constructible<typename remove_reference<A>::type>,
-          is_copy_constructible<typename remove_reference<A>::type>>,
-       And<
-         Not<std::is_rvalue_reference<A>>,
-         Or<Not<is_reference<A>>, is_const<typename remove_reference<A>::type>>
-         >
-        >,
-      Or<Not<is_pointer<A>>, is_same<A,const char*>>
-      >{};
 
     // true if C is non const, or M is a const member function or static
     template <class C, class M>
@@ -820,7 +831,7 @@ namespace classdesc
         return methods[methodIdx]->call(*this,object);
       }
     };
-    
+
 #else
     /// legacy code supporting pre-modern C++ compilers.
     
@@ -850,6 +861,24 @@ namespace classdesc
     };
 
 #include "functiondb.h"
+
+    template <class Buffer>
+    struct PackFunctor: public Buffer
+    {
+      PackFunctor() {}
+      PackFunctor(const Buffer& buffer): Buffer(buffer) {}
+
+      // TODO other C++11 stuff?
+      template <class F>
+      typename enable_if<is_void<typename Return<F>::T>, typename Return<F>::T>::T
+      call(F f) {callOnBuffer(*this, f);}
+      template <class F>
+      typename enable_if<Not<is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+      call(F f) {return callOnBuffer(*this, f);}
+      
+    };
+
+
 #endif
         
     template <class F, class Args>
@@ -873,4 +902,9 @@ namespace classdesc
   };
     
 }
+
+#if defined(__GNUC__) && !defined(__ICC)
+#pragma GCC diagnostic pop
+#endif
+    
 #endif

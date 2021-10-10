@@ -30,3 +30,4 @@ for i in $*; do
 done
 
 echo "$passed tests passed, $failed tests failed"
+exit $failed

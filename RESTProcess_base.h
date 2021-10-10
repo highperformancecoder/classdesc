@@ -639,13 +639,22 @@ namespace classdesc
         values.push_back(j);
       it=values.begin();
     }
-    template <class T>
-    JSONBuffer& operator>>(T& x) {
-      if (it!=values.end()) (*it++) >> x;
+    JSONBuffer(const JSONBuffer& x): values(x.values), it(values.begin()+(x.it-x.values.begin())) {}
+    JSONBuffer& operator=(const JSONBuffer& x) {
+      values=x.values;
+      it=values.begin()+(x.it-x.values.begin());
       return *this;
     }
     template <class T>
-    JSONBuffer& operator>>(const T& x) {++it; return *this;}
+    JSONBuffer& operator>>(T& x) {
+      if (it<values.end()) (*it++) >> x;
+      return *this;
+    }
+    template <class T>
+    JSONBuffer& operator>>(const T& x) {
+      if (it<values.end()) ++it;
+      return *this;
+    }
   };
 
   template <class F>

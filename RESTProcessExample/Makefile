@@ -1,6 +1,6 @@
 .SUFFIXES: .c .cc .o .d .h .cd
 OBJS=RESTProcessExample.o
-CFLAGS=-g -I.. -I. -fPIC -std=c++11
+CFLAGS=-g -I.. -I. -fPIC -std=c++11 -DUSE_UNROLLED
 VPATH=..
 LIBS=-ljson_spirit
 

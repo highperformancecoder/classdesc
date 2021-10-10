@@ -125,6 +125,7 @@ class bound_method<C, R (D::*)()>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()() const {return (obj->*method)();}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D>
@@ -140,6 +141,7 @@ class bound_method<C, void (D::*)()>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()() const {(obj->*method)();}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R>
@@ -154,6 +156,7 @@ class bound_method<C, R (D::*)() const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()() const {return (obj.*method)();}
+    static const bool is_const=true;
 };
 
 template <class C, class D>
@@ -168,6 +171,7 @@ class bound_method<C, void (D::*)() const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()() const {(obj.*method)();}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -192,17 +196,41 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f();
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 0>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  return f(
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 0>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  f(
+  );
+}
 template <class R, class A1> 
 struct Arg<R (*)(A1), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1> 
 struct Arg<R (C::*)(A1), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1> 
 struct Arg<R (C::*)(A1) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,1>
 {
@@ -330,6 +358,7 @@ class bound_method<C, R (D::*)(A1)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1) const {return (obj->*method)(a1);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1>
@@ -345,6 +374,7 @@ class bound_method<C, void (D::*)(A1)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1) const {(obj->*method)(a1);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1>
@@ -359,6 +389,7 @@ class bound_method<C, R (D::*)(A1) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1) const {return (obj.*method)(a1);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1>
@@ -373,6 +404,7 @@ class bound_method<C, void (D::*)(A1) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1) const {(obj.*method)(a1);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -397,28 +429,67 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 1>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  return f(
+a1
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 1>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  f(
+a1
+  );
+}
 template <class R, class A1, class A2> 
 struct Arg<R (*)(A1,A2), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2> 
 struct Arg<R (C::*)(A1,A2), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2> 
 struct Arg<R (C::*)(A1,A2) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2> 
 struct Arg<R (*)(A1,A2), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2> 
 struct Arg<R (C::*)(A1,A2), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2> 
 struct Arg<R (C::*)(A1,A2) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,2>
 {
@@ -546,6 +617,7 @@ class bound_method<C, R (D::*)(A1,A2)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2) const {return (obj->*method)(a1,a2);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2>
@@ -561,6 +633,7 @@ class bound_method<C, void (D::*)(A1,A2)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2) const {(obj->*method)(a1,a2);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2>
@@ -575,6 +648,7 @@ class bound_method<C, R (D::*)(A1,A2) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2) const {return (obj.*method)(a1,a2);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2>
@@ -589,6 +663,7 @@ class bound_method<C, void (D::*)(A1,A2) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2) const {(obj.*method)(a1,a2);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -613,39 +688,95 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 2>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  return f(
+a1
+,
+a2
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 2>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  f(
+a1
+,
+a2
+  );
+}
 template <class R, class A1, class A2, class A3> 
 struct Arg<R (*)(A1,A2,A3), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3> 
 struct Arg<R (C::*)(A1,A2,A3), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3> 
 struct Arg<R (C::*)(A1,A2,A3) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3> 
 struct Arg<R (*)(A1,A2,A3), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3> 
 struct Arg<R (C::*)(A1,A2,A3), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3> 
 struct Arg<R (C::*)(A1,A2,A3) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3> 
 struct Arg<R (*)(A1,A2,A3), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3> 
 struct Arg<R (C::*)(A1,A2,A3), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3> 
 struct Arg<R (C::*)(A1,A2,A3) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,3>
 {
@@ -773,6 +904,7 @@ class bound_method<C, R (D::*)(A1,A2,A3)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3) const {return (obj->*method)(a1,a2,a3);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3>
@@ -788,6 +920,7 @@ class bound_method<C, void (D::*)(A1,A2,A3)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3) const {(obj->*method)(a1,a2,a3);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3>
@@ -802,6 +935,7 @@ class bound_method<C, R (D::*)(A1,A2,A3) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3) const {return (obj.*method)(a1,a2,a3);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3>
@@ -816,6 +950,7 @@ class bound_method<C, void (D::*)(A1,A2,A3) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3) const {(obj.*method)(a1,a2,a3);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -840,50 +975,123 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 3>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  return f(
+a1
+,
+a2
+,
+a3
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 3>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  f(
+a1
+,
+a2
+,
+a3
+  );
+}
 template <class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (*)(A1,A2,A3,A4), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (C::*)(A1,A2,A3,A4), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (C::*)(A1,A2,A3,A4) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (*)(A1,A2,A3,A4), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (C::*)(A1,A2,A3,A4), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (C::*)(A1,A2,A3,A4) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (*)(A1,A2,A3,A4), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (C::*)(A1,A2,A3,A4), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (C::*)(A1,A2,A3,A4) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (*)(A1,A2,A3,A4), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (C::*)(A1,A2,A3,A4), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (C::*)(A1,A2,A3,A4) const, 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,4>
 {
@@ -1011,6 +1219,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4) const {return (obj->*method)(a1,a2,a3,a4);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4>
@@ -1026,6 +1235,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4) const {(obj->*method)(a1,a2,a3,a4);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3, class A4>
@@ -1040,6 +1250,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4) const {return (obj.*method)(a1,a2,a3,a4);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4>
@@ -1054,6 +1265,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4) const {(obj.*method)(a1,a2,a3,a4);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -1078,61 +1290,151 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2],a[3]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 4>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  return f(
+a1
+,
+a2
+,
+a3
+,
+a4
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 4>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  f(
+a1
+,
+a2
+,
+a3
+,
+a4
+  );
+}
 template <class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (*)(A1,A2,A3,A4,A5), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (*)(A1,A2,A3,A4,A5), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (*)(A1,A2,A3,A4,A5), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (*)(A1,A2,A3,A4,A5), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5) const, 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (*)(A1,A2,A3,A4,A5), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5) const, 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,5>
 {
@@ -1260,6 +1562,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) const {return (obj->*method)(a1,a2,a3,a4,a5);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5>
@@ -1275,6 +1578,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) const {(obj->*method)(a1,a2,a3,a4,a5);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5>
@@ -1289,6 +1593,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) const {return (obj.*method)(a1,a2,a3,a4,a5);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5>
@@ -1303,6 +1608,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) const {(obj.*method)(a1,a2,a3,a4,a5);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -1327,72 +1633,179 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2],a[3],a[4]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 5>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  return f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 5>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+  );
+}
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,6>
 {
@@ -1520,6 +1933,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6) const {return (obj->*method)(a1,a2,a3,a4,a5,a6);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6>
@@ -1535,6 +1949,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6) const {(obj->*method)(a1,a2,a3,a4,a5,a6);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6>
@@ -1549,6 +1964,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6) const {return (obj.*method)(a1,a2,a3,a4,a5,a6);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6>
@@ -1563,6 +1979,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6) const {(obj.*method)(a1,a2,a3,a4,a5,a6);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -1587,83 +2004,207 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2],a[3],a[4],a[5]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 6>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  return f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 6>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+  );
+}
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,7>
 {
@@ -1791,6 +2332,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7>
@@ -1806,6 +2348,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7>
@@ -1820,6 +2363,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7>
@@ -1834,6 +2378,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -1858,94 +2403,235 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2],a[3],a[4],a[5],a[6]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 7>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  return f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 7>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+  );
+}
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,8>
 {
@@ -2073,6 +2759,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
@@ -2088,6 +2775,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
@@ -2102,6 +2790,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
@@ -2116,6 +2805,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -2140,105 +2830,263 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 8>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  return f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 8>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+  );
+}
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,9>
 {
@@ -2366,6 +3214,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
@@ -2381,6 +3230,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
@@ -2395,6 +3245,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
@@ -2409,6 +3260,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -2433,116 +3285,291 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 9>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  return f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 9>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+  );
+}
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,10>
 {
@@ -2670,6 +3697,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
@@ -2685,6 +3713,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
@@ -2699,6 +3728,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
@@ -2713,6 +3743,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -2737,127 +3768,319 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 10>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  return f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 10>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+  );
+}
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,11>
 {
@@ -2985,6 +4208,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
@@ -3000,6 +4224,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
@@ -3014,6 +4239,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
@@ -3028,6 +4254,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -3052,138 +4279,347 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 11>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  return f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 11>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+  );
+}
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,12>
 {
@@ -3311,6 +4747,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
@@ -3326,6 +4763,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
@@ -3340,6 +4778,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
@@ -3354,6 +4793,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -3378,149 +4818,375 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 12>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  return f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 12>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+  );
+}
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,13>
 {
@@ -3648,6 +5314,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
@@ -3663,6 +5330,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
@@ -3677,6 +5345,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
@@ -3691,6 +5360,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) co
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -3715,160 +5385,403 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 13>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  typename remove_const<typename remove_reference<typename Arg<F,13>::T>::type>::type a13;
+  buffer>>a13;
+  return f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+,
+a13
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 13>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  typename remove_const<typename remove_reference<typename Arg<F,13>::T>::type>::type a13;
+  buffer>>a13;
+  f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+,
+a13
+  );
+}
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,14>
 {
@@ -3996,6 +5909,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14)>
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
@@ -4011,6 +5925,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
@@ -4025,6 +5940,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) c
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
@@ -4039,6 +5955,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -4063,171 +5980,431 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 14>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  typename remove_const<typename remove_reference<typename Arg<F,13>::T>::type>::type a13;
+  buffer>>a13;
+  typename remove_const<typename remove_reference<typename Arg<F,14>::T>::type>::type a14;
+  buffer>>a14;
+  return f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+,
+a13
+,
+a14
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 14>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  typename remove_const<typename remove_reference<typename Arg<F,13>::T>::type>::type a13;
+  buffer>>a13;
+  typename remove_const<typename remove_reference<typename Arg<F,14>::T>::type>::type a14;
+  buffer>>a14;
+  f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+,
+a13
+,
+a14
+  );
+}
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,15>
 {
@@ -4355,6 +6532,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
@@ -4370,6 +6548,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
@@ -4384,6 +6563,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
@@ -4398,6 +6578,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -4422,182 +6603,459 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13],a[14]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 15>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  typename remove_const<typename remove_reference<typename Arg<F,13>::T>::type>::type a13;
+  buffer>>a13;
+  typename remove_const<typename remove_reference<typename Arg<F,14>::T>::type>::type a14;
+  buffer>>a14;
+  typename remove_const<typename remove_reference<typename Arg<F,15>::T>::type>::type a15;
+  buffer>>a15;
+  return f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+,
+a13
+,
+a14
+,
+a15
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 15>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  typename remove_const<typename remove_reference<typename Arg<F,13>::T>::type>::type a13;
+  buffer>>a13;
+  typename remove_const<typename remove_reference<typename Arg<F,14>::T>::type>::type a14;
+  buffer>>a14;
+  typename remove_const<typename remove_reference<typename Arg<F,15>::T>::type>::type a15;
+  buffer>>a15;
+  f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+,
+a13
+,
+a14
+,
+a15
+  );
+}
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const, 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const, 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const, 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const, 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const, 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const, 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const, 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const, 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const, 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const, 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const, 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const, 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 16> 
-{typedef A16 T;};
+{
+  typedef A16 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 16> 
-{typedef A16 T;};
+{
+  typedef A16 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const, 16> 
-{typedef A16 T;};
+{
+  typedef A16 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,16>
 {
@@ -4725,6 +7183,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16>
@@ -4740,6 +7199,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16>
@@ -4754,6 +7214,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16>
@@ -4768,6 +7229,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -4792,193 +7254,487 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 16>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  typename remove_const<typename remove_reference<typename Arg<F,13>::T>::type>::type a13;
+  buffer>>a13;
+  typename remove_const<typename remove_reference<typename Arg<F,14>::T>::type>::type a14;
+  buffer>>a14;
+  typename remove_const<typename remove_reference<typename Arg<F,15>::T>::type>::type a15;
+  buffer>>a15;
+  typename remove_const<typename remove_reference<typename Arg<F,16>::T>::type>::type a16;
+  buffer>>a16;
+  return f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+,
+a13
+,
+a14
+,
+a15
+,
+a16
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 16>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  typename remove_const<typename remove_reference<typename Arg<F,13>::T>::type>::type a13;
+  buffer>>a13;
+  typename remove_const<typename remove_reference<typename Arg<F,14>::T>::type>::type a14;
+  buffer>>a14;
+  typename remove_const<typename remove_reference<typename Arg<F,15>::T>::type>::type a15;
+  buffer>>a15;
+  typename remove_const<typename remove_reference<typename Arg<F,16>::T>::type>::type a16;
+  buffer>>a16;
+  f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+,
+a13
+,
+a14
+,
+a15
+,
+a16
+  );
+}
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const, 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const, 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const, 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const, 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const, 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const, 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const, 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const, 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const, 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const, 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const, 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const, 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 16> 
-{typedef A16 T;};
+{
+  typedef A16 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 16> 
-{typedef A16 T;};
+{
+  typedef A16 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const, 16> 
-{typedef A16 T;};
+{
+  typedef A16 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 17> 
-{typedef A17 T;};
+{
+  typedef A17 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 17> 
-{typedef A17 T;};
+{
+  typedef A17 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const, 17> 
-{typedef A17 T;};
+{
+  typedef A17 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,17>
 {
@@ -5106,6 +7862,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17>
@@ -5121,6 +7878,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17>
@@ -5135,6 +7893,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17>
@@ -5149,6 +7908,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -5173,204 +7933,515 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15],a[16]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 17>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  typename remove_const<typename remove_reference<typename Arg<F,13>::T>::type>::type a13;
+  buffer>>a13;
+  typename remove_const<typename remove_reference<typename Arg<F,14>::T>::type>::type a14;
+  buffer>>a14;
+  typename remove_const<typename remove_reference<typename Arg<F,15>::T>::type>::type a15;
+  buffer>>a15;
+  typename remove_const<typename remove_reference<typename Arg<F,16>::T>::type>::type a16;
+  buffer>>a16;
+  typename remove_const<typename remove_reference<typename Arg<F,17>::T>::type>::type a17;
+  buffer>>a17;
+  return f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+,
+a13
+,
+a14
+,
+a15
+,
+a16
+,
+a17
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 17>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  typename remove_const<typename remove_reference<typename Arg<F,13>::T>::type>::type a13;
+  buffer>>a13;
+  typename remove_const<typename remove_reference<typename Arg<F,14>::T>::type>::type a14;
+  buffer>>a14;
+  typename remove_const<typename remove_reference<typename Arg<F,15>::T>::type>::type a15;
+  buffer>>a15;
+  typename remove_const<typename remove_reference<typename Arg<F,16>::T>::type>::type a16;
+  buffer>>a16;
+  typename remove_const<typename remove_reference<typename Arg<F,17>::T>::type>::type a17;
+  buffer>>a17;
+  f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+,
+a13
+,
+a14
+,
+a15
+,
+a16
+,
+a17
+  );
+}
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 16> 
-{typedef A16 T;};
+{
+  typedef A16 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 16> 
-{typedef A16 T;};
+{
+  typedef A16 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 16> 
-{typedef A16 T;};
+{
+  typedef A16 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 17> 
-{typedef A17 T;};
+{
+  typedef A17 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 17> 
-{typedef A17 T;};
+{
+  typedef A17 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 17> 
-{typedef A17 T;};
+{
+  typedef A17 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 18> 
-{typedef A18 T;};
+{
+  typedef A18 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 18> 
-{typedef A18 T;};
+{
+  typedef A18 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const, 18> 
-{typedef A18 T;};
+{
+  typedef A18 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,18>
 {
@@ -5498,6 +8569,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18>
@@ -5513,6 +8585,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18>
@@ -5527,6 +8600,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18>
@@ -5541,6 +8615,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -5565,215 +8640,543 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15],a[16],a[17]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 18>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  typename remove_const<typename remove_reference<typename Arg<F,13>::T>::type>::type a13;
+  buffer>>a13;
+  typename remove_const<typename remove_reference<typename Arg<F,14>::T>::type>::type a14;
+  buffer>>a14;
+  typename remove_const<typename remove_reference<typename Arg<F,15>::T>::type>::type a15;
+  buffer>>a15;
+  typename remove_const<typename remove_reference<typename Arg<F,16>::T>::type>::type a16;
+  buffer>>a16;
+  typename remove_const<typename remove_reference<typename Arg<F,17>::T>::type>::type a17;
+  buffer>>a17;
+  typename remove_const<typename remove_reference<typename Arg<F,18>::T>::type>::type a18;
+  buffer>>a18;
+  return f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+,
+a13
+,
+a14
+,
+a15
+,
+a16
+,
+a17
+,
+a18
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 18>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  typename remove_const<typename remove_reference<typename Arg<F,13>::T>::type>::type a13;
+  buffer>>a13;
+  typename remove_const<typename remove_reference<typename Arg<F,14>::T>::type>::type a14;
+  buffer>>a14;
+  typename remove_const<typename remove_reference<typename Arg<F,15>::T>::type>::type a15;
+  buffer>>a15;
+  typename remove_const<typename remove_reference<typename Arg<F,16>::T>::type>::type a16;
+  buffer>>a16;
+  typename remove_const<typename remove_reference<typename Arg<F,17>::T>::type>::type a17;
+  buffer>>a17;
+  typename remove_const<typename remove_reference<typename Arg<F,18>::T>::type>::type a18;
+  buffer>>a18;
+  f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+,
+a13
+,
+a14
+,
+a15
+,
+a16
+,
+a17
+,
+a18
+  );
+}
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 16> 
-{typedef A16 T;};
+{
+  typedef A16 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 16> 
-{typedef A16 T;};
+{
+  typedef A16 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 16> 
-{typedef A16 T;};
+{
+  typedef A16 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 17> 
-{typedef A17 T;};
+{
+  typedef A17 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 17> 
-{typedef A17 T;};
+{
+  typedef A17 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 17> 
-{typedef A17 T;};
+{
+  typedef A17 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 18> 
-{typedef A18 T;};
+{
+  typedef A18 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 18> 
-{typedef A18 T;};
+{
+  typedef A18 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 18> 
-{typedef A18 T;};
+{
+  typedef A18 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 19> 
-{typedef A19 T;};
+{
+  typedef A19 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 19> 
-{typedef A19 T;};
+{
+  typedef A19 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const, 19> 
-{typedef A19 T;};
+{
+  typedef A19 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,19>
 {
@@ -5901,6 +9304,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19>
@@ -5916,6 +9320,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19>
@@ -5930,6 +9335,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19>
@@ -5944,6 +9350,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -5968,226 +9375,571 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15],a[16],a[17],a[18]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 19>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  typename remove_const<typename remove_reference<typename Arg<F,13>::T>::type>::type a13;
+  buffer>>a13;
+  typename remove_const<typename remove_reference<typename Arg<F,14>::T>::type>::type a14;
+  buffer>>a14;
+  typename remove_const<typename remove_reference<typename Arg<F,15>::T>::type>::type a15;
+  buffer>>a15;
+  typename remove_const<typename remove_reference<typename Arg<F,16>::T>::type>::type a16;
+  buffer>>a16;
+  typename remove_const<typename remove_reference<typename Arg<F,17>::T>::type>::type a17;
+  buffer>>a17;
+  typename remove_const<typename remove_reference<typename Arg<F,18>::T>::type>::type a18;
+  buffer>>a18;
+  typename remove_const<typename remove_reference<typename Arg<F,19>::T>::type>::type a19;
+  buffer>>a19;
+  return f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+,
+a13
+,
+a14
+,
+a15
+,
+a16
+,
+a17
+,
+a18
+,
+a19
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 19>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  typename remove_const<typename remove_reference<typename Arg<F,13>::T>::type>::type a13;
+  buffer>>a13;
+  typename remove_const<typename remove_reference<typename Arg<F,14>::T>::type>::type a14;
+  buffer>>a14;
+  typename remove_const<typename remove_reference<typename Arg<F,15>::T>::type>::type a15;
+  buffer>>a15;
+  typename remove_const<typename remove_reference<typename Arg<F,16>::T>::type>::type a16;
+  buffer>>a16;
+  typename remove_const<typename remove_reference<typename Arg<F,17>::T>::type>::type a17;
+  buffer>>a17;
+  typename remove_const<typename remove_reference<typename Arg<F,18>::T>::type>::type a18;
+  buffer>>a18;
+  typename remove_const<typename remove_reference<typename Arg<F,19>::T>::type>::type a19;
+  buffer>>a19;
+  f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+,
+a13
+,
+a14
+,
+a15
+,
+a16
+,
+a17
+,
+a18
+,
+a19
+  );
+}
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 1> 
-{typedef A1 T;};
+{
+  typedef A1 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 2> 
-{typedef A2 T;};
+{
+  typedef A2 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 3> 
-{typedef A3 T;};
+{
+  typedef A3 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 4> 
-{typedef A4 T;};
+{
+  typedef A4 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 5> 
-{typedef A5 T;};
+{
+  typedef A5 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 6> 
-{typedef A6 T;};
+{
+  typedef A6 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 7> 
-{typedef A7 T;};
+{
+  typedef A7 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 8> 
-{typedef A8 T;};
+{
+  typedef A8 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 9> 
-{typedef A9 T;};
+{
+  typedef A9 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 10> 
-{typedef A10 T;};
+{
+  typedef A10 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 11> 
-{typedef A11 T;};
+{
+  typedef A11 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 12> 
-{typedef A12 T;};
+{
+  typedef A12 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 13> 
-{typedef A13 T;};
+{
+  typedef A13 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 14> 
-{typedef A14 T;};
+{
+  typedef A14 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 15> 
-{typedef A15 T;};
+{
+  typedef A15 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 16> 
-{typedef A16 T;};
+{
+  typedef A16 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 16> 
-{typedef A16 T;};
+{
+  typedef A16 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 16> 
-{typedef A16 T;};
+{
+  typedef A16 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 17> 
-{typedef A17 T;};
+{
+  typedef A17 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 17> 
-{typedef A17 T;};
+{
+  typedef A17 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 17> 
-{typedef A17 T;};
+{
+  typedef A17 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 18> 
-{typedef A18 T;};
+{
+  typedef A18 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 18> 
-{typedef A18 T;};
+{
+  typedef A18 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 18> 
-{typedef A18 T;};
+{
+  typedef A18 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 19> 
-{typedef A19 T;};
+{
+  typedef A19 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 19> 
-{typedef A19 T;};
+{
+  typedef A19 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 19> 
-{typedef A19 T;};
+{
+  typedef A19 T;
+  typedef T type;
+};
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 20> 
-{typedef A20 T;};
+{
+  typedef A20 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 20> 
-{typedef A20 T;};
+{
+  typedef A20 T;
+  typedef T type;
+};
 
 template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const, 20> 
-{typedef A20 T;};
+{
+  typedef A20 T;
+  typedef T type;
+};
 template <class F, template<class> class P>
 struct AllArgs<F,P,20>
 {
@@ -6315,6 +10067,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20>
@@ -6330,6 +10083,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     bound_method(C& obj, M method): obj(&obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20);}
     void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
 };
 
 template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20>
@@ -6344,6 +10098,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20);}
+    static const bool is_const=true;
 };
 
 template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20>
@@ -6358,6 +10113,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20);}
+    static const bool is_const=true;
 };
 
 template <class F, class Args> 
@@ -6382,3 +10138,176 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
   f(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15],a[16],a[17],a[18],a[19]);
 }
 
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 20>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  typename remove_const<typename remove_reference<typename Arg<F,13>::T>::type>::type a13;
+  buffer>>a13;
+  typename remove_const<typename remove_reference<typename Arg<F,14>::T>::type>::type a14;
+  buffer>>a14;
+  typename remove_const<typename remove_reference<typename Arg<F,15>::T>::type>::type a15;
+  buffer>>a15;
+  typename remove_const<typename remove_reference<typename Arg<F,16>::T>::type>::type a16;
+  buffer>>a16;
+  typename remove_const<typename remove_reference<typename Arg<F,17>::T>::type>::type a17;
+  buffer>>a17;
+  typename remove_const<typename remove_reference<typename Arg<F,18>::T>::type>::type a18;
+  buffer>>a18;
+  typename remove_const<typename remove_reference<typename Arg<F,19>::T>::type>::type a19;
+  buffer>>a19;
+  typename remove_const<typename remove_reference<typename Arg<F,20>::T>::type>::type a20;
+  buffer>>a20;
+  return f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+,
+a13
+,
+a14
+,
+a15
+,
+a16
+,
+a17
+,
+a18
+,
+a19
+,
+a20
+  );
+}
+
+template <class Buffer, class F>
+typename enable_if<And<Eq<Arity<F>::value, 20>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
+callOnBuffer(Buffer& buffer, F f)
+{
+  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
+  buffer>>a1;
+  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
+  buffer>>a2;
+  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
+  buffer>>a3;
+  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
+  buffer>>a4;
+  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
+  buffer>>a5;
+  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
+  buffer>>a6;
+  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
+  buffer>>a7;
+  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
+  buffer>>a8;
+  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
+  buffer>>a9;
+  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
+  buffer>>a10;
+  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
+  buffer>>a11;
+  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
+  buffer>>a12;
+  typename remove_const<typename remove_reference<typename Arg<F,13>::T>::type>::type a13;
+  buffer>>a13;
+  typename remove_const<typename remove_reference<typename Arg<F,14>::T>::type>::type a14;
+  buffer>>a14;
+  typename remove_const<typename remove_reference<typename Arg<F,15>::T>::type>::type a15;
+  buffer>>a15;
+  typename remove_const<typename remove_reference<typename Arg<F,16>::T>::type>::type a16;
+  buffer>>a16;
+  typename remove_const<typename remove_reference<typename Arg<F,17>::T>::type>::type a17;
+  buffer>>a17;
+  typename remove_const<typename remove_reference<typename Arg<F,18>::T>::type>::type a18;
+  buffer>>a18;
+  typename remove_const<typename remove_reference<typename Arg<F,19>::T>::type>::type a19;
+  buffer>>a19;
+  typename remove_const<typename remove_reference<typename Arg<F,20>::T>::type>::type a20;
+  buffer>>a20;
+  f(
+a1
+,
+a2
+,
+a3
+,
+a4
+,
+a5
+,
+a6
+,
+a7
+,
+a8
+,
+a9
+,
+a10
+,
+a11
+,
+a12
+,
+a13
+,
+a14
+,
+a15
+,
+a16
+,
+a17
+,
+a18
+,
+a19
+,
+a20
+  );
+}

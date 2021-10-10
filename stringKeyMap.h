@@ -24,9 +24,9 @@ namespace classdesc
   struct StringKeyMap: public std::map<std::string, T> {};
 
   template <class T>
-  struct is_associative_container<classdesc::StringKeyMap<T>>: public true_type {};
+  struct is_associative_container<classdesc::StringKeyMap<T> >: public true_type {};
 
-  template <class T> struct is_stringKeyMap<classdesc::StringKeyMap<T>>: public true_type {};
+  template <class T> struct is_stringKeyMap<classdesc::StringKeyMap<T> >: public true_type {};
 
 }
 
