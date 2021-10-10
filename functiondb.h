@@ -123,7 +123,7 @@ class bound_method<C, R (D::*)()>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)()> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()() const {return (obj->*method)();}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -140,7 +140,45 @@ class bound_method<C, void (D::*)()>
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()() const {(obj->*method)();}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()() const {(obj->*method)();}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R>
+class bound_method<const C, R (D::*)()>
+{
+    typedef R (D::*M)();
+    const C* obj;
+    M method;
+    public:
+    static const int arity=0;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()() const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D>
+class bound_method<const C, void (D::*)()>
+{
+    typedef void (D::*M)();
+    const C* obj;
+    M method;
+    public:
+    static const int arity=0;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()() const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -357,7 +395,7 @@ class bound_method<C, R (D::*)(A1)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1) const {return (obj->*method)(a1);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -374,7 +412,45 @@ class bound_method<C, void (D::*)(A1)>
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1) const {(obj->*method)(a1);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1) const {(obj->*method)(a1);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1>
+class bound_method<const C, R (D::*)(A1)>
+{
+    typedef R (D::*M)(A1);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=1;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1>
+class bound_method<const C, void (D::*)(A1)>
+{
+    typedef void (D::*M)(A1);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=1;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -617,7 +693,7 @@ class bound_method<C, R (D::*)(A1,A2)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2) const {return (obj->*method)(a1,a2);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -634,7 +710,45 @@ class bound_method<C, void (D::*)(A1,A2)>
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2) const {(obj->*method)(a1,a2);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2) const {(obj->*method)(a1,a2);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2>
+class bound_method<const C, R (D::*)(A1,A2)>
+{
+    typedef R (D::*M)(A1,A2);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=2;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2>
+class bound_method<const C, void (D::*)(A1,A2)>
+{
+    typedef void (D::*M)(A1,A2);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=2;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -905,7 +1019,7 @@ class bound_method<C, R (D::*)(A1,A2,A3)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3) const {return (obj->*method)(a1,a2,a3);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -922,7 +1036,45 @@ class bound_method<C, void (D::*)(A1,A2,A3)>
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3) const {(obj->*method)(a1,a2,a3);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3) const {(obj->*method)(a1,a2,a3);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3>
+class bound_method<const C, R (D::*)(A1,A2,A3)>
+{
+    typedef R (D::*M)(A1,A2,A3);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=3;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3>
+class bound_method<const C, void (D::*)(A1,A2,A3)>
+{
+    typedef void (D::*M)(A1,A2,A3);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=3;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -1221,7 +1373,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3,A4 a4) const {return (obj->*method)(a1,a2,a3,a4);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -1238,7 +1390,45 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4)>
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3,A4 a4) const {(obj->*method)(a1,a2,a3,a4);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4) const {(obj->*method)(a1,a2,a3,a4);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4)>
+{
+    typedef R (D::*M)(A1,A2,A3,A4);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=4;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4)>
+{
+    typedef void (D::*M)(A1,A2,A3,A4);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=4;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -1565,7 +1755,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) const {return (obj->*method)(a1,a2,a3,a4,a5);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -1582,7 +1772,45 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5)>
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) const {(obj->*method)(a1,a2,a3,a4,a5);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) const {(obj->*method)(a1,a2,a3,a4,a5);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5)>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=5;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5)>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=5;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -1937,7 +2165,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6) const {return (obj->*method)(a1,a2,a3,a4,a5,a6);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -1954,7 +2182,45 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6)>
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6) const {(obj->*method)(a1,a2,a3,a4,a5,a6);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6) const {(obj->*method)(a1,a2,a3,a4,a5,a6);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6)>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=6;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6)>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=6;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -2337,7 +2603,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -2354,7 +2620,45 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7)>
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7)>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=7;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7)>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=7;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -2765,7 +3069,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -2782,7 +3086,45 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8)>
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8)>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=8;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8)>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=8;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -3221,7 +3563,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -3238,7 +3580,45 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)>
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=9;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9)>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=9;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -3705,7 +4085,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -3722,7 +4102,45 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)>
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=10;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=10;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -4217,7 +4635,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -4234,7 +4652,45 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11)>
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11)>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=11;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11)>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=11;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -4757,7 +5213,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -4774,7 +5230,45 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12)>
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12)>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=12;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12)>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=12;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -5325,7 +5819,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -5342,7 +5836,45 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13)>
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13)>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=13;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13)>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=13;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -5921,7 +6453,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14)>
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -5938,7 +6470,45 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14)>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=14;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14)>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=14;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -6545,7 +7115,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -6562,7 +7132,45 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15)>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=15;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15)>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=15;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -7197,7 +7805,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -7214,7 +7822,45 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16)>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=16;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16)>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=16;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -7877,7 +8523,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -7894,7 +8540,45 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17)>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=17;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17)>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=17;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -8585,7 +9269,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -8602,7 +9286,45 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18)>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=18;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18)>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=18;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -9321,7 +10043,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -9338,7 +10060,45 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19)>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=19;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19)>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=19;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
@@ -10085,7 +10845,7 @@ class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A1
     typedef R Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Or<Not<classdesc::is_const<C> >, is_const_method<R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20)> >, R>::T
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
     operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20);}
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
@@ -10102,7 +10862,45 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     typedef void Ret;
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(&obj), method(method) {}
-    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20);}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20)>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=20;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20)>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=20;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
     void rebind(C& newObj) {obj=&newObj;}
     static const bool is_const=false;
 };
