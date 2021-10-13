@@ -825,7 +825,7 @@ namespace classdesc
   //template <class T> bool partiallyMatchable(const json_spirit::mValue& x);
 
   template <class T>
-  typename enable_if<is_floating_point<T>, bool>::T partiallyMatchable(const json_spirit::mValue& x)
+  typename enable_if<is_floating_point<typename remove_reference<T>::type>, bool>::T partiallyMatchable(const json_spirit::mValue& x)
   {return x.type()==json_spirit::int_type||x.type()==json_spirit::real_type;}
 
   template <class T>
@@ -842,7 +842,7 @@ namespace classdesc
   }
 
   template <class T>
-  typename enable_if<And<Not<is_floating_point<T> >, Not<is_container<T> > >, bool>::T
+  typename enable_if<And<Not<is_floating_point<typename remove_reference<T>::type> >, Not<is_container<T> > >, bool>::T
                        partiallyMatchable(const json_spirit::mValue& x)
   {return matches<T>(x);}
 

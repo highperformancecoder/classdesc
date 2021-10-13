@@ -72,6 +72,12 @@ struct Foo
   }
   std::vector<string> getVS() const {return vs;}
   virtual std::string name() const {return "Foo";}
+
+  // test for a bug in overload resolution
+  double m_rotation=0;
+  double rotation() const {return m_rotation;}
+  double rotation(const double& x) {return m_rotation=x;}
+  
   // function pointer member not yet supported
 //  int (Foo::* memPtrEx)(int);
 //  int (*ptrEx)(int);
