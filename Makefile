@@ -174,10 +174,8 @@ travis-test: build
 	cd RESTProcessExample && $(MAKE)
 	sh runtests "g++ $(GCOV_FLAGS)" `ls test/00/*.sh|grep -v t0002a|grep -v t0003a|grep -v t0041a|grep -v t0051a`
 
-VERSION=$(shell git describe)
-
 dist:
-	git archive --format=tar.gz --prefix=classdesc-$(VERSION)/ HEAD -o /tmp/classdesc-$(VERSION).tar.gz
+	sh makeDist.sh
 
 # install documentation on SourceForge
 DOCPREFIX=web.sf.net:/home/project-web/classdesc/htdocs/doc
