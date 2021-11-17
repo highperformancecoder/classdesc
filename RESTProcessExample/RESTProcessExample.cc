@@ -12,6 +12,7 @@
 
 using namespace classdesc;
 using namespace std;
+using namespace json_spirit;
 
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -55,7 +56,7 @@ int main()
               if (!t.empty())
                 read(t,jin);
               cout << cmd <<"=>";
-              write(registry.process(cmd, jin),cout);
+              write(registry.process(cmd, jin),cout,json_spirit::remove_trailing_zeros);
               cout << endl;
             }
           catch (const std::exception& ex)

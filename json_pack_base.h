@@ -9,7 +9,10 @@
 #ifndef JSON_PACK_BASE_H
 #define JSON_PACK_BASE_H
 #include "classdesc.h"
-#include <json_spirit.h>
+#define JSON_SPIRIT_MVALUE_ENABLED
+#include <json_spirit_value.h>
+#include <json_spirit_reader_template.h>
+#include <json_spirit_writer_template.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <vector>
@@ -17,6 +20,7 @@
 
 namespace classdesc
 {
+  
   class json_pack_error : public exception 
   {
     static const int maxchars=200; /* I hope this will always be large enough */
@@ -66,6 +70,35 @@ namespace classdesc
 #endif
   };
 
+  inline bool read(const std::string& s, json_pack_t& value)
+  {
+    return json_spirit::read_string(s, static_cast<json_spirit::mValue&>(value));
+  }
+  
+  inline bool read(std::istream& is, json_pack_t& value)
+  {
+    return json_spirit::read_stream(is, static_cast<json_spirit::mValue&>(value));
+  }
+     
+  inline void write(const json_pack_t& value, std::ostream& os, unsigned options=0)
+  {
+    json_spirit::write_stream(static_cast<const json_spirit::mValue&>(value), os, options );
+  }
+
+  inline std::string write(const json_pack_t& value, unsigned options=0)
+  {
+    return json_spirit::write_string(static_cast<const json_spirit::mValue&>(value), options );
+  }
+  
+  inline void write_formatted(const json_pack_t& value, std::ostream& os)
+  {
+    write_stream( static_cast<const json_spirit::mValue&>(value), os, json_spirit::pretty_print );
+  }
+
+  inline std::string write_formatted(const json_pack_t& value)
+  {
+    return write_string( static_cast<const json_spirit::mValue&>(value), json_spirit::pretty_print );
+  }
 
   typedef json_pack_t json_unpack_t;
 

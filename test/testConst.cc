@@ -23,7 +23,7 @@ int main()
 
   classdesc::json_pack_t j;
   j << foo1 >> foo2;
-  string json = json_spirit::write(j);
+  string json = write(j);
   assert(json.find("const_a")!=string::npos);
   assert(json.find("static_const_b")==string::npos);
 

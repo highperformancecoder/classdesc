@@ -10,7 +10,7 @@ testExclude ticket20-example enumKeys miscMemberTypes templateArgs	\
 test_const_method privateBase random_init stringInheritance		\
 cpdoexample privateEnum testFnPtr testContainersClear ticket43-example  \
 hyphen_in_template_parameter testXMLCDATA explicitTemplateArg           \
-complex_tcl_args referenceMember testBoundMethod testPackFunctor
+complex_tcl_args referenceMember testBoundMethod testPackFunctor testJsoncd testJsonStream 
 
 MPIEXES=mpibuf_array 
 OBJS=testXMLcd_other.o
@@ -31,17 +31,6 @@ endif
 DIRS=$(HOME)/usr /usr/local /usr
 LIBS+=$(foreach dir,$(DIRS),-L$(dir)/lib) ../xdr_pack.o -lm 
 CFLAGS+=$(foreach dir,$(DIRS),-I$(dir)/include)
-
-JSON_HEADER=$(firstword $(foreach dir,$(DIRS),$(wildcard $(dir)/include/json_spirit.h)))
-
-ifneq ("$(JSON_HEADER)","")
-JSON=1
-EXES+=testJsoncd testJsonStream 
-LIBS+=-ljson_spirit
-endif
-
-ifdef JSON
-endif
 
 OS=$(shell uname)
 CYG_OS=$(shell uname|cut -f1 -d_)
@@ -114,9 +103,7 @@ endif
 	../classdesc -I .. -nodef -typeName -use_mbr_pointers -i $< random_init pack unpack >$@
 # check that duplicate typeNames can be issued
 	../classdesc -I .. -nodef -typeName -respect_private -use_mbr_pointers -onbase -i $< xml_pack xml_unpack dump xsd_generate  >>$@
-ifdef JSON
 	../classdesc -I .. -nodef -respect_private -typeName -onbase -use_mbr_pointers  -i $< json_pack json_unpack >>$@
-endif
 
 xml_unpack_base.cd: xml_unpack_base.h
 	../classdesc -I .. -nodef pack unpack <$< >$@

@@ -33,7 +33,7 @@ endif
 # Utility programs
 EXES=classdesc insert-friend
 # wildcard runs before functiondb.h is created on some systems
-INCLUDES=$(wildcard *.h) functiondb.h unpack_base.h json_unpack_base.h 
+INCLUDES=$(wildcard *.h) functiondb.h unpack_base.h json_unpack_base.h $(wildcard json_spirit/json_spirit/*.h) 
 
 # canonicalise CYGWIN's OS name
 ifeq ($(findstring CYGWIN,$(OS)),CYGWIN)
