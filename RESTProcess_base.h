@@ -63,7 +63,12 @@ namespace classdesc
       throw std::runtime_error("can only assign a single character string to a character variable");
     y=x[0];
   }
-    
+  
+  inline void convert(const char* y, const string& x)
+  {
+    y=x.c_str();
+  }
+   
   template <class X, class Y>
   typename enable_if<And<is_convertible<X,Y>,Not<is_const<Y>>>, void>::T
   convert(Y& y, const X& x)

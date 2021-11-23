@@ -289,4 +289,6 @@ false
 20
 /root/bar/rotation
 
+/root/testString
+"hello"
 

@@ -182,6 +182,7 @@ struct Root
   double fb1a() {return getFB1().f.a;}
   Root(): bar(3), bar1(2) {}
   void dummy(DD& x) {}
+  std::string testString(const char* s) {return s;}
 };
 
 #include "RESTProcessExample.cd"

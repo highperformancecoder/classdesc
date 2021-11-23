@@ -115,6 +115,9 @@ namespace classdesc
 
   template <class T> const json_unpack_t& operator>>(const json_unpack_t& j, T& a) 
   {json_unpack(const_cast<json_unpack_t&>(j),"",a); return j;}
+  
+  inline const json_unpack_t& operator>>(const json_unpack_t& j, const char*& a) 
+  {throw json_pack_error("cannot unpack to char*, please use string instead");}
 
   template <class T, typename enable_if<Not<is_base_of<json_spirit::mValue,T> >, void>::T>
   json_pack_t::json_pack_t(const T& x):
