@@ -883,7 +883,7 @@ namespace classdesc
       if (arr.size()<2) return RESTProcessFunctionBase::maxMatchScore;
       return argMatchScore<typename functional::Arg<F,1>::T>(arr[0]) +
         argMatchScore<typename functional::Arg<F,2>::T>(arr[1])+
-        10*(arr.size()-1); // penalize for supplying more arguments than needed
+        10*(arr.size()-2); // penalize for supplying more arguments than needed
     }
   };
 

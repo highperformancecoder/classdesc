@@ -292,3 +292,11 @@ false
 /root/testString
 "hello"
 
+/root/testDoubleIntOverload
+1
+/root/testDoubleIntOverload
+[1,1]
+/root/testDoubleIntOverload
+[1,1.1]
+/root/testDoubleIntOverload
+[1.1,1]

@@ -143,3 +143,10 @@
 /root/bar/rotation=>20.0
 /root/testString=>Exception: cannot unpack to char*, please use string instead
 command doesn't starts with /
+/root/testDoubleIntOverload=>0
+{}
+/root/testDoubleIntOverload=>1
+{}
+/root/testDoubleIntOverload=>1
+{}
+/root/testDoubleIntOverload=>Exception: No suitable matching overload found
