@@ -860,7 +860,7 @@ namespace classdesc
   }
   
   
-  template <class F, int N>
+  template <class F, int N, int NN=N>
   struct MatchScore
   {
     static unsigned score(const json_spirit::mValue& x)
@@ -869,12 +869,12 @@ namespace classdesc
       auto& arr=x.get_array();
       if (arr.size()<N) return RESTProcessFunctionBase::maxMatchScore;
       return  argMatchScore<typename functional::Arg<F,N>::T>(arr[N-1]) +
-        MatchScore<F,N-1>::score(x);
+        MatchScore<F,N-1,NN>::score(x);
     }
   };
   
-  template <class F>
-  struct MatchScore<F,2>
+  template <class F, int NN>
+  struct MatchScore<F,2,NN>
   {
     static unsigned score(const json_spirit::mValue& x)
     {
@@ -883,12 +883,12 @@ namespace classdesc
       if (arr.size()<2) return RESTProcessFunctionBase::maxMatchScore;
       return argMatchScore<typename functional::Arg<F,1>::T>(arr[0]) +
         argMatchScore<typename functional::Arg<F,2>::T>(arr[1])+
-        10*(arr.size()-2); // penalize for supplying more arguments than needed
+        10*(arr.size()-NN); // penalize for supplying more arguments than needed
     }
   };
 
-  template <class F>
-  struct MatchScore<F,1>
+  template <class F,int NN>
+  struct MatchScore<F,1,NN>
   {
     static unsigned score(const json_spirit::mValue& x)
     {
@@ -901,7 +901,7 @@ namespace classdesc
             auto& arr=x.get_array();
             if (arr.empty()) return RESTProcessFunctionBase::maxMatchScore;
             return argMatchScore<typename functional::Arg<F,1>::T>(arr[0])+
-              10*(arr.size()-1); // penalize for supplying more arguments than needed
+              10*(arr.size()-NN); // penalize for supplying more arguments than needed
           }
         default:
           return argMatchScore<typename functional::Arg<F,1>::T>(x);
@@ -909,8 +909,8 @@ namespace classdesc
     }
   };
   
-  template <class F>
-  struct MatchScore<F,0>
+  template <class F,int NN>
+  struct MatchScore<F,0,NN>
   {
     static unsigned score(const json_spirit::mValue& x)
     {
@@ -921,7 +921,7 @@ namespace classdesc
         case json_spirit::array_type:
           {
             auto& arr=x.get_array();
-            return 10*arr.size(); // penalize for supplying more arguments than needed
+            return 10*arr.size()-NN; // penalize for supplying more arguments than needed
           }
         default:
           return 10; // penalize for supplying more arguments than needed
