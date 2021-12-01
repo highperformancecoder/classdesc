@@ -12,7 +12,7 @@
 
 using namespace classdesc;
 using namespace std;
-using namespace json_spirit;
+using namespace json5_parser;
 
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -50,13 +50,13 @@ int main()
           cmd=cmd.substr(0,i+1);
           try
             {
-              json_pack_t jin(json_spirit::mValue::null);
+              json_pack_t jin(json5_parser::mValue::null);
               string t;
               getline(cin,t);
               if (!t.empty())
                 read(t,jin);
               cout << cmd <<"=>";
-              write(registry.process(cmd, jin),cout,json_spirit::remove_trailing_zeros);
+              write(registry.process(cmd, jin),cout,json5_parser::remove_trailing_zeros);
               cout << endl;
             }
           catch (const std::exception& ex)

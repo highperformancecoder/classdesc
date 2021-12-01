@@ -9,10 +9,10 @@
 #ifndef JSON_PACK_BASE_H
 #define JSON_PACK_BASE_H
 #include "classdesc.h"
-#define JSON_SPIRIT_MVALUE_ENABLED
-#include <json_spirit_value.h>
-#include <json_spirit_reader_template.h>
-#include <json_spirit_writer_template.h>
+#define JSON5_PARSER_MVALUE_ENABLED
+#include <json5_parser_value.h>
+#include <json5_parser_reader_template.h>
+#include <json5_parser_writer_template.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <vector>
@@ -44,25 +44,25 @@ namespace classdesc
   };
 
   // these are classes, not typedefs to avoid adding properties to mValue
-  class json_pack_t: public json_spirit::mValue
+  class json_pack_t: public json5_parser::mValue
   {
   public:
     bool throw_on_error; ///< enable exceptions on error conditions
     bool throw_on_not_found; ///< enable exceptions if element not present in JSON stream
-    json_pack_t(): json_spirit::mValue(json_spirit::mObject()), 
+    json_pack_t(): json5_parser::mValue(json5_parser::mObject()), 
                    throw_on_error(false), throw_on_not_found(false)  {}
-    json_pack_t(const json_spirit::mValue& x): 
-      json_spirit::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
+    json_pack_t(const json5_parser::mValue& x): 
+      json5_parser::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
 
     template <class T,
-              typename enable_if<Not<is_base_of<json_spirit::mValue,T> >, void>::T>
+              typename enable_if<Not<is_base_of<json5_parser::mValue,T> >, void>::T>
     json_pack_t(const T& x);
 
     json_pack_t(const char* x):
-      json_spirit::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
+      json5_parser::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
 #if defined(__cplusplus) && __cplusplus>=201103L
     template <class T>
-    json_pack_t(const std::initializer_list<T>& x): json_spirit::mValue(json_spirit::mArray())
+    json_pack_t(const std::initializer_list<T>& x): json5_parser::mValue(json5_parser::mArray())
     {
       auto& arr=get_array();
       for (auto& i: x) arr.emplace_back(i);
@@ -72,32 +72,32 @@ namespace classdesc
 
   inline bool read(const std::string& s, json_pack_t& value)
   {
-    return json_spirit::read_string(s, static_cast<json_spirit::mValue&>(value));
+    return json5_parser::read_string(s, static_cast<json5_parser::mValue&>(value));
   }
   
   inline bool read(std::istream& is, json_pack_t& value)
   {
-    return json_spirit::read_stream(is, static_cast<json_spirit::mValue&>(value));
+    return json5_parser::read_stream(is, static_cast<json5_parser::mValue&>(value));
   }
      
   inline void write(const json_pack_t& value, std::ostream& os, unsigned options=0)
   {
-    json_spirit::write_stream(static_cast<const json_spirit::mValue&>(value), os, options );
+    json5_parser::write_stream(static_cast<const json5_parser::mValue&>(value), os, options );
   }
 
   inline std::string write(const json_pack_t& value, unsigned options=0)
   {
-    return json_spirit::write_string(static_cast<const json_spirit::mValue&>(value), options );
+    return json5_parser::write_string(static_cast<const json5_parser::mValue&>(value), options );
   }
   
   inline void write_formatted(const json_pack_t& value, std::ostream& os)
   {
-    write_stream( static_cast<const json_spirit::mValue&>(value), os, json_spirit::pretty_print );
+    write_stream( static_cast<const json5_parser::mValue&>(value), os, json5_parser::pretty_print );
   }
 
   inline std::string write_formatted(const json_pack_t& value)
   {
-    return write_string( static_cast<const json_spirit::mValue&>(value), json_spirit::pretty_print );
+    return write_string( static_cast<const json5_parser::mValue&>(value), json5_parser::pretty_print );
   }
 
   typedef json_pack_t json_unpack_t;
@@ -119,22 +119,22 @@ namespace classdesc
   inline const json_unpack_t& operator>>(const json_unpack_t& j, const char*& a) 
   {throw json_pack_error("cannot unpack to char*, please use string instead");}
 
-  template <class T, typename enable_if<Not<is_base_of<json_spirit::mValue,T> >, void>::T>
+  template <class T, typename enable_if<Not<is_base_of<json5_parser::mValue,T> >, void>::T>
   json_pack_t::json_pack_t(const T& x):
     throw_on_error(false), throw_on_not_found(false)
   {(*this)<<x;}
   
   /// find an object named by \a name within the json object x
-  inline json_spirit::mValue& 
-  json_find(json_spirit::mValue& x, std::string name)
+  inline json5_parser::mValue& 
+  json_find(json5_parser::mValue& x, std::string name)
   {
     if (name.size()==0) return x;
     if (name[0]=='.') name.erase(0,1); //remove leading '.'
     std::string::size_type p=name.find('.');
-    if (x.type()==json_spirit::obj_type)
+    if (x.type()==json5_parser::obj_type)
       {
-        json_spirit::mObject& xo=x.get_obj();
-        json_spirit::mObject::iterator i=xo.find(name.substr(0,p));
+        json5_parser::mObject& xo=x.get_obj();
+        json5_parser::mObject::iterator i=xo.find(name.substr(0,p));
         if (i==xo.end())
           throw json_object_not_found(name.substr(0,p));
         else if (p==std::string::npos)
@@ -146,67 +146,67 @@ namespace classdesc
       throw json_pack_error("%s is not a json object",name.c_str());
   }
 
-  //json_spirit::mValue does not provide constructors for everything. Oh well..
-  template <class T> json_spirit::mValue valueof(T a) 
-  {return json_spirit::mValue(a);}
-  template <class T> T getValue(const json_spirit::mValue& x) 
+  //json5_parser::mValue does not provide constructors for everything. Oh well..
+  template <class T> json5_parser::mValue valueof(T a) 
+  {return json5_parser::mValue(a);}
+  template <class T> T getValue(const json5_parser::mValue& x) 
   {return x.get_value<T>();} 
 
-  inline json_spirit::mValue valueof(unsigned char a)  
-  {return json_spirit::mValue(int(a));}
-  template <> inline unsigned char getValue(const json_spirit::mValue& x) 
+  inline json5_parser::mValue valueof(unsigned char a)  
+  {return json5_parser::mValue(int(a));}
+  template <> inline unsigned char getValue(const json5_parser::mValue& x) 
   {return x.get_value<int>();}
 
-  inline json_spirit::mValue valueof(signed char a)  
-  {return json_spirit::mValue(int(a));}
-  template <> inline signed char getValue(const json_spirit::mValue& x) 
+  inline json5_parser::mValue valueof(signed char a)  
+  {return json5_parser::mValue(int(a));}
+  template <> inline signed char getValue(const json5_parser::mValue& x) 
   {return x.get_value<int>();}
 
-  inline json_spirit::mValue valueof(char a)  
-  {return json_spirit::mValue(string()+a);}
-  template <> inline char getValue(const json_spirit::mValue& x) 
+  inline json5_parser::mValue valueof(char a)  
+  {return json5_parser::mValue(string()+a);}
+  template <> inline char getValue(const json5_parser::mValue& x) 
   {return x.get_value<string>()[0];}
 
-  inline json_spirit::mValue valueof(unsigned short a)  
-  {return json_spirit::mValue(int(a));}
-  template <> inline unsigned short getValue(const json_spirit::mValue& x) 
+  inline json5_parser::mValue valueof(unsigned short a)  
+  {return json5_parser::mValue(int(a));}
+  template <> inline unsigned short getValue(const json5_parser::mValue& x) 
   {return x.get_value<int>();}
 
-  inline json_spirit::mValue valueof(signed short a)  
-  {return json_spirit::mValue(int(a));}
-  template <> inline signed short getValue(const json_spirit::mValue& x) 
+  inline json5_parser::mValue valueof(signed short a)  
+  {return json5_parser::mValue(int(a));}
+  template <> inline signed short getValue(const json5_parser::mValue& x) 
   {return x.get_value<int>();}
 
-  inline json_spirit::mValue valueof(unsigned int a)  
-  {return json_spirit::mValue(boost::uint64_t(a));}
-  template <> inline unsigned getValue(const json_spirit::mValue& x) 
+  inline json5_parser::mValue valueof(unsigned int a)  
+  {return json5_parser::mValue(boost::uint64_t(a));}
+  template <> inline unsigned getValue(const json5_parser::mValue& x) 
   {return x.get_value<boost::uint64_t>();}
 
-  inline json_spirit::mValue valueof(unsigned long a)  
-  {return json_spirit::mValue(boost::uint64_t(a));}
-  template <> inline unsigned long getValue(const json_spirit::mValue& x) 
+  inline json5_parser::mValue valueof(unsigned long a)  
+  {return json5_parser::mValue(boost::uint64_t(a));}
+  template <> inline unsigned long getValue(const json5_parser::mValue& x) 
   {return x.get_value<boost::uint64_t>();}
 
-  inline json_spirit::mValue valueof(long a)  
-  {return json_spirit::mValue(boost::int64_t(a));}
-  template <> inline long getValue(const json_spirit::mValue& x) 
+  inline json5_parser::mValue valueof(long a)  
+  {return json5_parser::mValue(boost::int64_t(a));}
+  template <> inline long getValue(const json5_parser::mValue& x) 
   {return x.get_value<boost::int64_t>();}
 
 #ifdef HAVE_LONGLONG
-  inline json_spirit::mValue valueof(unsigned long long a)  
-  {return json_spirit::mValue(boost::uint64_t(a));}
-  template <> inline unsigned long long getValue(const json_spirit::mValue& x) 
+  inline json5_parser::mValue valueof(unsigned long long a)  
+  {return json5_parser::mValue(boost::uint64_t(a));}
+  template <> inline unsigned long long getValue(const json5_parser::mValue& x) 
   {return x.get_value<boost::uint64_t>();}
 
-  inline json_spirit::mValue valueof(long long a)  
-  {return json_spirit::mValue(boost::int64_t(a));}
-  template <> inline long long getValue(const json_spirit::mValue& x) 
+  inline json5_parser::mValue valueof(long long a)  
+  {return json5_parser::mValue(boost::int64_t(a));}
+  template <> inline long long getValue(const json5_parser::mValue& x) 
   {return x.get_value<boost::int64_t>();}
 #endif
 
-  inline json_spirit::mValue valueof(float a)  
-  {return json_spirit::mValue(double(a));}
-  template <> inline float getValue(const json_spirit::mValue& x) 
+  inline json5_parser::mValue valueof(float a)  
+  {return json5_parser::mValue(double(a));}
+  template <> inline float getValue(const json5_parser::mValue& x) 
   {return x.get_value<double>();}
 
  // basic types
@@ -214,14 +214,14 @@ namespace classdesc
   enable_if<Or<is_fundamental<T>,is_string<T> >, void>::T
   json_packp(json_unpack_t& o, const string& d, const T& a, dummy<0> dum=0)
   {
-    using namespace json_spirit;
+    using namespace json5_parser;
     if (d=="")
       o=valueof(a);
     else
       {
         try
           {
-            json_spirit::mValue& parent=json_find(o,head(d));
+            json5_parser::mValue& parent=json_find(o,head(d));
             if (parent.type()==obj_type)
               parent.get_obj()[tail(d)]=valueof(a);
             else
@@ -257,7 +257,7 @@ namespace classdesc
   }  
 
   template <class T> void json_pack_isarray
-  (json_spirit::mValue& jval, const T& val, std::vector<size_t> dims) 
+  (json5_parser::mValue& jval, const T& val, std::vector<size_t> dims) 
   {
     if (dims.empty())
       {
@@ -268,7 +268,7 @@ namespace classdesc
     else
       {
         size_t s=dims.back();
-        jval=json_spirit::mArray(s);
+        jval=json5_parser::mArray(s);
         dims.pop_back();
         size_t stride=1;
         for (size_t i=0; i<dims.size(); ++i) stride*=dims[i];
@@ -290,8 +290,8 @@ namespace classdesc
   va_end(ap);
   try
     {
-      json_spirit::mValue& parent=json_find(o,head(d));
-      if (parent.type()!=json_spirit::obj_type)
+      json5_parser::mValue& parent=json_find(o,head(d));
+      if (parent.type()!=json5_parser::obj_type)
         throw json_pack_error("attempt to pack an array member into a non-object");
       else
         json_pack_isarray(parent.get_obj()[tail(d)],a,dims);
@@ -304,7 +304,7 @@ namespace classdesc
   }
  
   template <class T> void json_unpack_isarray
-  (const json_spirit::mValue& jval, T& val, std::vector<size_t> dims) 
+  (const json5_parser::mValue& jval, T& val, std::vector<size_t> dims) 
   {
     if (dims.empty())
       {
@@ -334,8 +334,8 @@ namespace classdesc
     va_end(ap);
     try
       {
-        const json_spirit::mValue& v=json_find(o,d);
-        if (v.type()!=json_spirit::array_type)
+        const json5_parser::mValue& v=json_find(o,d);
+        if (v.type()!=json5_parser::array_type)
           throw json_pack_error
             ("attempt to unpack an array member from a non-object");
         else 
@@ -380,12 +380,12 @@ namespace classdesc
   {
     try
       {
-        const json_spirit::mValue& val=json_find(o,d);
-        if (val.type()!=json_spirit::array_type)
+        const json5_parser::mValue& val=json_find(o,d);
+        if (val.type()!=json5_parser::array_type)
           throw json_pack_error("%s is not an array",d.c_str());
         else
           {
-            const json_spirit::mArray& arr=val.get_array();
+            const json5_parser::mArray& arr=val.get_array();
             resize(a, arr.size());
             size_t i=0;
             for (typename T::iterator j=a.begin(); i<arr.size() && j!=a.end(); ++i, ++j)
@@ -421,19 +421,19 @@ namespace classdesc
   {
   try
     {
-      json_spirit::mValue& parent=json_find(o,head(d));
-      if (parent.type()!=json_spirit::obj_type)
+      json5_parser::mValue& parent=json_find(o,head(d));
+      if (parent.type()!=json5_parser::obj_type)
         throw json_pack_error("attempt to pack an array member into a non-object");
       else
         {
-          json_spirit::mValue* v;
+          json5_parser::mValue* v;
           if (d.empty())
             v=&parent;
           else
             v=&parent.get_obj()[tail(d)];
 
-          json_spirit::mArray& arr=
-            (*v=json_spirit::mArray(a.size())).get_array();
+          json5_parser::mArray& arr=
+            (*v=json5_parser::mArray(a.size())).get_array();
           typename T::const_iterator i=a.begin();
           for (size_t k=0; i!=a.end(); ++i, ++k)
             {
@@ -455,12 +455,12 @@ namespace classdesc
   {
     try
       {
-        const json_spirit::mValue& val=json_find(o,d);
-        if (val.type()!=json_spirit::array_type)
+        const json5_parser::mValue& val=json_find(o,d);
+        if (val.type()!=json5_parser::array_type)
           throw json_pack_error("%s is not an array",d.c_str());
         else
           {
-            const json_spirit::mArray& arr=val.get_array();
+            const json5_parser::mArray& arr=val.get_array();
             a.clear();
             for (size_t i=0; i<arr.size(); ++i)
               {

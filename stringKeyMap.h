@@ -41,8 +41,8 @@ namespace classdesc
   {
     try
       {
-        json_spirit::mValue& parent=json_find(j,head(d));
-        if (parent.type()!=json_spirit::obj_type)
+        json5_parser::mValue& parent=json_find(j,head(d));
+        if (parent.type()!=json5_parser::obj_type)
           throw json_pack_error("attempt to pack an array member into a non-object");
         else
           {
@@ -62,14 +62,14 @@ namespace classdesc
   {
     try
       {
-        const json_spirit::mValue& val=json_find(j,d);
-        if (val.type()!=json_spirit::obj_type)
+        const json5_parser::mValue& val=json_find(j,d);
+        if (val.type()!=json5_parser::obj_type)
           throw json_pack_error("%s is not an array",d.c_str());
         else
           {
-            const json_spirit::mObject& arr=val.get_obj();
+            const json5_parser::mObject& arr=val.get_obj();
             a.clear();
-            for (json_spirit::mObject::const_iterator i=arr.begin(); i!=arr.end(); ++i)
+            for (json5_parser::mObject::const_iterator i=arr.begin(); i!=arr.end(); ++i)
               json_unpack(j,d+"."+i->first,a[i->first]);
           }
       }

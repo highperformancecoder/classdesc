@@ -1,6 +1,7 @@
 .SUFFIXES: .c .cc .o .d .h .cd
 OBJS=RESTProcessExample.o
-CFLAGS=-g -I.. -I. -I../json_spirit/json_spirit -fPIC -std=c++11 -DUSE_UNROLLED
+CFLAGS=-g -I.. -I. -I../json5_parser/json5_parser -I/usr/local/include -fPIC -std=c++11 -DUSE_UNROLLED -pthread
+LIBS+=-L/usr/local/lib64 -lboost_thread -lpthread
 VPATH=..
 
 RESTProcess: $(OBJS)

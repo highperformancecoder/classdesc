@@ -34,13 +34,13 @@ namespace classdesc
         //create the object, if it doesn't already exist
         try
           {
-            json_spirit::mValue& parent=json_find(o,head(d));
-            if (parent.type()!=json_spirit::obj_type)
+            json5_parser::mValue& parent=json_find(o,head(d));
+            if (parent.type()!=json5_parser::obj_type)
               throw json_pack_error("trying to create object %s in non-object",
                                     d.c_str());
-            json_spirit::mObject::iterator member=parent.get_obj().find(tail(d));
+            json5_parser::mObject::iterator member=parent.get_obj().find(tail(d));
             if (member==parent.get_obj().end())
-              parent.get_obj().insert(make_pair(tail(d), json_spirit::mObject()));
+              parent.get_obj().insert(make_pair(tail(d), json5_parser::mObject()));
           }
          catch (json_pack_error&)
           {
@@ -66,7 +66,7 @@ namespace classdesc
   {}
   
   template <class T> void json_packp(json_pack_t& o, const string& d, const char* a)
-  {o=json_spirit::mValue(a);}
+  {o=json5_parser::mValue(a);}
 }
 
 namespace classdesc_access

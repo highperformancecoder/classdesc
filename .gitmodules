@@ -1,6 +1,6 @@
 [submodule "mpl"]
 	path = mpl
 	url = git@github.com:kvasir-io/mpl.git
-[submodule "json_spirit"]
-	path = json_spirit
-	url = git@github.com:highperformancecoder/json_spirit.git
+[submodule "json5_parser"]
+	path = json5_parser
+	url = git@github.com:highperformancecoder/json5_parser.git

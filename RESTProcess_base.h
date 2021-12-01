@@ -89,29 +89,29 @@ namespace classdesc
   {
       switch (j.type())
         {
-        case json_spirit::obj_type:
+        case json5_parser::obj_type:
           j>>x;
           break;
-        case json_spirit::array_type:
+        case json5_parser::array_type:
           {
             auto& arr=j.get_array();
             if (arr.size()>0)
               arr[0]>>x;
           }
           break;
-        case json_spirit::str_type:
+        case json5_parser::str_type:
           convert(x,j.get_str());
           break;
-        case json_spirit::bool_type:
+        case json5_parser::bool_type:
           convert(x,j.get_bool());
           break;
-        case json_spirit::int_type:
+        case json5_parser::int_type:
           convert(x,j.get_int());
           break;
-        case json_spirit::real_type:
+        case json5_parser::real_type:
           convert(x,j.get_real());
           break;
-        case json_spirit::null_type:
+        case json5_parser::null_type:
           break;
         }
   }
@@ -120,7 +120,7 @@ namespace classdesc
   typename enable_if<And<is_sequence<X>,Not<is_const<X>>>, void>::T
   convert(X& x, const json_pack_t& j)
   {
-    if (j.type()==json_spirit::array_type)
+    if (j.type()==json5_parser::array_type)
       {
         auto& arr=j.get_array();
         resize(x, arr.size());
@@ -184,11 +184,11 @@ namespace classdesc
 
       if (cmd=="/@enum/@list")
         {
-          json_spirit::mArray r;
+          json5_parser::mArray r;
           for (auto& i: *this)
             if (i.first.find("/@enum")==0)
               r.push_back(i.first);
-          return json_spirit::mValue(r);
+          return json5_parser::mValue(r);
         }
       
       for (auto cmdEnd=query.length(); ;
@@ -226,13 +226,13 @@ namespace classdesc
                 auto r=equal_range(cmd);
                 if (tail=="/@signature")
                   {
-                    json_spirit::mArray array;
+                    json5_parser::mArray array;
                     for (; r.first!=r.second; ++r.first)
                       array.push_back(r.first->second->signature());
                     return json_pack_t(array);
                   }
                 else if (tail=="/@list")
-                  return json_pack_t(json_spirit::mArray());
+                  return json_pack_t(json5_parser::mArray());
                 else if (tail=="/@type")
                   return json_pack_t("overloaded function");
                 else
@@ -305,7 +305,7 @@ namespace classdesc
     json_pack_t list() const override {
       RESTProcess_t map;
       RESTProcess(map,"",obj);
-      json_spirit::mArray array;
+      json5_parser::mArray array;
       for (auto& i:map)
         if (!i.first.empty())
           array.emplace_back(i.first);
@@ -452,7 +452,7 @@ namespace classdesc
     }
     json_pack_t signature() const override;
     json_pack_t list() const override {
-      json_spirit::mArray array{"/@elem","/@insert","/@erase","/@size"};
+      json5_parser::mArray array{"/@elem","/@insert","/@erase","/@size"};
       return json_pack_t(array);
     }
     json_pack_t type() const override {return json_pack_t(typeName<T>());}
@@ -548,7 +548,7 @@ namespace classdesc
               std::istringstream is(string(keyStart+1, keyEnd));
               is>>key;
               string tail(keyEnd,remainder.end());
-              if (tail.empty() && arguments.type()!=json_spirit::null_type)
+              if (tail.empty() && arguments.type()!=json5_parser::null_type)
                 assignIfMap(obj, key, arguments);
               auto i=obj.find(key);
               if (i==obj.end())
@@ -582,7 +582,7 @@ namespace classdesc
     }
     json_pack_t signature() const override;
     json_pack_t list() const override {
-      json_spirit::mArray array{"/@elem","/@insert","/@erase","/@size"};
+      json5_parser::mArray array{"/@elem","/@insert","/@erase","/@size"};
       return json_pack_t(array);
     }
     json_pack_t type() const override {return json_pack_t(typeName<T>());}
@@ -606,7 +606,7 @@ namespace classdesc
       if (ptr)
         return const_cast<RESTProcessPtr<T>*>(this)->process("/@list",{});
       else
-        return json_pack_t(json_spirit::mArray());
+        return json_pack_t(json5_parser::mArray());
     }
     json_pack_t type() const override {return json_pack_t(typeName<T>());}
   };
@@ -621,9 +621,9 @@ namespace classdesc
     json_pack_t list() const override {
       if (auto p=ptr.lock())
         return RESTProcessObject<T>(*p).list();
-      else return json_pack_t(json_spirit::mArray());
+      else return json_pack_t(json5_parser::mArray());
     }
-    json_pack_t type() const override {return json_spirit::mValue(typeName<std::weak_ptr<T> >());}
+    json_pack_t type() const override {return json5_parser::mValue(typeName<std::weak_ptr<T> >());}
  };
 
   
@@ -637,7 +637,7 @@ namespace classdesc
     std::vector<json_pack_t>::iterator it;
   public:
     JSONBuffer(const json_pack_t& j) {
-      if (j.type()==json_spirit::array_type)
+      if (j.type()==json5_parser::array_type)
         for (auto& i: j.get_array())
           values.push_back(i);
       else
@@ -677,8 +677,8 @@ namespace classdesc
         // remaining arguments to the result
         switch (arguments.type())
           {
-          case json_spirit::null_type: break;
-          case json_spirit::array_type:
+          case json5_parser::null_type: break;
+          case json5_parser::array_type:
             {
               auto& arr=arguments.get_array();
               if (arr.size()>functional::Arity<F>::value)
@@ -719,38 +719,38 @@ namespace classdesc
   
   /// @{
   /// return whether \a arg matches a C++ type T for a function call argument
-  //template <class T> bool matches(const json_spirit::mValue& arg);
+  //template <class T> bool matches(const json5_parser::mValue& arg);
   
   template <class T>
   typename enable_if<And<is_pointer<T>, Not<is_same<T,const char*> > >,bool>::T
-  matches(const json_spirit::mValue& x)
+  matches(const json5_parser::mValue& x)
   {return false;}
 
   template <class T>
   typename enable_if<is_same<T,bool>,bool>::T
-  matches(const json_spirit::mValue& x)
-  {return x.type()==json_spirit::bool_type;}
+  matches(const json5_parser::mValue& x)
+  {return x.type()==json5_parser::bool_type;}
 
   template <class T>
-  typename enable_if<is_same<T,string>,bool>::T matches(const json_spirit::mValue& x)
-  {return x.type()==json_spirit::str_type;}
+  typename enable_if<is_same<T,string>,bool>::T matches(const json5_parser::mValue& x)
+  {return x.type()==json5_parser::str_type;}
 
   template <class T>
   typename enable_if<is_same<T,const char*>, bool>::T
-  matches(const json_spirit::mValue& x)
-  {return x.type()==json_spirit::str_type;}
+  matches(const json5_parser::mValue& x)
+  {return x.type()==json5_parser::str_type;}
 
   template <class T>
-  typename enable_if<And<is_integral<T>,Not<is_same<T,bool>>>, bool>::T matches(const json_spirit::mValue& x)
-  {return x.type()==json_spirit::int_type;}
+  typename enable_if<And<is_integral<T>,Not<is_same<T,bool>>>, bool>::T matches(const json5_parser::mValue& x)
+  {return x.type()==json5_parser::int_type;}
 
   template <class T>
-  typename enable_if<is_floating_point<T>, bool>::T matches(const json_spirit::mValue& x)
-  {return x.type()==json_spirit::real_type;}
+  typename enable_if<is_floating_point<T>, bool>::T matches(const json5_parser::mValue& x)
+  {return x.type()==json5_parser::real_type;}
   
   template <class T>
-  typename enable_if<is_enum<T>, bool>::T matches(const json_spirit::mValue& x)
-  {return x.type()==json_spirit::str_type;}
+  typename enable_if<is_enum<T>, bool>::T matches(const json5_parser::mValue& x)
+  {return x.type()==json5_parser::str_type;}
   
   template <class T>
   typename enable_if<
@@ -761,9 +761,9 @@ namespace classdesc
         >,
       Not<is_container<T>>
       >, bool>::T
-  matches(const json_spirit::mValue& x)
+  matches(const json5_parser::mValue& x)
   {
-    if (x.type()!=json_spirit::obj_type) return false;
+    if (x.type()!=json5_parser::obj_type) return false;
     try // to convert the json object to a T
       {
         T test;
@@ -775,9 +775,9 @@ namespace classdesc
   }
 
   template <class T>
-  typename enable_if<is_container<T>, bool>::T matches(const json_spirit::mValue& x)
+  typename enable_if<is_container<T>, bool>::T matches(const json5_parser::mValue& x)
   {
-    if (x.type()==json_spirit::array_type)
+    if (x.type()==json5_parser::array_type)
       {
         auto& arr=x.get_array();
         bool r=true;
@@ -794,12 +794,12 @@ namespace classdesc
   
   template <class T>
   typename enable_if<is_abstract<T>, bool>::T
-  matches(const json_spirit::mValue&) {return false;}
+  matches(const json5_parser::mValue&) {return false;}
 
   template <class T>
   typename enable_if<
     And<is_const<typename remove_reference<T>::type>, is_reference<T>>, bool>::T
-  matches(const json_spirit::mValue& x)
+  matches(const json5_parser::mValue& x)
   {return matches<typename remove_const_ref<T>::type>(x);}
 
   template <class T>
@@ -808,7 +808,7 @@ namespace classdesc
       is_object<T>,
       Not<is_default_constructible<typename remove_reference<T>::type>>
       >, bool>::T
-  matches(const json_spirit::mValue& x)
+  matches(const json5_parser::mValue& x)
   {return false;}
 
   template <class T>
@@ -820,23 +820,23 @@ namespace classdesc
 
   template <class T>
   typename enable_if<And<Not<is_reference<T>>,isNoMatch<typename remove_const<T>::type>>, bool>::T
-  matches(const json_spirit::mValue&) {return false;}
+  matches(const json5_parser::mValue&) {return false;}
 
   template <class T>
   typename enable_if<And<is_reference<T>, Not<is_const<typename remove_reference<T>::type>>>, bool>::T
-  matches(const json_spirit::mValue&) {return false;}
+  matches(const json5_parser::mValue&) {return false;}
 
   /// @{ testing for not quite so good matches between json type and C++ type
-  //template <class T> bool partiallyMatchable(const json_spirit::mValue& x);
+  //template <class T> bool partiallyMatchable(const json5_parser::mValue& x);
 
   template <class T>
-  typename enable_if<is_floating_point<typename remove_reference<T>::type>, bool>::T partiallyMatchable(const json_spirit::mValue& x)
-  {return x.type()==json_spirit::int_type||x.type()==json_spirit::real_type;}
+  typename enable_if<is_floating_point<typename remove_reference<T>::type>, bool>::T partiallyMatchable(const json5_parser::mValue& x)
+  {return x.type()==json5_parser::int_type||x.type()==json5_parser::real_type;}
 
   template <class T>
-  typename enable_if<is_container<T>, bool>::T partiallyMatchable(const json_spirit::mValue& x)
+  typename enable_if<is_container<T>, bool>::T partiallyMatchable(const json5_parser::mValue& x)
   {
-    if (x.type()==json_spirit::array_type)
+    if (x.type()==json5_parser::array_type)
       {
         auto& arr=x.get_array();
         bool r;
@@ -848,11 +848,11 @@ namespace classdesc
 
   template <class T>
   typename enable_if<And<Not<is_floating_point<typename remove_reference<T>::type> >, Not<is_container<T> > >, bool>::T
-                       partiallyMatchable(const json_spirit::mValue& x)
+                       partiallyMatchable(const json5_parser::mValue& x)
   {return matches<T>(x);}
 
 
-  template <class T> unsigned argMatchScore(const json_spirit::mValue& x)
+  template <class T> unsigned argMatchScore(const json5_parser::mValue& x)
   {
     if (matches<T>(x)) return 0;
     if (partiallyMatchable<T>(x)) return 1;
@@ -863,9 +863,9 @@ namespace classdesc
   template <class F, int N, int NN=N>
   struct MatchScore
   {
-    static unsigned score(const json_spirit::mValue& x)
+    static unsigned score(const json5_parser::mValue& x)
     {
-      if (x.type()!=json_spirit::array_type) return RESTProcessFunctionBase::maxMatchScore;
+      if (x.type()!=json5_parser::array_type) return RESTProcessFunctionBase::maxMatchScore;
       auto& arr=x.get_array();
       if (arr.size()<N) return RESTProcessFunctionBase::maxMatchScore;
       return  argMatchScore<typename functional::Arg<F,N>::T>(arr[N-1]) +
@@ -876,9 +876,9 @@ namespace classdesc
   template <class F, int NN>
   struct MatchScore<F,2,NN>
   {
-    static unsigned score(const json_spirit::mValue& x)
+    static unsigned score(const json5_parser::mValue& x)
     {
-      if (x.type()!=json_spirit::array_type) return RESTProcessFunctionBase::maxMatchScore;
+      if (x.type()!=json5_parser::array_type) return RESTProcessFunctionBase::maxMatchScore;
       auto& arr=x.get_array();
       if (arr.size()<2) return RESTProcessFunctionBase::maxMatchScore;
       return argMatchScore<typename functional::Arg<F,1>::T>(arr[0]) +
@@ -890,13 +890,13 @@ namespace classdesc
   template <class F,int NN>
   struct MatchScore<F,1,NN>
   {
-    static unsigned score(const json_spirit::mValue& x)
+    static unsigned score(const json5_parser::mValue& x)
     {
       switch (x.type())
         {
-        case json_spirit::null_type:
+        case json5_parser::null_type:
           return RESTProcessFunctionBase::maxMatchScore;
-        case json_spirit::array_type:
+        case json5_parser::array_type:
           {
             auto& arr=x.get_array();
             if (arr.empty()) return RESTProcessFunctionBase::maxMatchScore;
@@ -912,13 +912,13 @@ namespace classdesc
   template <class F,int NN>
   struct MatchScore<F,0,NN>
   {
-    static unsigned score(const json_spirit::mValue& x)
+    static unsigned score(const json5_parser::mValue& x)
     {
       switch (x.type())
         {
-        case json_spirit::null_type:
+        case json5_parser::null_type:
           return 0;
-        case json_spirit::array_type:
+        case json5_parser::array_type:
           {
             auto& arr=x.get_array();
             return 10*arr.size()-NN; // penalize for supplying more arguments than needed
@@ -930,7 +930,7 @@ namespace classdesc
   };
   
   template <class F, int N=functional::Arity<F>::value>
-  unsigned matchScore(const json_spirit::mValue& x)
+  unsigned matchScore(const json5_parser::mValue& x)
   {return MatchScore<F,N>::score(x);}
 
   // static and free functions are const
@@ -955,7 +955,7 @@ namespace classdesc
     json_pack_t signature() const override {return functionSignature<F>();}
     unsigned matchScore(const json_pack_t& arguments) const override
     {return classdesc::matchScore<F>(arguments);}
-    json_pack_t list() const override {return json_pack_t(json_spirit::mArray());}
+    json_pack_t list() const override {return json_pack_t(json5_parser::mArray());}
     json_pack_t type() const override {return json_pack_t("function");}
     bool isObject() const override {return false;}
     bool isConst() const override {return FunctionalIsConst<F>::value;}
@@ -975,8 +975,8 @@ namespace classdesc
     json_pack_t signature() const override {return functionSignature<F>();}
     unsigned matchScore(const json_pack_t& arguments) const override
     {return classdesc::matchScore<F>(arguments);}
-    json_pack_t list() const override {return json_pack_t(json_spirit::mArray());}
-    json_pack_t type() const override {return json_spirit::mValue(typeName<F>());}
+    json_pack_t list() const override {return json_pack_t(json5_parser::mArray());}
+    json_pack_t type() const override {return json5_parser::mValue(typeName<F>());}
  };
 
   template <class T, class F>
@@ -1013,12 +1013,12 @@ namespace classdesc
         return r<<typeName<E>();
       else if (remainder=="@signature")
         return signature();
-      else if (arguments.type()==json_spirit::str_type)
+      else if (arguments.type()==json5_parser::str_type)
         convert(e, enum_keys<E>()(arguments.get_str()));
       return r<<enum_keys<E>()(e);
     }
     json_pack_t signature() const override;
-    json_pack_t list() const override {return json_pack_t(json_spirit::mArray());}
+    json_pack_t list() const override {return json_pack_t(json5_parser::mArray());}
     json_pack_t type() const override {return json_pack_t(typeName<E>());}
   };
 
@@ -1027,14 +1027,14 @@ namespace classdesc
   {
     json_pack_t process(const string& remainder, const json_pack_t& arguments) override
     {
-      json_spirit::mArray r;
+      json5_parser::mArray r;
       auto& enumerators=enum_keys<E>();
       for (auto i=enumerators.sbegin(); i!=enumerators.send(); ++i)
         r.push_back(*i);
-      return json_spirit::mValue(r);
+      return json5_parser::mValue(r);
     }
     json_pack_t signature() const override {return "{ret: \"vector<string>\", args: []}";}
-    json_pack_t list() const override {return json_pack_t(json_spirit::mArray());}
+    json_pack_t list() const override {return json_pack_t(json5_parser::mArray());}
     json_pack_t type() const override {return "function";}
   };
 
