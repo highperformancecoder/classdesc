@@ -357,6 +357,10 @@ namespace classdesc
   template <class T> struct is_smart_ptr<const std::unique_ptr<T>>: public true_type {};
 #endif
   /// @}
+
+  template <class T> struct is_weak_ptr: public false_type {};
+  template <class T> struct is_weak_ptr<weak_ptr<T> >: public true_type {};
+  template <class T> struct is_weak_ptr<const weak_ptr<T> >: public true_type {};
   
   ///  boolean arithmetic on is_ structs 
   ///@{

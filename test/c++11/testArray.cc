@@ -25,7 +25,7 @@ struct xmlBuf
 
 
 
-  template <class B>
+template <class B>
 void check()
 {
   array<int,5> a1={1,2,3,4,5}, a2={0,0,0,0,0};

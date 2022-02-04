@@ -1,6 +1,6 @@
 .SUFFIXES: .c .cc .o .d .h .cd
 OBJS=pythonExample.o
-CFLAGS=-g `pkg-config --cflags python3` -I.. -I. -fPIC -std=c++11 -DUSE_UNROLLED
+CFLAGS=-g `pkg-config --cflags python3` -I.. -I. -I../json5_parser/json5_parser -fPIC -std=c++11 -DUSE_UNROLLED
 VPATH=..
 
 example.so: $(OBJS)

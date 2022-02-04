@@ -12,7 +12,7 @@
 #include "classdesc_epilogue.h"
 using namespace std;
 using namespace classdesc;
-using namespace json_spirit;
+using namespace json5_parser;
 
 int main()
 {

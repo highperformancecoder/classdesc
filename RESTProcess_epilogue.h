@@ -70,7 +70,7 @@ namespace classdesc
   }
   
   template <class T> 
-  json_pack_t RESTProcessPtr<std::weak_ptr<T>>::signature() const
+  json_pack_t RESTProcessWeakPtr<T>::signature() const
   {
     json_pack_t r;
     auto tn=typeName<T>();
@@ -141,7 +141,7 @@ namespace classdesc
   }
 
   template <class T>
-  json_pack_t RESTProcessPtr<std::weak_ptr<T>>::process
+  json_pack_t RESTProcessWeakPtr<T>::process
   (const string& remainder, const json_pack_t& arguments)
   {
     if (auto p=ptr.lock())

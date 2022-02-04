@@ -8,7 +8,7 @@ OBJS=
 
 # note the internal type example cannot be correctly linked with g++ or icc!
 LIBS=-L.. -L/usr/X11R6/lib
-CFLAGS=-g -DXDR_PACK -std=c++11 -I../.. -I. -I/usr/X11R6/include 
+CFLAGS=-g -DXDR_PACK -std=c++11 -I../.. -I. -I/usr/X11R6/include -I../../json5_parser/json5_parser
 
 ifdef GCOV
 CFLAGS+=-fprofile-arcs -ftest-coverage

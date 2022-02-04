@@ -612,22 +612,28 @@ namespace classdesc
   };
 
   template <class T>
-  struct RESTProcessPtr<std::weak_ptr<T>>: public RESTProcessWrapperBase
+  struct RESTProcessWeakPtr: public RESTProcessWrapperBase
   {
-    std::weak_ptr<T>& ptr;
-    RESTProcessPtr(std::weak_ptr<T>& ptr): ptr(ptr) {}
+    T& ptr;
+    RESTProcessWeakPtr(std::weak_ptr<T>& ptr): ptr(ptr) {}
     json_pack_t process(const string& remainder, const json_pack_t& arguments) override;
     json_pack_t signature() const override;
     json_pack_t list() const override {
       if (auto p=ptr.lock())
-        return RESTProcessObject<T>(*p).list();
+        return RESTProcessObject<typename T::target>(*p).list();
       else return json_pack_t(json5_parser::mArray());
     }
     json_pack_t type() const override {return json5_parser::mValue(typeName<std::weak_ptr<T> >());}
  };
 
   
-
+  template <class T>
+  struct RESTProcessPtr<classdesc::weak_ptr<T>>: public RESTProcessWeakPtr<classdesc::weak_ptr<T>>
+  {RESTProcessPtr(classdesc::weak_ptr<T>& x): RESTProcessWeakPtr<classdesc::weak_ptr<T>>(x) {}};
+  
+  template <class T>
+  struct RESTProcessPtr<const classdesc::weak_ptr<T>>: public RESTProcessWeakPtr<const classdesc::weak_ptr<T>>
+  {RESTProcessPtr(const classdesc::weak_ptr<T>& x): RESTProcessWeakPtr<const classdesc::weak_ptr<T>>(x) {}};
   
   
   // buffer adaptor for a vector of json_pack_t objects 
