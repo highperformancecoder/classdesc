@@ -544,15 +544,17 @@ namespace classdesc
           if (keyStart!=remainder.end())
             {
               auto keyEnd=find(keyStart+1, remainder.end(), '/');
+              std::string keyString(keyStart+1, keyEnd);
+              json_pack_t jsonKey;
+              read(keyString,jsonKey);
               typename T::key_type key;
-              std::istringstream is(string(keyStart+1, keyEnd));
-              is>>key;
+              jsonKey>>key;
               string tail(keyEnd,remainder.end());
               if (tail.empty() && arguments.type()!=json5_parser::null_type)
                 assignIfMap(obj, key, arguments);
               auto i=obj.find(key);
               if (i==obj.end())
-                throw std::runtime_error("key "+string(keyStart+1, keyEnd)+" not found");
+                throw std::runtime_error("key "+keyString+" not found");
               else if (tail.empty())
                 return r<<*i;
               else
@@ -615,12 +617,12 @@ namespace classdesc
   struct RESTProcessWeakPtr: public RESTProcessWrapperBase
   {
     T& ptr;
-    RESTProcessWeakPtr(std::weak_ptr<T>& ptr): ptr(ptr) {}
+    RESTProcessWeakPtr(T& ptr): ptr(ptr) {}
     json_pack_t process(const string& remainder, const json_pack_t& arguments) override;
     json_pack_t signature() const override;
     json_pack_t list() const override {
       if (auto p=ptr.lock())
-        return RESTProcessObject<typename T::target>(*p).list();
+        return RESTProcessObject<typename T::element_type>(*p).list();
       else return json_pack_t(json5_parser::mArray());
     }
     json_pack_t type() const override {return json5_parser::mValue(typeName<std::weak_ptr<T> >());}
