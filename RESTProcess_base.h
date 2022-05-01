@@ -87,33 +87,33 @@ namespace classdesc
   typename enable_if<And<And<Not<is_sequence<X>>,Not<is_const<X>>>,Not<is_enum<X>>>, void>::T
   convert(X& x, const json_pack_t& j)
   {
-      switch (j.type())
+    switch (j.type())
+      {
+      case json5_parser::obj_type:
+        j>>x;
+        break;
+      case json5_parser::array_type:
         {
-        case json5_parser::obj_type:
-          j>>x;
-          break;
-        case json5_parser::array_type:
-          {
-            auto& arr=j.get_array();
-            if (arr.size()>0)
-              arr[0]>>x;
-          }
-          break;
-        case json5_parser::str_type:
-          convert(x,j.get_str());
-          break;
-        case json5_parser::bool_type:
-          convert(x,j.get_bool());
-          break;
-        case json5_parser::int_type:
-          convert(x,j.get_int());
-          break;
-        case json5_parser::real_type:
-          convert(x,j.get_real());
-          break;
-        case json5_parser::null_type:
-          break;
+          auto& arr=j.get_array();
+          if (arr.size()>0)
+            arr[0]>>x;
         }
+        break;
+      case json5_parser::str_type:
+        convert(x,j.get_str());
+        break;
+      case json5_parser::bool_type:
+        convert(x,j.get_bool());
+        break;
+      case json5_parser::int_type:
+        convert(x,j.get_int());
+        break;
+      case json5_parser::real_type:
+        convert(x,j.get_real());
+        break;
+      case json5_parser::null_type:
+        break;
+      }
   }
 
   template <class X>
@@ -239,7 +239,7 @@ namespace classdesc
                   {
                     // sort function overloads by best match
                     auto cmp=[&](RESTProcessFunctionBase*x, RESTProcessFunctionBase*y)
-                             {return x->matchScore(jin)<y->matchScore(jin);};
+                      {return x->matchScore(jin)<y->matchScore(jin);};
                     std::set<RESTProcessFunctionBase*, decltype(cmp)> sortedOverloads{cmp};
                     for (auto i=r.first; i!=r.second; ++i)
                       if (auto j=dynamic_cast<RESTProcessFunctionBase*>(i->second.get()))
@@ -256,7 +256,7 @@ namespace classdesc
                       }
                     return bestOverload->process(tail, jin);
                   }
-                }
+              }
             }
         }
     }
@@ -269,7 +269,7 @@ namespace classdesc
   };
 
   
- template <class T>
+  template <class T>
   inline json_pack_t mapAndProcess(const string& query, const json_pack_t& arguments, T& a)
   {
     RESTProcess_t map;
@@ -373,7 +373,7 @@ namespace classdesc
     struct Insertable: public
     And<
       And<
-      has_member_push_back<T,void (T::*)(const typename T::value_type&)>,
+        has_member_push_back<T,void (T::*)(const typename T::value_type&)>,
         is_default_constructible<typename T::value_type>>,
       Not<is_const<U>>> {};
     
@@ -508,6 +508,26 @@ namespace classdesc
     throw std::runtime_error("cannot erase data from a constant container");
   }
 
+  template <class U>
+  inline typename enable_if<is_fundamental<U>, void>::T
+  assignRawStringToKey(U& key, const std::string& x)
+  {
+    std::istringstream is(x); is>>key;
+  }
+    
+  template <class U>
+  inline typename enable_if<Not<is_fundamental<U>>, void>::T
+  assignRawStringToKey(U& key, const std::string& x)
+  {
+    throw std::runtime_error("key "+x+" needs to be JSON encoded");
+  }
+    
+  template <>
+  inline void assignRawStringToKey(std::string& key, const std::string& x)
+  {
+    key=x;
+  }
+    
   template <class T> class RESTProcessAssociativeContainer: public RESTProcessWrapperBase
   {
     T& obj;
@@ -543,18 +563,27 @@ namespace classdesc
           auto keyStart=find(remainder.begin()+1, remainder.end(), '/');
           if (keyStart!=remainder.end())
             {
-              auto keyEnd=find(keyStart+1, remainder.end(), '/');
-              std::string keyString(keyStart+1, keyEnd);
-              json_pack_t jsonKey;
-              read(keyString,jsonKey);
+              ++keyStart;
+              auto keyEnd=keyStart;
               typename T::key_type key;
-              jsonKey>>key;
+              if (strchr("\"'{[",*keyStart)) // JSON leadin
+                {
+                  json_pack_t jsonKey;
+                  read_range(keyEnd,remainder.end(),static_cast<json5_parser::mValue&>(jsonKey));
+                  jsonKey>>key;
+                }
+              else
+                {
+                  keyEnd=find(keyStart, remainder.end(), '/');
+                  assignRawStringToKey(key, std::string(keyStart, keyEnd));
+                }
+
               string tail(keyEnd,remainder.end());
               if (tail.empty() && arguments.type()!=json5_parser::null_type)
                 assignIfMap(obj, key, arguments);
               auto i=obj.find(key);
               if (i==obj.end())
-                throw std::runtime_error("key "+keyString+" not found");
+                throw std::runtime_error("key "+std::string(keyStart, keyEnd)+" not found");
               else if (tail.empty())
                 return r<<*i;
               else
@@ -626,7 +655,7 @@ namespace classdesc
       else return json_pack_t(json5_parser::mArray());
     }
     json_pack_t type() const override {return json5_parser::mValue(typeName<std::weak_ptr<T> >());}
- };
+  };
 
   
   template <class T>
@@ -695,7 +724,7 @@ namespace classdesc
             }
           default:
             if (functional::Arity<F>::value==0)
-                convert(r,arguments);
+              convert(r,arguments);
             break;
           }
         json_pack_t rj;
@@ -763,10 +792,10 @@ namespace classdesc
   template <class T>
   typename enable_if<
     And<
-      And<
-        And<is_class<T>, is_default_constructible<T> >,
-        Not<is_same<T,string>>
-        >,
+    And<
+      And<is_class<T>, is_default_constructible<T> >,
+      Not<is_same<T,string>>
+      >,
       Not<is_container<T>>
       >, bool>::T
   matches(const json5_parser::mValue& x)
@@ -813,7 +842,7 @@ namespace classdesc
   template <class T>
   typename enable_if<
     And<
-      is_object<T>,
+    is_object<T>,
       Not<is_default_constructible<typename remove_reference<T>::type>>
       >, bool>::T
   matches(const json5_parser::mValue& x)
@@ -856,7 +885,7 @@ namespace classdesc
 
   template <class T>
   typename enable_if<And<Not<is_floating_point<typename remove_reference<T>::type> >, Not<is_container<T> > >, bool>::T
-                       partiallyMatchable(const json5_parser::mValue& x)
+  partiallyMatchable(const json5_parser::mValue& x)
   {return matches<T>(x);}
 
 
@@ -985,7 +1014,7 @@ namespace classdesc
     {return classdesc::matchScore<F>(arguments);}
     json_pack_t list() const override {return json_pack_t(json5_parser::mArray());}
     json_pack_t type() const override {return json5_parser::mValue(typeName<F>());}
- };
+  };
 
   template <class T, class F>
   typename enable_if<functional::is_member_function_ptr<F>, void>::T
@@ -1075,7 +1104,7 @@ namespace classdesc
     }
   };
   
-   template <class E>
+  template <class E>
   typename enable_if<is_enum<E>, void>::T
   RESTProcessp(RESTProcess_t& repo, const string& d, E& e)
   {
