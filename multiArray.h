@@ -28,6 +28,20 @@ namespace classdesc
 
     friend void advance<T,Rank>(MultiArray<T,Rank>&,std::ptrdiff_t);
     
+#if defined(__cplusplus) && __cplusplus>=201703L
+    void constructDim(size_t& d, size_t dd)
+    {
+      dim[d++]=dd;
+      m_stride*=dd;
+    }
+    template <class... Args>
+    void constructDims(size_t d, Args... args)
+    {
+      m_stride=1;
+      (constructDim(d,args),...);
+    }
+#else
+
     void constructDims(size_t d, size_t d1)
     {
       assert(d==Rank-1);
@@ -40,7 +54,8 @@ namespace classdesc
       m_stride*=d1;
       constructDims(d+1, args...);
     }
-
+#endif
+    
   public:
     typedef MultiArray<T,Rank-1> value_type;
     typedef size_t size_type;

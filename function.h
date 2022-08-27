@@ -216,7 +216,25 @@ namespace classdesc
     {
       typedef FunctionalHelper<R,Args...> T;
     };
-    /// member object pointers
+#if defined(__cplusplus) && __cplusplus>=201703L    
+    template <class R, class... Args> struct FunctionalHelperFor<R(Args...) noexcept>
+    {
+      typedef FunctionalHelper<R,Args...> T;
+    };
+    template <class R, class... Args> struct FunctionalHelperFor<R(*)(Args...) noexcept>
+    {
+      typedef FunctionalHelper<R,Args...> T;
+    };
+    template <class R, class C, class... Args> struct FunctionalHelperFor<R(C::*)(Args...) noexcept>
+    {
+      typedef FunctionalHelper<R,Args...> T;
+    };
+     template <class R, class C, class... Args> struct FunctionalHelperFor<R(C::*)(Args...) const noexcept>
+    {
+      typedef FunctionalHelper<R,Args...> T;
+    };
+#endif
+   /// member object pointers
     template <class R, class C> struct FunctionalHelperFor<R(C::*)>
     {
       typedef FunctionalHelper<R> T;

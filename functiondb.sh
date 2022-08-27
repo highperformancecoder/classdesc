@@ -67,6 +67,30 @@ struct Arg<R (C::*)($arg_types) const, $arg>
   typedef A$arg T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R$template_args> 
+struct Arg<R (*)($arg_types) noexcept, $arg> 
+{
+  typedef A$arg T;
+  typedef T type;
+};
+
+template <class C, class R$template_args> 
+struct Arg<R (C::*)($arg_types) noexcept, $arg> 
+{
+  typedef A$arg T;
+  typedef T type;
+};
+
+template <class C, class R$template_args> 
+struct Arg<R (C::*)($arg_types) const noexcept, $arg> 
+{
+  typedef A$arg T;
+  typedef T type;
+};
+#endif
 EOF
     j=$[arg++]
     done
@@ -286,6 +310,218 @@ class bound_method<C, void (D::*)($arg_types) const>
     void operator()($arg_decl) const {(obj.*method)($args);}
     static const bool is_const=true;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R$template_args> 
+struct Arity<R (*)($arg_types) noexcept> 
+{
+    static const int V=$arity;
+    static const int value=$arity;
+};
+
+template <class R$template_args> 
+struct Return<R (*)($arg_types) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R$template_args> 
+struct Arity<R (* C::*)($arg_types) noexcept> 
+{
+    static const int V=$arity;
+    static const int value=$arity;
+};
+
+template <class C,class R$template_args> 
+struct Return<R (* C::*)($arg_types) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R$template_args> 
+struct Arity<R (C::*)($arg_types) noexcept> 
+{
+    static const int V=$arity;
+    static const int value=$arity;
+};
+
+template <class C, class R$template_args> 
+struct Return<R (C::*)($arg_types) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R$template_args> 
+struct Arity<R (C::*)($arg_types) const noexcept> 
+{
+    static const int V=$arity;
+    static const int value=$arity;
+};
+
+template <class C, class R$template_args> 
+struct Return<R (C::*)($arg_types) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R$template_args> 
+struct ClassOf<R (C::*)($arg_types) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R$template_args> 
+struct ClassOf<R (*C::*)($arg_types) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R$template_args> 
+struct ClassOf<R (C::*)($arg_types) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R$template_args> 
+struct is_member_function_ptr<R (C::*)($arg_types) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R$template_args> 
+struct is_member_function_ptr<R (C::*)($arg_types) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R$template_args> 
+struct is_const_method<R (C::*)($arg_types) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R$template_args> 
+struct is_nonmember_function_ptr<R (*)($arg_types) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R$template_args> 
+struct is_nonmember_function_ptr<R (*C::*)($arg_types) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R$template_args>
+class bound_method<C, R (D::*)($arg_types) noexcept>
+{
+    typedef R (D::*M)($arg_types);
+    C* obj;
+    M method;
+    public:
+    static const int arity=$arity;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()($arg_decl) const {return (obj->*method)($args);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D$template_args>
+class bound_method<C, void (D::*)($arg_types) noexcept>
+{
+    typedef void (D::*M)($arg_types);
+    C* obj;
+    M method;
+    public:
+    static const int arity=$arity;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()($arg_decl) const {(obj->*method)($args);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R$template_args>
+class bound_method<const C, R (D::*)($arg_types) noexcept>
+{
+    typedef R (D::*M)($arg_types);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=$arity;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()($arg_decl) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D$template_args>
+class bound_method<const C, void (D::*)($arg_types) noexcept>
+{
+    typedef void (D::*M)($arg_types);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=$arity;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()($arg_decl) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R$template_args>
+class bound_method<C, R (D::*)($arg_types) const noexcept>
+{
+    typedef R (D::*M)($arg_types) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=$arity;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()($arg_decl) const {return (obj.*method)($args);}
+    static const bool is_const=true;
+};
+
+template <class C, class D$template_args>
+class bound_method<C, void (D::*)($arg_types) const noexcept>
+{
+    typedef void (D::*M)($arg_types) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=$arity;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()($arg_decl) const {(obj.*method)($args);}
+    static const bool is_const=true;
+};
+#endif
 
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, $arity> >, 

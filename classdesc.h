@@ -887,8 +887,10 @@ namespace classdesc
     ExcludeClass() {}
     template <class U> explicit ExcludeClass(const U& x): T(x) {}
     template <class U> const T& operator=(const U& x) {return T::operator=(x);}
-    template <class U> operator const U&() const {return *static_cast<U*>(this);}
-    template <class U> operator U&() {return *static_cast<U*>(this);}
+    //    template <class U> operator const U&() const {return *static_cast<const U*>(static_cast<const T*>(this));}
+    template <class U> operator const U&() const {return *(const U*)this;}
+    //    template <class U> operator U&() {return *static_cast<U*>(static_cast<T*>(this));}
+    template <class U> operator U&() {return *(U*)this;}
     // other operators?
   };
 

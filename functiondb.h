@@ -213,6 +213,218 @@ class bound_method<C, void (D::*)() const>
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R> 
+struct Arity<R (*)() noexcept> 
+{
+    static const int V=0;
+    static const int value=0;
+};
+
+template <class R> 
+struct Return<R (*)() noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R> 
+struct Arity<R (* C::*)() noexcept> 
+{
+    static const int V=0;
+    static const int value=0;
+};
+
+template <class C,class R> 
+struct Return<R (* C::*)() noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R> 
+struct Arity<R (C::*)() noexcept> 
+{
+    static const int V=0;
+    static const int value=0;
+};
+
+template <class C, class R> 
+struct Return<R (C::*)() noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R> 
+struct Arity<R (C::*)() const noexcept> 
+{
+    static const int V=0;
+    static const int value=0;
+};
+
+template <class C, class R> 
+struct Return<R (C::*)() const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R> 
+struct ClassOf<R (C::*)() noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R> 
+struct ClassOf<R (*C::*)() noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R> 
+struct ClassOf<R (C::*)() const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R> 
+struct is_member_function_ptr<R (C::*)() noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R> 
+struct is_member_function_ptr<R (C::*)() const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R> 
+struct is_const_method<R (C::*)() const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R> 
+struct is_nonmember_function_ptr<R (*)() noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R> 
+struct is_nonmember_function_ptr<R (*C::*)() noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R>
+class bound_method<C, R (D::*)() noexcept>
+{
+    typedef R (D::*M)();
+    C* obj;
+    M method;
+    public:
+    static const int arity=0;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()() const {return (obj->*method)();}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D>
+class bound_method<C, void (D::*)() noexcept>
+{
+    typedef void (D::*M)();
+    C* obj;
+    M method;
+    public:
+    static const int arity=0;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()() const {(obj->*method)();}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R>
+class bound_method<const C, R (D::*)() noexcept>
+{
+    typedef R (D::*M)();
+    const C* obj;
+    M method;
+    public:
+    static const int arity=0;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()() const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D>
+class bound_method<const C, void (D::*)() noexcept>
+{
+    typedef void (D::*M)();
+    const C* obj;
+    M method;
+    public:
+    static const int arity=0;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()() const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R>
+class bound_method<C, R (D::*)() const noexcept>
+{
+    typedef R (D::*M)() const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=0;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()() const {return (obj.*method)();}
+    static const bool is_const=true;
+};
+
+template <class C, class D>
+class bound_method<C, void (D::*)() const noexcept>
+{
+    typedef void (D::*M)() const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=0;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()() const {(obj.*method)();}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 0> >, 
    typename Return<F>::T>::T
@@ -270,6 +482,30 @@ struct Arg<R (C::*)(A1) const, 1>
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1> 
+struct Arg<R (*)(A1) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1> 
+struct Arg<R (C::*)(A1) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1> 
+struct Arg<R (C::*)(A1) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,1>
 {
@@ -485,6 +721,218 @@ class bound_method<C, void (D::*)(A1) const>
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1> 
+struct Arity<R (*)(A1) noexcept> 
+{
+    static const int V=1;
+    static const int value=1;
+};
+
+template <class R, class A1> 
+struct Return<R (*)(A1) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1> 
+struct Arity<R (* C::*)(A1) noexcept> 
+{
+    static const int V=1;
+    static const int value=1;
+};
+
+template <class C,class R, class A1> 
+struct Return<R (* C::*)(A1) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1> 
+struct Arity<R (C::*)(A1) noexcept> 
+{
+    static const int V=1;
+    static const int value=1;
+};
+
+template <class C, class R, class A1> 
+struct Return<R (C::*)(A1) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1> 
+struct Arity<R (C::*)(A1) const noexcept> 
+{
+    static const int V=1;
+    static const int value=1;
+};
+
+template <class C, class R, class A1> 
+struct Return<R (C::*)(A1) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1> 
+struct ClassOf<R (C::*)(A1) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1> 
+struct ClassOf<R (*C::*)(A1) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1> 
+struct ClassOf<R (C::*)(A1) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1> 
+struct is_member_function_ptr<R (C::*)(A1) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1> 
+struct is_member_function_ptr<R (C::*)(A1) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1> 
+struct is_const_method<R (C::*)(A1) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1> 
+struct is_nonmember_function_ptr<R (*)(A1) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1> 
+struct is_nonmember_function_ptr<R (*C::*)(A1) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1>
+class bound_method<C, R (D::*)(A1) noexcept>
+{
+    typedef R (D::*M)(A1);
+    C* obj;
+    M method;
+    public:
+    static const int arity=1;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1) const {return (obj->*method)(a1);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1>
+class bound_method<C, void (D::*)(A1) noexcept>
+{
+    typedef void (D::*M)(A1);
+    C* obj;
+    M method;
+    public:
+    static const int arity=1;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1) const {(obj->*method)(a1);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1>
+class bound_method<const C, R (D::*)(A1) noexcept>
+{
+    typedef R (D::*M)(A1);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=1;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1>
+class bound_method<const C, void (D::*)(A1) noexcept>
+{
+    typedef void (D::*M)(A1);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=1;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1>
+class bound_method<C, R (D::*)(A1) const noexcept>
+{
+    typedef R (D::*M)(A1) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=1;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1) const {return (obj.*method)(a1);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1>
+class bound_method<C, void (D::*)(A1) const noexcept>
+{
+    typedef void (D::*M)(A1) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=1;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1) const {(obj.*method)(a1);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 1> >, 
    typename Return<F>::T>::T
@@ -548,6 +996,30 @@ struct Arg<R (C::*)(A1,A2) const, 1>
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2> 
+struct Arg<R (*)(A1,A2) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2> 
+struct Arg<R (C::*)(A1,A2) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2> 
+struct Arg<R (C::*)(A1,A2) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2> 
 struct Arg<R (*)(A1,A2), 2> 
 {
@@ -568,6 +1040,30 @@ struct Arg<R (C::*)(A1,A2) const, 2>
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2> 
+struct Arg<R (*)(A1,A2) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2> 
+struct Arg<R (C::*)(A1,A2) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2> 
+struct Arg<R (C::*)(A1,A2) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,2>
 {
@@ -783,6 +1279,218 @@ class bound_method<C, void (D::*)(A1,A2) const>
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2> 
+struct Arity<R (*)(A1,A2) noexcept> 
+{
+    static const int V=2;
+    static const int value=2;
+};
+
+template <class R, class A1, class A2> 
+struct Return<R (*)(A1,A2) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2> 
+struct Arity<R (* C::*)(A1,A2) noexcept> 
+{
+    static const int V=2;
+    static const int value=2;
+};
+
+template <class C,class R, class A1, class A2> 
+struct Return<R (* C::*)(A1,A2) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2> 
+struct Arity<R (C::*)(A1,A2) noexcept> 
+{
+    static const int V=2;
+    static const int value=2;
+};
+
+template <class C, class R, class A1, class A2> 
+struct Return<R (C::*)(A1,A2) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2> 
+struct Arity<R (C::*)(A1,A2) const noexcept> 
+{
+    static const int V=2;
+    static const int value=2;
+};
+
+template <class C, class R, class A1, class A2> 
+struct Return<R (C::*)(A1,A2) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2> 
+struct ClassOf<R (C::*)(A1,A2) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2> 
+struct ClassOf<R (*C::*)(A1,A2) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2> 
+struct ClassOf<R (C::*)(A1,A2) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2> 
+struct is_member_function_ptr<R (C::*)(A1,A2) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2> 
+struct is_member_function_ptr<R (C::*)(A1,A2) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2> 
+struct is_const_method<R (C::*)(A1,A2) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2> 
+struct is_nonmember_function_ptr<R (*)(A1,A2) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2>
+class bound_method<C, R (D::*)(A1,A2) noexcept>
+{
+    typedef R (D::*M)(A1,A2);
+    C* obj;
+    M method;
+    public:
+    static const int arity=2;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2) const {return (obj->*method)(a1,a2);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2>
+class bound_method<C, void (D::*)(A1,A2) noexcept>
+{
+    typedef void (D::*M)(A1,A2);
+    C* obj;
+    M method;
+    public:
+    static const int arity=2;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2) const {(obj->*method)(a1,a2);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2>
+class bound_method<const C, R (D::*)(A1,A2) noexcept>
+{
+    typedef R (D::*M)(A1,A2);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=2;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2>
+class bound_method<const C, void (D::*)(A1,A2) noexcept>
+{
+    typedef void (D::*M)(A1,A2);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=2;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2>
+class bound_method<C, R (D::*)(A1,A2) const noexcept>
+{
+    typedef R (D::*M)(A1,A2) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=2;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2) const {return (obj.*method)(a1,a2);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2>
+class bound_method<C, void (D::*)(A1,A2) const noexcept>
+{
+    typedef void (D::*M)(A1,A2) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=2;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2) const {(obj.*method)(a1,a2);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 2> >, 
    typename Return<F>::T>::T
@@ -854,6 +1562,30 @@ struct Arg<R (C::*)(A1,A2,A3) const, 1>
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3> 
+struct Arg<R (*)(A1,A2,A3) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct Arg<R (C::*)(A1,A2,A3) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct Arg<R (C::*)(A1,A2,A3) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3> 
 struct Arg<R (*)(A1,A2,A3), 2> 
 {
@@ -874,6 +1606,30 @@ struct Arg<R (C::*)(A1,A2,A3) const, 2>
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3> 
+struct Arg<R (*)(A1,A2,A3) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct Arg<R (C::*)(A1,A2,A3) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct Arg<R (C::*)(A1,A2,A3) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3> 
 struct Arg<R (*)(A1,A2,A3), 3> 
 {
@@ -894,6 +1650,30 @@ struct Arg<R (C::*)(A1,A2,A3) const, 3>
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3> 
+struct Arg<R (*)(A1,A2,A3) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct Arg<R (C::*)(A1,A2,A3) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct Arg<R (C::*)(A1,A2,A3) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,3>
 {
@@ -1109,6 +1889,218 @@ class bound_method<C, void (D::*)(A1,A2,A3) const>
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3> 
+struct Arity<R (*)(A1,A2,A3) noexcept> 
+{
+    static const int V=3;
+    static const int value=3;
+};
+
+template <class R, class A1, class A2, class A3> 
+struct Return<R (*)(A1,A2,A3) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3> 
+struct Arity<R (* C::*)(A1,A2,A3) noexcept> 
+{
+    static const int V=3;
+    static const int value=3;
+};
+
+template <class C,class R, class A1, class A2, class A3> 
+struct Return<R (* C::*)(A1,A2,A3) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct Arity<R (C::*)(A1,A2,A3) noexcept> 
+{
+    static const int V=3;
+    static const int value=3;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct Return<R (C::*)(A1,A2,A3) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct Arity<R (C::*)(A1,A2,A3) const noexcept> 
+{
+    static const int V=3;
+    static const int value=3;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct Return<R (C::*)(A1,A2,A3) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct ClassOf<R (C::*)(A1,A2,A3) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct ClassOf<R (*C::*)(A1,A2,A3) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct ClassOf<R (C::*)(A1,A2,A3) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct is_const_method<R (C::*)(A1,A2,A3) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3>
+class bound_method<C, R (D::*)(A1,A2,A3) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3);
+    C* obj;
+    M method;
+    public:
+    static const int arity=3;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3) const {return (obj->*method)(a1,a2,a3);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3>
+class bound_method<C, void (D::*)(A1,A2,A3) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3);
+    C* obj;
+    M method;
+    public:
+    static const int arity=3;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3) const {(obj->*method)(a1,a2,a3);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3>
+class bound_method<const C, R (D::*)(A1,A2,A3) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=3;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3>
+class bound_method<const C, void (D::*)(A1,A2,A3) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=3;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3>
+class bound_method<C, R (D::*)(A1,A2,A3) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=3;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3) const {return (obj.*method)(a1,a2,a3);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3>
+class bound_method<C, void (D::*)(A1,A2,A3) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=3;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3) const {(obj.*method)(a1,a2,a3);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 3> >, 
    typename Return<F>::T>::T
@@ -1188,6 +2180,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4) const, 1>
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4> 
+struct Arg<R (*)(A1,A2,A3,A4) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct Arg<R (C::*)(A1,A2,A3,A4) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct Arg<R (C::*)(A1,A2,A3,A4) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (*)(A1,A2,A3,A4), 2> 
 {
@@ -1208,6 +2224,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4) const, 2>
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4> 
+struct Arg<R (*)(A1,A2,A3,A4) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct Arg<R (C::*)(A1,A2,A3,A4) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct Arg<R (C::*)(A1,A2,A3,A4) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (*)(A1,A2,A3,A4), 3> 
 {
@@ -1228,6 +2268,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4) const, 3>
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4> 
+struct Arg<R (*)(A1,A2,A3,A4) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct Arg<R (C::*)(A1,A2,A3,A4) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct Arg<R (C::*)(A1,A2,A3,A4) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (*)(A1,A2,A3,A4), 4> 
 {
@@ -1248,6 +2312,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4) const, 4>
   typedef A4 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4> 
+struct Arg<R (*)(A1,A2,A3,A4) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct Arg<R (C::*)(A1,A2,A3,A4) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct Arg<R (C::*)(A1,A2,A3,A4) const noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,4>
 {
@@ -1463,6 +2551,218 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4) const>
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3, class A4> 
+struct Arity<R (*)(A1,A2,A3,A4) noexcept> 
+{
+    static const int V=4;
+    static const int value=4;
+};
+
+template <class R, class A1, class A2, class A3, class A4> 
+struct Return<R (*)(A1,A2,A3,A4) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4> 
+struct Arity<R (* C::*)(A1,A2,A3,A4) noexcept> 
+{
+    static const int V=4;
+    static const int value=4;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4> 
+struct Return<R (* C::*)(A1,A2,A3,A4) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct Arity<R (C::*)(A1,A2,A3,A4) noexcept> 
+{
+    static const int V=4;
+    static const int value=4;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct Return<R (C::*)(A1,A2,A3,A4) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct Arity<R (C::*)(A1,A2,A3,A4) const noexcept> 
+{
+    static const int V=4;
+    static const int value=4;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct Return<R (C::*)(A1,A2,A3,A4) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct is_const_method<R (C::*)(A1,A2,A3,A4) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3, class A4> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4>
+class bound_method<C, R (D::*)(A1,A2,A3,A4) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4);
+    C* obj;
+    M method;
+    public:
+    static const int arity=4;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4) const {return (obj->*method)(a1,a2,a3,a4);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4>
+class bound_method<C, void (D::*)(A1,A2,A3,A4) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4);
+    C* obj;
+    M method;
+    public:
+    static const int arity=4;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4) const {(obj->*method)(a1,a2,a3,a4);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=4;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=4;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4>
+class bound_method<C, R (D::*)(A1,A2,A3,A4) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=4;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4) const {return (obj.*method)(a1,a2,a3,a4);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4>
+class bound_method<C, void (D::*)(A1,A2,A3,A4) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=4;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3,A4 a4) const {(obj.*method)(a1,a2,a3,a4);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 4> >, 
    typename Return<F>::T>::T
@@ -1550,6 +2850,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5) const, 1>
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arg<R (*)(A1,A2,A3,A4,A5) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (*)(A1,A2,A3,A4,A5), 2> 
 {
@@ -1570,6 +2894,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5) const, 2>
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arg<R (*)(A1,A2,A3,A4,A5) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (*)(A1,A2,A3,A4,A5), 3> 
 {
@@ -1590,6 +2938,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5) const, 3>
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arg<R (*)(A1,A2,A3,A4,A5) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (*)(A1,A2,A3,A4,A5), 4> 
 {
@@ -1610,6 +2982,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5) const, 4>
   typedef A4 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arg<R (*)(A1,A2,A3,A4,A5) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5) const noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (*)(A1,A2,A3,A4,A5), 5> 
 {
@@ -1630,6 +3026,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5) const, 5>
   typedef A5 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arg<R (*)(A1,A2,A3,A4,A5) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5) const noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,5>
 {
@@ -1845,6 +3265,218 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5) const>
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arity<R (*)(A1,A2,A3,A4,A5) noexcept> 
+{
+    static const int V=5;
+    static const int value=5;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5> 
+struct Return<R (*)(A1,A2,A3,A4,A5) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5) noexcept> 
+{
+    static const int V=5;
+    static const int value=5;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5) noexcept> 
+{
+    static const int V=5;
+    static const int value=5;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5) const noexcept> 
+{
+    static const int V=5;
+    static const int value=5;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct is_const_method<R (C::*)(A1,A2,A3,A4,A5) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5);
+    C* obj;
+    M method;
+    public:
+    static const int arity=5;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) const {return (obj->*method)(a1,a2,a3,a4,a5);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5);
+    C* obj;
+    M method;
+    public:
+    static const int arity=5;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) const {(obj->*method)(a1,a2,a3,a4,a5);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=5;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=5;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=5;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) const {return (obj.*method)(a1,a2,a3,a4,a5);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=5;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) const {(obj.*method)(a1,a2,a3,a4,a5);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 5> >, 
    typename Return<F>::T>::T
@@ -1940,6 +3572,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 1>
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6), 2> 
 {
@@ -1960,6 +3616,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 2>
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6), 3> 
 {
@@ -1980,6 +3660,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 3>
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6), 4> 
 {
@@ -2000,6 +3704,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 4>
   typedef A4 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6), 5> 
 {
@@ -2020,6 +3748,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 5>
   typedef A5 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6), 6> 
 {
@@ -2040,6 +3792,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 6>
   typedef A6 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,6>
 {
@@ -2255,6 +4031,218 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6) const>
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arity<R (*)(A1,A2,A3,A4,A5,A6) noexcept> 
+{
+    static const int V=6;
+    static const int value=6;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Return<R (*)(A1,A2,A3,A4,A5,A6) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6) noexcept> 
+{
+    static const int V=6;
+    static const int value=6;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6) noexcept> 
+{
+    static const int V=6;
+    static const int value=6;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6) const noexcept> 
+{
+    static const int V=6;
+    static const int value=6;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6);
+    C* obj;
+    M method;
+    public:
+    static const int arity=6;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6) const {return (obj->*method)(a1,a2,a3,a4,a5,a6);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6);
+    C* obj;
+    M method;
+    public:
+    static const int arity=6;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6) const {(obj->*method)(a1,a2,a3,a4,a5,a6);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=6;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=6;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=6;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6) const {return (obj.*method)(a1,a2,a3,a4,a5,a6);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=6;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6) const {(obj.*method)(a1,a2,a3,a4,a5,a6);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 6> >, 
    typename Return<F>::T>::T
@@ -2358,6 +4346,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 1>
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7), 2> 
 {
@@ -2378,6 +4390,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 2>
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7), 3> 
 {
@@ -2398,6 +4434,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 3>
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7), 4> 
 {
@@ -2418,6 +4478,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 4>
   typedef A4 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7), 5> 
 {
@@ -2438,6 +4522,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 5>
   typedef A5 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7), 6> 
 {
@@ -2458,6 +4566,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 6>
   typedef A6 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7), 7> 
 {
@@ -2478,6 +4610,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 7>
   typedef A7 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,7>
 {
@@ -2693,6 +4849,218 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7) const>
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7) noexcept> 
+{
+    static const int V=7;
+    static const int value=7;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7) noexcept> 
+{
+    static const int V=7;
+    static const int value=7;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7) noexcept> 
+{
+    static const int V=7;
+    static const int value=7;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const noexcept> 
+{
+    static const int V=7;
+    static const int value=7;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7);
+    C* obj;
+    M method;
+    public:
+    static const int arity=7;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7);
+    C* obj;
+    M method;
+    public:
+    static const int arity=7;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=7;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=7;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=7;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=7;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 7> >, 
    typename Return<F>::T>::T
@@ -2804,6 +5172,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 1>
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8), 2> 
 {
@@ -2824,6 +5216,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 2>
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8), 3> 
 {
@@ -2844,6 +5260,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 3>
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8), 4> 
 {
@@ -2864,6 +5304,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 4>
   typedef A4 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8), 5> 
 {
@@ -2884,6 +5348,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 5>
   typedef A5 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8), 6> 
 {
@@ -2904,6 +5392,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 6>
   typedef A6 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8), 7> 
 {
@@ -2924,6 +5436,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 7>
   typedef A7 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8), 8> 
 {
@@ -2944,6 +5480,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 8>
   typedef A8 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,8>
 {
@@ -3159,6 +5719,218 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8) const>
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept> 
+{
+    static const int V=8;
+    static const int value=8;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept> 
+{
+    static const int V=8;
+    static const int value=8;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept> 
+{
+    static const int V=8;
+    static const int value=8;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const noexcept> 
+{
+    static const int V=8;
+    static const int value=8;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8);
+    C* obj;
+    M method;
+    public:
+    static const int arity=8;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8);
+    C* obj;
+    M method;
+    public:
+    static const int arity=8;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=8;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=8;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=8;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=8;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 8> >, 
    typename Return<F>::T>::T
@@ -3278,6 +6050,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 1>
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 2> 
 {
@@ -3298,6 +6094,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 2>
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 3> 
 {
@@ -3318,6 +6138,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 3>
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 4> 
 {
@@ -3338,6 +6182,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 4>
   typedef A4 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 5> 
 {
@@ -3358,6 +6226,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 5>
   typedef A5 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 6> 
 {
@@ -3378,6 +6270,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 6>
   typedef A6 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 7> 
 {
@@ -3398,6 +6314,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 7>
   typedef A7 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 8> 
 {
@@ -3418,6 +6358,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 8>
   typedef A8 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9), 9> 
 {
@@ -3438,6 +6402,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 9>
   typedef A9 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,9>
 {
@@ -3653,6 +6641,218 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const>
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept> 
+{
+    static const int V=9;
+    static const int value=9;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept> 
+{
+    static const int V=9;
+    static const int value=9;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept> 
+{
+    static const int V=9;
+    static const int value=9;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const noexcept> 
+{
+    static const int V=9;
+    static const int value=9;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9);
+    C* obj;
+    M method;
+    public:
+    static const int arity=9;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9);
+    C* obj;
+    M method;
+    public:
+    static const int arity=9;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=9;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=9;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=9;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=9;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 9> >, 
    typename Return<F>::T>::T
@@ -3780,6 +6980,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 1>
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 2> 
 {
@@ -3800,6 +7024,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 2>
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 3> 
 {
@@ -3820,6 +7068,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 3>
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 4> 
 {
@@ -3840,6 +7112,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 4>
   typedef A4 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 5> 
 {
@@ -3860,6 +7156,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 5>
   typedef A5 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 6> 
 {
@@ -3880,6 +7200,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 6>
   typedef A6 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 7> 
 {
@@ -3900,6 +7244,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 7>
   typedef A7 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 8> 
 {
@@ -3920,6 +7288,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 8>
   typedef A8 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 9> 
 {
@@ -3940,6 +7332,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 9>
   typedef A9 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10), 10> 
 {
@@ -3960,6 +7376,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 10>
   typedef A10 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,10>
 {
@@ -4175,6 +7615,218 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const>
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept> 
+{
+    static const int V=10;
+    static const int value=10;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept> 
+{
+    static const int V=10;
+    static const int value=10;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept> 
+{
+    static const int V=10;
+    static const int value=10;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const noexcept> 
+{
+    static const int V=10;
+    static const int value=10;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10);
+    C* obj;
+    M method;
+    public:
+    static const int arity=10;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10);
+    C* obj;
+    M method;
+    public:
+    static const int arity=10;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=10;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=10;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=10;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=10;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 10> >, 
    typename Return<F>::T>::T
@@ -4310,6 +7962,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 1>
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 2> 
 {
@@ -4330,6 +8006,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 2>
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 3> 
 {
@@ -4350,6 +8050,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 3>
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 4> 
 {
@@ -4370,6 +8094,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 4>
   typedef A4 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 5> 
 {
@@ -4390,6 +8138,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 5>
   typedef A5 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 6> 
 {
@@ -4410,6 +8182,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 6>
   typedef A6 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 7> 
 {
@@ -4430,6 +8226,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 7>
   typedef A7 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 8> 
 {
@@ -4450,6 +8270,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 8>
   typedef A8 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 9> 
 {
@@ -4470,6 +8314,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 9>
   typedef A9 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 10> 
 {
@@ -4490,6 +8358,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 10>
   typedef A10 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11), 11> 
 {
@@ -4510,6 +8402,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 11>
   typedef A11 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,11>
 {
@@ -4725,6 +8641,218 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const>
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept> 
+{
+    static const int V=11;
+    static const int value=11;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept> 
+{
+    static const int V=11;
+    static const int value=11;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept> 
+{
+    static const int V=11;
+    static const int value=11;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept> 
+{
+    static const int V=11;
+    static const int value=11;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11);
+    C* obj;
+    M method;
+    public:
+    static const int arity=11;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11);
+    C* obj;
+    M method;
+    public:
+    static const int arity=11;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=11;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=11;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=11;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=11;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 11> >, 
    typename Return<F>::T>::T
@@ -4868,6 +8996,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 1>
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 2> 
 {
@@ -4888,6 +9040,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 2>
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 3> 
 {
@@ -4908,6 +9084,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 3>
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 4> 
 {
@@ -4928,6 +9128,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 4>
   typedef A4 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 5> 
 {
@@ -4948,6 +9172,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 5>
   typedef A5 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 6> 
 {
@@ -4968,6 +9216,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 6>
   typedef A6 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 7> 
 {
@@ -4988,6 +9260,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 7>
   typedef A7 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 8> 
 {
@@ -5008,6 +9304,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 8>
   typedef A8 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 9> 
 {
@@ -5028,6 +9348,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 9>
   typedef A9 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 10> 
 {
@@ -5048,6 +9392,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 10>
   typedef A10 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 11> 
 {
@@ -5068,6 +9436,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 11>
   typedef A11 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12), 12> 
 {
@@ -5088,6 +9480,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 12>
   typedef A12 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,12>
 {
@@ -5303,6 +9719,218 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const>
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept> 
+{
+    static const int V=12;
+    static const int value=12;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept> 
+{
+    static const int V=12;
+    static const int value=12;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept> 
+{
+    static const int V=12;
+    static const int value=12;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept> 
+{
+    static const int V=12;
+    static const int value=12;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12);
+    C* obj;
+    M method;
+    public:
+    static const int arity=12;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12);
+    C* obj;
+    M method;
+    public:
+    static const int arity=12;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=12;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=12;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=12;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=12;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 12> >, 
    typename Return<F>::T>::T
@@ -5454,6 +10082,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 1>
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 2> 
 {
@@ -5474,6 +10126,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 2>
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 3> 
 {
@@ -5494,6 +10170,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 3>
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 4> 
 {
@@ -5514,6 +10214,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 4>
   typedef A4 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 5> 
 {
@@ -5534,6 +10258,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 5>
   typedef A5 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 6> 
 {
@@ -5554,6 +10302,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 6>
   typedef A6 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 7> 
 {
@@ -5574,6 +10346,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 7>
   typedef A7 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 8> 
 {
@@ -5594,6 +10390,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 8>
   typedef A8 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 9> 
 {
@@ -5614,6 +10434,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 9>
   typedef A9 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 10> 
 {
@@ -5634,6 +10478,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 10>
   typedef A10 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 11> 
 {
@@ -5654,6 +10522,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 11>
   typedef A11 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 12> 
 {
@@ -5674,6 +10566,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 12>
   typedef A12 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13), 13> 
 {
@@ -5694,6 +10610,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 13>
   typedef A13 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,13>
 {
@@ -5909,6 +10849,218 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) co
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept> 
+{
+    static const int V=13;
+    static const int value=13;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept> 
+{
+    static const int V=13;
+    static const int value=13;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept> 
+{
+    static const int V=13;
+    static const int value=13;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept> 
+{
+    static const int V=13;
+    static const int value=13;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13);
+    C* obj;
+    M method;
+    public:
+    static const int arity=13;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13);
+    C* obj;
+    M method;
+    public:
+    static const int arity=13;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=13;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=13;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=13;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=13;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 13> >, 
    typename Return<F>::T>::T
@@ -6068,6 +11220,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 1>
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 2> 
 {
@@ -6088,6 +11264,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 2>
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 3> 
 {
@@ -6108,6 +11308,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 3>
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 4> 
 {
@@ -6128,6 +11352,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 4>
   typedef A4 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 5> 
 {
@@ -6148,6 +11396,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 5>
   typedef A5 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 6> 
 {
@@ -6168,6 +11440,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 6>
   typedef A6 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 7> 
 {
@@ -6188,6 +11484,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 7>
   typedef A7 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 8> 
 {
@@ -6208,6 +11528,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 8>
   typedef A8 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 9> 
 {
@@ -6228,6 +11572,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 9>
   typedef A9 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 10> 
 {
@@ -6248,6 +11616,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 10>
   typedef A10 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 11> 
 {
@@ -6268,6 +11660,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 11>
   typedef A11 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 12> 
 {
@@ -6288,6 +11704,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 12>
   typedef A12 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 13> 
 {
@@ -6308,6 +11748,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 13>
   typedef A13 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14), 14> 
 {
@@ -6328,6 +11792,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 14>
   typedef A14 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,14>
 {
@@ -6543,6 +12031,218 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept> 
+{
+    static const int V=14;
+    static const int value=14;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept> 
+{
+    static const int V=14;
+    static const int value=14;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept> 
+{
+    static const int V=14;
+    static const int value=14;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept> 
+{
+    static const int V=14;
+    static const int value=14;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14);
+    C* obj;
+    M method;
+    public:
+    static const int arity=14;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14);
+    C* obj;
+    M method;
+    public:
+    static const int arity=14;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=14;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=14;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=14;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=14;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 14> >, 
    typename Return<F>::T>::T
@@ -6710,6 +12410,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 1
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 2> 
 {
@@ -6730,6 +12454,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 2
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 3> 
 {
@@ -6750,6 +12498,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 3
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 4> 
 {
@@ -6770,6 +12542,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 4
   typedef A4 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 5> 
 {
@@ -6790,6 +12586,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 5
   typedef A5 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 6> 
 {
@@ -6810,6 +12630,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 6
   typedef A6 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 7> 
 {
@@ -6830,6 +12674,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 7
   typedef A7 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 8> 
 {
@@ -6850,6 +12718,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 8
   typedef A8 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 9> 
 {
@@ -6870,6 +12762,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 9
   typedef A9 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 10> 
 {
@@ -6890,6 +12806,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 1
   typedef A10 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 11> 
 {
@@ -6910,6 +12850,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 1
   typedef A11 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 12> 
 {
@@ -6930,6 +12894,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 1
   typedef A12 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 13> 
 {
@@ -6950,6 +12938,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 1
   typedef A13 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 14> 
 {
@@ -6970,6 +12982,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 1
   typedef A14 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15), 15> 
 {
@@ -6990,6 +13026,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 1
   typedef A15 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,15>
 {
@@ -7205,6 +13265,218 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept> 
+{
+    static const int V=15;
+    static const int value=15;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept> 
+{
+    static const int V=15;
+    static const int value=15;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept> 
+{
+    static const int V=15;
+    static const int value=15;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept> 
+{
+    static const int V=15;
+    static const int value=15;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15);
+    C* obj;
+    M method;
+    public:
+    static const int arity=15;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15);
+    C* obj;
+    M method;
+    public:
+    static const int arity=15;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=15;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=15;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=15;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=15;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 15> >, 
    typename Return<F>::T>::T
@@ -7380,6 +13652,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 2> 
 {
@@ -7400,6 +13696,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 3> 
 {
@@ -7420,6 +13740,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 4> 
 {
@@ -7440,6 +13784,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef A4 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 5> 
 {
@@ -7460,6 +13828,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef A5 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 6> 
 {
@@ -7480,6 +13872,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef A6 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 7> 
 {
@@ -7500,6 +13916,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef A7 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 8> 
 {
@@ -7520,6 +13960,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef A8 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 9> 
 {
@@ -7540,6 +14004,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef A9 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 10> 
 {
@@ -7560,6 +14048,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef A10 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 11> 
 {
@@ -7580,6 +14092,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef A11 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 12> 
 {
@@ -7600,6 +14136,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef A12 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 13> 
 {
@@ -7620,6 +14180,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef A13 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 14> 
 {
@@ -7640,6 +14224,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef A14 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 15> 
 {
@@ -7660,6 +14268,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef A15 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16), 16> 
 {
@@ -7680,6 +14312,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef A16 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 16> 
+{
+  typedef A16 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 16> 
+{
+  typedef A16 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept, 16> 
+{
+  typedef A16 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,16>
 {
@@ -7895,6 +14551,218 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept> 
+{
+    static const int V=16;
+    static const int value=16;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept> 
+{
+    static const int V=16;
+    static const int value=16;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept> 
+{
+    static const int V=16;
+    static const int value=16;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept> 
+{
+    static const int V=16;
+    static const int value=16;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16);
+    C* obj;
+    M method;
+    public:
+    static const int arity=16;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16);
+    C* obj;
+    M method;
+    public:
+    static const int arity=16;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=16;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=16;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=16;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=16;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 16> >, 
    typename Return<F>::T>::T
@@ -8078,6 +14946,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 2> 
 {
@@ -8098,6 +14990,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 3> 
 {
@@ -8118,6 +15034,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 4> 
 {
@@ -8138,6 +15078,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef A4 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 5> 
 {
@@ -8158,6 +15122,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef A5 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 6> 
 {
@@ -8178,6 +15166,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef A6 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 7> 
 {
@@ -8198,6 +15210,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef A7 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 8> 
 {
@@ -8218,6 +15254,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef A8 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 9> 
 {
@@ -8238,6 +15298,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef A9 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 10> 
 {
@@ -8258,6 +15342,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef A10 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 11> 
 {
@@ -8278,6 +15386,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef A11 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 12> 
 {
@@ -8298,6 +15430,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef A12 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 13> 
 {
@@ -8318,6 +15474,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef A13 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 14> 
 {
@@ -8338,6 +15518,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef A14 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 15> 
 {
@@ -8358,6 +15562,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef A15 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 16> 
 {
@@ -8378,6 +15606,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef A16 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 16> 
+{
+  typedef A16 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 16> 
+{
+  typedef A16 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept, 16> 
+{
+  typedef A16 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17), 17> 
 {
@@ -8398,6 +15650,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef A17 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 17> 
+{
+  typedef A17 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 17> 
+{
+  typedef A17 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept, 17> 
+{
+  typedef A17 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,17>
 {
@@ -8613,6 +15889,218 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept> 
+{
+    static const int V=17;
+    static const int value=17;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept> 
+{
+    static const int V=17;
+    static const int value=17;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept> 
+{
+    static const int V=17;
+    static const int value=17;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept> 
+{
+    static const int V=17;
+    static const int value=17;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17);
+    C* obj;
+    M method;
+    public:
+    static const int arity=17;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17);
+    C* obj;
+    M method;
+    public:
+    static const int arity=17;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=17;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=17;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=17;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=17;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 17> >, 
    typename Return<F>::T>::T
@@ -8804,6 +16292,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 2> 
 {
@@ -8824,6 +16336,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 3> 
 {
@@ -8844,6 +16380,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 4> 
 {
@@ -8864,6 +16424,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A4 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 5> 
 {
@@ -8884,6 +16468,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A5 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 6> 
 {
@@ -8904,6 +16512,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A6 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 7> 
 {
@@ -8924,6 +16556,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A7 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 8> 
 {
@@ -8944,6 +16600,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A8 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 9> 
 {
@@ -8964,6 +16644,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A9 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 10> 
 {
@@ -8984,6 +16688,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A10 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 11> 
 {
@@ -9004,6 +16732,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A11 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 12> 
 {
@@ -9024,6 +16776,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A12 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 13> 
 {
@@ -9044,6 +16820,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A13 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 14> 
 {
@@ -9064,6 +16864,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A14 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 15> 
 {
@@ -9084,6 +16908,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A15 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 16> 
 {
@@ -9104,6 +16952,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A16 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 16> 
+{
+  typedef A16 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 16> 
+{
+  typedef A16 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 16> 
+{
+  typedef A16 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 17> 
 {
@@ -9124,6 +16996,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A17 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 17> 
+{
+  typedef A17 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 17> 
+{
+  typedef A17 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 17> 
+{
+  typedef A17 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18), 18> 
 {
@@ -9144,6 +17040,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A18 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 18> 
+{
+  typedef A18 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 18> 
+{
+  typedef A18 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept, 18> 
+{
+  typedef A18 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,18>
 {
@@ -9359,6 +17279,218 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept> 
+{
+    static const int V=18;
+    static const int value=18;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept> 
+{
+    static const int V=18;
+    static const int value=18;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept> 
+{
+    static const int V=18;
+    static const int value=18;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept> 
+{
+    static const int V=18;
+    static const int value=18;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18);
+    C* obj;
+    M method;
+    public:
+    static const int arity=18;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18);
+    C* obj;
+    M method;
+    public:
+    static const int arity=18;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=18;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=18;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=18;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=18;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 18> >, 
    typename Return<F>::T>::T
@@ -9558,6 +17690,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 2> 
 {
@@ -9578,6 +17734,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 3> 
 {
@@ -9598,6 +17778,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 4> 
 {
@@ -9618,6 +17822,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A4 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 5> 
 {
@@ -9638,6 +17866,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A5 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 6> 
 {
@@ -9658,6 +17910,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A6 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 7> 
 {
@@ -9678,6 +17954,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A7 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 8> 
 {
@@ -9698,6 +17998,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A8 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 9> 
 {
@@ -9718,6 +18042,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A9 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 10> 
 {
@@ -9738,6 +18086,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A10 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 11> 
 {
@@ -9758,6 +18130,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A11 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 12> 
 {
@@ -9778,6 +18174,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A12 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 13> 
 {
@@ -9798,6 +18218,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A13 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 14> 
 {
@@ -9818,6 +18262,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A14 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 15> 
 {
@@ -9838,6 +18306,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A15 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 16> 
 {
@@ -9858,6 +18350,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A16 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 16> 
+{
+  typedef A16 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 16> 
+{
+  typedef A16 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 16> 
+{
+  typedef A16 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 17> 
 {
@@ -9878,6 +18394,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A17 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 17> 
+{
+  typedef A17 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 17> 
+{
+  typedef A17 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 17> 
+{
+  typedef A17 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 18> 
 {
@@ -9898,6 +18438,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A18 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 18> 
+{
+  typedef A18 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 18> 
+{
+  typedef A18 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 18> 
+{
+  typedef A18 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19), 19> 
 {
@@ -9918,6 +18482,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A19 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 19> 
+{
+  typedef A19 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 19> 
+{
+  typedef A19 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept, 19> 
+{
+  typedef A19 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,19>
 {
@@ -10133,6 +18721,218 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     static const bool is_const=true;
 };
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept> 
+{
+    static const int V=19;
+    static const int value=19;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept> 
+{
+    static const int V=19;
+    static const int value=19;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept> 
+{
+    static const int V=19;
+    static const int value=19;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept> 
+{
+    static const int V=19;
+    static const int value=19;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19);
+    C* obj;
+    M method;
+    public:
+    static const int arity=19;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19);
+    C* obj;
+    M method;
+    public:
+    static const int arity=19;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=19;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=19;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=19;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=19;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19);}
+    static const bool is_const=true;
+};
+#endif
+
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 19> >, 
    typename Return<F>::T>::T
@@ -10340,6 +19140,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A1 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 1> 
+{
+  typedef A1 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 2> 
 {
@@ -10360,6 +19184,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A2 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 2> 
+{
+  typedef A2 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 3> 
 {
@@ -10380,6 +19228,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A3 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 3> 
+{
+  typedef A3 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 4> 
 {
@@ -10400,6 +19272,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A4 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 4> 
+{
+  typedef A4 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 5> 
 {
@@ -10420,6 +19316,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A5 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 5> 
+{
+  typedef A5 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 6> 
 {
@@ -10440,6 +19360,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A6 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 6> 
+{
+  typedef A6 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 7> 
 {
@@ -10460,6 +19404,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A7 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 7> 
+{
+  typedef A7 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 8> 
 {
@@ -10480,6 +19448,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A8 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 8> 
+{
+  typedef A8 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 9> 
 {
@@ -10500,6 +19492,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A9 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 9> 
+{
+  typedef A9 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 10> 
 {
@@ -10520,6 +19536,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A10 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 10> 
+{
+  typedef A10 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 11> 
 {
@@ -10540,6 +19580,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A11 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 11> 
+{
+  typedef A11 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 12> 
 {
@@ -10560,6 +19624,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A12 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 12> 
+{
+  typedef A12 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 13> 
 {
@@ -10580,6 +19668,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A13 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 13> 
+{
+  typedef A13 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 14> 
 {
@@ -10600,6 +19712,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A14 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 14> 
+{
+  typedef A14 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 15> 
 {
@@ -10620,6 +19756,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A15 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 15> 
+{
+  typedef A15 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 16> 
 {
@@ -10640,6 +19800,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A16 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 16> 
+{
+  typedef A16 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 16> 
+{
+  typedef A16 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 16> 
+{
+  typedef A16 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 17> 
 {
@@ -10660,6 +19844,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A17 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 17> 
+{
+  typedef A17 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 17> 
+{
+  typedef A17 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 17> 
+{
+  typedef A17 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 18> 
 {
@@ -10680,6 +19888,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A18 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 18> 
+{
+  typedef A18 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 18> 
+{
+  typedef A18 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 18> 
+{
+  typedef A18 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 19> 
 {
@@ -10700,6 +19932,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A19 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 19> 
+{
+  typedef A19 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 19> 
+{
+  typedef A19 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 19> 
+{
+  typedef A19 T;
+  typedef T type;
+};
+#endif
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20), 20> 
 {
@@ -10720,6 +19976,30 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef A20 T;
   typedef T type;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 20> 
+{
+  typedef A20 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 20> 
+{
+  typedef A20 T;
+  typedef T type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept, 20> 
+{
+  typedef A20 T;
+  typedef T type;
+};
+#endif
 template <class F, template<class> class P>
 struct AllArgs<F,P,20>
 {
@@ -10934,6 +20214,218 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20);}
     static const bool is_const=true;
 };
+
+#if defined(__cplusplus) && __cplusplus>=201103L
+// noexcept methods
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arity<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept> 
+{
+    static const int V=20;
+    static const int value=20;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Return<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arity<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept> 
+{
+    static const int V=20;
+    static const int value=20;
+};
+
+template <class C,class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Return<R (* C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept> 
+{
+    static const int V=20;
+    static const int value=20;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Arity<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept> 
+{
+    static const int V=20;
+    static const int value=20;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct Return<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept> 
+{
+    typedef R T;
+    typedef R type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct ClassOf<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct ClassOf<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept> 
+{
+    typedef C T;
+    typedef C type;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct is_member_function_ptr<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct is_const_method<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept>
+{
+   static const bool value=true;
+};
+
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct is_nonmember_function_ptr<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
+struct is_nonmember_function_ptr<R (*C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept>
+{
+   static const bool value=true;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20);
+    C* obj;
+    M method;
+    public:
+    static const int arity=20;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> >, R>::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {return (obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20);
+    C* obj;
+    M method;
+    public:
+    static const int arity=20;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {(obj->*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20);}
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20>
+class bound_method<const C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=20;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20>
+class bound_method<const C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20);
+    const C* obj;
+    M method;
+    public:
+    static const int arity=20;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(const C& obj, M method): obj(&obj), method(method) {}
+    typename enable_if<Not<classdesc::is_const<C> > >::T
+    operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {
+        throw std::runtime_error("cannot call method, inappropriate argument type");
+    }
+    void rebind(C& newObj) {obj=&newObj;}
+    static const bool is_const=false;
+};
+
+template <class C, class D, class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20>
+class bound_method<C, R (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept>
+{
+    typedef R (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=20;
+    typedef R Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    R operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {return (obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20);}
+    static const bool is_const=true;
+};
+
+template <class C, class D, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20>
+class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const noexcept>
+{
+    typedef void (D::*M)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) const;
+    C& obj;
+    M method;
+    public:
+    static const int arity=20;
+    typedef void Ret;
+    template <int i> struct Arg: public functional::Arg<M,i> {};
+    bound_method(C& obj, M method): obj(obj), method(method) {}
+    void operator()(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5,A6 a6,A7 a7,A8 a8,A9 a9,A10 a10,A11 a11,A12 a12,A13 a13,A14 a14,A15 a15,A16 a16,A17 a17,A18 a18,A19 a19,A20 a20) const {(obj.*method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20);}
+    static const bool is_const=true;
+};
+#endif
 
 template <class F, class Args> 
 typename enable_if<And<AllArgs<F, is_rvalue>, Eq<Arity<F>::value, 20> >, 
