@@ -1,6 +1,6 @@
 .SUFFIXES: .c .cc .o .d .h .cd
 OBJS=RESTProcessExample.o
-CFLAGS=-g -I.. -I. -I../json5_parser/json5_parser -I/usr/local/include -fPIC -std=c++17 -DUSE_UNROLLED -pthread
+CFLAGS=-g -I.. -I. -I../json5_parser/json5_parser -I/usr/local/include -fPIC -DUSE_UNROLLED -pthread
 LIBS+=-L/usr/local/lib64 -lboost_thread -lpthread
 VPATH=..
 

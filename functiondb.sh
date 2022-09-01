@@ -68,7 +68,7 @@ struct Arg<R (C::*)($arg_types) const, $arg>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R$template_args> 
 struct Arg<R (*)($arg_types) noexcept, $arg> 
@@ -311,7 +311,7 @@ class bound_method<C, void (D::*)($arg_types) const>
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R$template_args> 

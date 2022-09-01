@@ -70,12 +70,12 @@ namespace classdesc
   }
    
   template <class X, class Y>
-  typename enable_if<And<is_assignable<Y,X>,Not<is_const<Y>>>, void>::T
+  typename enable_if<And<Or<is_assignable<Y,X>,is_convertible<X,Y>>,Not<is_const<Y>>>, void>::T
   convert(Y& y, const X& x)
   {y=x;}
 
   template <class X, class Y>
-  typename enable_if<And<And<Not<is_assignable<Y,X>>,Not<is_const<Y>>>,Not<is_enum<Y>>>, void>::T
+  typename enable_if<And<And<Not<Or<is_assignable<Y,X>,is_convertible<X,Y>>>,Not<is_const<Y>>>,Not<is_enum<Y>>>, void>::T
   convert(Y& y, const X& x)
   {throw std::runtime_error(typeName<X>()+" cannot be converted to "+typeName<Y>());}
 

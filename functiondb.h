@@ -213,7 +213,7 @@ class bound_method<C, void (D::*)() const>
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R> 
@@ -483,7 +483,7 @@ struct Arg<R (C::*)(A1) const, 1>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1> 
 struct Arg<R (*)(A1) noexcept, 1> 
@@ -721,7 +721,7 @@ class bound_method<C, void (D::*)(A1) const>
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1> 
@@ -997,7 +997,7 @@ struct Arg<R (C::*)(A1,A2) const, 1>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2> 
 struct Arg<R (*)(A1,A2) noexcept, 1> 
@@ -1041,7 +1041,7 @@ struct Arg<R (C::*)(A1,A2) const, 2>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2> 
 struct Arg<R (*)(A1,A2) noexcept, 2> 
@@ -1279,7 +1279,7 @@ class bound_method<C, void (D::*)(A1,A2) const>
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2> 
@@ -1563,7 +1563,7 @@ struct Arg<R (C::*)(A1,A2,A3) const, 1>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3> 
 struct Arg<R (*)(A1,A2,A3) noexcept, 1> 
@@ -1607,7 +1607,7 @@ struct Arg<R (C::*)(A1,A2,A3) const, 2>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3> 
 struct Arg<R (*)(A1,A2,A3) noexcept, 2> 
@@ -1651,7 +1651,7 @@ struct Arg<R (C::*)(A1,A2,A3) const, 3>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3> 
 struct Arg<R (*)(A1,A2,A3) noexcept, 3> 
@@ -1889,7 +1889,7 @@ class bound_method<C, void (D::*)(A1,A2,A3) const>
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3> 
@@ -2181,7 +2181,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4) const, 1>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (*)(A1,A2,A3,A4) noexcept, 1> 
@@ -2225,7 +2225,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4) const, 2>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (*)(A1,A2,A3,A4) noexcept, 2> 
@@ -2269,7 +2269,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4) const, 3>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (*)(A1,A2,A3,A4) noexcept, 3> 
@@ -2313,7 +2313,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4) const, 4>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4> 
 struct Arg<R (*)(A1,A2,A3,A4) noexcept, 4> 
@@ -2551,7 +2551,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4) const>
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3, class A4> 
@@ -2851,7 +2851,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5) const, 1>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (*)(A1,A2,A3,A4,A5) noexcept, 1> 
@@ -2895,7 +2895,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5) const, 2>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (*)(A1,A2,A3,A4,A5) noexcept, 2> 
@@ -2939,7 +2939,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5) const, 3>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (*)(A1,A2,A3,A4,A5) noexcept, 3> 
@@ -2983,7 +2983,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5) const, 4>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (*)(A1,A2,A3,A4,A5) noexcept, 4> 
@@ -3027,7 +3027,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5) const, 5>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5> 
 struct Arg<R (*)(A1,A2,A3,A4,A5) noexcept, 5> 
@@ -3265,7 +3265,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5) const>
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3, class A4, class A5> 
@@ -3573,7 +3573,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 1>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6) noexcept, 1> 
@@ -3617,7 +3617,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 2>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6) noexcept, 2> 
@@ -3661,7 +3661,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 3>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6) noexcept, 3> 
@@ -3705,7 +3705,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 4>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6) noexcept, 4> 
@@ -3749,7 +3749,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 5>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6) noexcept, 5> 
@@ -3793,7 +3793,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6) const, 6>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6) noexcept, 6> 
@@ -4031,7 +4031,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6) const>
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6> 
@@ -4347,7 +4347,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 1>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 1> 
@@ -4391,7 +4391,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 2>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 2> 
@@ -4435,7 +4435,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 3>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 3> 
@@ -4479,7 +4479,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 4>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 4> 
@@ -4523,7 +4523,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 5>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 5> 
@@ -4567,7 +4567,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 6>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 6> 
@@ -4611,7 +4611,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7) const, 7>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7) noexcept, 7> 
@@ -4849,7 +4849,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7) const>
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7> 
@@ -5173,7 +5173,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 1>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 1> 
@@ -5217,7 +5217,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 2>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 2> 
@@ -5261,7 +5261,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 3>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 3> 
@@ -5305,7 +5305,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 4>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 4> 
@@ -5349,7 +5349,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 5>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 5> 
@@ -5393,7 +5393,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 6>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 6> 
@@ -5437,7 +5437,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 7>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 7> 
@@ -5481,7 +5481,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8) const, 8>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8) noexcept, 8> 
@@ -5719,7 +5719,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8) const>
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> 
@@ -6051,7 +6051,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 1>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 1> 
@@ -6095,7 +6095,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 2>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 2> 
@@ -6139,7 +6139,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 3>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 3> 
@@ -6183,7 +6183,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 4>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 4> 
@@ -6227,7 +6227,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 5>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 5> 
@@ -6271,7 +6271,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 6>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 6> 
@@ -6315,7 +6315,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 7>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 7> 
@@ -6359,7 +6359,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 8>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 8> 
@@ -6403,7 +6403,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const, 9>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) noexcept, 9> 
@@ -6641,7 +6641,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const>
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> 
@@ -6981,7 +6981,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 1>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 1> 
@@ -7025,7 +7025,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 2>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 2> 
@@ -7069,7 +7069,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 3>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 3> 
@@ -7113,7 +7113,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 4>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 4> 
@@ -7157,7 +7157,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 5>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 5> 
@@ -7201,7 +7201,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 6>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 6> 
@@ -7245,7 +7245,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 7>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 7> 
@@ -7289,7 +7289,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 8>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 8> 
@@ -7333,7 +7333,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 9>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 9> 
@@ -7377,7 +7377,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const, 10>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) noexcept, 10> 
@@ -7615,7 +7615,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const>
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> 
@@ -7963,7 +7963,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 1>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 1> 
@@ -8007,7 +8007,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 2>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 2> 
@@ -8051,7 +8051,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 3>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 3> 
@@ -8095,7 +8095,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 4>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 4> 
@@ -8139,7 +8139,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 5>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 5> 
@@ -8183,7 +8183,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 6>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 6> 
@@ -8227,7 +8227,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 7>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 7> 
@@ -8271,7 +8271,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 8>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 8> 
@@ -8315,7 +8315,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 9>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 9> 
@@ -8359,7 +8359,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 10>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 10> 
@@ -8403,7 +8403,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const, 11>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) noexcept, 11> 
@@ -8641,7 +8641,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11) const>
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> 
@@ -8997,7 +8997,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 1>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 1> 
@@ -9041,7 +9041,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 2>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 2> 
@@ -9085,7 +9085,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 3>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 3> 
@@ -9129,7 +9129,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 4>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 4> 
@@ -9173,7 +9173,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 5>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 5> 
@@ -9217,7 +9217,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 6>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 6> 
@@ -9261,7 +9261,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 7>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 7> 
@@ -9305,7 +9305,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 8>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 8> 
@@ -9349,7 +9349,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 9>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 9> 
@@ -9393,7 +9393,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 10>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 10> 
@@ -9437,7 +9437,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 11>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 11> 
@@ -9481,7 +9481,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const, 12>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) noexcept, 12> 
@@ -9719,7 +9719,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12) const>
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> 
@@ -10083,7 +10083,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 1>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 1> 
@@ -10127,7 +10127,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 2>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 2> 
@@ -10171,7 +10171,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 3>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 3> 
@@ -10215,7 +10215,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 4>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 4> 
@@ -10259,7 +10259,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 5>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 5> 
@@ -10303,7 +10303,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 6>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 6> 
@@ -10347,7 +10347,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 7>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 7> 
@@ -10391,7 +10391,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 8>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 8> 
@@ -10435,7 +10435,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 9>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 9> 
@@ -10479,7 +10479,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 10>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 10> 
@@ -10523,7 +10523,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 11>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 11> 
@@ -10567,7 +10567,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 12>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 12> 
@@ -10611,7 +10611,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) const, 13>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) noexcept, 13> 
@@ -10849,7 +10849,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13) co
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> 
@@ -11221,7 +11221,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 1>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 1> 
@@ -11265,7 +11265,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 2>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 2> 
@@ -11309,7 +11309,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 3>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 3> 
@@ -11353,7 +11353,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 4>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 4> 
@@ -11397,7 +11397,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 5>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 5> 
@@ -11441,7 +11441,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 6>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 6> 
@@ -11485,7 +11485,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 7>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 7> 
@@ -11529,7 +11529,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 8>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 8> 
@@ -11573,7 +11573,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 9>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 9> 
@@ -11617,7 +11617,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 10>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 10> 
@@ -11661,7 +11661,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 11>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 11> 
@@ -11705,7 +11705,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 12>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 12> 
@@ -11749,7 +11749,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 13>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 13> 
@@ -11793,7 +11793,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) const, 14>
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14) noexcept, 14> 
@@ -12031,7 +12031,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> 
@@ -12411,7 +12411,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 1
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 1> 
@@ -12455,7 +12455,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 2
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 2> 
@@ -12499,7 +12499,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 3
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 3> 
@@ -12543,7 +12543,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 4
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 4> 
@@ -12587,7 +12587,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 5
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 5> 
@@ -12631,7 +12631,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 6
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 6> 
@@ -12675,7 +12675,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 7
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 7> 
@@ -12719,7 +12719,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 8
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 8> 
@@ -12763,7 +12763,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 9
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 9> 
@@ -12807,7 +12807,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 1
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 10> 
@@ -12851,7 +12851,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 1
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 11> 
@@ -12895,7 +12895,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 1
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 12> 
@@ -12939,7 +12939,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 1
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 13> 
@@ -12983,7 +12983,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 1
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 14> 
@@ -13027,7 +13027,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) const, 1
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15) noexcept, 15> 
@@ -13265,7 +13265,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> 
@@ -13653,7 +13653,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 1> 
@@ -13697,7 +13697,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 2> 
@@ -13741,7 +13741,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 3> 
@@ -13785,7 +13785,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 4> 
@@ -13829,7 +13829,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 5> 
@@ -13873,7 +13873,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 6> 
@@ -13917,7 +13917,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 7> 
@@ -13961,7 +13961,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 8> 
@@ -14005,7 +14005,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 9> 
@@ -14049,7 +14049,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 10> 
@@ -14093,7 +14093,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 11> 
@@ -14137,7 +14137,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 12> 
@@ -14181,7 +14181,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 13> 
@@ -14225,7 +14225,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 14> 
@@ -14269,7 +14269,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 15> 
@@ -14313,7 +14313,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) cons
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16) noexcept, 16> 
@@ -14551,7 +14551,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16> 
@@ -14947,7 +14947,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 1> 
@@ -14991,7 +14991,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 2> 
@@ -15035,7 +15035,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 3> 
@@ -15079,7 +15079,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 4> 
@@ -15123,7 +15123,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 5> 
@@ -15167,7 +15167,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 6> 
@@ -15211,7 +15211,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 7> 
@@ -15255,7 +15255,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 8> 
@@ -15299,7 +15299,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 9> 
@@ -15343,7 +15343,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 10> 
@@ -15387,7 +15387,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 11> 
@@ -15431,7 +15431,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 12> 
@@ -15475,7 +15475,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 13> 
@@ -15519,7 +15519,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 14> 
@@ -15563,7 +15563,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 15> 
@@ -15607,7 +15607,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 16> 
@@ -15651,7 +15651,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) 
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17) noexcept, 17> 
@@ -15889,7 +15889,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17> 
@@ -16293,7 +16293,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 1> 
@@ -16337,7 +16337,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 2> 
@@ -16381,7 +16381,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 3> 
@@ -16425,7 +16425,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 4> 
@@ -16469,7 +16469,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 5> 
@@ -16513,7 +16513,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 6> 
@@ -16557,7 +16557,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 7> 
@@ -16601,7 +16601,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 8> 
@@ -16645,7 +16645,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 9> 
@@ -16689,7 +16689,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 10> 
@@ -16733,7 +16733,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 11> 
@@ -16777,7 +16777,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 12> 
@@ -16821,7 +16821,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 13> 
@@ -16865,7 +16865,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 14> 
@@ -16909,7 +16909,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 15> 
@@ -16953,7 +16953,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 16> 
@@ -16997,7 +16997,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 17> 
@@ -17041,7 +17041,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18) noexcept, 18> 
@@ -17279,7 +17279,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18> 
@@ -17691,7 +17691,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 1> 
@@ -17735,7 +17735,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 2> 
@@ -17779,7 +17779,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 3> 
@@ -17823,7 +17823,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 4> 
@@ -17867,7 +17867,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 5> 
@@ -17911,7 +17911,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 6> 
@@ -17955,7 +17955,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 7> 
@@ -17999,7 +17999,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 8> 
@@ -18043,7 +18043,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 9> 
@@ -18087,7 +18087,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 10> 
@@ -18131,7 +18131,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 11> 
@@ -18175,7 +18175,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 12> 
@@ -18219,7 +18219,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 13> 
@@ -18263,7 +18263,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 14> 
@@ -18307,7 +18307,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 15> 
@@ -18351,7 +18351,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 16> 
@@ -18395,7 +18395,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 17> 
@@ -18439,7 +18439,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 18> 
@@ -18483,7 +18483,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19) noexcept, 19> 
@@ -18721,7 +18721,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19> 
@@ -19141,7 +19141,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 1> 
@@ -19185,7 +19185,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 2> 
@@ -19229,7 +19229,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 3> 
@@ -19273,7 +19273,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 4> 
@@ -19317,7 +19317,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 5> 
@@ -19361,7 +19361,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 6> 
@@ -19405,7 +19405,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 7> 
@@ -19449,7 +19449,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 8> 
@@ -19493,7 +19493,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 9> 
@@ -19537,7 +19537,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 10> 
@@ -19581,7 +19581,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 11> 
@@ -19625,7 +19625,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 12> 
@@ -19669,7 +19669,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 13> 
@@ -19713,7 +19713,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 14> 
@@ -19757,7 +19757,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 15> 
@@ -19801,7 +19801,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 16> 
@@ -19845,7 +19845,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 17> 
@@ -19889,7 +19889,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 18> 
@@ -19933,7 +19933,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 19> 
@@ -19977,7 +19977,7 @@ struct Arg<R (C::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A
   typedef T type;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
 struct Arg<R (*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20) noexcept, 20> 
@@ -20215,7 +20215,7 @@ class bound_method<C, void (D::*)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14
     static const bool is_const=true;
 };
 
-#if defined(__cplusplus) && __cplusplus>=201103L
+#if defined(__cplusplus) && __cplusplus>=201703L
 // noexcept methods
 
 template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class A16, class A17, class A18, class A19, class A20> 
