@@ -878,7 +878,14 @@ namespace classdesc
       typedef T type;
     };
 
+#if defined(__GNUC__) && !defined(__ICC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 #include "functiondb.h"
+#if defined(__GNUC__) && !defined(__ICC)
+#pragma GCC diagnostic pop
+#endif
 
     template <class Buffer>
     struct PackFunctor: public Buffer
