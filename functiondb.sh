@@ -10,12 +10,23 @@ remove_reference()
 {
     i=0
     while [ $i -lt $arity ]; do
-        echo "  typename remove_reference<A$[$i+1]>::type a$i(a[$[$i]]);"
+        echo "  typename remove_reference<A$[$i+1]>::type a$i(a[$[$i]]);" >>functiondb$arity.h
         j=$[i++]
     done
 }    
 
 while [ $arity -le $max_arity ]; do
+    cat <<EOF
+#if !defined(CLASSDESC_ARITIES) || (CLASSDESC_ARITIES & (1<<$arity))
+#include "functiondb$arity.h"
+#endif
+EOF
+    # create the arity include file
+    cat >functiondb$arity.h <<EOF
+#ifndef CLASSDESC_FUNCTIONDB$arity
+#define CLASSDESC_FUNCTIONDB$arity
+EOF
+    
     i=1
     template_args=
     arg_types=
@@ -46,7 +57,7 @@ while [ $arity -le $max_arity ]; do
 # definition of Arg type accessors
     arg=1
     while [ $arg -le $arity ]; do
-cat <<EOF
+cat >>functiondb$arity.h <<EOF
 template <class R$template_args> 
 struct Arg<R (*)($arg_types), $arg> 
 {
@@ -95,7 +106,7 @@ EOF
     j=$[arg++]
     done
 
-    cat <<EOF
+    cat >>functiondb$arity.h <<EOF
 template <class F, template<class> class P>
 struct AllArgs<F,P,$arity>
 {
@@ -552,22 +563,22 @@ callOnBuffer(Buffer& buffer, F f)
 EOF
     arg=1
     while [ $arg -le $arity ]; do
-        cat <<EOF
+        cat >>functiondb$arity.h <<EOF
   typename remove_const<typename remove_reference<typename Arg<F,$arg>::T>::type>::type a$arg;
   buffer>>a$arg;
 EOF
         let $[arg++]
     done
-    echo "  return f("
+    echo "  return f(" >>functiondb$arity.h
     arg=1
     while [ $arg -le $arity ]; do
         if [ $arg -gt 1 ]; then
-            echo ","
+            echo "," >>functiondb$arity.h
         fi
-        echo "a$arg"
+        echo "a$arg" >>functiondb$arity.h
         let $[arg++]
     done
-    cat <<EOF
+    cat >>functiondb$arity.h <<EOF
   );
 }
 
@@ -578,24 +589,25 @@ callOnBuffer(Buffer& buffer, F f)
 EOF
     arg=1
     while [ $arg -le $arity ]; do
-        cat <<EOF
+        cat >>functiondb$arity.h  <<EOF
   typename remove_const<typename remove_reference<typename Arg<F,$arg>::T>::type>::type a$arg;
   buffer>>a$arg;
 EOF
         let $[arg++]
     done
-    echo "  f("
+    echo "  f(" >>functiondb$arity.h 
     arg=1
     while [ $arg -le $arity ]; do
         if [ $arg -gt 1 ]; then
-            echo ","
+            echo "," >>functiondb$arity.h 
         fi
-        echo "a$arg"
+        echo "a$arg" >>functiondb$arity.h 
         let $[arg++]
     done
-    cat <<EOF
+    cat >>functiondb$arity.h  <<EOF
   );
 }
+#endif
 EOF
     j=$[arity++]
 done
