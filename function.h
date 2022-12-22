@@ -754,17 +754,9 @@ namespace classdesc
       void packArg() {}
 
       template <class F>
-      typename enable_if<Not<is_void<typename Return<F>::T>>, typename Return<F>::T>::T
-      call(F f) {
+      typename Return<F>::T call(F f) {
         return *CallOnBuffer<Buffer, F>(*this,f)();
       }
-      
-      template <class F>
-      typename enable_if<is_void<typename Return<F>::T>,void>::T
-      call(F f) {
-        CallOnBuffer<Buffer, F>(*this,f)();
-      }
-      
     };
 
     template <class Class, class Buffer>
@@ -895,12 +887,7 @@ namespace classdesc
 
       // TODO other C++11 stuff?
       template <class F>
-      typename enable_if<is_void<typename Return<F>::T>, typename Return<F>::T>::T
-      call(F f) {callOnBuffer(*this, f);}
-      template <class F>
-      typename enable_if<Not<is_void<typename Return<F>::T> >, typename Return<F>::T>::T
-      call(F f) {return callOnBuffer(*this, f);}
-      
+      typename Return<F>::T call(F f) {return callOnBuffer(*this, f);}
     };
 
 

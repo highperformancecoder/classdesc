@@ -626,7 +626,7 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
 }
 
 template <class Buffer, class F>
-typename enable_if<And<Eq<Arity<F>::value, 4>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+typename enable_if<Eq<Arity<F>::value, 4>, typename Return<F>::T>::T
 callOnBuffer(Buffer& buffer, F f)
 {
   typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
@@ -638,29 +638,6 @@ callOnBuffer(Buffer& buffer, F f)
   typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
   buffer>>a4;
   return f(
-a1
-,
-a2
-,
-a3
-,
-a4
-  );
-}
-
-template <class Buffer, class F>
-typename enable_if<And<Eq<Arity<F>::value, 4>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
-callOnBuffer(Buffer& buffer, F f)
-{
-  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
-  buffer>>a1;
-  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
-  buffer>>a2;
-  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
-  buffer>>a3;
-  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
-  buffer>>a4;
-  f(
 a1
 ,
 a2

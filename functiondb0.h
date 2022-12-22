@@ -450,18 +450,10 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
 }
 
 template <class Buffer, class F>
-typename enable_if<And<Eq<Arity<F>::value, 0>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+typename enable_if<Eq<Arity<F>::value, 0>, typename Return<F>::T>::T
 callOnBuffer(Buffer& buffer, F f)
 {
   return f(
-  );
-}
-
-template <class Buffer, class F>
-typename enable_if<And<Eq<Arity<F>::value, 0>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
-callOnBuffer(Buffer& buffer, F f)
-{
-  f(
   );
 }
 #endif

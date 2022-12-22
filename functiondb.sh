@@ -557,7 +557,7 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
 }
 
 template <class Buffer, class F>
-typename enable_if<And<Eq<Arity<F>::value, $arity>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+typename enable_if<Eq<Arity<F>::value, $arity>, typename Return<F>::T>::T
 callOnBuffer(Buffer& buffer, F f)
 {
 EOF
@@ -579,32 +579,6 @@ EOF
         let $[arg++]
     done
     cat >>functiondb$arity.h <<EOF
-  );
-}
-
-template <class Buffer, class F>
-typename enable_if<And<Eq<Arity<F>::value, $arity>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
-callOnBuffer(Buffer& buffer, F f)
-{
-EOF
-    arg=1
-    while [ $arg -le $arity ]; do
-        cat >>functiondb$arity.h  <<EOF
-  typename remove_const<typename remove_reference<typename Arg<F,$arg>::T>::type>::type a$arg;
-  buffer>>a$arg;
-EOF
-        let $[arg++]
-    done
-    echo "  f(" >>functiondb$arity.h 
-    arg=1
-    while [ $arg -le $arity ]; do
-        if [ $arg -gt 1 ]; then
-            echo "," >>functiondb$arity.h 
-        fi
-        echo "a$arg" >>functiondb$arity.h 
-        let $[arg++]
-    done
-    cat >>functiondb$arity.h  <<EOF
   );
 }
 #endif

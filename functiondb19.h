@@ -1286,7 +1286,7 @@ apply_void_fn(F f, Args& a, Fdummy<F> dum=0)
 }
 
 template <class Buffer, class F>
-typename enable_if<And<Eq<Arity<F>::value, 19>, Not<is_void<typename Return<F>::T> > >, typename Return<F>::T>::T
+typename enable_if<Eq<Arity<F>::value, 19>, typename Return<F>::T>::T
 callOnBuffer(Buffer& buffer, F f)
 {
   typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
@@ -1328,89 +1328,6 @@ callOnBuffer(Buffer& buffer, F f)
   typename remove_const<typename remove_reference<typename Arg<F,19>::T>::type>::type a19;
   buffer>>a19;
   return f(
-a1
-,
-a2
-,
-a3
-,
-a4
-,
-a5
-,
-a6
-,
-a7
-,
-a8
-,
-a9
-,
-a10
-,
-a11
-,
-a12
-,
-a13
-,
-a14
-,
-a15
-,
-a16
-,
-a17
-,
-a18
-,
-a19
-  );
-}
-
-template <class Buffer, class F>
-typename enable_if<And<Eq<Arity<F>::value, 19>, is_void<typename Return<F>::T> >, typename Return<F>::T>::T
-callOnBuffer(Buffer& buffer, F f)
-{
-  typename remove_const<typename remove_reference<typename Arg<F,1>::T>::type>::type a1;
-  buffer>>a1;
-  typename remove_const<typename remove_reference<typename Arg<F,2>::T>::type>::type a2;
-  buffer>>a2;
-  typename remove_const<typename remove_reference<typename Arg<F,3>::T>::type>::type a3;
-  buffer>>a3;
-  typename remove_const<typename remove_reference<typename Arg<F,4>::T>::type>::type a4;
-  buffer>>a4;
-  typename remove_const<typename remove_reference<typename Arg<F,5>::T>::type>::type a5;
-  buffer>>a5;
-  typename remove_const<typename remove_reference<typename Arg<F,6>::T>::type>::type a6;
-  buffer>>a6;
-  typename remove_const<typename remove_reference<typename Arg<F,7>::T>::type>::type a7;
-  buffer>>a7;
-  typename remove_const<typename remove_reference<typename Arg<F,8>::T>::type>::type a8;
-  buffer>>a8;
-  typename remove_const<typename remove_reference<typename Arg<F,9>::T>::type>::type a9;
-  buffer>>a9;
-  typename remove_const<typename remove_reference<typename Arg<F,10>::T>::type>::type a10;
-  buffer>>a10;
-  typename remove_const<typename remove_reference<typename Arg<F,11>::T>::type>::type a11;
-  buffer>>a11;
-  typename remove_const<typename remove_reference<typename Arg<F,12>::T>::type>::type a12;
-  buffer>>a12;
-  typename remove_const<typename remove_reference<typename Arg<F,13>::T>::type>::type a13;
-  buffer>>a13;
-  typename remove_const<typename remove_reference<typename Arg<F,14>::T>::type>::type a14;
-  buffer>>a14;
-  typename remove_const<typename remove_reference<typename Arg<F,15>::T>::type>::type a15;
-  buffer>>a15;
-  typename remove_const<typename remove_reference<typename Arg<F,16>::T>::type>::type a16;
-  buffer>>a16;
-  typename remove_const<typename remove_reference<typename Arg<F,17>::T>::type>::type a17;
-  buffer>>a17;
-  typename remove_const<typename remove_reference<typename Arg<F,18>::T>::type>::type a18;
-  buffer>>a18;
-  typename remove_const<typename remove_reference<typename Arg<F,19>::T>::type>::type a19;
-  buffer>>a19;
-  f(
 a1
 ,
 a2
