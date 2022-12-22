@@ -238,23 +238,6 @@ class bound_method<C, R (D::*)($arg_types)>
     static const bool is_const=false;
 };
 
-template <class C, class D$template_args>
-class bound_method<C, void (D::*)($arg_types)>
-{
-    typedef void (D::*M)($arg_types);
-    C* obj;
-    M method;
-    public:
-    static const int arity=$arity;
-    typedef void Ret;
-    template <int i> struct Arg: public functional::Arg<M,i> {};
-    bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Not<classdesc::is_const<C> > >::T
-    operator()($arg_decl) const {(obj->*method)($args);}
-    void rebind(C& newObj) {obj=&newObj;}
-    static const bool is_const=false;
-};
-
 template <class C, class D, class R$template_args>
 class bound_method<const C, R (D::*)($arg_types)>
 {
@@ -273,25 +256,6 @@ class bound_method<const C, R (D::*)($arg_types)>
     static const bool is_const=false;
 };
 
-template <class C, class D$template_args>
-class bound_method<const C, void (D::*)($arg_types)>
-{
-    typedef void (D::*M)($arg_types);
-    const C* obj;
-    M method;
-    public:
-    static const int arity=$arity;
-    typedef void Ret;
-    template <int i> struct Arg: public functional::Arg<M,i> {};
-    bound_method(const C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Not<classdesc::is_const<C> > >::T
-    operator()($arg_decl) const {
-        throw std::runtime_error("cannot call method, inappropriate argument type");
-    }
-    void rebind(C& newObj) {obj=&newObj;}
-    static const bool is_const=false;
-};
-
 template <class C, class D, class R$template_args>
 class bound_method<C, R (D::*)($arg_types) const>
 {
@@ -304,21 +268,6 @@ class bound_method<C, R (D::*)($arg_types) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()($arg_decl) const {return (obj.*method)($args);}
-    static const bool is_const=true;
-};
-
-template <class C, class D$template_args>
-class bound_method<C, void (D::*)($arg_types) const>
-{
-    typedef void (D::*M)($arg_types) const;
-    C& obj;
-    M method;
-    public:
-    static const int arity=$arity;
-    typedef void Ret;
-    template <int i> struct Arg: public functional::Arg<M,i> {};
-    bound_method(C& obj, M method): obj(obj), method(method) {}
-    void operator()($arg_decl) const {(obj.*method)($args);}
     static const bool is_const=true;
 };
 

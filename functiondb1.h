@@ -175,23 +175,6 @@ class bound_method<C, R (D::*)(A1)>
     static const bool is_const=false;
 };
 
-template <class C, class D, class A1>
-class bound_method<C, void (D::*)(A1)>
-{
-    typedef void (D::*M)(A1);
-    C* obj;
-    M method;
-    public:
-    static const int arity=1;
-    typedef void Ret;
-    template <int i> struct Arg: public functional::Arg<M,i> {};
-    bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Not<classdesc::is_const<C> > >::T
-    operator()(A1 a1) const {(obj->*method)(a1);}
-    void rebind(C& newObj) {obj=&newObj;}
-    static const bool is_const=false;
-};
-
 template <class C, class D, class R, class A1>
 class bound_method<const C, R (D::*)(A1)>
 {
@@ -210,25 +193,6 @@ class bound_method<const C, R (D::*)(A1)>
     static const bool is_const=false;
 };
 
-template <class C, class D, class A1>
-class bound_method<const C, void (D::*)(A1)>
-{
-    typedef void (D::*M)(A1);
-    const C* obj;
-    M method;
-    public:
-    static const int arity=1;
-    typedef void Ret;
-    template <int i> struct Arg: public functional::Arg<M,i> {};
-    bound_method(const C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Not<classdesc::is_const<C> > >::T
-    operator()(A1 a1) const {
-        throw std::runtime_error("cannot call method, inappropriate argument type");
-    }
-    void rebind(C& newObj) {obj=&newObj;}
-    static const bool is_const=false;
-};
-
 template <class C, class D, class R, class A1>
 class bound_method<C, R (D::*)(A1) const>
 {
@@ -241,21 +205,6 @@ class bound_method<C, R (D::*)(A1) const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()(A1 a1) const {return (obj.*method)(a1);}
-    static const bool is_const=true;
-};
-
-template <class C, class D, class A1>
-class bound_method<C, void (D::*)(A1) const>
-{
-    typedef void (D::*M)(A1) const;
-    C& obj;
-    M method;
-    public:
-    static const int arity=1;
-    typedef void Ret;
-    template <int i> struct Arg: public functional::Arg<M,i> {};
-    bound_method(C& obj, M method): obj(obj), method(method) {}
-    void operator()(A1 a1) const {(obj.*method)(a1);}
     static const bool is_const=true;
 };
 

@@ -131,23 +131,6 @@ class bound_method<C, R (D::*)()>
     static const bool is_const=false;
 };
 
-template <class C, class D>
-class bound_method<C, void (D::*)()>
-{
-    typedef void (D::*M)();
-    C* obj;
-    M method;
-    public:
-    static const int arity=0;
-    typedef void Ret;
-    template <int i> struct Arg: public functional::Arg<M,i> {};
-    bound_method(C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Not<classdesc::is_const<C> > >::T
-    operator()() const {(obj->*method)();}
-    void rebind(C& newObj) {obj=&newObj;}
-    static const bool is_const=false;
-};
-
 template <class C, class D, class R>
 class bound_method<const C, R (D::*)()>
 {
@@ -166,25 +149,6 @@ class bound_method<const C, R (D::*)()>
     static const bool is_const=false;
 };
 
-template <class C, class D>
-class bound_method<const C, void (D::*)()>
-{
-    typedef void (D::*M)();
-    const C* obj;
-    M method;
-    public:
-    static const int arity=0;
-    typedef void Ret;
-    template <int i> struct Arg: public functional::Arg<M,i> {};
-    bound_method(const C& obj, M method): obj(&obj), method(method) {}
-    typename enable_if<Not<classdesc::is_const<C> > >::T
-    operator()() const {
-        throw std::runtime_error("cannot call method, inappropriate argument type");
-    }
-    void rebind(C& newObj) {obj=&newObj;}
-    static const bool is_const=false;
-};
-
 template <class C, class D, class R>
 class bound_method<C, R (D::*)() const>
 {
@@ -197,21 +161,6 @@ class bound_method<C, R (D::*)() const>
     template <int i> struct Arg: public functional::Arg<M,i> {};
     bound_method(C& obj, M method): obj(obj), method(method) {}
     R operator()() const {return (obj.*method)();}
-    static const bool is_const=true;
-};
-
-template <class C, class D>
-class bound_method<C, void (D::*)() const>
-{
-    typedef void (D::*M)() const;
-    C& obj;
-    M method;
-    public:
-    static const int arity=0;
-    typedef void Ret;
-    template <int i> struct Arg: public functional::Arg<M,i> {};
-    bound_method(C& obj, M method): obj(obj), method(method) {}
-    void operator()() const {(obj.*method)();}
     static const bool is_const=true;
 };
 
