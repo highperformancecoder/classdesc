@@ -665,7 +665,7 @@ namespace classdesc
     public:
       CallOnBuffer(Buffer& buffer, F f): buffer(buffer), f(f) {}
       R operator()() {
-        auto ff=[&](typename Arg<F,1>::T a){return CallOnBuffer<Buffer, CurryFirst<F>, R, N-1>
+        auto ff=[&](typename Arg<F,1>::T a)->R {return CallOnBuffer<Buffer, CurryFirst<F>, R, N-1>
             (buffer, CurryFirst<F>(f,a))();};
         return eval<decltype(ff),A1,R,Buffer>(ff, buffer);
        }
