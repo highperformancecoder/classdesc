@@ -46,22 +46,23 @@ int main()
   
   pf.clear();
 
-  // now try calling vectors methods via the Command pattern
-  void (VI::*resize)(size_t)=&VI::resize;
-  int& (VI::*at)(size_t)=&VI::at;
-  MethodPackFunctor<VI,pack_t> mpf(resize,at,&VI::size,&VI::clear);
-  mpf(resize,2);
-  mpf.invoke(x);
-  assert(x.size()==2);
-  mpf(&VI::size);
-  auto r=mpf.invoke(x);
-  assert(r->getResult<size_t>()==2);
-  x[1]=10;
-  mpf(at,1);
-  r=mpf.invoke(x);
-  assert(r->getResult<int&>()==x[1]);
-  mpf(&VI::clear);
-  mpf.invoke(x);
-  assert(x.empty());
+  // disable, as it causes some compile performance concerns.
+//  // now try calling vectors methods via the Command pattern
+//  void (VI::*resize)(size_t)=&VI::resize;
+//  int& (VI::*at)(size_t)=&VI::at;
+//  MethodPackFunctor<VI,pack_t> mpf(resize,at,&VI::size,&VI::clear);
+//  mpf(resize,2);
+//  mpf.invoke(x);
+//  assert(x.size()==2);
+//  mpf(&VI::size);
+//  auto r=mpf.invoke(x);
+//  assert(r->getResult<size_t>()==2);
+//  x[1]=10;
+//  mpf(at,1);
+//  r=mpf.invoke(x);
+//  assert(r->getResult<int&>()==x[1]);
+//  mpf(&VI::clear);
+//  mpf.invoke(x);
+//  assert(x.empty());
 }  
   

@@ -14,11 +14,13 @@
 #define PACK_STL_H
 
 #include "pack_base.h"
-#include <iterator>
 
-#include <vector>
+#if defined(__cplusplus) && __cplusplus>=201103L
+#include <array>
+#endif
 #include <iterator>
 #include <string>
+#include <vector>
 
 namespace classdesc
 {
@@ -111,9 +113,9 @@ namespace classdesc
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-value"
 #endif
+
   template <class T>
-  typename enable_if<is_sequence<T>, void>::T
-  unpack(classdesc::pack_t& b, const classdesc::string& d, T& a)
+  void unpackSequence(classdesc::pack_t& b, const classdesc::string& d, T& a)
   {
     uint64 sz=0, i=0;
     b >> sz;
@@ -125,6 +127,23 @@ namespace classdesc
         classdesc::push_back(a, x);
       }
   }
+ 
+#if defined(__cplusplus) && __cplusplus>=201103L
+  template <class T, size_t N>
+  void unpackSequence(classdesc::pack_t& b, const classdesc::string& d, std::array<T,N>& a)
+  {
+    uint64 sz=0, i=0;
+    b >> sz;
+    for (size_t i=0; i<sz && i<N; ++i)
+      b >> a[i];
+  }
+#endif
+  
+  template <class T>
+  typename enable_if<is_sequence<T>,void>::T
+  unpack(classdesc::pack_t& b, const classdesc::string& d, T& a)
+  {unpackSequence(b,d,a);}
+  
   template <class T>
   typename enable_if<is_sequence<T>, void>::T
   unpack(classdesc::pack_t& b, const classdesc::string&, const T& a)
