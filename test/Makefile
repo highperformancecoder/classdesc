@@ -4,7 +4,7 @@ UNITTESTOBJS=main.o testTensorOps.o testXVector.o
 
 CIVITAOBJS=$(filter-out ../tclmain.o,$(wildcard ../*.o))
 FLAGS=-g -I.. -I../RavelCAPI
-LIBS+=-L.. -lcivita -L../RavelCAPI -lravelCAPI -lUnitTest++ 
+LIBS+=-L.. -lcivita -L../RavelCAPI -lravelCAPI -lboost_date_time -lUnitTest++ 
 CPLUSPLUS=g++
 
 ifdef GCOV
