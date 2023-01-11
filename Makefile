@@ -24,3 +24,16 @@ libcivita.a: $(OBJS)
 ifneq ($(MAKECMDGOALS),clean)
 include $(OBJS:.o=.d)
 endif
+
+tests: libcivita.a
+	cd test; $(MAKE)
+
+sure: tests
+	test/unittests
+
+BASIC_CLEAN=rm -rf *.o *~ "\#*\#" core *.d *.cd *.xcd *.gcda *.gcno
+
+clean:
+	-$(BASIC_CLEAN) libcivita.a
+	cd RavelCAPI; $(MAKE) clean
+	cd test; $(MAKE) clean

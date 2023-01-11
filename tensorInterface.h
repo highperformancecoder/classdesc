@@ -26,6 +26,7 @@
 #define CLASSDESC_ACCESS(x)
 #endif
 #include <chrono>
+#include <iostream>
 #include <set>
 
 namespace civita
@@ -126,6 +127,8 @@ namespace civita
     {throw std::runtime_error("setArgument(s) variant not implemented");}
   };
 
+  inline std::ostream& operator<<(std::ostream& o, const ITensor::Timestamp& t)
+  {return o<<ITensor::Timestamp::clock::to_time_t(t);}
 }
 
 #endif
