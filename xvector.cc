@@ -174,24 +174,6 @@ namespace civita
     return any(); // shut up compiler warning
   }
 
-  ptime sToPtime(const string& s)
-  {
-    const char* p=s.c_str();
-    char *lp;
-    unsigned long d[]={1,1,1,0,0,0}; // Y,M,D,h,m,s
-    size_t i=0;
-    for (; i<6 && *p; p=lp, ++i)
-      {
-        d[i]=strtoul(p,&lp,10);
-        if (lp==p)
-          break;
-        while (*lp && !isdigit(*lp)) lp++;
-      }
-    if (i==0)
-      throw runtime_error("invalid date/time: "+s);
-    return ptime(date(d[0],d[1],d[2]), time_duration(d[3],d[4],d[5]));
-  }
-  
   double diff(const any& x, const any& y)
   {
     if (x.type!=y.type)

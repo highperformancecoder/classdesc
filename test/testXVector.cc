@@ -160,5 +160,38 @@ SUITE(XVector)
     CHECK_EQUAL("%b %Y",x.timeFormat());
     x.push_back("2020-09-03T03:05:01");
     CHECK_EQUAL("%Y",x.timeFormat());
+    CHECK(x.checkType<ptime>());
+    CHECK(!x.checkType<double>());
  }
+
+  TEST(anyCompare)
+    {
+      any zero(0), one(1);
+      CHECK(zero<one);
+      CHECK(zero==zero);
+      CHECK_EQUAL(1, diff(one,zero));
+
+      any hello("hello"), goodbye("goodbye");
+      CHECK(goodbye<hello);
+      CHECK(goodbye==goodbye);
+      CHECK(!(goodbye==zero));
+      CHECK(goodbye<zero);
+      CHECK_EQUAL(7,diff(hello,goodbye));
+      
+      any aprilFool(ptime(date(2018,Apr,1))), dayLater(ptime(date(2018,Apr,2)));
+      CHECK(aprilFool<dayLater);
+      CHECK(aprilFool==aprilFool);
+      CHECK_EQUAL(86400, diff(dayLater, aprilFool));
+    }
+
+  TEST(imposeDimensions)
+    {
+      XVector x("hello",{Dimension::time,""});
+      CHECK_EQUAL("",x.timeFormat());
+      x.push_back("2000-01-01T01:01:00");
+      x.emplace_back(any("2001-01-01T01:01:00"));
+      CHECK(!x.checkType<ptime>());
+      x.imposeDimension();
+      CHECK(x.checkType<ptime>());
+    }
 }
