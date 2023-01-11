@@ -18,7 +18,6 @@
 */
 
 #include "interpolateHypercube.h"
-#include <ecolab_epilogue.h>
 
 namespace civita
 {

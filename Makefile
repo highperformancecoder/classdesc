@@ -9,6 +9,8 @@ endif
 CPLUSPLUS=g++
 
 OBJS=hypercube.o index.o interpolateHypercube.o tensorOp.o xvector.o
+VPATH=. RavelCAPI
+FLAGS+=-I. -IRavelCAPI
 
 libcivita.a: $(OBJS)
 	ar r $@ $^

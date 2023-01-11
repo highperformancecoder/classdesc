@@ -18,10 +18,7 @@
 */
 
 #include "xvector.h"
-#include <error.h>
 #include <regex>
-#include "minsky_epilogue.h"
-using ecolab::error;
 
 using namespace std;
 
@@ -124,9 +121,9 @@ namespace civita
                 else
                   extract(dim.units,s,pY,"(\\d{4})",year,pq,"(\\d)",quarter);
               else
-                throw error("year not specified in format string");
+                throw runtime_error("year not specified in format string");
               if (quarter<1 || quarter>4)
-                throw error("invalid quarter %d",quarter);
+                throw runtime_error("invalid quarter "+to_string(quarter));
               return ptime(date(year, quarterMonth[quarter-1], 1));
             }
           case regular: // handle date formats with any combination of %Y, %m, %d, %H, %M, %S
@@ -191,7 +188,7 @@ namespace civita
         while (*lp && !isdigit(*lp)) lp++;
       }
     if (i==0)
-      throw error("invalid date/time: %s",s.c_str());
+      throw runtime_error("invalid date/time: "+s);
     return ptime(date(d[0],d[1],d[2]), time_duration(d[3],d[4],d[5]));
   }
   
@@ -245,7 +242,7 @@ namespace civita
             {
               auto pY=format.find("%Y");
               if (pY==string::npos)
-                throw error("year not specified in format string");
+                throw runtime_error("year not specified in format string");
             
               // replace %Q and %Y with %d
               string sformat=format;
