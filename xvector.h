@@ -39,7 +39,8 @@ namespace civita
     std::string format;
     std::string::size_type pq;
     enum TimeType {quarter, regular, time_input_facet} timeType=time_input_facet;
-    
+    any constructAnyFromQuarter(const std::string&) const;
+    any constructAnyFromRegular(const std::string&) const;
   public:
     AnyVal()=default;
     AnyVal(const Dimension& dim) {setDimension(dim);}

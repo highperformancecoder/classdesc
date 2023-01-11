@@ -38,7 +38,7 @@ namespace civita
                  int pos2, const char* re2, int& var2)
     {
       string rePat=fmt.substr(0,pos1)+re1+
-                    fmt.substr(pos1+2,pos2-pos1-2)+re2+
+        fmt.substr(pos1+2,pos2-pos1-2)+re2+
         fmt.substr(pos2+2);
       regex pattern(rePat);
       smatch match;
@@ -94,6 +94,58 @@ namespace civita
       }
   }
 
+  any AnyVal::constructAnyFromQuarter(const std::string& s) const
+  {
+    // year quarter format expected. Takes the first %Y (or
+    // %y) and first %Q for year and quarter
+    // respectively. Everything else is passed to regex, which
+    // can be used to match complicated patterns.
+    string pattern;
+    static greg_month quarterMonth[]={Jan,Apr,Jul,Oct};
+    int year, quarter;
+    auto pY=dim.units.find("%Y");
+    if (pY!=string::npos)
+      if (pq<pY)
+        extract(dim.units,s,pq,"(\\d)",quarter,pY,"(\\d{4})",year);
+      else
+        extract(dim.units,s,pY,"(\\d{4})",year,pq,"(\\d)",quarter);
+    else
+      throw runtime_error("year not specified in format string");
+    if (quarter<1 || quarter>4)
+      throw runtime_error("invalid quarter "+to_string(quarter));
+    return ptime(date(year, quarterMonth[quarter-1], 1));
+  }
+    
+  // handle date formats with any combination of %Y, %m, %d, %H, %M, %S
+  any AnyVal::constructAnyFromRegular(const std::string& s) const
+  {
+    smatch val;
+    static regex valParser{"(\\d+)"};
+    int day=1, month=1, year=0, hours=0, minutes=0, seconds=0;
+    size_t i=0;
+    for (auto ss=s.c_str(); i<format.size(); ++i)
+      {
+        for (; *ss && !isdigit(*ss); ++ss); // skip to next integer field
+        if (!*ss) break;
+        int v=strtol(ss, const_cast<char**>(&ss),10);
+        switch (format[i])
+          {
+          case 'd': day=v; break;
+          case 'm': month=v; break;
+          case 'y':
+            if (v>99) throw runtime_error(to_string(v)+" is out of range for %y");
+            year=v>68? v+1900: v+2000;
+            break;
+          case 'Y': year=v; break;
+          case 'H': hours=v; break;
+          case 'M': minutes=v; break;
+          case 'S': seconds=v; break;
+          }
+      }
+    if (!dim.units.empty() && i<format.size()) throw InvalidDate(s, dim.units);
+    return ptime(date(year,month,day),time_duration(hours,minutes,seconds));
+  }
+  
   any AnyVal::operator()(const std::string& s) const
   {
     switch (dim.type)
@@ -105,55 +157,8 @@ namespace civita
       case Dimension::time:
         switch (timeType)
           {
-          case quarter: 
-            {
-              // year quarter format expected. Takes the first %Y (or
-              // %y) and first %Q for year and quarter
-              // respectively. Everything else is passed to regex, which
-              // can be used to match complicated patterns.
-              string pattern;
-              static greg_month quarterMonth[]={Jan,Apr,Jul,Oct};
-              int year, quarter;
-              auto pY=dim.units.find("%Y");
-              if (pY!=string::npos)
-                if (pq<pY)
-                  extract(dim.units,s,pq,"(\\d)",quarter,pY,"(\\d{4})",year);
-                else
-                  extract(dim.units,s,pY,"(\\d{4})",year,pq,"(\\d)",quarter);
-              else
-                throw runtime_error("year not specified in format string");
-              if (quarter<1 || quarter>4)
-                throw runtime_error("invalid quarter "+to_string(quarter));
-              return ptime(date(year, quarterMonth[quarter-1], 1));
-            }
-          case regular: // handle date formats with any combination of %Y, %m, %d, %H, %M, %S
-            {
-              smatch val;
-              static regex valParser{"(\\d+)"};
-              int day=1, month=1, year=0, hours=0, minutes=0, seconds=0;
-              size_t i=0;
-              for (auto ss=s.c_str(); i<format.size(); ++i)
-                {
-                  for (; *ss && !isdigit(*ss); ++ss); // skip to next integer field
-                  if (!*ss) break;
-                  int v=strtol(ss, const_cast<char**>(&ss),10);
-                  switch (format[i])
-                    {
-                    case 'd': day=v; break;
-                    case 'm': month=v; break;
-                    case 'y':
-                      if (v>99) throw runtime_error(to_string(v)+" is out of range for %y");
-                      year=v>68? v+1900: v+2000;
-                      break;
-                    case 'Y': year=v; break;
-                    case 'H': hours=v; break;
-                    case 'M': minutes=v; break;
-                    case 'S': seconds=v; break;
-                    }
-                }
-              if (!dim.units.empty() && i<format.size()) throw InvalidDate(s, dim.units);
-              return ptime(date(year,month,day),time_duration(hours,minutes,seconds));
-            }
+          case quarter: return constructAnyFromQuarter(s);
+          case regular: return constructAnyFromRegular(s);
           case time_input_facet:
             {
               // default case - delegate to std::time_input_facet
@@ -180,7 +185,7 @@ namespace civita
 #ifdef CLASSDESC_H
       throw runtime_error("incompatible types "+classdesc::to_string(x.type)+" and "+classdesc::to_string(y.type)+" in diff");
 #else
-      throw runtime_error("incompatible types in diff");
+    throw runtime_error("incompatible types in diff");
 #endif
     switch (x.type)
       {
