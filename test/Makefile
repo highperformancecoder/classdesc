@@ -7,6 +7,10 @@ FLAGS=-g -I.. -I../RavelCAPI
 LIBS+=-L.. -lcivita -L../RavelCAPI -lravelCAPI -lUnitTest++ 
 CPLUSPLUS=g++
 
+ifdef GCOV
+FLAGS+=-fprofile-arcs -ftest-coverage
+endif
+
 all: unittests 
 
 unittests: $(UNITTESTOBJS) $(CIVITAOBJS) ../RavelCAPI/libravelCAPI.a
