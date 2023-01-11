@@ -23,6 +23,7 @@
 *.exe
 *.out
 *.app
+unittests
 
 # Editor files
 *~
