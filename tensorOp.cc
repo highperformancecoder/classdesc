@@ -275,21 +275,21 @@ namespace civita
         // set up index vector
         auto& ahc=arg->hypercube();
         map<size_t, size_t> ai;
-        for (size_t i=0; i<arg->index().size(); ++i)
+        for (size_t k=0; k<arg->index().size(); ++k)
           {
-            auto splitIdx=ahc.splitIndex(arg->index()[i]);
+            auto splitIdx=ahc.splitIndex(arg->index()[k]);
             if (splitIdx[splitAxis]==sliceIndex)
               {
                 splitIdx.erase(splitIdx.begin()+splitAxis);
                 auto l=hc.linealIndex(splitIdx);
-                ai[l]=i;
+                ai[l]=k;
               }
           }
         m_index=ai;
         arg_index.resize(ai.size());
         // convert into lineal addressing
         size_t j=0;
-        for (auto& i: ai) arg_index[j++]=i.second;
+        for (auto& k: ai) arg_index[j++]=k.second;
       }
   }
 
