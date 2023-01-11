@@ -525,8 +525,8 @@ namespace civita
                   sort(perm.begin(), perm.end(),
                        [&](size_t i, size_t j) {return diff(xv[i],xv[j])>0;});
                   break;
-                case ravel::HandleSort::custom:
-                  break; // shouldn't be here with an empty custom order
+                default:
+                  break;
                 }
             }
           else

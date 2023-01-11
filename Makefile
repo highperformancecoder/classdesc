@@ -12,6 +12,10 @@ OBJS=hypercube.o index.o interpolateHypercube.o tensorOp.o xvector.o
 VPATH=. RavelCAPI
 FLAGS+=-I. -IRavelCAPI
 
+ifdef AEGIS
+FLAGS+=-Werror -Wall -Wno-unused-variable -Wno-unused-function
+endif
+
 libcivita.a: $(OBJS)
 	ar r $@ $^
 
