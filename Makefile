@@ -6,6 +6,10 @@ else
 OPT=-O3 -DNDEBUG
 endif
 
+ifdef FPIC
+OPT+=-fPIC
+endif
+
 CPLUSPLUS=g++
 
 OBJS=hypercube.o index.o interpolateHypercube.o tensorOp.o xvector.o
