@@ -551,7 +551,6 @@ namespace civita
                 perm.push_back(i);
               switch (i.order)
                 {
-                case ravel::HandleSort::none: break;
                 case ravel::HandleSort::forward:
                 case ravel::HandleSort::numForward:
                 case ravel::HandleSort::timeForward:
@@ -565,6 +564,7 @@ namespace civita
                        [&](size_t i, size_t j) {return diff(xv[i],xv[j])>0;});
                   break;
                 default:
+                  assert(i.order==ravel::HandleSort::none);
                   break;
                 }
             }
