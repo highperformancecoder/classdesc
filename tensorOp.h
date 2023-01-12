@@ -352,6 +352,43 @@ namespace civita
     }
   };
 
+  /// spread the argument over the given hypercube. Entries in hypercube not in arg are NAN.
+  class SpreadOverHC: public ITensor
+  {
+    TensorPtr arg;
+    std::vector<std::vector<std::size_t>> permutations;
+  public:
+    /// set the destination hypercube prior to calling this
+    /// order of axes must mathc hypercube
+    void setArgument(const TensorPtr& a,const std::string& axis="",double ag=0) override;
+    double operator[](size_t i) const override;
+    Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
+  };
+
+  /// Combines tensors in such a way that if the first argument doesn't return a value, the second argument is checked and so on
+  class Meld: public ITensor
+  {
+    std::vector<TensorPtr> args;
+  public:
+
+    /// all arguments must have the same hypercube
+    void setArguments(const std::vector<TensorPtr>& a, const std::string& d="", double av=0) override;
+    Timestamp timestamp() const override;
+    double operator[](std::size_t) const override;
+  };
+
+  /// stacks tensors along an extra dimension
+  class Merge: public ITensor
+  {
+    std::vector<TensorPtr> args;
+  public:
+
+    /// all arguments must have the same hypercube
+    /// @param dimension - name of the new dimension
+    void setArguments(const std::vector<TensorPtr>& a, const std::string& dimension, double) override;
+    Timestamp timestamp() const override;
+    double operator[](size_t i) const override;
+  };
     
   /// creates a chain of tensor operations that represents a Ravel in
   /// state \a state, operating on \a arg
