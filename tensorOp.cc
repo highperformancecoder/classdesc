@@ -20,7 +20,6 @@
 #include "tensorOp.h"
 #include <exception>
 #include <set>
-#include <ecolab_epilogue.h>
 using namespace std;
 
 namespace civita
