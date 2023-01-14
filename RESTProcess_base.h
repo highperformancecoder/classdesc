@@ -702,12 +702,12 @@ namespace classdesc
   template <class F>
   typename enable_if<
     And<functional::AllArgs<F, functional::ArgAcceptable>,
-        Not<is_void<typename functional::Return<F>::T>>>,
+        is_reference<typename functional::Return<F>::T>>,
     json_pack_t>::T
   callFunction(const string& remainder, const json_pack_t& arguments, F f)
   {
-    functional::PackFunctor<JSONBuffer> argBuf(arguments);
-    typename functional::Return<F>::T r=argBuf.call(f);
+    JSONBuffer argBuf(arguments);
+    auto& r=functional::callOnBuffer(argBuf,f);
     if (remainder.empty())
       {
         // if there are arguments left over, assign the first of the
@@ -738,12 +738,27 @@ namespace classdesc
   template <class F>
   typename enable_if<
     And<functional::AllArgs<F, functional::ArgAcceptable>,
+        And<
+          Not<is_void<typename functional::Return<F>::T>>,
+        Not<is_reference<typename functional::Return<F>::T>>>>,
+    json_pack_t>::T
+  callFunction(const string& remainder, const json_pack_t& arguments, F f)
+  {
+    JSONBuffer argBuf(arguments);
+    json_pack_t r;
+    r<<functional::callOnBuffer(argBuf,f);
+    return r;
+  }
+  
+  template <class F>
+  typename enable_if<
+    And<functional::AllArgs<F, functional::ArgAcceptable>,
         is_void<typename functional::Return<F>::T>>,
     json_pack_t>::T
   callFunction(const string& remainder, const json_pack_t& arguments, F f)
   {
-    functional::PackFunctor<JSONBuffer> argBuf(arguments);
-    argBuf.call(f);
+    JSONBuffer argBuf(arguments);
+    functional::callOnBuffer(argBuf,f);
     return {};
   }
 
@@ -756,7 +771,6 @@ namespace classdesc
   
   /// @{
   /// return whether \a arg matches a C++ type T for a function call argument
-  //template <class T> bool matches(const json5_parser::mValue& arg);
   
   template <class T>
   typename enable_if<And<is_pointer<T>, Not<is_same<T,const char*> > >,bool>::T
