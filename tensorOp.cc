@@ -390,24 +390,6 @@ namespace civita
   }
 
   
-  namespace
-  {
-    /// factory method for creating reduction operations
-    TensorPtr createReductionOp(ravel::Op::ReductionOp op)
-    {
-      switch (op)
-        {
-        case ravel::Op::sum: return make_shared<Sum>();
-        case ravel::Op::prod: return make_shared<Product>();
-        case ravel::Op::av: return make_shared<civita::Average>();
-        case ravel::Op::stddev: return make_shared<civita::StdDeviation>();
-        case ravel::Op::min: return make_shared<Min>();
-        case ravel::Op::max: return make_shared<Max>();
-        default: throw runtime_error("Reduction "+to_string(op)+" not understood");
-        }
-    }
-  } 
-
   void PermuteAxis::setArgument(const TensorPtr& a,const std::string& axisName,double)
   {
     arg=a;
@@ -459,37 +441,37 @@ namespace civita
   }
 
 
-  void SortByValue::computeTensor() const 
-  {
-    assert(arg->rank()==1);
-    vector<size_t> idx; idx.reserve(arg->size());
-    vector<double> tmp;
-    for (size_t i=0; i<arg->size(); ++i)
-      {
-        idx.push_back(i);
-        tmp.push_back((*arg)[i]);
-      }
-    switch (order)
-      {
-      case ravel::HandleSort::forward:
-        sort(idx.begin(), idx.end(), [&](size_t i, size_t j){return tmp[i]<tmp[j];});
-        break;
-      case ravel::HandleSort::reverse:
-        sort(idx.begin(), idx.end(), [&](size_t i, size_t j){return tmp[i]>tmp[j];});
-        break;
-      default:
-        break;
-      }
-    // reorder labels
-    auto hc=arg->hypercube();
-    XVector xv(hc.xvectors[0]);
-    for (size_t i=0; i<idx.size(); ++i)
-      xv[i]=hc.xvectors[0][idx[i]];
-    hc.xvectors[0].swap(xv);
-    cachedResult.hypercube(move(hc));
-    for (size_t i=0; i<idx.size(); ++i)
-      cachedResult[i]=tmp[idx[i]];
-  }
+//  void SortByValue::computeTensor() const 
+//  {
+//    assert(arg->rank()==1);
+//    vector<size_t> idx; idx.reserve(arg->size());
+//    vector<double> tmp;
+//    for (size_t i=0; i<arg->size(); ++i)
+//      {
+//        idx.push_back(i);
+//        tmp.push_back((*arg)[i]);
+//      }
+//    switch (order)
+//      {
+//      case ravel::HandleSort::forward:
+//        sort(idx.begin(), idx.end(), [&](size_t i, size_t j){return tmp[i]<tmp[j];});
+//        break;
+//      case ravel::HandleSort::reverse:
+//        sort(idx.begin(), idx.end(), [&](size_t i, size_t j){return tmp[i]>tmp[j];});
+//        break;
+//      default:
+//        break;
+//      }
+//    // reorder labels
+//    auto hc=arg->hypercube();
+//    XVector xv(hc.xvectors[0]);
+//    for (size_t i=0; i<idx.size(); ++i)
+//      xv[i]=hc.xvectors[0][idx[i]];
+//    hc.xvectors[0].swap(xv);
+//    cachedResult.hypercube(move(hc));
+//    for (size_t i=0; i<idx.size(); ++i)
+//      cachedResult[i]=tmp[idx[i]];
+//  }
 
   void SpreadOverHC::setArgument(const TensorPtr& a,const std::string&,double) {
     if (a->rank()!=rank())
@@ -528,112 +510,6 @@ namespace civita
         }
       return arg->atHCIndex(arg->hypercube().linealIndex(splitIdx));
     }
-
-  
-  vector<TensorPtr> createRavelChain(const ravel::RavelState& state, const TensorPtr& input)
-  {
-    set<string> outputHandles(state.outputHandles.begin(), state.outputHandles.end());
-    vector<TensorPtr> chain{input};
-    // TODO sorts and calipers
-    for (auto& i: state.handleStates)
-      {
-        if (i.order!=ravel::HandleSort::none || i.displayFilterCaliper || !i.customOrder.empty())
-        {
-          //apply sorting/calipers
-          auto permuteAxis=make_shared<PermuteAxis>();
-          permuteAxis->setArgument(chain.back(), i.description);
-          auto& xv=chain.back()->hypercube().xvectors[permuteAxis->axis()];
-          vector<size_t> perm;
-          if (i.customOrder.empty())
-            {
-              for (size_t i=0; i<xv.size(); ++i)
-                perm.push_back(i);
-              switch (i.order)
-                {
-                case ravel::HandleSort::forward:
-                case ravel::HandleSort::numForward:
-                case ravel::HandleSort::timeForward:
-                  sort(perm.begin(), perm.end(),
-                       [&](size_t i, size_t j) {return diff(xv[i],xv[j])<0;});
-                  break;
-                case ravel::HandleSort::reverse:
-                case ravel::HandleSort::numReverse:
-                case ravel::HandleSort::timeReverse:
-                  sort(perm.begin(), perm.end(),
-                       [&](size_t i, size_t j) {return diff(xv[i],xv[j])>0;});
-                  break;
-                default:
-                  assert(i.order==ravel::HandleSort::none);
-                  break;
-                }
-            }
-          else
-            {
-              map<string, size_t> offsets;
-              for (size_t i=0; i<xv.size(); ++i)
-                offsets[str(xv[i], xv.dimension.units)]=i;
-              perm.clear();
-              for (auto& j: i.customOrder)
-                if (offsets.count(j))
-                  perm.push_back(offsets[j]);
-            }
-          
-          if (i.displayFilterCaliper)
-            {
-              // remove any permutation items outside calipers
-              if (!i.minLabel.empty())
-                for (auto j=perm.begin(); j!=perm.end(); ++j)
-                  if (str(xv[*j],xv.dimension.units) == i.minLabel)
-                    {
-                      perm.erase(perm.begin(), j);
-                      break;
-                    }
-              if (!i.maxLabel.empty())
-                for (auto j=perm.begin(); j!=perm.end(); ++j)
-                  if (str(xv[*j],xv.dimension.units) == i.maxLabel)
-                    {
-                      perm.erase(j+1, perm.end());
-                      break;
-                    }
-            }
-          permuteAxis->setPermutation(move(perm));
-          chain.push_back(permuteAxis);
-        }
-      if (!outputHandles.count(i.description))
-        {
-          auto arg=chain.back();
-          if (i.collapsed)
-            {
-              chain.emplace_back(createReductionOp(i.reductionOp));
-              chain.back()->setArgument(arg, i.description);
-            }
-          else
-            {
-              chain.emplace_back(new Slice);
-              auto& xv=arg->hypercube().xvectors;
-              auto axisIt=find_if(xv.begin(), xv.end(),
-                                  [&](const XVector& j){return j.name==i.description;});
-              if (axisIt==xv.end()) throw runtime_error("axis "+i.description+" not found");
-              auto sliceIt=find_if(axisIt->begin(), axisIt->end(),
-                                   [&](const civita::any& j){return str(j,axisIt->dimension.units)==i.sliceLabel;});
-              // determine slice index
-              size_t sliceIdx=0;
-              if (sliceIt!=axisIt->end())
-                sliceIdx=sliceIt-axisIt->begin();
-              chain.back()->setArgument(arg, i.description, sliceIdx);
-            }
-        }
-      }
-    
-    if (chain.back()->rank()>1)
-      {
-        auto finalPivot=make_shared<Pivot>();
-        finalPivot->setArgument(chain.back());
-        finalPivot->setOrientation(state.outputHandles);
-        chain.push_back(finalPivot);
-      }
-    return chain;
-  }
 
   namespace
   {

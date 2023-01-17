@@ -13,8 +13,7 @@ endif
 CPLUSPLUS=g++
 
 OBJS=hypercube.o index.o interpolateHypercube.o tensorOp.o xvector.o
-VPATH=. RavelCAPI
-FLAGS+=-I. -IRavelCAPI
+FLAGS+=-I.
 
 ifdef AEGIS
 FLAGS+=-Werror -Wall -Wno-unused-variable -Wno-unused-function
@@ -56,5 +55,4 @@ BASIC_CLEAN=rm -rf *.o *~ "\#*\#" core *.d *.cd *.xcd *.gcda *.gcno
 
 clean:
 	-$(BASIC_CLEAN) libcivita.a
-	cd RavelCAPI; $(MAKE) clean
 	cd test; $(MAKE) clean
