@@ -116,6 +116,8 @@ namespace classdesc
       if (tok.empty()) throw xml_pack_error("XML token expected");
       else return tok;
     }
+    // handle XML tags ('<' case)
+    std::string processOpenXMLTag(std::string&);
   };
 
   template <class Stream> 
@@ -196,6 +198,54 @@ namespace classdesc
   }
 
   template <class Stream> 
+  std::string XMLtoken<Stream>::processOpenXMLTag(std::string& tok)
+  {
+    char c=getNoEOF();
+    switch (c)
+      {
+      case '!': 
+        // look ahead for [CDATA[
+        {
+          std::string leadin;
+          for (int i=0; i<7; i++)
+            {
+              if (!get(c) || c=='>') break; // in case of EOF, or end of tag
+              leadin+=c;
+            }
+          if (leadin=="[CDATA[")
+            { // CDATA processing, add CDATA contents verbatim
+              leadin.clear();
+              while ((c=getNoEOF()))
+                {
+                  if (c==']')
+                    if (leadin=="]")
+                      leadin+=c;
+                    else
+                      leadin=c;
+                  else if (c=='>' && leadin=="]]")
+                    return tok;
+                  else
+                    {
+                      tok+=leadin+c;
+                      leadin.clear();
+                    }
+                }
+            }
+          else if (c!='>')
+            gobble_comment();
+          return "";
+        }
+      case '?': //we have a comment or XML declaration, which we ignore, except for CDATA
+        gobble_comment(); return "";
+      case '/': //we have begin end tag token
+        return  retval('/',tok);
+      default:
+        unget(c);
+        return retval('<',tok);
+      }
+  }
+
+  template <class Stream> 
   std::string XMLtoken<Stream>::token()
   {
     std::string tok;
@@ -227,51 +277,11 @@ namespace classdesc
               return tok;
             }
           case '<':
-            c=getNoEOF();
-            switch (c)
-              {
-              case '!': 
-                // look ahead for [CDATA[
-                {
-                  std::string leadin;
-                  for (int i=0; i<7; i++)
-                    {
-                      if (!get(c) || c=='>') break; // in case of EOF, or end of tag
-                      leadin+=c;
-                    }
-                  if (leadin=="[CDATA[")
-                    { // CDATA processing, add CDATA contents verbatim
-                      leadin.clear();
-                      while ((c=getNoEOF()))
-                        {
-                          if (c==']')
-                            if (leadin=="]")
-                              leadin+=c;
-                            else
-                              leadin=c;
-                          else if (c=='>' && leadin=="]]")
-                            return tok;
-                          else
-                            {
-                              tok+=leadin+c;
-                              leadin.clear();
-                            }
-                        }
-                    }
-                  else if (c!='>')
-                    gobble_comment();
-                  continue;
-                }
-              case '?': //we have a comment or XML declaration, which we ignore, except for CDATA
-                gobble_comment(); continue;
-              case '/': //we have begin end tag token
-                return  retval('/',tok);
-              default:
-                {
-                  unget(c);
-                  return retval('<',tok);
-                }
-              }
+            {
+              std::string r=processOpenXMLTag(tok);
+              if (r.empty()) continue;
+              return r;
+            }
           case '/':
             if ((c=getNoEOF())=='>') //we have end empty tag token
               return retval('\\',tok);
