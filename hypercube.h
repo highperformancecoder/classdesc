@@ -74,15 +74,15 @@ namespace civita
 
     /// return json representation of this hypercube
     std::string json() const;
+
+    /// construct a hypercube from a JSON representation
+    static Hypercube fromJson(const std::string&);
   };
 
   // returns a hypercube which merges the elements along each dimension. Extra dimensions in x are appended to the end.
   // @param intersection - whether to restrict the resulting hypercube to the intersection of value/time ranges
   // @throw if dimension types do not match
   void unionHypercube(Hypercube& result, const Hypercube& x, bool intersection=true);
-
-  /// construct a hypercube from a JSON representation
-  Hypercube fromJson(const std::string&);
 }
 
 #endif

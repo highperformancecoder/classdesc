@@ -149,7 +149,7 @@ namespace civita
     return classdesc::json(*this);
   }
 
-  Hypercube fromJson(const std::string& s)
+  Hypercube Hypercube::fromJson(const std::string& s)
   {
     Hypercube hc;
     classdesc::json(hc,s);
