@@ -745,9 +745,15 @@ namespace classdesc
   callFunction(const string& remainder, const json_pack_t& arguments, F f)
   {
     JSONBuffer argBuf(arguments);
-    json_pack_t r;
-    r<<functional::callOnBuffer(argBuf,f);
-    return r;
+    auto r=functional::callOnBuffer(argBuf,f);
+    if (remainder.empty())
+      {
+        json_pack_t rj;
+        return rj<<r;
+      }
+    RESTProcess_t map;
+    RESTProcess(map,"",r);
+    return map.process(remainder, arguments);
   }
   
   template <class F>
