@@ -111,9 +111,18 @@ namespace civita
         }
       return false;
     }
-
   };
 
 }
 
+#ifdef CLASSDESC
+#pragma omit json_unpack civita::xvector
+#include <json_pack_base.h>
+namespace classdesc
+{
+  inline void json_pack(json_pack_t& j, const std::string&, const civita::any& x)
+  {j<<civita::str(x);}
+  void json_unpack(json_unpack_t& j, const std::string&, civita::XVector& x);
+}
+#endif
 #endif

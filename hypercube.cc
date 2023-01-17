@@ -21,6 +21,11 @@
 #include <error.h>
 #include <set>
 
+#include "dimension.cd"
+#include "xvector.cd"
+#include "hypercube.cd"
+#include <classdesc_epilogue.h>
+
 using namespace std;
 
 namespace civita
@@ -137,6 +142,18 @@ namespace civita
       }
     for (auto& i: extraDims)
       result.xvectors.push_back(i);
+  }
+
+  string Hypercube::json() const
+  {
+    return classdesc::json(*this);
+  }
+
+  Hypercube fromJson(const std::string& s)
+  {
+    Hypercube hc;
+    classdesc::json(hc,s);
+    return hc;
   }
 }
 

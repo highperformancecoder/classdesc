@@ -22,6 +22,10 @@
 #include <set>
 using namespace std;
 
+#ifdef CLASSDESC
+#include <classdesc_epilogue.h>
+#endif
+
 namespace civita
 {
   void BinOp::setArguments(const TensorPtr& a1, const TensorPtr& a2,

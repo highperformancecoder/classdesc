@@ -18,6 +18,9 @@
 */
 
 #include "interpolateHypercube.h"
+#ifdef CLASSDESC
+#include <classdesc_epilogue.h>
+#endif
 
 namespace civita
 {

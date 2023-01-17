@@ -1,4 +1,4 @@
-.SUFFIXES: .d .h .cc .o
+.SUFFIXES: .d .h .cc .o .cd
 
 ifdef DEBUG
 OPT=-g
@@ -13,7 +13,11 @@ endif
 CPLUSPLUS=g++
 
 OBJS=hypercube.o index.o interpolateHypercube.o tensorOp.o xvector.o
-FLAGS+=-I.
+FLAGS+=-I. -I$(HOME)/usr/include -I/usr/local/include 
+
+ifeq ($(shell if which classdesc>&/dev/null; then echo 1; fi),1)
+FLAGS+=-DCLASSDESC
+endif
 
 ifdef AEGIS
 FLAGS+=-Werror -Wall -Wno-unused-variable -Wno-unused-function
@@ -31,6 +35,9 @@ libcivita.a: $(OBJS)
 
 .cc.o: 
 	$(CPLUSPLUS) -c $(FLAGS) $(OPT) -o $@ $<
+
+.h.cd:
+	classdesc -typeName -nodef -respect_private -i $< json_pack json_unpack >$@
 
 ifneq ($(MAKECMDGOALS),clean)
 include $(OBJS:.o=.d)

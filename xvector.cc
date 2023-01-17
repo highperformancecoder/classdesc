@@ -304,3 +304,20 @@ namespace civita
   }
 
 }
+
+#ifdef CLASSDESC
+#include "dimension.cd"
+#include "xvector.cd"
+#include <classdesc_epilogue.h>
+namespace classdesc
+{
+  void json_unpack(json_unpack_t& j, const std::string&, civita::XVector& x)
+  {
+    x.clear();
+    json_unpack(j,"",static_cast<civita::NamedDimension&>(x));
+    vector<string> slices;
+    j>>slices;
+    for (auto& i: slices) x.push_back(i);
+  }
+}
+#endif
