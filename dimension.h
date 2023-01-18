@@ -112,12 +112,28 @@ namespace civita
     Conversions& operator=(const ConversionsMap& x)
     {ConversionsMap::operator=(x); return *this;}
   };
+  
+  /// \a format - can be any format string suitable for a
+  /// boost::date_time time_facet. eg "%Y-%m-%d %H:%M:%S"
+  std::string str(const any&, const std::string& format="");
 }
 
 #ifdef CLASSDESC
 #pragma omit json_pack civita::any
 #pragma omit json_unpack civita::any
 #pragma omit RESTProcess civita::any
+#include <json_pack_base.h>
+namespace classdesc_access
+{
+  template <>
+  struct access_json_pack<civita::any>
+  {
+    inline void operator()(classdesc::json_pack_t& j, const std::string&, const civita::any& x)
+    {j<<civita::str(x);}
+  };
+  template <>
+  struct access_json_unpack<civita::any>: public classdesc::NullDescriptor<classdesc::json_pack_t> {};
+}
 #endif
 
 #endif

@@ -21,10 +21,12 @@
 #include <error.h>
 #include <set>
 
-#include "dimension.cd"
-#include "xvector.cd"
-#include "hypercube.cd"
+#ifdef CLASSDESC
+#include "dimension.jcd"
+#include "xvector.jcd"
+#include "hypercube.jcd"
 #include <classdesc_epilogue.h>
+#endif
 
 using namespace std;
 
@@ -146,13 +148,20 @@ namespace civita
 
   string Hypercube::json() const
   {
+#ifdef CLASSDESC
+    cout<<classdesc::json(*this)<<endl;
     return classdesc::json(*this);
+#else
+    return "";
+#endif
   }
 
   Hypercube Hypercube::fromJson(const std::string& s)
   {
     Hypercube hc;
+#ifdef CLASSDESC
     classdesc::json(hc,s);
+#endif
     return hc;
   }
 }

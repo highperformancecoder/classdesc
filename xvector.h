@@ -26,10 +26,6 @@
 
 namespace civita
 {
-  /// \a format - can be any format string suitable for a
-  /// boost::date_time time_facet. eg "%Y-%m-%d %H:%M:%S"
-  std::string str(const any&, const std::string& format="");
-
 
   /// convert string rep to an any rep
   ///two phase caching data independent computation for ptime conversion 
@@ -116,12 +112,12 @@ namespace civita
 }
 
 #ifdef CLASSDESC
+#pragma omit json_pack civita::xvector
 #pragma omit json_unpack civita::xvector
 #include <json_pack_base.h>
 namespace classdesc
 {
-  inline void json_pack(json_pack_t& j, const std::string&, const civita::any& x)
-  {j<<civita::str(x);}
+  void json_pack(json_unpack_t& j, const std::string&, civita::XVector& x);
   void json_unpack(json_unpack_t& j, const std::string&, civita::XVector& x);
 }
 #endif

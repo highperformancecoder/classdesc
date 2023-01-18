@@ -1,4 +1,4 @@
-.SUFFIXES: .d .h .cc .o .cd
+.SUFFIXES: .d .h .cc .o .jcd
 
 ifdef DEBUG
 OPT=-g
@@ -36,7 +36,7 @@ libcivita.a: $(OBJS)
 .cc.o: 
 	$(CPLUSPLUS) -c $(FLAGS) $(OPT) -o $@ $<
 
-.h.cd:
+.h.jcd:
 	classdesc -typeName -nodef -respect_private -i $< json_pack json_unpack >$@
 
 ifneq ($(MAKECMDGOALS),clean)
