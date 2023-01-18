@@ -149,7 +149,6 @@ namespace civita
   string Hypercube::json() const
   {
 #ifdef CLASSDESC
-    cout<<classdesc::json(*this)<<endl;
     return classdesc::json(*this);
 #else
     return "";
