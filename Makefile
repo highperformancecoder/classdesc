@@ -15,8 +15,14 @@ CPLUSPLUS=g++
 OBJS=hypercube.o index.o interpolateHypercube.o tensorOp.o xvector.o
 FLAGS+=-I. -I$(HOME)/usr/include -I/usr/local/include 
 
+ifndef CLASSDESC
 ifeq ($(shell if which classdesc>&/dev/null; then echo 1; fi),1)
-FLAGS+=-DCLASSDESC
+CLASSDESC=$(shell which classdesc)
+endif
+endif
+
+ifdef CLASSDESC
+FLAGS+=-DCLASSDESC -I$(dir $(dir,$(CLASSDESC)))/include
 endif
 
 ifdef AEGIS
@@ -37,7 +43,7 @@ libcivita.a: $(OBJS)
 	$(CPLUSPLUS) -c $(FLAGS) $(OPT) -o $@ $<
 
 .h.jcd:
-	classdesc -typeName -nodef -respect_private -i $< json_pack json_unpack >$@
+	$(CLASSDESC) -typeName -nodef -respect_private -i $< json_pack json_unpack >$@
 
 ifneq ($(MAKECMDGOALS),clean)
 include $(OBJS:.o=.d)
