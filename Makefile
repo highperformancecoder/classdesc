@@ -46,7 +46,7 @@ FLAGS+=-DCLASSDESC -I$(dir $(dir,$(CLASSDESC)))/include
 endif
 
 ifdef AEGIS
-FLAGS+=-Werror -Wall -Wno-unused-variable -Wno-unused-function
+FLAGS+=-Werror -Wall -Wno-unused-variable -Wno-unused-function -Wno-unknown-pragmas
 endif
 
 ifdef GCOV

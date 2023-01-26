@@ -115,6 +115,11 @@ namespace civita
           {
             if (intersection)
               {
+                if (xvectorData->second.empty())
+                  {
+                    result.xvectors.clear(); // intersection empty anyway
+                    return;
+                  }
                 // trim to intersection of the two
                 // TODO use structured binding when we go C++17.
                 auto xRange=std::minmax_element(xvector.begin(),xvector.end());
