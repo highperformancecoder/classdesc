@@ -311,7 +311,10 @@ namespace classdesc
   void json_pack(json_unpack_t& j, const std::string&, civita::XVector& x)
   {
     json_pack(j,"",static_cast<civita::NamedDimension&>(x));
-    json_pack(j,".slices",static_cast<vector<civita::any>>(x));
+    vector<string> sliceLabels;
+    for (auto& i: x)
+      sliceLabels.push_back(str(i, x.dimension.units));
+    json_pack(j,".slices",sliceLabels);
   }
   void json_unpack(json_unpack_t& j, const std::string&, civita::XVector& x)
   {
