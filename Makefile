@@ -42,7 +42,7 @@ endif
 endif
 
 ifdef CLASSDESC
-FLAGS+=-DCLASSDESC -I$(dir $(dir,$(CLASSDESC)))/include
+FLAGS+=-DCLASSDESC -I$(dir $(CLASSDESC))/../include
 endif
 
 ifdef AEGIS
