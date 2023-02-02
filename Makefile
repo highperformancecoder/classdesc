@@ -84,7 +84,7 @@ lcov:
 	lcov -a lcovi.info -a lcovt.info -o lcov.info
 	genhtml -o coverage lcov.info
 
-BASIC_CLEAN=rm -rf *.o *~ "\#*\#" core *.d *.cd *.xcd *.gcda *.gcno
+BASIC_CLEAN=rm -rf *.o *~ "\#*\#" core *.d *.cd *.jcd *.gcda *.gcno
 
 clean:
 	-$(BASIC_CLEAN) libcivita.a
