@@ -81,7 +81,7 @@ namespace classdesc
         objName << std::hex << cleanupContainer.back().get();
         std::string objNameStr=objName.str();
         std::vector<jchar> jname(objNameStr.begin(), objNameStr.end());
-        env->SetObjectField(obj,fld,env->NewString(&jname[0], jname.size()));
+        env->SetObjectField(obj,fld,env->NewString(jname.data(), jname.size()));
         // register the objects instance variables and methods with the
         // method registry
         register_java_class jc;

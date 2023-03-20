@@ -209,7 +209,7 @@ namespace classdesc
     static jstring from(JNIEnv *env, const char* x) 
     {
       std::vector<jchar> tmp(x, x+strlen(x));
-      return env->NewString(&tmp[0], strlen(x));
+      return env->NewString(tmp.data(), strlen(x));
     }
     static jstring from(JNIEnv *env, const std::string& x) 
     {
