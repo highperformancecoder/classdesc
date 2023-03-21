@@ -82,7 +82,7 @@ namespace classdesc
   {
     (*this) << uint64(x.size());
     if (!x.empty())
-      packer.packraw(reinterpret_cast<const char*>(&x[0]), 
+      packer.packraw(reinterpret_cast<const char*>(x.data()), 
                      x.size()*sizeof(x[0]));
     return *this;
   }
@@ -95,7 +95,7 @@ namespace classdesc
       throw pack_error("invalid size for data available");
     x.resize(sz);
     if (sz)
-      packer.unpackraw(reinterpret_cast<char*>(&x[0]), 
+      packer.unpackraw(reinterpret_cast<char*>(x.data()), 
                        x.size()*sizeof(x[0]));
     return *this;
   }
@@ -253,7 +253,7 @@ namespace classdesc_access
     void asg(string& x, const std::vector<cT>& b) 
     {
       if (!b.empty())
-        x=string(&b[0], b.size()-1);
+        x=string(b.data(), b.size()-1);
     }
 
     template <class U>
@@ -261,7 +261,7 @@ namespace classdesc_access
     {
       classdesc::uint64 size=0; targ>>size;
       std::vector<cT> buf(size+1); //ensure buf[0] exists
-      targ.unpackraw(&buf[0],sizeof(cT)*size);
+      targ.unpackraw(buf.data(),sizeof(cT)*size);
       asg(arg, buf);
     }
   };

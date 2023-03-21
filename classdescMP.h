@@ -186,7 +186,7 @@ namespace classdesc
     {
       int flag;
       for (size_t i=0; i<bufs.size(); i++) requests[i]=bufs[i].request;
-      MPI_Testall(bufs.size(),&requests[0],&flag,MPI_STATUSES_IGNORE);
+      MPI_Testall(bufs.size(),requests.data(),&flag,MPI_STATUSES_IGNORE);
       return flag;
     }
     /// return the index of any request that has completed, or MPI_UNDEFINED if none  
@@ -194,7 +194,7 @@ namespace classdesc
     {
       int flag,index;
       for (size_t i=0; i<bufs.size(); i++) requests[i]=bufs[i].request;
-      MPI_Testany(bufs.size(),&requests[0],&index,&flag,MPI_STATUS_IGNORE);
+      MPI_Testany(bufs.size(),requests.data(),&index,&flag,MPI_STATUS_IGNORE);
       return index;
     }
     /// return the index of the requests that have completed
@@ -203,21 +203,21 @@ namespace classdesc
       int count;
       std::vector<int> index(bufs.size());
       for (size_t i=0; i<bufs.size(); i++) requests[i]=bufs[i].request;
-      MPI_Testsome(bufs.size(),&requests[0],&count,&index[0],MPI_STATUSES_IGNORE);
+      MPI_Testsome(bufs.size(),requests.data(),&count,index.data(),MPI_STATUSES_IGNORE);
       return std::vector<int>(index.begin(),index.begin()+count);
     }
     /// wait for all outstanding requests to complete
     void waitall() 
     {
       for (size_t i=0; i<bufs.size(); i++) requests[i]=bufs[i].request;
-      MPI_Waitall(bufs.size(),&requests[0],MPI_STATUSES_IGNORE);
+      MPI_Waitall(bufs.size(),requests.data(),MPI_STATUSES_IGNORE);
     }
     /// wait for any outstanding request to complete, returning index of completed request
     int waitany()
     {
       int index;
       for (size_t i=0; i<bufs.size(); i++) requests[i]=bufs[i].request;
-      MPI_Waitany(bufs.size(),&requests[0],&index,MPI_STATUSES_IGNORE);
+      MPI_Waitany(bufs.size(),requests.data(),&index,MPI_STATUSES_IGNORE);
       return index;
     }
     /// wait for some outstanding requests to complete, returning an array of request indices
@@ -226,7 +226,7 @@ namespace classdesc
       int count;
       std::vector<int> index(bufs.size());
       for (size_t i=0; i<bufs.size(); i++) requests[i]=bufs[i].request;
-      MPI_Waitsome(bufs.size(),&requests[0],&count,&index[0],MPI_STATUS_IGNORE);
+      MPI_Waitsome(bufs.size(),requests.data(),&count,index.data(),MPI_STATUS_IGNORE);
       return std::vector<int>(index.begin(),index.begin()+count);
     }
   };
