@@ -161,6 +161,11 @@ namespace classdesc
   /// REST processor registry 
   struct RESTProcess_t: public std::multimap<std::string, std::unique_ptr<RESTProcessBase> >
   {
+    RESTProcess_t()=default;
+    /// populate this map with the members of \a obj. T must be a
+    /// classdescified type, otherwise this is equivalent to a default
+    /// contructor
+    template <class T> RESTProcess_t(T& obj);
     /// ownership of \a rp is passed
     void add(string d, RESTProcessBase* rp)
     {
@@ -284,7 +289,7 @@ namespace classdesc
       }
     return map.process(query,arguments);
   }
-  
+
   /// handle setting and getting of objects
   template <class T> struct RESTProcessObject: public RESTProcessBase
   {
@@ -448,6 +453,8 @@ namespace classdesc
         erase(obj, arguments);
       else if (startsWith(remainder,"/@size"))
         return r<<obj.size();
+      else
+        return RESTProcess_t(obj).process(remainder,arguments); // treat as an object, not container
       return r<<obj;
     }
     json_pack_t signature() const override;
@@ -556,7 +563,9 @@ namespace classdesc
     {
       json_pack_t r;
       if (remainder.empty())
-        convert(obj, arguments);
+        {
+          convert(obj, arguments);
+        }
       else if (startsWith(remainder,"/@elem"))
         {
           // extract key
@@ -586,20 +595,13 @@ namespace classdesc
                 throw std::runtime_error("key "+std::string(keyStart, keyEnd)+" not found");
               else if (tail.empty())
                 return r<<*i;
-              else
-                return mapAndProcess(tail, arguments, *i);
+              return mapAndProcess(tail, arguments, *i);
             }
         }
       else if (startsWith(remainder,"/@insert"))
-        {
-          RPAC_insert(obj,arguments);
-          return r;
-        }
+        RPAC_insert(obj,arguments);
       else if (startsWith(remainder,"/@erase"))
-        {
-          RPAC_erase(obj,arguments);
-          return r;
-        }
+        RPAC_erase(obj,arguments);
       else if (startsWith(remainder,"/@size"))
         return r<<obj.size();
       else if (startsWith(remainder,"/@keys"))
@@ -609,6 +611,8 @@ namespace classdesc
             keys.push_back(keyOf(i));
           return r<<keys;
         }
+      else
+        return RESTProcess_t(obj).process(remainder,arguments); // treat as an object, not container
       return r<<obj;
     }
     json_pack_t signature() const override;

@@ -150,6 +150,15 @@ namespace classdesc
       return {};
   }
 
+  template <class T> typename enable_if<And<is_class<T>, Not<is_container<T>>>,void>::T
+  populateFromObj(RESTProcess_t& r, T&obj)
+  {classdesc_access::access_RESTProcess<T>()(r,"",obj);}
+  
+  template <class T> typename enable_if<Or<Not<is_class<T>>, is_container<T>>,void>::T
+  populateFromObj(RESTProcess_t& r, T&obj)
+  {}
+  
+  template <class T> RESTProcess_t::RESTProcess_t(T&obj) {populateFromObj(*this,obj);}
 }
 
 namespace classdesc_access
