@@ -22,11 +22,16 @@ Root root;
 const int Foo::csi;
 int Foo::si;
 
+string toREST(string x)
+{
+  replace(x.begin(),x.end(),'.','/');
+  return '/'+x;
+}
 
 int main()
 {
   RESTProcess_t registry;
-  RESTProcess(registry,"/root",root);
+  RESTProcess(registry,"root",root);
 
   char* c;
   string cmd;
@@ -41,13 +46,14 @@ int main()
         cerr << cmd << "command doesn't starts with /"<<endl;
       else if (cmd=="/list")
         for (auto& i: registry)
-          cout << i.first << endl;
+          cout << toREST(i.first) << endl;
       else
         {
           // trim any trailing whitespace
           int i=cmd.length()-1;
           for (; i>=0 && isspace(cmd[i]); --i);
-          cmd=cmd.substr(0,i+1);
+          cmd=cmd.substr(1,i);
+          replace(cmd.begin(),cmd.end(),'/','.');
           try
             {
               json_pack_t jin(json5_parser::mValue::null);
@@ -55,7 +61,7 @@ int main()
               getline(cin,t);
               if (!t.empty())
                 read(t,jin);
-              cout << cmd <<"=>";
+              cout << toREST(cmd) <<"=>";
               write(registry.process(cmd, jin),cout,json5_parser::remove_trailing_zeros);
               cout << endl;
             }

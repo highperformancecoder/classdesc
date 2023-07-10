@@ -169,7 +169,6 @@ namespace classdesc
     /// ownership of \a rp is passed
     void add(string d, RESTProcessBase* rp)
     {
-      std::replace(d.begin(),d.end(),'.','/');
       // for objects, ensure any previous entries of this key are deleted
       erase(d);
       emplace(d,std::unique_ptr<RESTProcessBase>(rp));
@@ -177,27 +176,25 @@ namespace classdesc
     /// ownership of \a rp is passed
     void add(string d, RESTProcessFunctionBase* rp)
     {
-      std::replace(d.begin(),d.end(),'.','/');
       // for overloadable functions, allow multiple entries for this key
       emplace(d,std::unique_ptr<RESTProcessBase>(rp));
     }
 
     json_pack_t process(const std::string& query, const json_pack_t& jin)
     {
-      if (query[0]!='/') return {};
       string cmd=query;
 
-      if (cmd=="/@enum/@list")
+      if (cmd=="@enum.@list")
         {
           json5_parser::mArray r;
           for (auto& i: *this)
-            if (i.first.find("/@enum")==0)
-              r.push_back(i.first);
+            if (i.first.find("@enum")==0)
+              r.push_back(i.first.substr(6));
           return json5_parser::mValue(r);
         }
       
       for (auto cmdEnd=query.length(); ;
-           cmdEnd=cmd.rfind('/'), cmd=cmd.substr(0,cmdEnd))
+           cmdEnd=cmd.rfind('.'), cmd=cmd.substr(0,cmdEnd))
         {
           if (cmdEnd==string::npos)
             {
@@ -211,34 +208,34 @@ namespace classdesc
               if (cmdEnd)
                 continue; // try next split
               else
-                throw std::runtime_error("Command not found: "+query);
+                throw std::runtime_error("Command not found: "+query.substr(1));
             case 1: // simple object or non overloaded function
               {
                 auto r=find(cmd);
-                if (tail=="/@signature")
+                if (tail==".@signature")
                   return r->second->signature();
-                else if (tail=="/@list")
+                else if (tail==".@list")
                   return r->second->list();
-                else if (tail=="/@type")
+                else if (tail==".@type")
                   return r->second->type();
                 else if (cmdEnd || dynamic_cast<RESTProcessWrapperBase*>(r->second.get()))
                   return r->second->process(tail, jin);
                 else
-                  throw std::runtime_error("Command not found: "+query);
+                  throw std::runtime_error("Command not found: "+query.substr(1));
               }
             default:
               {
                 auto r=equal_range(cmd);
-                if (tail=="/@signature")
+                if (tail==".@signature")
                   {
                     json5_parser::mArray array;
                     for (; r.first!=r.second; ++r.first)
                       array.push_back(r.first->second->signature());
                     return json_pack_t(array);
                   }
-                else if (tail=="/@list")
+                else if (tail==".@list")
                   return json_pack_t(json5_parser::mArray());
-                else if (tail=="/@type")
+                else if (tail==".@type")
                   return json_pack_t("overloaded function");
                 else
                   {
@@ -433,13 +430,13 @@ namespace classdesc
       json_pack_t r;
       if (remainder.empty())
         convert(obj, arguments);
-      else if (startsWith(remainder,"/@elem"))
+      else if (startsWith(remainder,".@elem"))
         {
           // extract idx
-          auto idxStart=find(remainder.begin()+1, remainder.end(), '/');
+          auto idxStart=find(remainder.begin()+1, remainder.end(), '.');
           if (idxStart==remainder.end())
             throw std::runtime_error("no index");
-          auto idxEnd=find(idxStart+1, remainder.end(), '/');
+          auto idxEnd=find(idxStart+1, remainder.end(), '.');
           size_t idx=stoi(string(idxStart+1, idxEnd));
           if (idx>=obj.size())
             throw std::runtime_error("idx out of bounds");
@@ -447,11 +444,11 @@ namespace classdesc
           std::advance(i, idx);
           return mapAndProcess(string(idxEnd,remainder.end()), arguments, *i);
         }
-      else if (startsWith(remainder,"/@insert"))
+      else if (startsWith(remainder,".@insert"))
         insert(obj, arguments);
-      else if (startsWith(remainder,"/@erase"))
+      else if (startsWith(remainder,".@erase"))
         erase(obj, arguments);
-      else if (startsWith(remainder,"/@size"))
+      else if (startsWith(remainder,".@size"))
         return r<<obj.size();
       else
         return RESTProcess_t(obj).process(remainder,arguments); // treat as an object, not container
@@ -459,7 +456,7 @@ namespace classdesc
     }
     json_pack_t signature() const override;
     json_pack_t list() const override {
-      json5_parser::mArray array{"/@elem","/@insert","/@erase","/@size"};
+      json5_parser::mArray array{"@elem","@insert","@erase","@size"};
       return json_pack_t(array);
     }
     json_pack_t type() const override {return json_pack_t(typeName<T>());}
@@ -566,10 +563,10 @@ namespace classdesc
         {
           convert(obj, arguments);
         }
-      else if (startsWith(remainder,"/@elem"))
+      else if (startsWith(remainder,".@elem"))
         {
           // extract key
-          auto keyStart=find(remainder.begin()+1, remainder.end(), '/');
+          auto keyStart=find(remainder.begin()+1, remainder.end(), '.');
           if (keyStart!=remainder.end())
             {
               ++keyStart;
@@ -583,7 +580,7 @@ namespace classdesc
                 }
               else
                 {
-                  keyEnd=find(keyStart, remainder.end(), '/');
+                  keyEnd=find(keyStart, remainder.end(), '.');
                   assignRawStringToKey(key, std::string(keyStart, keyEnd));
                 }
 
@@ -598,13 +595,13 @@ namespace classdesc
               return mapAndProcess(tail, arguments, *i);
             }
         }
-      else if (startsWith(remainder,"/@insert"))
+      else if (startsWith(remainder,".@insert"))
         RPAC_insert(obj,arguments);
-      else if (startsWith(remainder,"/@erase"))
+      else if (startsWith(remainder,".@erase"))
         RPAC_erase(obj,arguments);
-      else if (startsWith(remainder,"/@size"))
+      else if (startsWith(remainder,".@size"))
         return r<<obj.size();
-      else if (startsWith(remainder,"/@keys"))
+      else if (startsWith(remainder,".@keys"))
         {
           std::vector<typename T::key_type> keys;
           for (auto& i: obj)
@@ -617,7 +614,7 @@ namespace classdesc
     }
     json_pack_t signature() const override;
     json_pack_t list() const override {
-      json5_parser::mArray array{"/@elem","/@insert","/@erase","/@size"};
+      json5_parser::mArray array{"@elem","@insert","@erase","@size"};
       return json_pack_t(array);
     }
     json_pack_t type() const override {return json_pack_t(typeName<T>());}
@@ -639,7 +636,7 @@ namespace classdesc
     json_pack_t signature() const override;
     json_pack_t list() const override {
       if (ptr)
-        return const_cast<RESTProcessPtr<T>*>(this)->process("/@list",{});
+        return const_cast<RESTProcessPtr<T>*>(this)->process(".@list",{});
       else
         return json_pack_t(json5_parser::mArray());
     }
@@ -1103,7 +1100,7 @@ namespace classdesc
   template <class E>
   typename enable_if<is_enum<E>, void>::T
   defineType(RESTProcess_t& r)
-  {r.add("/@enum/"+typeName<E>(), new EnumerateEnumerators<E>());}
+  {r.add("@enum."+typeName<E>(), new EnumerateEnumerators<E>());}
 
   template <class T>
   typename enable_if<Not<is_enum<T>>, void>::T
