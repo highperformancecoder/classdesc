@@ -6,6 +6,12 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
+#include "RESTProcessBuffers.h"
+namespace classdesc {
+  template <class B> struct RESTProcessRegistry;
+  using RESTProcess_t=RESTProcessRegistry<json_pack_t>;
+}
+  
 #include "RESTProcessExample.h"
 #include "classdesc_epilogue.h"
 #include "RESTProcess_epilogue.h"
