@@ -367,12 +367,25 @@ namespace classdesc
   template <class T> struct Not
   {static const bool value=!T::value;};
 
+#if defined(__cplusplus) && __cplusplus>=201103L
+  // variadic versions of the below conjunctions
+  template <class A, class... B> struct And
+  {static const bool value=A::value && And<B...>::value;};
+  
+  template <class A> struct And<A> {static const bool value=A::value;};
+  
+  template <class A, class... B> struct Or
+  {static const bool value=A::value || Or<B...>::value;};
+  
+  template <class A> struct Or<A> {static const bool value=A::value;};
+#else
   template <class A, class B> struct And
   {static const bool value=A::value && B::value;};
-  
+
   template <class A, class B> struct Or
   {static const bool value=A::value || B::value;};
-
+#endif
+  
   template <int X, int Y> struct Eq
   {static const bool value=X==Y;};
   ///@}
@@ -1037,6 +1050,13 @@ namespace classdesc
       if (!isalnum(r[i])) r[i]='_';
     return r;
   }
+
+  /// types for RESTProcess and other embedding applications
+  struct RESTProcessType
+  {
+    enum Type {boolean, int_number, float_number, string, array, object, null};
+  };
+
 }
 
 

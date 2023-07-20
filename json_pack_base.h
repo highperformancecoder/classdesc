@@ -43,31 +43,61 @@ namespace classdesc
       json_pack_error("json object %s not found", name.c_str()) {}
   };
 
+  static std::map<json5_parser::Value_type,RESTProcessType::Type> RESTProcessTypeJSONMap {
+    {json5_parser::obj_type, RESTProcessType::object},
+    {json5_parser::array_type, RESTProcessType::array},
+    {json5_parser::str_type, RESTProcessType::string},
+    {json5_parser::bool_type, RESTProcessType::boolean},
+    {json5_parser::int_type, RESTProcessType::int_number},
+    {json5_parser::real_type, RESTProcessType::float_number},
+    {json5_parser::null_type, RESTProcessType::null}
+  };
+  
   // these are classes, not typedefs to avoid adding properties to mValue
   class json_pack_t: public json5_parser::mValue
   {
   public:
     bool throw_on_error; ///< enable exceptions on error conditions
     bool throw_on_not_found; ///< enable exceptions if element not present in JSON stream
+
+    typedef json5_parser::mArray Array;
     json_pack_t(): json5_parser::mValue(json5_parser::mObject()), 
                    throw_on_error(false), throw_on_not_found(false)  {}
-    json_pack_t(const json5_parser::mValue& x): 
+    
+    template <class T>
+    explicit json_pack_t(const T& x,
+                         typename enable_if<is_base_of<json5_parser::mValue,T>, dummy<0>>::T* d=0 ): 
       json5_parser::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
 
-    template <class T,
-              typename enable_if<Not<is_base_of<json5_parser::mValue,T> >, void>::T>
-    json_pack_t(const T& x);
+    template <class T> 
+    explicit json_pack_t(const T& x, typename enable_if<Not<is_base_of<json5_parser::mValue,T> >, dummy<1>>::T* d=0);
 
-    json_pack_t(const char* x):
+    explicit json_pack_t(bool x):
+      json5_parser::mValue(x),
+      throw_on_error(false), throw_on_not_found(false) {}
+    explicit json_pack_t(double x):
       json5_parser::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
+    explicit json_pack_t(const char* x):
+      json5_parser::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
+    explicit json_pack_t(const string& x):
+      json5_parser::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
+//    explicit json_pack_t(const Array& x):
+//      json5_parser::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
+//    explicit json_pack_t(const json5_parser::mValue& x):
+//      json5_parser::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
 #if defined(__cplusplus) && __cplusplus>=201103L
     template <class T>
-    json_pack_t(const std::initializer_list<T>& x): json5_parser::mValue(json5_parser::mArray())
+    explicit json_pack_t(const std::initializer_list<T>& x): json5_parser::mValue(json5_parser::mArray())
     {
       auto& arr=get_array();
       for (auto& i: x) arr.emplace_back(i);
     }
 #endif
+
+    const Array& array() const {return get_array();}
+    RESTProcessType::Type type() const {
+      return RESTProcessTypeJSONMap.find(json5_parser::mValue::type())->second;
+    }
   };
 
   inline bool read(const std::string& s, json_pack_t& value)
@@ -119,8 +149,8 @@ namespace classdesc
   inline const json_unpack_t& operator>>(const json_unpack_t& j, const char*& a) 
   {throw json_pack_error("cannot unpack to char*, please use string instead");}
 
-  template <class T, typename enable_if<Not<is_base_of<json5_parser::mValue,T> >, void>::T>
-  json_pack_t::json_pack_t(const T& x):
+  template <class T>
+  json_pack_t::json_pack_t(const T& x, typename enable_if<Not<is_base_of<json5_parser::mValue,T> >,dummy<1> >::T*):
     throw_on_error(false), throw_on_not_found(false)
   {(*this)<<x;}
   
@@ -216,7 +246,7 @@ namespace classdesc
   {
     using namespace json5_parser;
     if (d=="")
-      o=valueof(a);
+      o=json_unpack_t(valueof(a));
     else
       {
         try
@@ -531,6 +561,12 @@ namespace classdesc
   void json_unpack_onbase(json_unpack_t& x,const string& d,T& a)
   {json_unpack(x,d+basename<T>(),a);}
 
+}
+
+std::ostream& operator<<(std::ostream& o, const json5_parser::mValue& x)
+{
+  json5_parser::write_stream(x,o);
+  return o;
 }
 
 namespace classdesc_access

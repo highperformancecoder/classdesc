@@ -62,7 +62,7 @@ namespace classdesc
   json_unpack_smart_ptr(json_unpack_t& x, const string& d, T& a,
                          dummy<0> dum=0)
   {
-    if (x.type()==json5_parser::obj_type && x.get_obj().count("type"))
+    if (x.type()==RESTProcessType::object && x.get_obj().count("type"))
       {
         typename T::element_type::Type type;
         ::json_unpack(x,d+".type",type);

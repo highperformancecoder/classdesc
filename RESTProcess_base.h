@@ -11,9 +11,13 @@
 /// A classdesc descriptor to generate virtual xrap processing calls
 #include "function.h"
 #include "multiArray.h"
-#include "json_pack_base.h"
+//#include "json_pack_base.h"
 #include <map>
 #include <stdexcept>
+
+#ifndef REST_PROCESS_BUFFER
+#define REST_PROCESS_BUFFER json_pack_t
+#endif
 
 namespace classdesc
 {
@@ -23,15 +27,15 @@ namespace classdesc
   public:
     virtual ~RESTProcessBase() {}
     /// perform the REST operation, with \a remainder being the query string and \a arguments as body text
-    virtual json_pack_t process(const string& remainder, const json_pack_t& arguments)=0;
+    virtual REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments)=0;
     /// return signature(s) of the operations
-    virtual json_pack_t signature() const=0;
+    virtual REST_PROCESS_BUFFER signature() const=0;
     /// return list of subcommands to this
-    virtual json_pack_t list() const=0;
+    virtual REST_PROCESS_BUFFER list() const=0;
     /// return type name of this
-    virtual json_pack_t type() const=0;
+    virtual REST_PROCESS_BUFFER type() const=0;
     /// return signature for a function type F
-    template <class F> json_pack_t functionSignature() const;
+    template <class F> REST_PROCESS_BUFFER functionSignature() const;
     /// returns a pointer to the underlying object if it is one of type T, otherwise null
     template <class T> T* getObject();
     /// true if this is an object, not a function
@@ -54,7 +58,7 @@ namespace classdesc
 
     virtual ~RESTProcessFunctionBase() {}
     /// returns how good the match is with arguments, less is best
-    virtual unsigned matchScore(const json_pack_t& arguments) const=0;
+    virtual unsigned matchScore(const REST_PROCESS_BUFFER& arguments) const=0;
   };
 
   inline void convert(char& y, const string& x)
@@ -85,75 +89,90 @@ namespace classdesc
   
   template <class X>
   typename enable_if<And<And<Not<is_sequence<X>>,Not<is_const<X>>>,Not<is_enum<X>>>, void>::T
-  convert(X& x, const json_pack_t& j)
+  convert(X& x, const REST_PROCESS_BUFFER& j)
   {
     switch (j.type())
       {
-      case json5_parser::obj_type:
+      case RESTProcessType::object:
         j>>x;
         break;
-      case json5_parser::array_type:
+      case RESTProcessType::array:
         {
-          auto& arr=j.get_array();
+          auto& arr=j.array();
           if (arr.size()>0)
-            arr[0]>>x;
+            REST_PROCESS_BUFFER(arr[0])>>x;
         }
         break;
-      case json5_parser::str_type:
-        convert(x,j.get_str());
+      case RESTProcessType::string:
+        {
+          string tmp;
+          j>>tmp;
+          convert(x,tmp);
+        }
         break;
-      case json5_parser::bool_type:
-        convert(x,j.get_bool());
+      case RESTProcessType::boolean:
+        {
+          bool tmp;
+          j>>tmp;
+          convert(x,tmp);
+        }
         break;
-      case json5_parser::int_type:
-        convert(x,j.get_int());
+      case RESTProcessType::int_number:
+        {
+          int64_t tmp;
+          j>>tmp;
+          convert(x,tmp);
+        }
         break;
-      case json5_parser::real_type:
-        convert(x,j.get_real());
-        break;
-      case json5_parser::null_type:
+      case RESTProcessType::float_number:
+        {
+          double tmp;
+          j>>tmp;
+          convert(x,tmp);
+        }
         break;
       }
   }
 
   template <class X>
   typename enable_if<And<is_sequence<X>,Not<is_const<X>>>, void>::T
-  convert(X& x, const json_pack_t& j)
+  convert(X& x, const REST_PROCESS_BUFFER& j)
   {
-    if (j.type()==json5_parser::array_type)
+    if (j.type()==RESTProcessType::array)
       {
-        auto& arr=j.get_array();
+        auto& arr=j.array();
         resize(x, arr.size());
         auto xi=x.begin();
         for (auto& ai: arr)
           {
             if (xi==x.end()) break;
-            ai >> *xi++;
+            REST_PROCESS_BUFFER(ai) >> *xi++;
           }
       }
   }
 
   template <class X>
-  void convert(std::shared_ptr<X>& x, const json_pack_t& j)
+  void convert(std::shared_ptr<X>& x, const REST_PROCESS_BUFFER& j)
   {
     if (x) convert(*x,j);
   }
 
   template <class X>
-  void convert(std::weak_ptr<X>& x, const json_pack_t& j)
+  void convert(std::weak_ptr<X>& x, const REST_PROCESS_BUFFER& j)
   {
     if (auto s=x.lock()) convert(*s,j);
   }
   
   template <class E>
   typename enable_if<is_enum<E>,void>::T
-  convert(E& x, const json_pack_t& j)
+  convert(E& x, const REST_PROCESS_BUFFER& j)
   {
-    x=enum_keys<E>()(j.get_str());
+    string tmp; j>>tmp;
+    x=enum_keys<E>()(tmp);
   }
   
   template <class X>
-  void convert(const X* x, const json_pack_t& j)
+  void convert(const X* x, const REST_PROCESS_BUFFER& j)
   {}
 
   template <class F, int N> struct DefineFunctionArgTypes;
@@ -179,91 +198,10 @@ namespace classdesc
       // for overloadable functions, allow multiple entries for this key
       emplace(d,std::unique_ptr<RESTProcessBase>(rp));
     }
+  
+    REST_PROCESS_BUFFER process(const std::string& query, const REST_PROCESS_BUFFER& jin);
 
-    json_pack_t process(const std::string& query, const json_pack_t& jin)
-    {
-      string cmd=query;
-
-      if (cmd=="@enum.@list")
-        {
-          json5_parser::mArray r;
-          for (auto& i: *this)
-            if (i.first.find("@enum")==0)
-              r.push_back(i.first.substr(6));
-          return json5_parser::mValue(r);
-        }
-      
-      for (auto cmdEnd=query.length(); ;
-           cmdEnd=cmd.rfind('.'), cmd=cmd.substr(0,cmdEnd))
-        {
-          if (cmdEnd==string::npos)
-            {
-              cmdEnd=0;
-              cmd="";
-            }
-          auto tail=query.substr(cmdEnd);
-          switch (count(cmd))
-            {
-            case 0:
-              if (cmdEnd)
-                continue; // try next split
-              else
-                throw std::runtime_error("Command not found: "+query.substr(1));
-            case 1: // simple object or non overloaded function
-              {
-                auto r=find(cmd);
-                if (tail==".@signature")
-                  return r->second->signature();
-                else if (tail==".@list")
-                  return r->second->list();
-                else if (tail==".@type")
-                  return r->second->type();
-                else if (cmdEnd || dynamic_cast<RESTProcessWrapperBase*>(r->second.get()))
-                  return r->second->process(tail, jin);
-                else
-                  throw std::runtime_error("Command not found: "+query.substr(1));
-              }
-            default:
-              {
-                auto r=equal_range(cmd);
-                if (tail==".@signature")
-                  {
-                    json5_parser::mArray array;
-                    for (; r.first!=r.second; ++r.first)
-                      array.push_back(r.first->second->signature());
-                    return json_pack_t(array);
-                  }
-                else if (tail==".@list")
-                  return json_pack_t(json5_parser::mArray());
-                else if (tail==".@type")
-                  return json_pack_t("overloaded function");
-                else
-                  {
-                    // sort function overloads by best match
-                    auto cmp=[&](RESTProcessFunctionBase*x, RESTProcessFunctionBase*y)
-                      {return x->matchScore(jin)<y->matchScore(jin);};
-                    std::set<RESTProcessFunctionBase*, decltype(cmp)> sortedOverloads{cmp};
-                    for (auto i=r.first; i!=r.second; ++i)
-                      if (auto j=dynamic_cast<RESTProcessFunctionBase*>(i->second.get()))
-                        sortedOverloads.insert(j);
-                    auto& bestOverload=*sortedOverloads.begin();
-                    if (bestOverload->matchScore(jin) >=
-                        RESTProcessFunctionBase::maxMatchScore)
-                      throw std::runtime_error("No suitable matching overload found");
-                    if (sortedOverloads.size()>1)
-                      { // ambiguous overload detection
-                        auto i=sortedOverloads.begin(); i++;
-                        if ((*i)->matchScore(jin)==bestOverload->matchScore(jin))
-                          throw std::runtime_error("Ambiguous resolution of overloaded function");
-                      }
-                    return bestOverload->process(tail, jin);
-                  }
-              }
-            }
-        }
-    }
-
-    /// define all arguments of \a F
+      /// define all arguments of \a F
     template <class F> void defineFunctionArgTypes()
     {
       DefineFunctionArgTypes<F,functional::Arity<F>::value>::define(*this);
@@ -272,7 +210,7 @@ namespace classdesc
 
   
   template <class T>
-  inline json_pack_t mapAndProcess(const string& query, const json_pack_t& arguments, T& a)
+  inline REST_PROCESS_BUFFER mapAndProcess(const string& query, const REST_PROCESS_BUFFER& arguments, T& a)
   {
     RESTProcess_t map;
     RESTProcess(map,"",a);
@@ -292,28 +230,28 @@ namespace classdesc
   {
     T& obj;
     RESTProcessObject(T& obj): obj(obj) {}
-    json_pack_t process(const string& remainder, const json_pack_t& arguments) override
+    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
     {
-      json_pack_t r;
+      REST_PROCESS_BUFFER r;
       if (remainder.empty())
         {
-          if (!arguments.is_null())
+          if (!arguments.type()==RESTProcessType::null)
             convert(obj, arguments);
           return r<<obj;
         }
       return mapAndProcess(remainder, arguments, obj);
     }
-    json_pack_t signature() const override;
-    json_pack_t list() const override {
+    REST_PROCESS_BUFFER signature() const override;
+    REST_PROCESS_BUFFER list() const override {
       RESTProcess_t map;
       RESTProcess(map,"",obj);
       json5_parser::mArray array;
       for (auto& i:map)
         if (!i.first.empty())
           array.emplace_back(i.first);
-      return json_pack_t(array);
+      return REST_PROCESS_BUFFER(array);
     }
-    json_pack_t type() const override {return json_pack_t(typeName<T>());}
+    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
     bool isObject() const override {return true;}
     bool isConst() const override {return std::is_const<T>::value;}
   };
@@ -381,14 +319,14 @@ namespace classdesc
     
     template <class U>
     typename enable_if<Insertable<U>, void>::T
-    insert(U& o, const json_pack_t& j) {
+    insert(U& o, const REST_PROCESS_BUFFER& j) {
       typename U::value_type v;
       j>>v;
       o.push_back(v);
     }
 
     template <class U>
-    typename enable_if<Not<Insertable<U> >, void>::T insert(U&, const json_pack_t&)
+    typename enable_if<Not<Insertable<U> >, void>::T insert(U&, const REST_PROCESS_BUFFER&)
     {
       throw std::runtime_error("cannot insert into this sequence");
     }
@@ -405,7 +343,7 @@ namespace classdesc
     
     template <class U>
     typename enable_if<Erasable<U>,void>::T
-    erase(U& seq, const json_pack_t& j)
+    erase(U& seq, const REST_PROCESS_BUFFER& j)
     {
       size_t idx; j>>idx;
       if (idx<seq.size())
@@ -418,16 +356,16 @@ namespace classdesc
     
     template <class U>
     typename enable_if<Not<Erasable<U>>,void>::T
-    erase(U& seq, const json_pack_t& j)
+    erase(U& seq, const REST_PROCESS_BUFFER& j)
     {
       throw std::runtime_error("cannot erase from this sequence");
     }
     
   public:
     RESTProcessSequence(T& obj): obj(obj) {}
-    json_pack_t process(const string& remainder, const json_pack_t& arguments) override
+    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
     {
-      json_pack_t r;
+      REST_PROCESS_BUFFER r;
       if (remainder.empty())
         convert(obj, arguments);
       else if (startsWith(remainder,".@elem"))
@@ -454,12 +392,12 @@ namespace classdesc
         return RESTProcess_t(obj).process(remainder,arguments); // treat as an object, not container
       return r<<obj;
     }
-    json_pack_t signature() const override;
-    json_pack_t list() const override {
+    REST_PROCESS_BUFFER signature() const override;
+    REST_PROCESS_BUFFER list() const override {
       json5_parser::mArray array{"@elem","@insert","@erase","@size"};
-      return json_pack_t(array);
+      return REST_PROCESS_BUFFER(array);
     }
-    json_pack_t type() const override {return json_pack_t(typeName<T>());}
+    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
   };
 
   template <class T>
@@ -482,7 +420,7 @@ namespace classdesc
   
   /// insert element into an associative container
   template <class T> 
-  void RPAC_insert(T& obj, const json_pack_t& arguments)
+  void RPAC_insert(T& obj, const REST_PROCESS_BUFFER& arguments)
   {
     typename MutableValueType<typename T::value_type>::type v;
     arguments>>v;
@@ -492,13 +430,13 @@ namespace classdesc
 
   /// insert element into map
   template <class T>
-  void RPAC_insert(const T&, const json_pack_t& argument)
+  void RPAC_insert(const T&, const REST_PROCESS_BUFFER& argument)
   {
     throw std::runtime_error("cannot insert data into a constant container");
   }
 
   template <class T> 
-  void RPAC_erase(T& obj, const json_pack_t& arguments)
+  void RPAC_erase(T& obj, const REST_PROCESS_BUFFER& arguments)
   {
     typename T::key_type k;
     arguments>>k;
@@ -507,7 +445,7 @@ namespace classdesc
 
   /// insert element into map
   template <class T>
-  void RPAC_erase(const T&, const json_pack_t& argument)
+  void RPAC_erase(const T&, const REST_PROCESS_BUFFER& argument)
   {
     throw std::runtime_error("cannot erase data from a constant container");
   }
@@ -538,27 +476,27 @@ namespace classdesc
 
     /// assign \a x if T is a map
     template <class K, class V, class C, class A>
-    void assignIfMap(std::map<K,V,C,A>& m, const K& k, const json_pack_t& x)
+    void assignIfMap(std::map<K,V,C,A>& m, const K& k, const REST_PROCESS_BUFFER& x)
     {
       V v;
       x>>v;
       m[k]=v;
     }
     template <class K, class V, class C, class A>
-    void assignIfMap(std::unordered_map<K,V,C,A>& m, const K& k, const json_pack_t& x)
+    void assignIfMap(std::unordered_map<K,V,C,A>& m, const K& k, const REST_PROCESS_BUFFER& x)
     {
       V v;
       x>>v;
       m[k]=v;
     }
-    template <class U, class K> void assignIfMap(U&,const K&,const json_pack_t&) {}
+    template <class U, class K> void assignIfMap(U&,const K&,const REST_PROCESS_BUFFER&) {}
 
     
   public:
     RESTProcessAssociativeContainer(T& obj): obj(obj) {}
-    json_pack_t process(const string& remainder, const json_pack_t& arguments) override
+    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
     {
-      json_pack_t r;
+      REST_PROCESS_BUFFER r;
       if (remainder.empty())
         {
           convert(obj, arguments);
@@ -585,7 +523,7 @@ namespace classdesc
                 }
 
               string tail(keyEnd,remainder.end());
-              if (tail.empty() && arguments.type()!=json5_parser::null_type)
+              if (tail.empty() && arguments.type()!=RESTProcessType::null)
                 assignIfMap(obj, key, arguments);
               auto i=obj.find(key);
               if (i==obj.end())
@@ -612,12 +550,12 @@ namespace classdesc
         return RESTProcess_t(obj).process(remainder,arguments); // treat as an object, not container
       return r<<obj;
     }
-    json_pack_t signature() const override;
-    json_pack_t list() const override {
-      json5_parser::mArray array{"@elem","@insert","@erase","@size"};
-      return json_pack_t(array);
+    REST_PROCESS_BUFFER signature() const override;
+    REST_PROCESS_BUFFER list() const override {
+      std::vector<string> array{"@elem","@insert","@erase","@size"};
+      return REST_PROCESS_BUFFER(array);
     }
-    json_pack_t type() const override {return json_pack_t(typeName<T>());}
+    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
   };
 
   template <class T>
@@ -632,15 +570,15 @@ namespace classdesc
   {
     T& ptr;
     RESTProcessPtr(T& ptr): ptr(ptr) {}
-    json_pack_t process(const string& remainder, const json_pack_t& arguments) override;
-    json_pack_t signature() const override;
-    json_pack_t list() const override {
+    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
+    REST_PROCESS_BUFFER signature() const override;
+    REST_PROCESS_BUFFER list() const override {
       if (ptr)
         return const_cast<RESTProcessPtr<T>*>(this)->process(".@list",{});
       else
-        return json_pack_t(json5_parser::mArray());
+        return REST_PROCESS_BUFFER(json5_parser::mArray());
     }
-    json_pack_t type() const override {return json_pack_t(typeName<T>());}
+    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
   };
 
   template <class T>
@@ -648,14 +586,14 @@ namespace classdesc
   {
     T& ptr;
     RESTProcessWeakPtr(T& ptr): ptr(ptr) {}
-    json_pack_t process(const string& remainder, const json_pack_t& arguments) override;
-    json_pack_t signature() const override;
-    json_pack_t list() const override {
+    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
+    REST_PROCESS_BUFFER signature() const override;
+    REST_PROCESS_BUFFER list() const override {
       if (auto p=ptr.lock())
         return RESTProcessObject<typename T::element_type>(*p).list();
-      else return json_pack_t(json5_parser::mArray());
+      else return REST_PROCESS_BUFFER(json5_parser::mArray());
     }
-    json_pack_t type() const override {return json5_parser::mValue(typeName<std::weak_ptr<T> >());}
+    REST_PROCESS_BUFFER type() const override {return json5_parser::mValue(typeName<std::weak_ptr<T> >());}
   };
 
   
@@ -668,16 +606,16 @@ namespace classdesc
   {RESTProcessPtr(const classdesc::weak_ptr<T>& x): RESTProcessWeakPtr<const classdesc::weak_ptr<T>>(x) {}};
   
   
-  // buffer adaptor for a vector of json_pack_t objects 
+  // buffer adaptor for a vector of REST_PROCESS_BUFFER objects 
   class JSONBuffer
   {
-    std::vector<json_pack_t> values;
-    std::vector<json_pack_t>::iterator it;
+    std::vector<REST_PROCESS_BUFFER> values;
+    std::vector<REST_PROCESS_BUFFER>::iterator it;
   public:
-    JSONBuffer(const json_pack_t& j) {
-      if (j.type()==json5_parser::array_type)
-        for (auto& i: j.get_array())
-          values.push_back(i);
+    JSONBuffer(const REST_PROCESS_BUFFER& j) {
+      if (j.type()==RESTProcessType::array)
+        for (auto& i: j.array())
+          values.push_back(REST_PROCESS_BUFFER(i));
       else
         values.push_back(j);
       it=values.begin();
@@ -704,8 +642,8 @@ namespace classdesc
   typename enable_if<
     And<functional::AllArgs<F, functional::ArgAcceptable>,
         is_reference<typename functional::Return<F>::T>>,
-    json_pack_t>::T
-  callFunction(const string& remainder, const json_pack_t& arguments, F f)
+    REST_PROCESS_BUFFER>::T
+  callFunction(const string& remainder, const REST_PROCESS_BUFFER& arguments, F f)
   {
     JSONBuffer argBuf(arguments);
     auto& r=functional::callOnBuffer(argBuf,f);
@@ -718,9 +656,9 @@ namespace classdesc
           case json5_parser::null_type: break;
           case json5_parser::array_type:
             {
-              auto& arr=arguments.get_array();
+              auto& arr=arguments.array();
               if (arr.size()>functional::Arity<F>::value)
-                convert(r,json_pack_t(arr[functional::Arity<F>::value]));
+                convert(r,REST_PROCESS_BUFFER(arr[functional::Arity<F>::value]));
               break;
             }
           default:
@@ -728,7 +666,7 @@ namespace classdesc
               convert(r,arguments);
             break;
           }
-        json_pack_t rj;
+        REST_PROCESS_BUFFER rj;
         return rj<<r;
       }
     RESTProcess_t map;
@@ -742,14 +680,14 @@ namespace classdesc
         And<
           Not<is_void<typename functional::Return<F>::T>>,
         Not<is_reference<typename functional::Return<F>::T>>>>,
-    json_pack_t>::T
-  callFunction(const string& remainder, const json_pack_t& arguments, F f)
+    REST_PROCESS_BUFFER>::T
+  callFunction(const string& remainder, const REST_PROCESS_BUFFER& arguments, F f)
   {
     JSONBuffer argBuf(arguments);
     auto r=functional::callOnBuffer(argBuf,f);
     if (remainder.empty())
       {
-        json_pack_t rj;
+        REST_PROCESS_BUFFER rj;
         return rj<<r;
       }
     RESTProcess_t map;
@@ -761,8 +699,8 @@ namespace classdesc
   typename enable_if<
     And<functional::AllArgs<F, functional::ArgAcceptable>,
         is_void<typename functional::Return<F>::T>>,
-    json_pack_t>::T
-  callFunction(const string& remainder, const json_pack_t& arguments, F f)
+    REST_PROCESS_BUFFER>::T
+  callFunction(const string& remainder, const REST_PROCESS_BUFFER& arguments, F f)
   {
     JSONBuffer argBuf(arguments);
     functional::callOnBuffer(argBuf,f);
@@ -772,43 +710,43 @@ namespace classdesc
   
   // don't do anything if we cannot create or copy an argument
   template <class F>
-  typename enable_if<Not<functional::AllArgs<F, functional::ArgAcceptable>>, json_pack_t>::T
-  callFunction(const string& remainder, const json_pack_t& arguments, F f)
+  typename enable_if<Not<functional::AllArgs<F, functional::ArgAcceptable>>, REST_PROCESS_BUFFER>::T
+  callFunction(const string& remainder, const REST_PROCESS_BUFFER& arguments, F f)
   {throw std::runtime_error("cannot call this function");}
   
   /// @{
   /// return whether \a arg matches a C++ type T for a function call argument
   
-  template <class T>
+  template <class T, class V>
   typename enable_if<And<is_pointer<T>, Not<is_same<T,const char*> > >,bool>::T
-  matches(const json5_parser::mValue& x)
+  matches(const V& x)
   {return false;}
 
-  template <class T>
+  template <class T, class V>
   typename enable_if<is_same<T,bool>,bool>::T
-  matches(const json5_parser::mValue& x)
-  {return x.type()==json5_parser::bool_type;}
+  matches(const V& x)
+  {return x.type()==RESTProcessType::boolean;}
 
   template <class T>
-  typename enable_if<is_same<T,string>,bool>::T matches(const json5_parser::mValue& x)
-  {return x.type()==json5_parser::str_type;}
+  typename enable_if<is_same<T,string>,bool>::T matches(const REST_PROCESS_BUFFER& x)
+  {return x.type()==RESTProcessType::string;}
 
   template <class T>
   typename enable_if<is_same<T,const char*>, bool>::T
-  matches(const json5_parser::mValue& x)
-  {return x.type()==json5_parser::str_type;}
+  matches(const REST_PROCESS_BUFFER& x)
+  {return x.type()==RESTProcessType::string;}
 
   template <class T>
-  typename enable_if<And<is_integral<T>,Not<is_same<T,bool>>>, bool>::T matches(const json5_parser::mValue& x)
-  {return x.type()==json5_parser::int_type;}
+  typename enable_if<And<is_integral<T>,Not<is_same<T,bool>>>, bool>::T matches(const REST_PROCESS_BUFFER& x)
+  {return x.type()==RESTProcessType::int_number || x.type()==RESTProcessType::float_number;}
 
   template <class T>
-  typename enable_if<is_floating_point<T>, bool>::T matches(const json5_parser::mValue& x)
-  {return x.type()==json5_parser::real_type;}
+  typename enable_if<is_floating_point<T>, bool>::T matches(const REST_PROCESS_BUFFER& x)
+  {return x.type()==RESTProcessType::float_number;}
   
   template <class T>
-  typename enable_if<is_enum<T>, bool>::T matches(const json5_parser::mValue& x)
-  {return x.type()==json5_parser::str_type;}
+  typename enable_if<is_enum<T>, bool>::T matches(const REST_PROCESS_BUFFER& x)
+  {return x.type()==RESTProcessType::string;}
   
   template <class T>
   typename enable_if<
@@ -819,13 +757,13 @@ namespace classdesc
       >,
       Not<is_container<T>>
       >, bool>::T
-  matches(const json5_parser::mValue& x)
+  matches(const REST_PROCESS_BUFFER& x)
   {
-    if (x.type()!=json5_parser::obj_type) return false;
+    if (x.type()!=RESTProcessType::object) return false;
     try // to convert the json object to a T
       {
         T test;
-        x>>test;
+        REST_PROCESS_BUFFER(x)>>test;
       }
     catch(const std::exception&)
       {return false;}
@@ -833,13 +771,13 @@ namespace classdesc
   }
 
   template <class T>
-  typename enable_if<is_container<T>, bool>::T matches(const json5_parser::mValue& x)
+  typename enable_if<is_container<T>, bool>::T matches(const REST_PROCESS_BUFFER& x)
   {
-    if (x.type()==json5_parser::array_type)
+    if (x.type()==RESTProcessType::array)
       {
-        auto& arr=x.get_array();
+        auto& arr=x.array();
         bool r=true;
-        for (auto& i: arr) r &= matches<typename T::value_type>(i);
+        for (auto& i: arr) r &= matches<typename T::value_type>(REST_PROCESS_BUFFER(i));
         return r;
       }
     return matches<typename T::value_type>(x); // treat a single json object as a single element sequence
@@ -852,12 +790,12 @@ namespace classdesc
   
   template <class T>
   typename enable_if<is_abstract<T>, bool>::T
-  matches(const json5_parser::mValue&) {return false;}
+  matches(const REST_PROCESS_BUFFER&) {return false;}
 
   template <class T>
   typename enable_if<
     And<is_const<typename remove_reference<T>::type>, is_reference<T>>, bool>::T
-  matches(const json5_parser::mValue& x)
+  matches(const REST_PROCESS_BUFFER& x)
   {return matches<typename remove_const_ref<T>::type>(x);}
 
   template <class T>
@@ -866,7 +804,7 @@ namespace classdesc
     is_object<T>,
       Not<is_default_constructible<typename remove_reference<T>::type>>
       >, bool>::T
-  matches(const json5_parser::mValue& x)
+  matches(const REST_PROCESS_BUFFER& x)
   {return false;}
 
   template <class T>
@@ -878,25 +816,25 @@ namespace classdesc
 
   template <class T>
   typename enable_if<And<Not<is_reference<T>>,isNoMatch<typename remove_const<T>::type>>, bool>::T
-  matches(const json5_parser::mValue&) {return false;}
+  matches(const REST_PROCESS_BUFFER&) {return false;}
 
   template <class T>
   typename enable_if<And<is_reference<T>, Not<is_const<typename remove_reference<T>::type>>>, bool>::T
-  matches(const json5_parser::mValue&) {return false;}
+  matches(const REST_PROCESS_BUFFER&) {return false;}
 
   /// @{ testing for not quite so good matches between json type and C++ type
   //template <class T> bool partiallyMatchable(const json5_parser::mValue& x);
 
   template <class T>
-  typename enable_if<is_floating_point<typename remove_reference<T>::type>, bool>::T partiallyMatchable(const json5_parser::mValue& x)
-  {return x.type()==json5_parser::int_type||x.type()==json5_parser::real_type;}
+  typename enable_if<is_floating_point<typename remove_reference<T>::type>, bool>::T partiallyMatchable(const REST_PROCESS_BUFFER& x)
+  {return x.type()==RESTProcessType::float_number;}
 
   template <class T>
-  typename enable_if<is_container<T>, bool>::T partiallyMatchable(const json5_parser::mValue& x)
+  typename enable_if<is_container<T>, bool>::T partiallyMatchable(const REST_PROCESS_BUFFER& x)
   {
-    if (x.type()==json5_parser::array_type)
+    if (x.type()==RESTProcessType::array)
       {
-        auto& arr=x.get_array();
+        auto& arr=x.array();
         bool r;
         for (auto& i: arr) r &= partiallyMatchable<typename T::value_type>(i);
         return r;
@@ -906,11 +844,11 @@ namespace classdesc
 
   template <class T>
   typename enable_if<And<Not<is_floating_point<typename remove_reference<T>::type> >, Not<is_container<T> > >, bool>::T
-  partiallyMatchable(const json5_parser::mValue& x)
+  partiallyMatchable(const REST_PROCESS_BUFFER& x)
   {return matches<T>(x);}
 
 
-  template <class T> unsigned argMatchScore(const json5_parser::mValue& x)
+  template <class T> unsigned argMatchScore(const REST_PROCESS_BUFFER& x)
   {
     if (matches<T>(x)) return 0;
     if (partiallyMatchable<T>(x)) return 1;
@@ -921,12 +859,12 @@ namespace classdesc
   template <class F, int N, int NN=N>
   struct MatchScore
   {
-    static unsigned score(const json5_parser::mValue& x)
+    static unsigned score(const REST_PROCESS_BUFFER& x)
     {
-      if (x.type()!=json5_parser::array_type) return RESTProcessFunctionBase::maxMatchScore;
-      auto& arr=x.get_array();
+      if (x.type()!=RESTProcessType::array) return RESTProcessFunctionBase::maxMatchScore;
+      auto& arr=x.array();
       if (arr.size()<N) return RESTProcessFunctionBase::maxMatchScore;
-      return  argMatchScore<typename functional::Arg<F,N>::T>(arr[N-1]) +
+      return  argMatchScore<typename functional::Arg<F,N>::T>(REST_PROCESS_BUFFER(arr[N-1])) +
         MatchScore<F,N-1,NN>::score(x);
     }
   };
@@ -934,13 +872,13 @@ namespace classdesc
   template <class F, int NN>
   struct MatchScore<F,2,NN>
   {
-    static unsigned score(const json5_parser::mValue& x)
+    static unsigned score(const REST_PROCESS_BUFFER& x)
     {
-      if (x.type()!=json5_parser::array_type) return RESTProcessFunctionBase::maxMatchScore;
-      auto& arr=x.get_array();
+      if (x.type()!=RESTProcessType::array) return RESTProcessFunctionBase::maxMatchScore;
+      auto& arr=x.array();
       if (arr.size()<2) return RESTProcessFunctionBase::maxMatchScore;
-      return argMatchScore<typename functional::Arg<F,1>::T>(arr[0]) +
-        argMatchScore<typename functional::Arg<F,2>::T>(arr[1])+
+      return argMatchScore<typename functional::Arg<F,1>::T>(REST_PROCESS_BUFFER(arr[0])) +
+        argMatchScore<typename functional::Arg<F,2>::T>(REST_PROCESS_BUFFER(arr[1]))+
         10*(arr.size()-NN); // penalize for supplying more arguments than needed
     }
   };
@@ -948,17 +886,17 @@ namespace classdesc
   template <class F,int NN>
   struct MatchScore<F,1,NN>
   {
-    static unsigned score(const json5_parser::mValue& x)
+    static unsigned score(const REST_PROCESS_BUFFER& x)
     {
       switch (x.type())
         {
-        case json5_parser::null_type:
+        case RESTProcessType::null:
           return RESTProcessFunctionBase::maxMatchScore;
-        case json5_parser::array_type:
+        case RESTProcessType::array:
           {
-            auto& arr=x.get_array();
+            auto& arr=x.array();
             if (arr.empty()) return RESTProcessFunctionBase::maxMatchScore;
-            return argMatchScore<typename functional::Arg<F,1>::T>(arr[0])+
+            return argMatchScore<typename functional::Arg<F,1>::T>(REST_PROCESS_BUFFER(arr[0]))+
               10*(arr.size()-NN); // penalize for supplying more arguments than needed
           }
         default:
@@ -970,15 +908,15 @@ namespace classdesc
   template <class F,int NN>
   struct MatchScore<F,0,NN>
   {
-    static unsigned score(const json5_parser::mValue& x)
+    static unsigned score(const REST_PROCESS_BUFFER& x)
     {
       switch (x.type())
         {
-        case json5_parser::null_type:
+        case RESTProcessType::null:
           return 0;
-        case json5_parser::array_type:
+        case RESTProcessType::array:
           {
-            auto& arr=x.get_array();
+            auto& arr=x.array();
             return 10*arr.size()-NN; // penalize for supplying more arguments than needed
           }
         default:
@@ -988,7 +926,7 @@ namespace classdesc
   };
   
   template <class F, int N=functional::Arity<F>::value>
-  unsigned matchScore(const json5_parser::mValue& x)
+  unsigned matchScore(const REST_PROCESS_BUFFER& x)
   {return MatchScore<F,N>::score(x);}
 
   // static and free functions are const
@@ -1007,14 +945,14 @@ namespace classdesc
     RESTProcessFunction(F f): f(f) {}
     
 
-    json_pack_t process(const string& remainder, const json_pack_t& arguments) override
+    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
     {return callFunction(remainder, arguments, f);}
     
-    json_pack_t signature() const override {return functionSignature<F>();}
-    unsigned matchScore(const json_pack_t& arguments) const override
+    REST_PROCESS_BUFFER signature() const override {return functionSignature<F>();}
+    unsigned matchScore(const REST_PROCESS_BUFFER& arguments) const override
     {return classdesc::matchScore<F>(arguments);}
-    json_pack_t list() const override {return json_pack_t(json5_parser::mArray());}
-    json_pack_t type() const override {return json_pack_t("function");}
+    REST_PROCESS_BUFFER list() const override {return REST_PROCESS_BUFFER(json5_parser::mArray());}
+    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER("function");}
     bool isObject() const override {return false;}
     bool isConst() const override {return FunctionalIsConst<F>::value;}
     unsigned arity() const override {return functional::Arity<F>::value;}
@@ -1026,15 +964,15 @@ namespace classdesc
     F f;
   public:
     RESTProcessFunction(F f): f(f) {}
-    json_pack_t process(const string& remainder, const json_pack_t& arguments) override
+    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
     {
       throw std::runtime_error("currently unable to call functions returning unique_ptr");
     }
-    json_pack_t signature() const override {return functionSignature<F>();}
-    unsigned matchScore(const json_pack_t& arguments) const override
+    REST_PROCESS_BUFFER signature() const override {return functionSignature<F>();}
+    unsigned matchScore(const REST_PROCESS_BUFFER& arguments) const override
     {return classdesc::matchScore<F>(arguments);}
-    json_pack_t list() const override {return json_pack_t(json5_parser::mArray());}
-    json_pack_t type() const override {return json5_parser::mValue(typeName<F>());}
+    REST_PROCESS_BUFFER list() const override {return REST_PROCESS_BUFFER(json5_parser::mArray());}
+    REST_PROCESS_BUFFER type() const override {return json5_parser::mValue(typeName<F>());}
   };
 
   template <class T, class F>
@@ -1064,36 +1002,32 @@ namespace classdesc
     E& e;
   public:
     RESTProcessEnum(E& e): e(e) {}
-    json_pack_t process(const string& remainder, const json_pack_t& arguments) override
+    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
     {
-      json_pack_t r;
+      REST_PROCESS_BUFFER r;
       if (remainder=="@type")
         return r<<typeName<E>();
       else if (remainder=="@signature")
         return signature();
-      else if (arguments.type()==json5_parser::str_type)
-        convert(e, enum_keys<E>()(arguments.get_str()));
+      else if (arguments.type()==RESTProcessType::string)
+        {
+          string tmp; arguments>>tmp;
+          convert(e, enum_keys<E>()(tmp));
+        }
       return r<<enum_keys<E>()(e);
     }
-    json_pack_t signature() const override;
-    json_pack_t list() const override {return json_pack_t(json5_parser::mArray());}
-    json_pack_t type() const override {return json_pack_t(typeName<E>());}
+    REST_PROCESS_BUFFER signature() const override;
+    REST_PROCESS_BUFFER list() const override {return REST_PROCESS_BUFFER(json5_parser::mArray());}
+    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<E>());}
   };
 
   template <class E>
   class EnumerateEnumerators: public RESTProcessBase
   {
-    json_pack_t process(const string& remainder, const json_pack_t& arguments) override
-    {
-      json5_parser::mArray r;
-      auto& enumerators=enum_keys<E>();
-      for (auto i=enumerators.sbegin(); i!=enumerators.send(); ++i)
-        r.push_back(*i);
-      return json5_parser::mValue(r);
-    }
-    json_pack_t signature() const override {return "{ret: \"vector<string>\", args: []}";}
-    json_pack_t list() const override {return json_pack_t(json5_parser::mArray());}
-    json_pack_t type() const override {return "function";}
+    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
+    REST_PROCESS_BUFFER signature() const override {return REST_PROCESS_BUFFER("{ret: \"vector<string>\", args: []}");}
+    REST_PROCESS_BUFFER list() const override {return REST_PROCESS_BUFFER(json5_parser::mArray());}
+    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER("function");}
   };
 
   /// @{ define type dependent information in repository

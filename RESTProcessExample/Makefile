@@ -1,10 +1,16 @@
 .SUFFIXES: .c .cc .o .d .h .cd
-OBJS=RESTProcessExample.o
+OBJS=RESTProcessExample.o SimpleBufferExample.o
 CFLAGS=-g -I.. -I. -I../json5_parser/json5_parser -I/usr/local/include -fPIC -DUSE_UNROLLED -pthread
 LIBS+=-L/usr/local/lib64 -lboost_thread -lpthread
 VPATH=..
+EXES=RESTProcess SimpleBuffer
 
-RESTProcess: $(OBJS)
+all: $(EXES)
+
+RESTProcess: RESTProcessExample.o
+	g++  $^ $(LIBS) -o $@
+
+SimpleBuffer: SimpleBufferExample.o
 	g++  $^ $(LIBS) -o $@
 
 .h.cd:
@@ -17,8 +23,8 @@ RESTProcess: $(OBJS)
 .cc.d: 
 	gcc $(CFLAGS) -w -MM -MG $< >$@
 
-include $(OBJS:.o=.d) $(EXES:=.d)
+include $(OBJS:.o=.d)
 
 clean: 
 	rm -f *.o  *~ "\#*\#" core *.exh *.exc *.d *.cd *,D 
-	rm -rf RESTProcessExample
+	rm -rf $(EXES)

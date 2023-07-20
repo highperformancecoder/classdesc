@@ -35,8 +35,8 @@ namespace classdesc
   };
 
   template <class T>
-  typename enable_if<is_base_of<PolyRESTProcessBase, T>, json_pack_t>::T
-  rProcess(T& a, const string& remainder, const json_pack_t& arguments)
+  typename enable_if<is_base_of<PolyRESTProcessBase, T>, REST_PROCESS_BUFFER>::T
+  rProcess(T& a, const string& remainder, const REST_PROCESS_BUFFER& arguments)
   {
     RESTProcess_t r;
     a.RESTProcess(r,"");
@@ -48,8 +48,8 @@ namespace classdesc
   }
 
   template <class T>
-  typename enable_if<Not<is_base_of<PolyRESTProcessBase, T>>, json_pack_t>::T
-  rProcess(T& a, const string& remainder, const json_pack_t& arguments)
+  typename enable_if<Not<is_base_of<PolyRESTProcessBase, T>>, REST_PROCESS_BUFFER>::T
+  rProcess(T& a, const string& remainder, const REST_PROCESS_BUFFER& arguments)
   {
     return RESTProcessObject<T>(a).process(remainder, arguments);
   }
