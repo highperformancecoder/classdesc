@@ -151,6 +151,7 @@ namespace classdesc
 
   template <class T>
   json_pack_t::json_pack_t(const T& x, typename enable_if<Not<is_base_of<json5_parser::mValue,T> >,dummy<1> >::T*):
+    json5_parser::mValue(json5_parser::mObject()),
     throw_on_error(false), throw_on_not_found(false)
   {(*this)<<x;}
   

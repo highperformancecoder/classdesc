@@ -104,6 +104,19 @@ namespace classdesc
       {{"std::string",{}},{"std::string",{"std::string"}}};
     return r<<signature;
   }
+
+  template <class T> 
+  REST_PROCESS_BUFFER RESTProcessObject<T>::list() const
+  {
+    RESTProcess_t map;
+    RESTProcess(map,"",obj);
+    REST_PROCESS_BUFFER::Array array;
+    for (auto& i:map)
+      if (!i.first.empty())
+        array.emplace_back(i.first);
+    return REST_PROCESS_BUFFER(array);
+  }
+
   
   template <class F, int N=functional::Arity<F>::value >
   struct Args: public std::vector<string>
@@ -146,7 +159,7 @@ namespace classdesc
     {
       auto& enumerators=enum_keys<E>();
       std::vector<string> tmp(enumerators.sbegin(), enumerators.send());
-      return {};//REST_PROCESS_BUFFER()<<tmp;
+      return REST_PROCESS_BUFFER(tmp);
     }
 
   

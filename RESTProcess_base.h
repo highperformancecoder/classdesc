@@ -235,22 +235,14 @@ namespace classdesc
       REST_PROCESS_BUFFER r;
       if (remainder.empty())
         {
-          if (!arguments.type()==RESTProcessType::null)
+          if (arguments.type()!=RESTProcessType::null)
             convert(obj, arguments);
           return r<<obj;
         }
       return mapAndProcess(remainder, arguments, obj);
     }
     REST_PROCESS_BUFFER signature() const override;
-    REST_PROCESS_BUFFER list() const override {
-      RESTProcess_t map;
-      RESTProcess(map,"",obj);
-      json5_parser::mArray array;
-      for (auto& i:map)
-        if (!i.first.empty())
-          array.emplace_back(i.first);
-      return REST_PROCESS_BUFFER(array);
-    }
+    REST_PROCESS_BUFFER list() const override;
     REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
     bool isObject() const override {return true;}
     bool isConst() const override {return std::is_const<T>::value;}
@@ -394,7 +386,7 @@ namespace classdesc
     }
     REST_PROCESS_BUFFER signature() const override;
     REST_PROCESS_BUFFER list() const override {
-      json5_parser::mArray array{"@elem","@insert","@erase","@size"};
+      std::vector<string> array{"@elem","@insert","@erase","@size"};
       return REST_PROCESS_BUFFER(array);
     }
     REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
@@ -738,7 +730,7 @@ namespace classdesc
 
   template <class T>
   typename enable_if<And<is_integral<T>,Not<is_same<T,bool>>>, bool>::T matches(const REST_PROCESS_BUFFER& x)
-  {return x.type()==RESTProcessType::int_number || x.type()==RESTProcessType::float_number;}
+  {return x.type()==RESTProcessType::int_number;}
 
   template <class T>
   typename enable_if<is_floating_point<T>, bool>::T matches(const REST_PROCESS_BUFFER& x)
@@ -827,7 +819,7 @@ namespace classdesc
 
   template <class T>
   typename enable_if<is_floating_point<typename remove_reference<T>::type>, bool>::T partiallyMatchable(const REST_PROCESS_BUFFER& x)
-  {return x.type()==RESTProcessType::float_number;}
+  {return x.type()==RESTProcessType::float_number||x.type()==RESTProcessType::int_number;}
 
   template <class T>
   typename enable_if<is_container<T>, bool>::T partiallyMatchable(const REST_PROCESS_BUFFER& x)
