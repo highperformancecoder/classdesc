@@ -83,7 +83,7 @@
 /root/bar/m/@type=>"std::map<int,int>"
 /root/bar/m/@list=>["@elem","@insert","@erase","@size"]
 /root/bar/m/@erase=>[{"first":0,"second":5},{"first":3,"second":5}]
-/root/bar/m/=>Exception: Command not found: 
+/root/bar/m/=>Exception: Command not found: .
 /root/bar/m/@keys=>[0,3]
 /root/bar/um/@insert=>[{"first":1,"second":3}]
 /root/bar/um=>[{"first":1,"second":3}]
@@ -94,12 +94,12 @@
 /root/bar/llex=>[["hello","hello"],["baa","baa","blacksheep"]]
 /root/bar/llex/@signature=>[{"args":[],"ret":"std::list<std::list<std::string>>"},{"args":["std::list<std::list<std::string>>"],"ret":"std::list<std::list<std::string>>"}]
 /root/bar/llex/@elem/1/@elem/1=>"baa"
-/root/bar/iex=>Exception: Command not found: iex
+/root/bar/iex=>Exception: Command not found: .iex
 /root/bar/sef=>"ea"
 /root/bar/sef=>"eb"
 /root/bar/sef=>"eb"
 /root/bar/vs0/@signature=>{"args":[],"ret":"std::string"}
-/root/bar/vs0/=>Exception: Command not found: 
+/root/bar/vs0/=>Exception: Command not found: .
 /root/bar/shello=>"hello"
 /root/bar/seqLength=>3
 /root/bar/name=>"Bar"
@@ -118,8 +118,8 @@
 /root/bar1/fooRef/b=>3
 /root/bar1/fooRef/b=>3
 /root/bar1/foo/b=>3
-/root/bar1/foo/=>Exception: Command not found: 
-/root/bar1/foo/=>Exception: Command not found: 
+/root/bar1/foo/=>Exception: Command not found: .
+/root/bar1/foo/=>Exception: Command not found: .
 /root/bar1/sfoop=>{}
 /root/bar1/recursiveType=>Exception: cannot unpack to char*, please use string instead
 /root/defaultless/foo=>0

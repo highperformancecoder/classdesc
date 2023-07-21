@@ -564,7 +564,7 @@ namespace classdesc
 
 }
 
-std::ostream& operator<<(std::ostream& o, const json5_parser::mValue& x)
+inline std::ostream& operator<<(std::ostream& o, const json5_parser::mValue& x)
 {
   json5_parser::write_stream(x,o);
   return o;

@@ -203,7 +203,7 @@ namespace classdesc
               if (cmdEnd)
                 continue; // try next split
               else
-                throw std::runtime_error("Command not found: "+query.substr(1));
+                throw std::runtime_error("Command not found: "+query);
             case 1: // simple object or non overloaded function
               {
                 auto r=find(cmd);
@@ -216,7 +216,7 @@ namespace classdesc
                 else if (cmdEnd || dynamic_cast<RESTProcessWrapperBase*>(r->second.get()))
                   return r->second->process(tail, jin);
                 else
-                  throw std::runtime_error("Command not found: "+query.substr(1));
+                  throw std::runtime_error("Command not found: "+query);
               }
             default:
               {
