@@ -69,8 +69,13 @@ namespace classdesc
                          typename enable_if<is_base_of<json5_parser::mValue,T>, dummy<0>>::T* d=0 ): 
       json5_parser::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
 
+    template <class T>
+    explicit json_pack_t(const T& x,
+                         typename enable_if<is_base_of<json5_parser::mArray,T>, dummy<0>>::T* d=0 ): 
+      json5_parser::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
+
     template <class T> 
-    explicit json_pack_t(const T& x, typename enable_if<Not<is_base_of<json5_parser::mValue,T> >, dummy<1>>::T* d=0);
+    explicit json_pack_t(const T& x, typename enable_if<And<Not<is_base_of<json5_parser::mValue,T> >,Not<is_base_of<json5_parser::mArray,T> > >, dummy<1>>::T* d=0);
 
     explicit json_pack_t(bool x):
       json5_parser::mValue(x),
@@ -150,7 +155,7 @@ namespace classdesc
   {throw json_pack_error("cannot unpack to char*, please use string instead");}
 
   template <class T>
-  json_pack_t::json_pack_t(const T& x, typename enable_if<Not<is_base_of<json5_parser::mValue,T> >,dummy<1> >::T*):
+  json_pack_t::json_pack_t(const T& x, typename enable_if<And<Not<is_base_of<json5_parser::mValue,T> >,Not<is_base_of<json5_parser::mArray,T> > >, dummy<1> >::T*):
     json5_parser::mValue(json5_parser::mObject()),
     throw_on_error(false), throw_on_not_found(false)
   {(*this)<<x;}

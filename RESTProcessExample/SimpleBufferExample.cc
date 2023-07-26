@@ -64,16 +64,7 @@ int main()
               if (!t.empty())
                 read(t,jin);
               cout << toREST(cmd) <<"=>";
-              SimpleBuffer args;
-              if (jin.type()==RESTProcessType::array)
-                {
-                  auto& arr=jin.array();
-                  std::deque<json_pack_t> tmp;
-                  for (auto& i: arr) tmp.push_back(json_pack_t(i));
-                  args=SimpleBuffer(tmp);
-                }
-              else
-                args=SimpleBuffer(std::deque<json_pack_t>({jin}));
+              SimpleBuffer args(jin);
               auto ret=boost::apply_visitor(ToJsonVisitor(), registry.process(cmd, args));
               write(ret,cout,json5_parser::remove_trailing_zeros);
               cout << endl;

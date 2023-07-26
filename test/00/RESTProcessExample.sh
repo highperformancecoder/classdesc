@@ -38,7 +38,7 @@ $here/RESTProcessExample/RESTProcess <$here/RESTProcessExample/RESTProcessExampl
 diff output.txt $here/RESTProcessExample/RESTProcessExpected.txt
 if test $? -ne 0; then fail; fi
 
-#$here/RESTProcessExample/SimpleBuffer <$here/RESTProcessExample/RESTProcessExample.txt &>output.txt
+$here/RESTProcessExample/SimpleBuffer <$here/RESTProcessExample/RESTProcessExample.txt &>output.txt
 
 diff output.txt $here/RESTProcessExample/RESTProcessExpected.txt
 if test $? -ne 0; then fail; fi

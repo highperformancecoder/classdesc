@@ -49,7 +49,7 @@ namespace classdesc
   {
     using Super=SuperVariant;
     using Array=std::deque<json_pack_t>;
-    SimpleBuffer() {}
+    SimpleBuffer(): Super(json_pack_t()) {}
     explicit SimpleBuffer(RESTProcessType::Type type) {
       switch (type)
         {
@@ -64,19 +64,39 @@ namespace classdesc
     explicit SimpleBuffer(bool x): Super(x) {}
     explicit SimpleBuffer(double x): Super(x) {}
     explicit SimpleBuffer(const string& x): Super(x) {}
-    explicit SimpleBuffer(const json_pack_t& x): Super(x) {}
+    explicit SimpleBuffer(const json_pack_t& x) {operator=(x);}
+    SimpleBuffer& operator=(const json_pack_t& x) {
+      switch (x.type())
+        {
+        case RESTProcessType::boolean:
+          Super::operator=(x.get_bool());
+          break;
+        case RESTProcessType::int_number:
+          Super::operator=(x.get_int());
+          break;
+        case RESTProcessType::float_number:
+          Super::operator=(x.get_real());
+          break;
+        case RESTProcessType::string:
+          Super::operator=(x.get_str());
+          break;
+        case RESTProcessType::array:
+          {
+            auto& arr=x.get_array();
+            std::deque<json_pack_t> v(arr.begin(),arr.end());
+            Super::operator=(v);
+          }
+          break;
+        default:
+          Super::operator=(x);
+        }
+      return *this;
+    }
     explicit SimpleBuffer(const std::deque<json_pack_t>& x): Super(x) {}
     template <class T> explicit SimpleBuffer(const T& x) {
       json_pack_t j;
       j<<x;
-      if (j.type()==RESTProcessType::array)
-        {
-          auto& arr=j.array();
-          std::deque<json_pack_t> v(arr.begin(),arr.end());
-          Super::operator=(v);
-        }
-      else
-        Super::operator=(j);
+      operator=(j);
     }
 
     template <class T>
@@ -91,51 +111,86 @@ namespace classdesc
     }
   };
 
-   SimpleBuffer& operator>>(const SimpleBuffer& b, bool& x)
-  {x=boost::get<bool>(b);}
+  const SimpleBuffer& operator>>(const SimpleBuffer& b, bool& x)
+  {x=boost::get<bool>(b); return b;}
 
   SimpleBuffer& operator<<(SimpleBuffer& b, const bool& x)
-  {b=x;}
+  {b=x; return b;}
+
+  const SimpleBuffer& operator>>(const SimpleBuffer& b, char& x)
+  {x=boost::get<string>(b)[0]; return b;}
+
+  SimpleBuffer& operator<<(SimpleBuffer& b, const char& x)
+  {b=string{x}; return b;}
 
   // numbers
   template <class T>
   typename enable_if<
     And<is_arithmetic<T>,Not<is_same<T,bool>>,Not<is_const<T>>>,
-    SimpleBuffer&>::T
+    const SimpleBuffer&>::T
   operator>>(const SimpleBuffer& b, T& x)
-  {x=boost::get<double>(b);}
+  {
+    switch (b.type())
+      {
+      case RESTProcessType::float_number:
+        x=boost::get<double>(b);
+        break;
+      case RESTProcessType::int_number:
+        x=boost::get<int>(b);
+        break;
+      case RESTProcessType::object:
+        boost::get<json_pack_t>(b)>>x;
+        break;
+      default:
+        throw std::runtime_error("Invalid variant type");
+      }
+    return b;
+  }
 
   template <class T>
   typename enable_if<
     And<is_arithmetic<T>,Not<is_same<T,bool>>>,
     SimpleBuffer&>::T
   operator<<(SimpleBuffer& b, const T& x)
-  {b=double(x);}
+  {b=double(x); return b;}
 
   // strings
   template <class T>
-  typename enable_if<And<is_string<T>,Not<is_const<T>>>, SimpleBuffer&>::T
+  typename enable_if<And<is_string<T>,Not<is_const<T>>>, const SimpleBuffer&>::T
   operator>>(const SimpleBuffer& b, T& x)
-  {x=boost::get<string>(b);}
+  {x=boost::get<string>(b); return b;}
 
   template <class T>
   typename enable_if<And<is_string<T>>, SimpleBuffer&>::T
   operator<<(SimpleBuffer& b, const T& x)
-  {b=string(x);}
+  {b=string(x); return b;}
+
+  // enums
+  template <class T>
+  typename enable_if<And<is_enum<T>,Not<is_const<T>>>, const SimpleBuffer&>::T
+  operator>>(const SimpleBuffer& b, T& x)
+  {auto tmp=boost::get<string>(b); x=enum_keys<T>()(tmp); return b;}
+
+  template <class T>
+  typename enable_if<And<is_enum<T>>, SimpleBuffer&>::T
+  operator<<(SimpleBuffer& b, const T& x)
+  {b=to_string(x); return b;}
 
   // sequences
   template <class T>
-  typename enable_if<And<is_sequence<T>,Not<is_const<T>>>, SimpleBuffer&>::T
+  typename enable_if<And<is_sequence<T>,Not<is_const<T>>>, const SimpleBuffer&>::T
   operator>>(const SimpleBuffer& b, T& x)
   {
-    auto& arr=b.array();
     resize(x,0);
+    if (b.type()!=RESTProcessType::array) return b;
+    auto& arr=b.array();
     for (auto& i: arr)
       {
         typename T::value_type e;
         i>>e;
         push_back(x,e);
       }
+    return b;
   }
 
   template <class T>
@@ -149,14 +204,20 @@ namespace classdesc
         tmp.back()<<i;
       }
     b=SimpleBuffer(tmp);
+    return b;
   }
 
   // const
   template <class T>
-  typename enable_if<is_const<T>, SimpleBuffer&>::T
+  typename enable_if<is_const<T>, const SimpleBuffer&>::T
   operator>>(const SimpleBuffer& b, T& x)
-  {}
+  {return b;}
 
+
+  const SimpleBuffer& operator>>(const SimpleBuffer& b, const char* x)
+  {
+    throw std::runtime_error("cannot unpack to char*, please use string instead");
+  }
   
   // everything else
   template <class T>
@@ -165,11 +226,13 @@ namespace classdesc
       Not<is_arithmetic<T>>,
       Not<is_string<T>>,
       Not<is_sequence<T>>,
+      Not<is_enum<T>>,
       Not<is_const<T>>
-      >, SimpleBuffer&>::T
+      >, const SimpleBuffer&>::T
   operator>>(const SimpleBuffer& b, T& x)
   {
     boost::get<json_pack_t>(b)>>x;
+    return b;
   }
 
   template <class T>
@@ -177,12 +240,14 @@ namespace classdesc
     And<
       Not<is_arithmetic<T>>,
       Not<is_string<T>>,
-      Not<is_sequence<T>>
+      Not<is_sequence<T>>,
+      Not<is_enum<T>>
       >, SimpleBuffer&>::T
   operator<<(SimpleBuffer& b, const T& x)
   {
     json_pack_t tmp; tmp<<x;
     b=tmp;
+    return b;
   }
 }
 \

@@ -187,7 +187,7 @@ namespace classdesc
           r<<enums;
           return r;
         }
-      
+
       for (auto cmdEnd=query.length(); ;
            cmdEnd=cmd.rfind('.'), cmd=cmd.substr(0,cmdEnd))
         {

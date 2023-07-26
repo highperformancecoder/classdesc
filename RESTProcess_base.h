@@ -235,8 +235,15 @@ namespace classdesc
       REST_PROCESS_BUFFER r;
       if (remainder.empty())
         {
-          if (arguments.type()!=RESTProcessType::null)
-            convert(obj, arguments);
+          switch (arguments.type())
+            {
+            case RESTProcessType::null: break;
+            case RESTProcessType::array:
+              if (arguments.array().empty()) break;
+            default:
+              convert(obj, arguments);
+              break;
+            }
           return r<<obj;
         }
       return mapAndProcess(remainder, arguments, obj);
@@ -359,7 +366,10 @@ namespace classdesc
     {
       REST_PROCESS_BUFFER r;
       if (remainder.empty())
-        convert(obj, arguments);
+          {
+            if (arguments.type()!=RESTProcessType::array || !arguments.array().empty())
+              convert(obj, arguments);
+          }
       else if (startsWith(remainder,".@elem"))
         {
           // extract idx
@@ -608,7 +618,7 @@ namespace classdesc
       if (j.type()==RESTProcessType::array)
         for (auto& i: j.array())
           values.push_back(REST_PROCESS_BUFFER(i));
-      else
+      else if (j.type()!=RESTProcessType::null)
         values.push_back(j);
       it=values.begin();
     }
@@ -1004,6 +1014,11 @@ namespace classdesc
       else if (arguments.type()==RESTProcessType::string)
         {
           string tmp; arguments>>tmp;
+          convert(e, enum_keys<E>()(tmp));
+        }
+      else if (arguments.type()==RESTProcessType::array && !arguments.array().empty())
+        {
+          string tmp; json_pack_t(arguments.array()[0])>>tmp;
           convert(e, enum_keys<E>()(tmp));
         }
       return r<<enum_keys<E>()(e);
