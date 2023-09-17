@@ -155,6 +155,7 @@ struct Root
   Defaultless defaultless{1};
   Bar bar;
   Bar1 bar1;
+  static Bar sbar;
   FooBar1& getFB1() {
     static FooBar1 m;
     return m;

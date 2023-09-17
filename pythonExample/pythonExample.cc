@@ -6,6 +6,8 @@ Root root;
 const int Foo::csi;
 int Foo::si=25;
 
+Bar Root::sbar;
+
 void registerRoot()
 {
   addPythonObject("root1",root);

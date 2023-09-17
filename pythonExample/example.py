@@ -157,4 +157,7 @@ assert example.Foo(2).b==2
 
 # check that virtual functions work correctly from polymorphic returns
 assert r.bar.foo().name()=="Bar"
+
+# test static member
+assert r.sbar.name()=="Bar"
 exit(0)

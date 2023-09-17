@@ -1048,6 +1048,13 @@ namespace classdesc
     p.addStaticMember<C>(d,m);
   }
   
+  template <class C, class T, class M>
+  typename enable_if<Not<is_function<M> >, void>::T
+  python_type(python_t& p, const string& d, M* m)
+  {
+    p.addStaticMember<C>(d,m);
+  }
+ 
   template <class T>
   void python(python_t& p, const string& d, is_constructor, T* a)
   {}
