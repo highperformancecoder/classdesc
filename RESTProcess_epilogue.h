@@ -173,7 +173,7 @@ namespace classdesc
       return {};
   }
 
-  REST_PROCESS_BUFFER RESTProcess_t::process(const std::string& query, const REST_PROCESS_BUFFER& jin)
+  inline REST_PROCESS_BUFFER RESTProcess_t::process(const std::string& query, const REST_PROCESS_BUFFER& jin)
     {
       string cmd=query;
 

@@ -66,7 +66,7 @@ namespace classdesc
   {}
   
   template <class T> void json_packp(json_pack_t& o, const string& d, const char* a)
-  {o=json5_parser::mValue(a);}
+  {o=json_pack_t(a);}
 }
 
 namespace classdesc_access

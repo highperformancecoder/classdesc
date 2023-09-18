@@ -131,6 +131,8 @@ namespace classdesc
           convert(x,tmp);
         }
         break;
+      case RESTProcessType::null:
+        break;
       }
   }
 
@@ -595,7 +597,7 @@ namespace classdesc
         return RESTProcessObject<typename T::element_type>(*p).list();
       else return REST_PROCESS_BUFFER(json5_parser::mArray());
     }
-    REST_PROCESS_BUFFER type() const override {return json5_parser::mValue(typeName<std::weak_ptr<T> >());}
+    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<std::weak_ptr<T> >());}
   };
 
   
@@ -655,8 +657,8 @@ namespace classdesc
         // remaining arguments to the result
         switch (arguments.type())
           {
-          case json5_parser::null_type: break;
-          case json5_parser::array_type:
+          case RESTProcessType::null: break;
+          case RESTProcessType::array:
             {
               auto& arr=arguments.array();
               if (arr.size()>functional::Arity<F>::value)
@@ -974,7 +976,7 @@ namespace classdesc
     unsigned matchScore(const REST_PROCESS_BUFFER& arguments) const override
     {return classdesc::matchScore<F>(arguments);}
     REST_PROCESS_BUFFER list() const override {return REST_PROCESS_BUFFER(json5_parser::mArray());}
-    REST_PROCESS_BUFFER type() const override {return json5_parser::mValue(typeName<F>());}
+    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<F>());}
   };
 
   template <class T, class F>
