@@ -54,6 +54,12 @@ namespace classdesc
       e.value(i.name,E(i.value));
     e.export_values();
   }
+
+  template <class T> struct PythonTypableMember: public And<
+    Not<PythonExcludeType<typename remove_pointer<typename remove_reference<T>::type>::type>>,
+    is_complete<T>
+    > {};
+
 }
 
 namespace classdesc_access

@@ -361,6 +361,20 @@ namespace classdesc
   template <class T> struct is_weak_ptr: public false_type {};
   template <class T> struct is_weak_ptr<weak_ptr<T> >: public true_type {};
   template <class T> struct is_weak_ptr<const weak_ptr<T> >: public true_type {};
+
+  /// @{ Determine if a type has been completely defined
+  // modified slightly from StackOverflow answer https://stackoverflow.com/questions/21119281/using-sfinae-to-check-if-the-type-is-complete-or-not
+  template <typename T>
+  struct is_complete_helper {
+    template <typename U>
+    static auto test(U*)  -> std::integral_constant<bool, sizeof(U) == sizeof(U)>;
+    static auto test(...) -> std::false_type;
+    using type = decltype(test((T*)0));
+  };
+
+  template <typename T>
+  struct is_complete : is_complete_helper<typename std::remove_pointer<typename std::remove_reference<T>::type>::type>::type {};
+  /// @}
   
   ///  boolean arithmetic on is_ structs 
   ///@{
@@ -494,6 +508,10 @@ namespace classdesc
   };
   template <class T, class EqualTo=T>
   struct has_equality_operator: public has_equality_operator_impl<T,EqualTo>::type {};
+
+  template <class T, class U>
+  struct has_equality_operator<std::pair<T,U>>:
+    public And<has_equality_operator<T>, has_equality_operator<U>> {};
 #endif
  
   /*

@@ -304,7 +304,7 @@ namespace classdesc
     typename enable_if<And<is_container<T>, has_equality_operator<typename T::value_type>>, bool>::T
     defaultEquality(const T& x, const T& y)
     { return &x==&y || x==y;}
-    
+   
     template <class T>
     typename enable_if<Not<has_equality_operator<T>>, bool>::T
     defaultEquality(const T& x, const T& y)
@@ -356,6 +356,11 @@ namespace boost {
 
 namespace classdesc
 {
+  template <class T>
+  struct PythonExcludeType: public false_type {};
+    
+  template <class T> struct PythonTypableMember;
+  
   template <class T>
   typename enable_if<Not<PythonBasicType<T>>, boost::python::return_internal_reference<>>::T
   return_policy() {return boost::python::return_internal_reference<>();}
@@ -612,9 +617,26 @@ namespace classdesc
         PyClass<T,copiable>::def(n,boost::python::raw_function(f));
         return *this;
       }
+
       template <class F>
-      typename enable_if<Not<pythonDetail::is_rawFunction<F>>, Class&>::T
+      typename enable_if<
+        And<
+          Not<pythonDetail::is_rawFunction<F>>,
+          functional::AllArgs<F, is_complete>,
+          is_copy_constructible<functional::Return<F>>
+          >, Class&>::T
       defFn(const char* n, F f) {PyClass<T,copiable>::def(n,f); return *this;}
+
+      template <class F>
+      typename enable_if<
+        And<
+          Not<pythonDetail::is_rawFunction<F>>,
+          Not<functional::AllArgs<F, is_complete>>,
+          Not<is_copy_constructible<functional::Return<F>>>
+          >, Class&>::T
+      defFn(const char* n, F f) {return *this;}
+
+      
 
       template <class R, class... Args>
       typename enable_if<is_reference<R>, Class&>::T
@@ -856,19 +878,46 @@ namespace classdesc
                        pythonDetail::ArrayMemRef<C,M>(m));
       pythonDetail::ArrayMemRef<C,M>::L::registerClass(*this);
     }
+
+
     template <class C, class M>
-    typename enable_if<is_member_function_pointer<M>,void>::T
+    typename enable_if<
+      And<is_member_function_pointer<M>,
+          functional::AllArgs<M,PythonTypableMember>,
+          Not<is_pointer<typename functional::Return<M>::T>>
+          >,void>::T
     addMember(const string& d, M m) {addMemberFunction<C>(d,m);}
+    
+//    template <class C, class M>
+//    typename enable_if<
+//      And<is_member_function_pointer<M>,
+//          Not<functional::AllArgs<M,PythonTypableMember>>,
+//          Not<is_pointer<typename functional::Return<M>::T>>
+//          >,void>::T
+//    addMember(const string& d, M m) {}
     
     template <class C, class M>
     typename enable_if<And<is_member_object_pointer<M>,
-                           Not<functional::is_nonmember_function_ptr<M> > >,void>::T
+                           PythonTypableMember<M>,
+                           Not<functional::is_nonmember_function_ptr<M> >
+                           >,void>::T
     addMember(const string& d, M m) {addMemberObject<C>(d,m);}
+
     
+    template <class C, class M>
+    typename enable_if<And<is_member_object_pointer<M>,
+                           Or<
+                             Not<PythonTypableMember<M>>,
+                             functional::is_nonmember_function_ptr<M>
+                           >>,void>::T
+    addMember(const string& d, M m) {}
+
+   
     template <class C, class M>
     typename enable_if<
       And<
         functional::is_nonmember_function_ptr<M>,
+        functional::AllArgs<M,PythonTypableMember>,
         Not<is_pointer<typename functional::Return<M>::T>>
         >,void>::T
     addMember(const string& d, M m) {
@@ -876,14 +925,14 @@ namespace classdesc
       if (!c.completed)
           c.defFn(tail(d).c_str(),m);
     }
-    
-    // ignore pointer returns
+
+    // ignore pointer returns, and unassignable arguments
     template <class C, class M>
     typename enable_if<
-      And<
-        functional::is_nonmember_function_ptr<M>,
-        is_pointer<typename functional::Return<M>::T>
-        >,void>::T
+      Or<
+        is_pointer<typename functional::Return<M>::T>,
+        Not<functional::AllArgs<M, PythonTypableMember>>
+        >, void>::T
     addMember(const string&, M) {}
 
     template <class C, class T>
@@ -1070,14 +1119,13 @@ namespace classdesc
   typename enable_if<is_abstract<T>, void>::T
   python_type(python_t&, const string&, is_constructor, M)
   { }
-  
- 
+
   template <class C, class B, class M>
   void python_type(python_t& p, const string& d, M m)
   {
     p.addMember<C>(d,m);
   }
-
+  
   template <class C, class T>
   void python_type(python_t& p, const string& d, Exclude<T> (C::*m))
   {
