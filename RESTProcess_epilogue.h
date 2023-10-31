@@ -75,7 +75,7 @@ namespace classdesc
     json_pack_t r;
     auto tn=typeName<T>();
     std::vector<Signature> signature{{tn,{}},{tn,{tn}}};
-    return r<<signature;
+    return REST_PROCESS_BUFFER(r<<signature);
   }
 
   template <class T> 
@@ -84,7 +84,7 @@ namespace classdesc
     REST_PROCESS_BUFFER r;
     auto tn=typeName<T>();
     std::vector<Signature> signature{{tn,{}},{tn,{tn}}};
-    return r<<signature;
+    return REST_PROCESS_BUFFER(r<<signature);
   }
 
   template <class T> 
@@ -93,7 +93,7 @@ namespace classdesc
     REST_PROCESS_BUFFER r;
     auto tn=typeName<T>();
     std::vector<Signature> signature{{tn,{}},{tn,{tn}}};
-    return r<<signature;
+    return REST_PROCESS_BUFFER(r<<signature);
   }
 
   template <class E> 
@@ -102,7 +102,7 @@ namespace classdesc
     REST_PROCESS_BUFFER r;
     std::vector<Signature> signature
       {{"std::string",{}},{"std::string",{"std::string"}}};
-    return r<<signature;
+    return REST_PROCESS_BUFFER(r<<signature);
   }
 
   template <class T> 
@@ -133,7 +133,7 @@ namespace classdesc
   REST_PROCESS_BUFFER RESTProcessBase::functionSignature() const
   {
     REST_PROCESS_BUFFER r;
-    return r<<Signature{typeName<typename functional::Return<F>::T>(), Args<F>()};
+    return REST_PROCESS_BUFFER(r<<Signature{typeName<typename functional::Return<F>::T>(), Args<F>()});
   }
 
   template <class T>

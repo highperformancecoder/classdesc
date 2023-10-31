@@ -98,7 +98,7 @@ namespace classdesc
         break;
       case RESTProcessType::array:
         {
-          auto& arr=j.array();
+          auto arr=j.array();
           if (arr.size()>0)
             REST_PROCESS_BUFFER(arr[0])>>x;
         }
@@ -142,7 +142,7 @@ namespace classdesc
   {
     if (j.type()==RESTProcessType::array)
       {
-        auto& arr=j.array();
+        auto arr=j.array();
         resize(x, arr.size());
         auto xi=x.begin();
         for (auto& ai: arr)
@@ -660,7 +660,7 @@ namespace classdesc
           case RESTProcessType::null: break;
           case RESTProcessType::array:
             {
-              auto& arr=arguments.array();
+              auto arr=arguments.array();
               if (arr.size()>functional::Arity<F>::value)
                 convert(r,REST_PROCESS_BUFFER(arr[functional::Arity<F>::value]));
               break;
@@ -779,7 +779,7 @@ namespace classdesc
   {
     if (x.type()==RESTProcessType::array)
       {
-        auto& arr=x.array();
+        auto arr=x.array();
         bool r=true;
         for (auto& i: arr) r &= matches<typename T::value_type>(REST_PROCESS_BUFFER(i));
         return r;
@@ -838,7 +838,7 @@ namespace classdesc
   {
     if (x.type()==RESTProcessType::array)
       {
-        auto& arr=x.array();
+        auto arr=x.array();
         bool r;
         for (auto& i: arr) r &= partiallyMatchable<typename T::value_type>(i);
         return r;
@@ -866,7 +866,7 @@ namespace classdesc
     static unsigned score(const REST_PROCESS_BUFFER& x)
     {
       if (x.type()!=RESTProcessType::array) return RESTProcessFunctionBase::maxMatchScore;
-      auto& arr=x.array();
+      auto arr=x.array();
       if (arr.size()<N) return RESTProcessFunctionBase::maxMatchScore;
       return  argMatchScore<typename functional::Arg<F,N>::T>(REST_PROCESS_BUFFER(arr[N-1])) +
         MatchScore<F,N-1,NN>::score(x);
@@ -879,7 +879,7 @@ namespace classdesc
     static unsigned score(const REST_PROCESS_BUFFER& x)
     {
       if (x.type()!=RESTProcessType::array) return RESTProcessFunctionBase::maxMatchScore;
-      auto& arr=x.array();
+      auto arr=x.array();
       if (arr.size()<2) return RESTProcessFunctionBase::maxMatchScore;
       return argMatchScore<typename functional::Arg<F,1>::T>(REST_PROCESS_BUFFER(arr[0])) +
         argMatchScore<typename functional::Arg<F,2>::T>(REST_PROCESS_BUFFER(arr[1]))+
@@ -898,7 +898,7 @@ namespace classdesc
           return RESTProcessFunctionBase::maxMatchScore;
         case RESTProcessType::array:
           {
-            auto& arr=x.array();
+            auto arr=x.array();
             if (arr.empty()) return RESTProcessFunctionBase::maxMatchScore;
             return argMatchScore<typename functional::Arg<F,1>::T>(REST_PROCESS_BUFFER(arr[0]))+
               10*(arr.size()-NN); // penalize for supplying more arguments than needed
@@ -920,7 +920,7 @@ namespace classdesc
           return 0;
         case RESTProcessType::array:
           {
-            auto& arr=x.array();
+            auto arr=x.array();
             return 10*arr.size()-NN; // penalize for supplying more arguments than needed
           }
         default:
@@ -955,7 +955,7 @@ namespace classdesc
     REST_PROCESS_BUFFER signature() const override {return functionSignature<F>();}
     unsigned matchScore(const REST_PROCESS_BUFFER& arguments) const override
     {return classdesc::matchScore<F>(arguments);}
-    REST_PROCESS_BUFFER list() const override {return REST_PROCESS_BUFFER(json5_parser::mArray());}
+    REST_PROCESS_BUFFER list() const override {return REST_PROCESS_BUFFER(RESTProcessType::array);}
     REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER("function");}
     bool isObject() const override {return false;}
     bool isConst() const override {return FunctionalIsConst<F>::value;}
