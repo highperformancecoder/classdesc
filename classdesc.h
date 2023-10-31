@@ -1057,6 +1057,23 @@ namespace classdesc
     enum Type {boolean, int_number, float_number, string, array, object, null};
   };
 
+  template <> inline std::string typeName<RESTProcessType::Type >()
+  {return "::classdesc::RESTProcessType::Type";}
+  namespace   {
+    template <> EnumKey enum_keysData<RESTProcessType::Type >::keysData[]=
+      {
+        {"boolean",int(RESTProcessType::boolean)},
+        {"int_number",int(RESTProcessType::int_number)},
+        {"float_number",int(RESTProcessType::float_number)},
+        {"string",int(RESTProcessType::string)},
+        {"array",int(RESTProcessType::array)},
+        {"object",int(RESTProcessType::object)},
+        {"null",int(RESTProcessType::null)}
+      };
+    template <> EnumKeys<RESTProcessType::Type > enum_keysData<RESTProcessType::Type >::keys(enum_keysData<RESTProcessType::Type >::keysData,sizeof(enum_keysData<RESTProcessType::Type >::keysData)/sizeof(enum_keysData<RESTProcessType::Type >::keysData[0]));
+    template <> int enumKey<RESTProcessType::Type >(const string& x){return int(enum_keysData<RESTProcessType::Type >::keys(x));}
+    template <> string enumKey<RESTProcessType::Type >(int x){return enum_keysData<RESTProcessType::Type >::keys(x);}
+  }
 }
 
 

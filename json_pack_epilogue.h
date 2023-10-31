@@ -132,7 +132,21 @@ namespace classdesc_access
     void operator()(cd::json_pack_t& b, const cd::string& d, cd::json_pack_t& a){a=b;}
     void operator()(cd::json_pack_t& b, const cd::string& d, const cd::json_pack_t& a){}
   };
- 
+
+  template <> struct access_json_pack<json5_parser::mValue>
+  {
+    template <class U>
+    void operator()(cd::json_pack_t& b, const cd::string& d, U& a)
+    {b=cd::json_pack_t(a);}
+  };
+  template <> struct access_json_unpack<json5_parser::mValue>
+  {
+    void operator()(cd::json_pack_t& b, const cd::string& d, json5_parser::mValue& a){a=b;}
+    void operator()(cd::json_pack_t& b, const cd::string& d, const json5_parser::mValue& a){}
+  };
+
+  
+  
   // support for polymorphic types, if loaded
 //#ifdef NEW_POLY_H
 //  template <class T> struct access_json_pack<cd::PolyBase<T> >: 
