@@ -15,7 +15,7 @@ TRAVIS=1
 endif
 
 ifdef TRAVIS
-FLAGS+=-Werror -Wall -Wno-unused-variable -std=c++98
+FLAGS+=-Werror -Wall -Wno-unused-variable -Wno-unused-function -std=c++98
 endif
 
 XDR=1

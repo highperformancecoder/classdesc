@@ -24,7 +24,7 @@ CFLAGS+=-fprofile-arcs -ftest-coverage
 endif
 
 ifdef AEGIS
-CFLAGS+=-Werror -Wall -Wno-unused-variable -Wno-unused-local-typedefs -std=c++98
+CFLAGS+=-Werror -Wall -Wno-unused-variable -Wno-unused-function -Wno-unused-local-typedefs -std=c++98
 endif
 
 

@@ -362,6 +362,7 @@ namespace classdesc
   template <class T> struct is_weak_ptr<weak_ptr<T> >: public true_type {};
   template <class T> struct is_weak_ptr<const weak_ptr<T> >: public true_type {};
 
+#if defined(__cplusplus) && __cplusplus>=201103L
   /// @{ Determine if a type has been completely defined
   // modified slightly from StackOverflow answer https://stackoverflow.com/questions/21119281/using-sfinae-to-check-if-the-type-is-complete-or-not
   template <typename T>
@@ -375,6 +376,7 @@ namespace classdesc
   template <typename T>
   struct is_complete : is_complete_helper<typename std::remove_pointer<typename std::remove_reference<T>::type>::type>::type {};
   /// @}
+#endif
   
   ///  boolean arithmetic on is_ structs 
   ///@{

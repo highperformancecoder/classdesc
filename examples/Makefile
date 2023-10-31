@@ -35,7 +35,7 @@ CFLAGS+=-DAEGIS_TEST
 endif
 
 ifdef AEGIS
-CFLAGS+=-Werror -Wall -Wno-unused-variable -std=c++98
+CFLAGS+=-Werror -Wall -Wno-unused-variable -Wno-unused-function -std=c++98
 endif
 
 CC=gcc

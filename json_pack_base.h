@@ -43,14 +43,20 @@ namespace classdesc
       json_pack_error("json object %s not found", name.c_str()) {}
   };
 
-  static std::map<json5_parser::Value_type,RESTProcessType::Type> RESTProcessTypeJSONMap {
-    {json5_parser::obj_type, RESTProcessType::object},
-    {json5_parser::array_type, RESTProcessType::array},
-    {json5_parser::str_type, RESTProcessType::string},
-    {json5_parser::bool_type, RESTProcessType::boolean},
-    {json5_parser::int_type, RESTProcessType::int_number},
-    {json5_parser::real_type, RESTProcessType::float_number},
-    {json5_parser::null_type, RESTProcessType::null}
+  const inline std::map<json5_parser::Value_type,RESTProcessType::Type>& RESTProcessTypeJSONMap()
+  {
+    static std::map<json5_parser::Value_type,RESTProcessType::Type> jsonMap;
+    if (jsonMap.empty())
+      {
+        jsonMap[json5_parser::obj_type]=RESTProcessType::object;
+        jsonMap[json5_parser::array_type]=RESTProcessType::array;
+        jsonMap[json5_parser::str_type]=RESTProcessType::string;
+        jsonMap[json5_parser::bool_type]=RESTProcessType::boolean;
+        jsonMap[json5_parser::int_type]=RESTProcessType::int_number;
+        jsonMap[json5_parser::real_type]=RESTProcessType::float_number;
+        jsonMap[json5_parser::null_type]=RESTProcessType::null;
+      }
+    return jsonMap;
   };
   
   // these are classes, not typedefs to avoid adding properties to mValue
@@ -66,16 +72,16 @@ namespace classdesc
     
     template <class T>
     explicit json_pack_t(const T& x,
-                         typename enable_if<is_base_of<json5_parser::mValue,T>, dummy<0>>::T* d=0 ): 
+                         typename enable_if<is_base_of<json5_parser::mValue,T>, dummy<0> >::T* d=0 ): 
       json5_parser::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
 
     template <class T>
     explicit json_pack_t(const T& x,
-                         typename enable_if<is_base_of<json5_parser::mArray,T>, dummy<0>>::T* d=0 ): 
+                         typename enable_if<is_base_of<json5_parser::mArray,T>, dummy<0> >::T* d=0 ): 
       json5_parser::mValue(x), throw_on_error(false), throw_on_not_found(false) {}
 
     template <class T> 
-    explicit json_pack_t(const T& x, typename enable_if<And<Not<is_base_of<json5_parser::mValue,T> >,Not<is_base_of<json5_parser::mArray,T> > >, dummy<1>>::T* d=0);
+    explicit json_pack_t(const T& x, typename enable_if<And<Not<is_base_of<json5_parser::mValue,T> >,Not<is_base_of<json5_parser::mArray,T> > >, dummy<1> >::T* d=0);
 
     explicit json_pack_t(bool x):
       json5_parser::mValue(x),
@@ -101,7 +107,7 @@ namespace classdesc
 
     const Array& array() const {return get_array();}
     RESTProcessType::Type type() const {
-      return RESTProcessTypeJSONMap.find(json5_parser::mValue::type())->second;
+      return RESTProcessTypeJSONMap().find(json5_parser::mValue::type())->second;
     }
   };
 
