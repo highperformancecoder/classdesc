@@ -134,8 +134,8 @@ namespace classdesc
     typedef T value_type;
     typedef size_t size_type;
     static const int rank=1;
-    MultiArray<T, 1>(T* data, size_t size): m_data(data), m_size(size) {}
-    MultiArray<T, 1>(T* data, const size_t size[]): m_data(data), m_size(size[0]) {}
+    MultiArray(T* data, size_t size): m_data(data), m_size(size) {}
+    MultiArray(T* data, const size_t size[]): m_data(data), m_size(size[0]) {}
     T& operator[](size_t i) {return m_data[i];}
     const T& operator[](size_t i) const {return m_data[i];}
     typedef T* iterator;
