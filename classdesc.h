@@ -237,19 +237,19 @@ namespace classdesc
       std::tr1::is_convertible<U,T>::value;
   };
  
-  // ensure at least strings work!
-  template <class C, class A> 
-  struct is_default_constructible<std::basic_string<C,A> >: 
-    public std::tr1::true_type {};
-  template <class C, class A> 
-  struct is_copy_constructible<std::basic_string<C,A> >: 
-    public std::tr1::true_type {};
-  template <class C, class A, class U> 
-  struct is_assignable<std::basic_string<C,A>, U>
-  {
-    static const bool value=
-      std::tr1::is_convertible<U,std::basic_string<C,A> >::value;
-  };
+//  // ensure at least strings work!
+//  template <class C, class A> 
+//  struct is_default_constructible<std::basic_string<C,A> >: 
+//    public std::tr1::true_type {};
+//  template <class C, class A> 
+//  struct is_copy_constructible<std::basic_string<C,A> >: 
+//    public std::tr1::true_type {};
+//  template <class C, class A, class U> 
+//  struct is_assignable<std::basic_string<C,A>, U>
+//  {
+//    static const bool value=
+//      std::tr1::is_convertible<U,std::basic_string<C,A> >::value;
+//  };
 }  
 
 #endif
