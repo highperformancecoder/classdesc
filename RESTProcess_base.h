@@ -11,7 +11,6 @@
 /// A classdesc descriptor to generate virtual xrap processing calls
 #include "function.h"
 #include "multiArray.h"
-//#include "json_pack_base.h"
 #include <map>
 #include <stdexcept>
 
@@ -74,12 +73,22 @@ namespace classdesc
   }
    
   template <class X, class Y>
-  typename enable_if<And<Or<is_assignable<Y,X>,is_convertible<X,Y>>,Not<is_const<Y>>>, void>::T
+  typename enable_if<And<is_assignable<Y,X>,Not<is_const<Y>>>, void>::T
   convert(Y& y, const X& x)
   {y=x;}
 
   template <class X, class Y>
-  typename enable_if<And<And<Not<Or<is_assignable<Y,X>,is_convertible<X,Y>>>,Not<is_const<Y>>>,Not<is_enum<Y>>>, void>::T
+  typename enable_if<And<Not<is_assignable<Y,X>>, is_convertible<X,Y>, std::is_move_assignable<Y>, Not<is_const<Y>>>, void>::T
+  convert(Y& y, const X& x)
+  {y=std::move(Y(x));}
+
+  template <class X, class Y>
+  typename enable_if<And<
+                       Not<is_assignable<Y,X>>,
+                       Not<And<is_convertible<X,Y>, std::is_move_assignable<Y>>>,
+                       Not<is_const<Y>>,
+                       Not<is_enum<Y>>
+                       >, void>::T
   convert(Y& y, const X& x)
   {throw std::runtime_error(typeName<X>()+" cannot be converted to "+typeName<Y>());}
 
@@ -88,7 +97,7 @@ namespace classdesc
   {throw std::runtime_error("attempt to alter a const variable");}
   
   template <class X>
-  typename enable_if<And<And<Not<is_sequence<X>>,Not<is_const<X>>>,Not<is_enum<X>>>, void>::T
+  typename enable_if<And<Not<is_sequence<X>>,Not<is_const<X>>,Not<is_enum<X>>>, void>::T
   convert(X& x, const REST_PROCESS_BUFFER& j)
   {
     switch (j.type())
