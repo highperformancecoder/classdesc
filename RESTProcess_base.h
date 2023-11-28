@@ -121,21 +121,21 @@ namespace classdesc
         break;
       case RESTProcessType::boolean:
         {
-          bool tmp;
+          bool tmp{};
           j>>tmp;
           convert(x,tmp);
         }
         break;
       case RESTProcessType::int_number:
         {
-          int64_t tmp;
+          int64_t tmp{};
           j>>tmp;
           convert(x,tmp);
         }
         break;
       case RESTProcessType::float_number:
         {
-          double tmp;
+          double tmp{};
           j>>tmp;
           convert(x,tmp);
         }
@@ -351,6 +351,11 @@ namespace classdesc
       Not<is_const<U>>> {};
 
     
+#if defined(__GNUC__) && !defined(__ICC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
+#endif
+
     template <class U>
     typename enable_if<Erasable<U>,void>::T
     erase(U& seq, const REST_PROCESS_BUFFER& j)
@@ -363,6 +368,9 @@ namespace classdesc
           seq.erase(i);
         }
     }
+#if defined(__GNUC__) && !defined(__ICC)
+#pragma GCC diagnostic pop
+#endif
     
     template <class U>
     typename enable_if<Not<Erasable<U>>,void>::T

@@ -507,7 +507,7 @@ namespace classdesc
             a.clear();
             for (size_t i=0; i<arr.size(); ++i)
               {
-                typename NonConstKeyValueType<typename T::value_type>::T v;
+                typename NonConstKeyValueType<typename T::value_type>::T v{};
                 json_unpack_t j(arr[i]);
                 json_unpack(j,"",v);
                 a.insert(v);
