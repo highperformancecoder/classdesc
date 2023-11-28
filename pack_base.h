@@ -70,7 +70,7 @@ namespace classdesc
 #if defined(__GNUC__) && !defined(__ICC)
 #pragma GCC diagnostic push
       // gcc is not clever enough to delve into xdr to know this is not uninitialised
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#pragma GCC diagnostic ignored "-Wuninitialized"
 #endif
       
 #ifdef XDR_PACK
