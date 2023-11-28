@@ -35,9 +35,9 @@ Factory<object, string> factory;
 
 struct xml_packunpack
 {
+  stringstream s;
   xml_pack_t pb;
   xml_unpack_t ub;
-  stringstream s;
   xml_packunpack(): pb(s) {}
   template <class T>
   xml_packunpack& operator<<(T& x)

@@ -10,6 +10,7 @@
 #define JSON_PACK_BASE_H
 #include "classdesc.h"
 #define JSON5_PARSER_MVALUE_ENABLED
+#define BOOST_BIND_GLOBAL_PLACEHOLDERS
 #include <json5_parser_value.h>
 #include <json5_parser_reader_template.h>
 #include <json5_parser_writer_template.h>

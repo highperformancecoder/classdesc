@@ -208,29 +208,21 @@ template <> struct access_json_pack< enum ::classdesc::RESTProcessType::Type > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::json_pack_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
 {
-using namespace ::classdesc;
-typedef  ::classdesc::RESTProcessType::Type Type;
 ::json_pack(targ,desc+"",(int&)arg);
 }
 template <class _CD_TYPE>
 void type(classdesc::json_pack_t& targ, const classdesc::string& desc)
 {
-using namespace ::classdesc;
-typedef  ::classdesc::RESTProcessType::Type Type;
 }
 };
 template <> struct access_json_pack< struct ::classdesc::RESTProcessType > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::json_pack_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
 {
-using namespace ::classdesc;
-typedef  ::classdesc::RESTProcessType::Type Type;
 }
 template <class _CD_TYPE>
 void type(classdesc::json_pack_t& targ, const classdesc::string& desc)
 {
-using namespace ::classdesc;
-typedef  ::classdesc::RESTProcessType::Type Type;
 }
 };
 
@@ -238,29 +230,21 @@ template <> struct access_json_unpack< enum ::classdesc::RESTProcessType::Type >
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::json_unpack_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
 {
-using namespace ::classdesc;
-typedef  ::classdesc::RESTProcessType::Type Type;
 ::json_unpack(targ,desc+"",(int&)arg);
 }
 template <class _CD_TYPE>
 void type(classdesc::json_unpack_t& targ, const classdesc::string& desc)
 {
-using namespace ::classdesc;
-typedef  ::classdesc::RESTProcessType::Type Type;
 }
 };
 template <> struct access_json_unpack< struct ::classdesc::RESTProcessType > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::json_unpack_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
 {
-using namespace ::classdesc;
-typedef  ::classdesc::RESTProcessType::Type Type;
 }
 template <class _CD_TYPE>
 void type(classdesc::json_unpack_t& targ, const classdesc::string& desc)
 {
-using namespace ::classdesc;
-typedef  ::classdesc::RESTProcessType::Type Type;
 }
 };
 

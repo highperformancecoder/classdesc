@@ -41,9 +41,9 @@ void testPtr()
 
 struct xml_packunpack
 {
+  std::stringstream s;
   xml_pack_t pb;
   xml_unpack_t ub;
-  std::stringstream s;
   xml_packunpack(): pb(s) {}
   template <class T>
   xml_packunpack& operator<<(T& x)

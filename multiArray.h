@@ -39,6 +39,8 @@ namespace classdesc
     {
       m_stride=1;
       (constructDim(d,args),...);
+      // fold expression multiplies m_stride by one too many dimensions
+      if (d>0) m_stride/=dim[d-1];
     }
 #else
 

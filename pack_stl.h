@@ -351,24 +351,26 @@ namespace classdesc_access
 
 #pragma omit pack binary_function
 #pragma omit unpack binary_function
+#pragma omit pack unary_function
+#pragma omit unpack unary_function
+
 #endif
 
+#if defined(__cplusplus) && __cplusplus<201103L
+// note - these types were deprecated in C++11 and removed in C++17.
 template <class A1, class A2, class R> 
 void pack(classdesc::pack_t& targ, const classdesc::string& desc, std::binary_function<A1,A2,R>& arg) {}
 
 template <class A1, class A2, class R> 
 void unpack(classdesc::pack_t& targ, const classdesc::string& desc, std::binary_function<A1,A2,R>& arg) {}
 
-#ifdef _CLASSDESC
-#pragma omit pack unary_function
-#pragma omit unpack unary_function
-#endif
 
 template <class A, class R> 
 void pack(classdesc::pack_t& targ, const classdesc::string& desc, std::unary_function<A,R>& arg) {}
 
 template <class A, class R> 
 void unpack(classdesc::pack_t& targ, const classdesc::string& desc, std::unary_function<A,R>& arg) {}
+#endif
 
 template <class C> typename
 classdesc::enable_if<classdesc::is_container<C> >::T

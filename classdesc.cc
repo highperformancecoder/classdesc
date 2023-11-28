@@ -780,7 +780,7 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="::", s
 	    }
           for (int i=0; i<dim; i++)
           { action += "[0]"; }
-	  if (!objc) {char s[10]; sprintf(s,",%d",dim); action+=s;}
+	  if (!objc) {char s[12]; sprintf(s,",%d",dim); action+=s;}
           action += action2;
 	  if (!objc) action.erase(action.size()-1,1); /* remove trailing "," */
           else  action+="\"";
