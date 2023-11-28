@@ -351,16 +351,11 @@ namespace classdesc
       Not<is_const<U>>> {};
 
     
-#if defined(__GNUC__) && !defined(__ICC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuninitialized"
-#endif
-
     template <class U>
     typename enable_if<Erasable<U>,void>::T
     erase(U& seq, const REST_PROCESS_BUFFER& j)
     {
-      size_t idx; j>>idx;
+      size_t idx{}; j>>idx;
       if (idx<seq.size())
         {
           auto i=seq.begin();
@@ -368,9 +363,6 @@ namespace classdesc
           seq.erase(i);
         }
     }
-#if defined(__GNUC__) && !defined(__ICC)
-#pragma GCC diagnostic pop
-#endif
     
     template <class U>
     typename enable_if<Not<Erasable<U>>,void>::T
