@@ -66,9 +66,19 @@ namespace classdesc
   {
     Basic_Type(const T& x){
       val=(void*)&x; size=sizeof(x);
+
+#if defined(__GNUC__) && !defined(__ICC)
+#pragma GCC diagnostic push
+      // gcc is not clever enough to delve into xdr to know this is not uninitialised
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+      
 #ifdef XDR_PACK
       filter=XDR_filter(x);
 #endif      
+#if defined(__GNUC__) && !defined(__ICC)
+#pragma GCC diagnostic pop
+#endif
     }
   };
 
@@ -221,7 +231,7 @@ namespace classdesc
     pack_t& operator=(pack_t&& x) {swap_base(x); return *this;}
 #endif
 
-    virtual operator bool() {return m_pos<m_size;}
+    operator bool() {return m_pos<m_size;}
     virtual pack_t& reseti() {m_size=0; if (f) fseek(f,0,SEEK_SET); return *this;}
     virtual pack_t& reseto() {m_pos=0; if (f) fseek(f,0,SEEK_SET); return *this;}
     virtual pack_t& seeki(long offs) {
