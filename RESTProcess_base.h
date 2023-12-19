@@ -390,7 +390,15 @@ namespace classdesc
           auto idxEnd=find(idxStart+1, remainder.end(), '.');
           size_t idx=stoi(string(idxStart+1, idxEnd));
           if (idx>=obj.size())
-            throw std::runtime_error("idx out of bounds");
+            {
+              if (startsWith(remainder,".@elemNoThrow"))
+                {
+                  static typename T::value_type dummy;
+                  return mapAndProcess(string(idxEnd,remainder.end()), arguments, dummy);
+                }
+              else
+                throw std::runtime_error("idx out of bounds");
+            }
           auto i=obj.begin();
           std::advance(i, idx);
           return mapAndProcess(string(idxEnd,remainder.end()), arguments, *i);
@@ -407,7 +415,7 @@ namespace classdesc
     }
     REST_PROCESS_BUFFER signature() const override;
     REST_PROCESS_BUFFER list() const override {
-      std::vector<string> array{"@elem","@insert","@erase","@size"};
+      std::vector<string> array{"@elem","@elemNoThrow","@insert","@erase","@size"};
       return REST_PROCESS_BUFFER(array);
     }
     REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
@@ -540,7 +548,15 @@ namespace classdesc
                 assignIfMap(obj, key, arguments);
               auto i=obj.find(key);
               if (i==obj.end())
-                throw std::runtime_error("key "+std::string(keyStart, keyEnd)+" not found");
+                {
+                  if (startsWith(remainder,".@elemNoThrow"))
+                    {
+                      static typename T::value_type dummy;
+                      return mapAndProcess(tail, arguments, dummy);
+                    }
+                  else
+                    throw std::runtime_error("key "+std::string(keyStart, keyEnd)+" not found");
+                }
               else if (tail.empty())
                 return r<<*i;
               return mapAndProcess(tail, arguments, *i);
@@ -565,7 +581,7 @@ namespace classdesc
     }
     REST_PROCESS_BUFFER signature() const override;
     REST_PROCESS_BUFFER list() const override {
-      std::vector<string> array{"@elem","@insert","@erase","@size"};
+      std::vector<string> array{"@elem","@elemNoThrow","@insert","@erase","@size"};
       return REST_PROCESS_BUFFER(array);
     }
     REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
