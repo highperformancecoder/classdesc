@@ -236,6 +236,21 @@ namespace classdesc
     return map.process(query,arguments);
   }
 
+  template <class T>
+  inline typename enable_if<is_default_constructible<T>,REST_PROCESS_BUFFER>::T
+  mapAndProcessDummy(const string& query, const REST_PROCESS_BUFFER& arguments)
+  {
+    T dummy{};
+    return mapAndProcess(query,arguments,dummy);
+  }
+
+  template <class T>
+  inline typename enable_if<Not<is_default_constructible<T>>,REST_PROCESS_BUFFER>::T
+  mapAndProcessDummy(const string& query, const REST_PROCESS_BUFFER& arguments)
+  {
+    throw std::runtime_error(typeName<T>()+" is not default constructible, but requested element doesn't exist");
+  }
+
   /// handle setting and getting of objects
   template <class T> struct RESTProcessObject: public RESTProcessBase
   {
@@ -392,10 +407,7 @@ namespace classdesc
           if (idx>=obj.size())
             {
               if (startsWith(remainder,".@elemNoThrow"))
-                {
-                  static typename T::value_type dummy;
-                  return mapAndProcess(string(idxEnd,remainder.end()), arguments, dummy);
-                }
+                return mapAndProcessDummy<typename T::value_type>(string(idxEnd,remainder.end()), arguments);
               else
                 throw std::runtime_error("idx out of bounds");
             }
@@ -550,10 +562,7 @@ namespace classdesc
               if (i==obj.end())
                 {
                   if (startsWith(remainder,".@elemNoThrow"))
-                    {
-                      static typename T::value_type dummy;
-                      return mapAndProcess(tail, arguments, dummy);
-                    }
+                    return mapAndProcessDummy<typename T::value_type>(tail, arguments);
                   else
                     throw std::runtime_error("key "+std::string(keyStart, keyEnd)+" not found");
                 }
