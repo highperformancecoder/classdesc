@@ -111,9 +111,9 @@ namespace classdesc
       {
         while (restart.size())
           {
-            T& arg=*restart.back(); //we need to pop_back() before packing
+            T& aa=*restart.back(); //we need to pop_back() before packing
             restart.pop_back();    //in case further restarts are needed
-            pack_graph(buf,arg);
+            pack_graph(buf,aa);
           }
         graph_map.clear();
       }
@@ -154,9 +154,9 @@ namespace classdesc
       {
         while (restart.size())
           {
-            T& arg=*restart.back(); //we need to pop_back() before packing
+            T& aa=*restart.back(); //we need to pop_back() before packing
             restart.pop_back();    //in case further restarts are needed
-            unpack_graph(buf,arg);
+            unpack_graph(buf,aa);
           }
         graph_map.clear();
       }
