@@ -427,7 +427,7 @@ namespace classdesc
     }
     REST_PROCESS_BUFFER signature() const override;
     REST_PROCESS_BUFFER list() const override {
-      std::vector<string> array{"@elem","@elemNoThrow","@insert","@erase","@size"};
+      std::vector<string> array{".@elem",".@elemNoThrow",".@insert",".@erase",".@size"};
       return REST_PROCESS_BUFFER(array);
     }
     REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
@@ -590,7 +590,7 @@ namespace classdesc
     }
     REST_PROCESS_BUFFER signature() const override;
     REST_PROCESS_BUFFER list() const override {
-      std::vector<string> array{"@elem","@elemNoThrow","@insert","@erase","@size"};
+      std::vector<string> array{".@elem",".@elemNoThrow",".@insert",".@erase",".@size"};
       return REST_PROCESS_BUFFER(array);
     }
     REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
@@ -1077,7 +1077,7 @@ namespace classdesc
   template <class E>
   typename enable_if<is_enum<E>, void>::T
   defineType(RESTProcess_t& r)
-  {r.add("@enum."+typeName<E>(), new EnumerateEnumerators<E>());}
+  {r.add(".@enum."+typeName<E>(), new EnumerateEnumerators<E>());}
 
   template <class T>
   typename enable_if<Not<is_enum<T>>, void>::T
