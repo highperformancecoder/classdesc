@@ -174,6 +174,10 @@ false
 
 /root/bar/m/@keys
 
+/root/bar/ss
+["hello","foo","bar"]
+/root/bar/ss
+
 /root/bar/um/@insert
 {"first":1,"second":3}
 /root/bar/um

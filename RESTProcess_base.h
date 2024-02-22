@@ -97,7 +97,13 @@ namespace classdesc
   {throw std::runtime_error("attempt to alter a const variable");}
   
   template <class X>
-  typename enable_if<And<Not<is_sequence<X>>,Not<is_const<X>>,Not<is_enum<X>>>, void>::T
+  typename enable_if<
+    And<
+      Not<is_sequence<X>>,
+      Not<is_associative_container<X>>,
+      Not<is_const<X>>,
+      Not<is_enum<X>>
+      >, void>::T
   convert(X& x, const REST_PROCESS_BUFFER& j)
   {
     switch (j.type())
@@ -158,6 +164,23 @@ namespace classdesc
           {
             if (xi==x.end()) break;
             REST_PROCESS_BUFFER(ai) >> *xi++;
+          }
+      }
+  }
+  
+  template <class X>
+  typename enable_if<And<is_associative_container<X>,Not<is_const<X>>>, void>::T
+  convert(X& x, const REST_PROCESS_BUFFER& j)
+  {
+    if (j.type()==RESTProcessType::array)
+      {
+        auto arr=j.array();
+        x.clear();
+        for (auto& ai: arr)
+          {
+            typename X::value_type v;
+            REST_PROCESS_BUFFER(ai) >> v;
+            x.insert(v);
           }
       }
   }

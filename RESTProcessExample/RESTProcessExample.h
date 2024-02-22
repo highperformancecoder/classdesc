@@ -40,6 +40,7 @@ struct Foo
   std::vector<int> h;
   std::list<int> l;
   std::map<int,int> m;
+  std::set<string> ss;
   std::unordered_map<int,int> um;
   std::list<std::list<std::string> > llex;
   Exclude<int> iex;
