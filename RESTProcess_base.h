@@ -172,16 +172,23 @@ namespace classdesc
   typename enable_if<And<is_associative_container<X>,Not<is_const<X>>>, void>::T
   convert(X& x, const REST_PROCESS_BUFFER& j)
   {
-    if (j.type()==RESTProcessType::array)
+    switch (j.type())
       {
-        auto arr=j.array();
-        x.clear();
-        for (auto& ai: arr)
-          {
-            typename X::value_type v;
-            REST_PROCESS_BUFFER(ai) >> v;
-            x.insert(v);
-          }
+      case RESTProcessType::array:
+        {
+          auto arr=j.array();
+          x.clear();
+          for (auto& ai: arr)
+            {
+              typename X::value_type v;
+              REST_PROCESS_BUFFER(ai) >> v;
+              x.insert(v);
+            }
+        }
+        break;
+      case RESTProcessType::object: // special case for StringKeys 
+        j>>x;
+        break;
       }
   }
 
@@ -288,7 +295,11 @@ namespace classdesc
             {
             case RESTProcessType::null: break;
             case RESTProcessType::array:
-              if (arguments.array().empty()) break;
+              {
+                auto& arr=arguments.array();
+                if (!arr.empty()) convert(obj, REST_PROCESS_BUFFER(arr[0]));
+                break;
+              }
             default:
               convert(obj, arguments);
               break;
@@ -1100,7 +1111,7 @@ namespace classdesc
   template <class E>
   typename enable_if<is_enum<E>, void>::T
   defineType(RESTProcess_t& r)
-  {r.add(".@enum."+typeName<E>(), new EnumerateEnumerators<E>());}
+  {r.add("@enum."+typeName<E>(), new EnumerateEnumerators<E>());}
 
   template <class T>
   typename enable_if<Not<is_enum<T>>, void>::T
