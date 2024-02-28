@@ -189,6 +189,7 @@ namespace classdesc
       case RESTProcessType::object: // special case for StringKeys 
         j>>x;
         break;
+      default: break;
       }
   }
 
