@@ -89,8 +89,10 @@ namespace classdesc
     template <class T> 
     explicit json_pack_t(const T& x, typename enable_if<
                          And<
+                         And<
                          Not<is_base_of<json5_parser::mValue,T> >,
-                         Not<is_base_of<json5_parser::mArray,T> >,
+                         Not<is_base_of<json5_parser::mArray,T> >
+                         >,
                          Not<is_base_of<json5_parser::mObject,T> >
                          >, dummy<1> >::T* d=0);
 
@@ -174,8 +176,10 @@ namespace classdesc
   template <class T>
   json_pack_t::json_pack_t(const T& x, typename enable_if<
                            And<
+                           And<
                            Not<is_base_of<json5_parser::mValue,T> >,
-                           Not<is_base_of<json5_parser::mArray,T> >,
+                           Not<is_base_of<json5_parser::mArray,T> >
+                           >,
                            Not<is_base_of<json5_parser::mObject,T> >
                            >, dummy<1> >::T*):
     json5_parser::mValue(json5_parser::mObject()),

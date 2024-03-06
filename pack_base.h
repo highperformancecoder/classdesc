@@ -71,6 +71,7 @@ namespace classdesc
 #pragma GCC diagnostic push
       // gcc is not clever enough to delve into xdr to know this is not uninitialised
 #pragma GCC diagnostic ignored "-Wuninitialized"
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
       
 #ifdef XDR_PACK
