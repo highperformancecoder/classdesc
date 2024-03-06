@@ -526,7 +526,12 @@ namespace classdesc
             a.clear();
             for (size_t i=0; i<arr.size(); ++i)
               {
+                // certain linters fail to recognise that this variable is initialised in the json_unpack call
+#if defined(__cplusplus) && __cplusplus>=201103L
+                typename NonConstKeyValueType<typename T::value_type>::T v{};
+#else
                 typename NonConstKeyValueType<typename T::value_type>::T v;
+#endif
                 json_unpack_t j(arr[i]);
                 json_unpack(j,"",v);
                 a.insert(v);
