@@ -14,6 +14,10 @@ ifdef AEGIS
 TRAVIS=1
 endif
 
+ifdef ASAN
+FLAGS+=-fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -O1
+endif
+
 ifdef TRAVIS
 FLAGS+=-Werror -Wall -Wno-unused-variable -Wno-unused-function -std=c++98
 endif

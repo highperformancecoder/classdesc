@@ -9,12 +9,15 @@
 #include "testExclude.h"
 #include <classdesc_epilogue.h>
 #include <assert.h>
+#include <memory>
+using namespace std;
 
 int main()
 {
   pack_t b;
   foo f;
-  f.unpackable=new bar;
+  shared_ptr<bar> barPtr=make_shared<bar>();
+  f.unpackable=barPtr.get();
   f.unpackable->barfoo();
   f.foosbar.barfoo();
   b<<f;

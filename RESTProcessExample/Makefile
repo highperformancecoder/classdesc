@@ -5,13 +5,17 @@ LIBS+=-L/usr/local/lib64 -lboost_thread -lpthread
 VPATH=..
 EXES=RESTProcess SimpleBuffer
 
+ifdef ASAN
+CFLAGS+=-fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -O1
+endif
+
 all: $(EXES)
 
 RESTProcess: RESTProcessExample.o
-	g++  $^ $(LIBS) -o $@
+	g++  $^ $(CFLAGS) $(LIBS) -o $@
 
 SimpleBuffer: SimpleBufferExample.o
-	g++  $^ $(LIBS) -o $@
+	g++  $^ $(CFLAGS) $(LIBS) -o $@
 
 .h.cd:
 	../classdesc -I .. -nodef -typeName -use_mbr_pointers -respect_private json_pack json_unpack <$< >$@

@@ -13,7 +13,11 @@ LIBS=-L.. -L$(HOME)/usr/lib
 VPATH=..
 
 ifdef GCOV
-FLAGS+=-fprofile-arcs -ftest-coverage
+CFLAGS+=-fprofile-arcs -ftest-coverage
+endif
+
+ifdef ASAN
+CFLAGS+=-fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -O1
 endif
 
 ifndef NOGUI

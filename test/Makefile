@@ -27,6 +27,9 @@ ifdef AEGIS
 CFLAGS+=-Werror -Wall -Wno-unused-variable -Wno-unused-function -Wno-unused-local-typedefs -std=c++98
 endif
 
+ifdef ASAN
+CFLAGS+=-fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -O1
+endif
 
 DIRS=$(HOME)/usr /usr/local /usr
 LIBS+=$(foreach dir,$(DIRS),-L$(dir)/lib) ../xdr_pack.o -lm 

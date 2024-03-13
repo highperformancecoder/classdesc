@@ -1450,7 +1450,7 @@ int main(int argc, char* argv[])
           }
         if (basef!=NULL)
           {
-            while ((nconv=fscanf(basef,"#pragma omit %1024[^\n]",tname))!=EOF)
+            while ((nconv=fscanf(basef,"#pragma omit %1023[^\n]",tname))!=EOF)
               {
                 if (nconv==1)
                   {omit[rm_space(tname)]=1;}

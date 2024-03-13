@@ -20,16 +20,27 @@ first, but occupying a different part of the heap.  */
 #include "graphnode.cd"
 #include "classdesc_epilogue.h"
 
+#include <memory>
+using namespace std;
+
 using namespace classdesc;
 
 int foonode::nodecntr=0;
+
+// register in static object to get around leak detector
+vector<shared_ptr<foonode>> store;
+
+foonode* newFoonode() {
+  store.push_back(make_shared<foonode>());
+  return store.back().get();
+}
 
 foonode * generate_graph()
 {
   const int N=20;
   foonode *graphbegin, *rowbegin, *lastrow=NULL, *left, *current;
   int i,j;
-  for (graphbegin=current=new foonode, i=0; i<N; i++, current=new foonode)
+  for (graphbegin=current=newFoonode(), i=0; i<N; i++, current=newFoonode())
     {
       if (lastrow) 
 	{
@@ -39,7 +50,7 @@ foonode * generate_graph()
       for (rowbegin=current, j=1; j<N; j++)
 	{
 	  left=current;
-	  current=new foonode;
+	  current=newFoonode();
 	  current->left=left;
 	  left->right=current;
 	  if (lastrow)
