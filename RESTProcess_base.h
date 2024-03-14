@@ -428,7 +428,7 @@ namespace classdesc
       REST_PROCESS_BUFFER r;
       if (remainder.empty())
           {
-            if (arguments.type()!=RESTProcessType::array || !arguments.array().empty())
+            if (arguments.type()!=RESTProcessType::null)
               convert(obj, arguments);
           }
       else if (startsWith(remainder,".@elem"))
