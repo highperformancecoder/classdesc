@@ -719,7 +719,7 @@ namespace classdesc
   callFunction(const string& remainder, const REST_PROCESS_BUFFER& arguments, F f)
   {
     JSONBuffer argBuf(arguments);
-    auto& r=functional::callOnBuffer(argBuf,f);
+    auto& r=functional::CallOnBuffer(argBuf,f)();
     if (remainder.empty())
       {
         // if there are arguments left over, assign the first of the
@@ -757,7 +757,7 @@ namespace classdesc
   callFunction(const string& remainder, const REST_PROCESS_BUFFER& arguments, F f)
   {
     JSONBuffer argBuf(arguments);
-    auto r=functional::callOnBuffer(argBuf,f);
+    auto r=functional::CallOnBuffer(argBuf,f)();
     if (remainder.empty())
       {
         REST_PROCESS_BUFFER rj;
@@ -776,7 +776,7 @@ namespace classdesc
   callFunction(const string& remainder, const REST_PROCESS_BUFFER& arguments, F f)
   {
     JSONBuffer argBuf(arguments);
-    functional::callOnBuffer(argBuf,f);
+    functional::CallOnBuffer(argBuf,f)();
     return {};
   }
 
