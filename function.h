@@ -609,8 +609,11 @@ namespace classdesc
       R operator()() {return f();}
     };
 
+    template <class Buffer, class F>
+    typename Return<F>::T callOnBuffer(Buffer& buff, F f)
+    {return CallOnBuffer<Buffer,F,typename Return<F>::T>(buff,f)();}
 
-    
+  
     template <class Buffer>
     class PackFunctor: public Buffer
     {
