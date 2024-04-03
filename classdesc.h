@@ -345,6 +345,10 @@ namespace classdesc
 
   /// true_type if T is a StringKeyMap
   template <class T> struct is_stringKeyMap: public false_type {};
+
+  /// true_type if T is a std::pair
+  template <class T> struct is_pair: public false_type {};
+  template <class F, class S> struct is_pair<std::pair<F,S>>: public true_type {};
   
   /// @{ type trait for the smart pointer concept
   template <class T> struct is_smart_ptr: public false_type {};

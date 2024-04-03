@@ -16,7 +16,7 @@ void registerRoot()
 }
 
 //BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Bar_overloadExample0,overloadExample,0,0);
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Bar_overloadExample1,overloadExample,1,2);
+//BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Bar_overloadExample1,overloadExample,1,2);
 
 
 BOOST_PYTHON_MODULE(example)
@@ -29,6 +29,6 @@ BOOST_PYTHON_MODULE(example)
   addPythonObject("root",root);
 
   int (Bar::*o2)(int,int) const=&Bar::overloadExample;
-  p.getClass<Bar>().overload("overloadExample",o2,Bar_overloadExample1());
+  //p.getClass<Bar>().overload("overloadExample",o2,Bar_overloadExample1());
 }
 

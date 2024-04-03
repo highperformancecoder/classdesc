@@ -537,28 +537,41 @@ namespace classdesc
   {
     key=x;
   }
-    
+
+    /// assign \a x if T is a map
+  template <class T,class K>
+  typename enable_if<is_pair<typename T::value_type>, void>::T
+  assignElem(T& obj, const K& k, const REST_PROCESS_BUFFER& x)
+  {
+    auto iter=obj.emplace(k, typename T::mapped_type()).first;
+    x>>iter->second;
+  }
+
+  /// assign \a x if T is a set
+  template <class T,class K>
+  typename enable_if<Not<is_pair<typename T::value_type>>, void>::T
+  assignElem(T& obj, const K& k,const REST_PROCESS_BUFFER& x)
+  {
+    bool v; x>>v;
+    if (v)
+      obj.insert(k);
+    else
+      obj.erase(k);
+  }
+
   template <class T> class RESTProcessAssociativeContainer: public RESTProcessWrapperBase
   {
     T& obj;
 
-    /// assign \a x if T is a map
-    template <class K, class V, class C, class A>
-    void assignIfMap(std::map<K,V,C,A>& m, const K& k, const REST_PROCESS_BUFFER& x)
-    {
-      V v;
-      x>>v;
-      m[k]=v;
-    }
-    template <class K, class V, class C, class A>
-    void assignIfMap(std::unordered_map<K,V,C,A>& m, const K& k, const REST_PROCESS_BUFFER& x)
-    {
-      V v;
-      x>>v;
-      m[k]=v;
-    }
-    template <class U, class K> void assignIfMap(U&,const K&,const REST_PROCESS_BUFFER&) {}
+    /// get element if a map
+    template <class I>
+    typename enable_if<is_pair<typename std::iterator_traits<I>::value_type>, typename std::iterator_traits<I>::value_type::second_type>::T
+    elem_of(const I& i) {return i->second;}
 
+    /// get element if a set
+    template <class I>
+    typename enable_if<Not<is_pair<typename std::iterator_traits<I>::value_type>>, typename std::iterator_traits<I>::value_type>::T
+    elem_of(const I& i) {return *i;}
     
   public:
     RESTProcessAssociativeContainer(T& obj): obj(obj) {}
@@ -592,7 +605,7 @@ namespace classdesc
 
               string tail(keyEnd,remainder.end());
               if (tail.empty() && arguments.type()!=RESTProcessType::null)
-                assignIfMap(obj, key, arguments);
+                assignElem(obj, key, arguments);
               auto i=obj.find(key);
               if (i==obj.end())
                 {
@@ -602,8 +615,9 @@ namespace classdesc
                     throw std::runtime_error("key "+std::string(keyStart, keyEnd)+" not found");
                 }
               else if (tail.empty())
-                return r<<*i;
-              return mapAndProcess(tail, arguments, *i);
+                return r<<elem_of(i);
+              auto eoi=elem_of(i);
+              return mapAndProcess(tail, arguments, eoi);
             }
         }
       else if (startsWith(remainder,".@insert"))
@@ -777,7 +791,7 @@ namespace classdesc
   {
     JSONBuffer argBuf(arguments);
     functional::callOnBuffer(argBuf,f);
-    return REST_PROCESS_BUFFER{RESTProcessType::null};
+    return {};
   }
 
   

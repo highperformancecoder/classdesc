@@ -29,6 +29,7 @@ namespace classdesc
   enable_if< AllOtherJsonPackpTypes<T>, void >::T
   json_packp(json_pack_t& o, const string& d, T& a)
   {
+    o.objectify();
     if (tail(d)!="")
       {
         //create the object, if it doesn't already exist

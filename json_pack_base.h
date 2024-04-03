@@ -59,6 +59,28 @@ namespace classdesc
       }
     return jsonMap;
   };
+
+  /// convert a json5_parser::Value_type to a RESTProcessType::Type
+  RESTProcessType::Type Json5ParserTypeToRESTProcessType(json5_parser::Value_type type)
+  {
+    auto r=RESTProcessTypeJSONMap().find(type);
+    if (r!=RESTProcessTypeJSONMap().end()) return r->second;
+    return RESTProcessType::null;
+  }
+  
+  /// convert a RESTProcessType::Type to a json5_parser::Value_type
+  json5_parser::Value_type RESTProcessTypeToJson5ParserType(RESTProcessType::Type type)
+  {
+    static std::map<RESTProcessType::Type,json5_parser::Value_type> jsonMap;
+    if (jsonMap.empty())
+      {
+        auto& m=RESTProcessTypeJSONMap();
+        for (auto& i: m) jsonMap.emplace(i.second,i.first);
+      }
+    auto r=jsonMap.find(type);
+    if (r!=jsonMap.end()) return r->second;
+    return json5_parser::null_type;
+  };
   
   // these are classes, not typedefs to avoid adding properties to mValue
   class json_pack_t: public json5_parser::mValue
@@ -68,8 +90,7 @@ namespace classdesc
     bool throw_on_not_found; ///< enable exceptions if element not present in JSON stream
 
     typedef json5_parser::mArray Array;
-    json_pack_t(): json5_parser::mValue(json5_parser::mObject()), 
-                   throw_on_error(false), throw_on_not_found(false)  {}
+    json_pack_t(): throw_on_error(false), throw_on_not_found(false)  {}
     
     template <class T>
     explicit json_pack_t(const T& x,
@@ -120,8 +141,12 @@ namespace classdesc
 
     const Array& array() const {return get_array();}
     RESTProcessType::Type type() const {
-      return RESTProcessTypeJSONMap().find(json5_parser::mValue::type())->second;
+      return Json5ParserTypeToRESTProcessType(json5_parser::mValue::type());
     }
+
+    /// convert this to an object type (if not already)
+    void objectify() {if (type()!=RESTProcessType::object) *this=json_pack_t(json5_parser::mObject());}
+
   };
 
   inline bool read(const std::string& s, json_pack_t& value)
@@ -277,8 +302,9 @@ namespace classdesc
   json_packp(json_unpack_t& o, const string& d, const T& a, dummy<0> dum=0)
   {
     using namespace json5_parser;
+    o.objectify();
     if (d=="")
-      o=json_unpack_t(valueof(a));
+      o=json_pack_t(valueof(a));
     else
       {
         try
@@ -466,6 +492,7 @@ namespace classdesc
   template <class T1, class T2> 
   void json_pack(json_pack_t& o, const string& d, std::pair<T1,T2>& a)
   {
+    o.objectify();
     json_pack(o,d+".first",a.first);
     json_pack(o,d+".second",a.second);
   }
@@ -481,34 +508,35 @@ namespace classdesc
   enable_if<Or<is_sequence<T>,is_associative_container<T> >, void>::T
   json_packp(json_pack_t& o, const string& d, const T& a, dummy<1> dum=0)
   {
-  try
-    {
-      json5_parser::mValue& parent=json_find(o,head(d));
-      if (parent.type()!=json5_parser::obj_type)
-        throw json_pack_error("attempt to pack an array member into a non-object");
-      else
-        {
-          json5_parser::mValue* v;
-          if (d.empty())
-            v=&parent;
-          else
-            v=&parent.get_obj()[tail(d)];
+    o.objectify();
+    try
+      {
+        json5_parser::mValue& parent=json_find(o,head(d));
+        if (parent.type()!=json5_parser::obj_type)
+          throw json_pack_error("attempt to pack an array member into a non-object");
+        else
+          {
+            json5_parser::mValue* v;
+            if (d.empty())
+              v=&parent;
+            else
+              v=&parent.get_obj()[tail(d)];
 
-          json5_parser::mArray& arr=
-            (*v=json5_parser::mArray(a.size())).get_array();
-          typename T::const_iterator i=a.begin();
-          for (size_t k=0; i!=a.end(); ++i, ++k)
-            {
-              json_pack_t j;
-              json_pack(j,"",*i);
-              arr[k]=j;
-            }
-        }
-    }
-  catch (json_pack_error&)
-    {
-      if (o.throw_on_error) throw;
-    }
+            json5_parser::mArray& arr=
+              (*v=json5_parser::mArray(a.size())).get_array();
+            typename T::const_iterator i=a.begin();
+            for (size_t k=0; i!=a.end(); ++i, ++k)
+              {
+                json_pack_t j;
+                json_pack(j,"",*i);
+                arr[k]=j;
+              }
+          }
+      }
+    catch (json_pack_error&)
+      {
+        if (o.throw_on_error) throw;
+      }
   }
 
   template <class T> typename

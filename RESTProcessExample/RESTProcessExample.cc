@@ -56,7 +56,7 @@ int main()
           replace(cmd.begin(),cmd.end(),'/','.');
           try
             {
-              json_pack_t jin(json5_parser::mValue::null);
+              json_pack_t jin;
               string t;
               getline(cin,t);
               if (!t.empty())
