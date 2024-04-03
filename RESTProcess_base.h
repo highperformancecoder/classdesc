@@ -625,7 +625,7 @@ namespace classdesc
     }
     REST_PROCESS_BUFFER signature() const override;
     REST_PROCESS_BUFFER list() const override {
-      std::vector<string> array{".@elem",".@elemNoThrow",".@insert",".@erase",".@size"};
+      std::vector<string> array{".@elem",".@elemNoThrow",".@insert",".@erase",".@size",".@keys"};
       return REST_PROCESS_BUFFER(array);
     }
     REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
@@ -777,7 +777,7 @@ namespace classdesc
   {
     JSONBuffer argBuf(arguments);
     functional::callOnBuffer(argBuf,f);
-    return {};
+    return REST_PROCESS_BUFFER{RESTProcessType::null};
   }
 
   
