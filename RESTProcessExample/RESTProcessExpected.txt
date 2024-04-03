@@ -74,14 +74,14 @@
 /root/bar/m=>[{"first":0,"second":5},{"first":3,"second":2}]
 /root/bar/m/@size=>2
 /root/bar/m/@signature=>[{"args":[],"ret":"std::map<int,int>"},{"args":["std::map<int,int>"],"ret":"std::map<int,int>"}]
-/root/bar/m/@elem/3=>{"first":3,"second":2}
-/root/bar/m/@elem/3=>{"first":3,"second":5}
-/root/bar/m/@elem/3=>{"first":3,"second":5}
+/root/bar/m/@elem/3=>2
+/root/bar/m/@elem/3=>5
+/root/bar/m/@elem/3=>5
 /root/bar/m/@elem/1=>Exception: key 1 not found
 /root/bar/m/@insert=>[{"first":0,"second":5},{"first":1,"second":2},{"first":3,"second":5}]
-/root/bar/m/@elem/1=>{"first":1,"second":2}
+/root/bar/m/@elem/1=>2
 /root/bar/m/@type=>"std::map<int,int>"
-/root/bar/m/@list=>[".@elem",".@elemNoThrow",".@insert",".@erase",".@size"]
+/root/bar/m/@list=>[".@elem",".@elemNoThrow",".@insert",".@erase",".@size",".@keys"]
 /root/bar/m/@erase=>[{"first":0,"second":5},{"first":3,"second":5}]
 /root/bar/m/=>Exception: Command not found: .
 /root/bar/m/@keys=>[0,3]
@@ -89,8 +89,8 @@
 /root/bar/ss=>["bar","foo","hello"]
 /root/bar/um/@insert=>[{"first":1,"second":3}]
 /root/bar/um=>[{"first":1,"second":3}]
-/root/bar/um/@elem/1=>{"first":1,"second":5}
-/root/bar/um/@elem/1=>{"first":1,"second":5}
+/root/bar/um/@elem/1=>5
+/root/bar/um/@elem/1=>5
 /root/bar/llex=>[["hello","hello"],["hello","hello"]]
 /root/bar/llex/@elem/1=>["baa","baa","blacksheep"]
 /root/bar/llex=>[["hello","hello"],["baa","baa","blacksheep"]]
@@ -122,7 +122,7 @@
 /root/bar1/foo/b=>3
 /root/bar1/foo/=>Exception: Command not found: .
 /root/bar1/foo/=>Exception: Command not found: .
-/root/bar1/sfoop=>{}
+/root/bar1/sfoop=>null
 /root/bar1/recursiveType=>Exception: cannot unpack to char*, please use string instead
 /root/defaultless/foo=>0
 /root/defaultless/bar=>2
@@ -136,7 +136,7 @@
 /root/bar/sm=>{"bar":2,"foo":1}
 /root/bar/sm=>{"bar":2,"foo":1}
 /root/bar/sm=>{"foo":1,"foobar":3}
-/root/bar/sm/@elem/foo=>{"first":"foo","second":1}
+/root/bar/sm/@elem/foo=>1
 /root/bar/sm/@erase=>{"foo":1}
 /root/bar/sm/@insert=>{"bar":1,"foo":1}
 /root/bar/sm/@keys=>["bar","foo"]
@@ -146,9 +146,10 @@
 /root/testString=>Exception: cannot unpack to char*, please use string instead
 command doesn't starts with /
 /root/testDoubleIntOverload=>0
-{}
+null
 /root/testDoubleIntOverload=>1
-{}
+null
 /root/testDoubleIntOverload=>1
-{}
+null
 /root/testDoubleIntOverload=>Exception: No suitable matching overload found
+/root/dummy=>Exception: cannot call this function
