@@ -1,1 +1,1 @@
-#define CLASSDESC_VERSION "3.42"
+#define CLASSDESC_VERSION "3.43"
