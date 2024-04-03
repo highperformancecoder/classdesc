@@ -61,7 +61,7 @@ namespace classdesc
   };
 
   /// convert a json5_parser::Value_type to a RESTProcessType::Type
-  RESTProcessType::Type Json5ParserTypeToRESTProcessType(json5_parser::Value_type type)
+  inline RESTProcessType::Type Json5ParserTypeToRESTProcessType(json5_parser::Value_type type)
   {
     auto r=RESTProcessTypeJSONMap().find(type);
     if (r!=RESTProcessTypeJSONMap().end()) return r->second;
@@ -69,7 +69,7 @@ namespace classdesc
   }
   
   /// convert a RESTProcessType::Type to a json5_parser::Value_type
-  json5_parser::Value_type RESTProcessTypeToJson5ParserType(RESTProcessType::Type type)
+  inline json5_parser::Value_type RESTProcessTypeToJson5ParserType(RESTProcessType::Type type)
   {
     static std::map<RESTProcessType::Type,json5_parser::Value_type> jsonMap;
     if (jsonMap.empty())
