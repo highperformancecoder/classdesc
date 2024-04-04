@@ -540,7 +540,11 @@ namespace classdesc
 
     /// assign \a x if T is a map
   template <class T,class K>
-  typename enable_if<is_pair<typename T::value_type>, void>::T
+  typename enable_if<
+    And<
+      Not<is_const<T>>,
+      is_pair<typename T::value_type>
+      >, void>::T
   assignElem(T& obj, const K& k, const REST_PROCESS_BUFFER& x)
   {
     auto iter=obj.emplace(k, typename T::mapped_type()).first;
@@ -549,7 +553,11 @@ namespace classdesc
 
   /// assign \a x if T is a set
   template <class T,class K>
-  typename enable_if<Not<is_pair<typename T::value_type>>, void>::T
+  typename enable_if<
+    And<
+      Not<is_const<T>>,
+      Not<is_pair<typename T::value_type>>
+      >, void>::T
   assignElem(T& obj, const K& k,const REST_PROCESS_BUFFER& x)
   {
     bool v; x>>v;
@@ -559,6 +567,11 @@ namespace classdesc
       obj.erase(k);
   }
 
+  template <class T,class K>
+  typename enable_if<is_const<T>, void>::T
+  assignElem(T& obj, const K& k,const REST_PROCESS_BUFFER& x) {}
+
+  
   template <class T> class RESTProcessAssociativeContainer: public RESTProcessWrapperBase
   {
     T& obj;
