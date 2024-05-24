@@ -34,7 +34,7 @@ namespace classdesc
 {
   template <class T>
   void convert(StringKeyMap<T>& map,  const json_pack_t& j)
-  {j>>map;}
+  {if (j.type()!=RESTProcessType::null) j>>map;}
 
   template <class T>
   void json_pack_stringKeyMap(json_pack_t& j,const string& d, const StringKeyMap<T>& a)
@@ -63,14 +63,21 @@ namespace classdesc
     try
       {
         const json5_parser::mValue& val=json_find(j,d);
-        if (val.type()!=json5_parser::obj_type)
-          throw json_pack_error("%s is not an array",d.c_str());
-        else
+        switch (val.type())
           {
-            const json5_parser::mObject& arr=val.get_obj();
+          case json5_parser::obj_type:
+            {
+              const json5_parser::mObject& arr=val.get_obj();
+              a.clear();
+              for (json5_parser::mObject::const_iterator i=arr.begin(); i!=arr.end(); ++i)
+                json_unpack(j,d+"."+i->first,a[i->first]);
+            }
+            break;
+          case json5_parser::null_type:
             a.clear();
-            for (json5_parser::mObject::const_iterator i=arr.begin(); i!=arr.end(); ++i)
-              json_unpack(j,d+"."+i->first,a[i->first]);
+            break;
+          default:
+            throw json_pack_error("%s is not an array",d.c_str());
           }
       }
     catch (json_pack_error&)
