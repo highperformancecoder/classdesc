@@ -3,7 +3,9 @@ OBJS=RESTProcessExample.o SimpleBufferExample.o
 CFLAGS=-g -I.. -I. -I../json5_parser/json5_parser -I/usr/local/include -fPIC -DUSE_UNROLLED -pthread
 LIBS+=-L/usr/local/lib64 -lboost_thread -lpthread
 VPATH=..
-EXES=RESTProcess SimpleBuffer
+EXES=RESTProcess SimpleBuffer pyExample.so
+
+CFLAGS+=$(shell pkg-config --cflags python3)
 
 ifdef ASAN
 CFLAGS+=-fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -O1
@@ -16,6 +18,9 @@ RESTProcess: RESTProcessExample.o
 
 SimpleBuffer: SimpleBufferExample.o
 	g++  $^ $(CFLAGS) $(LIBS) -o $@
+
+pyExample.so: pyExample.o
+	g++ -shared -o $@ $^ $(LIBS)
 
 .h.cd:
 	../classdesc -I .. -nodef -typeName -use_mbr_pointers -respect_private json_pack json_unpack <$< >$@
