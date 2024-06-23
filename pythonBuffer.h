@@ -601,4 +601,34 @@ namespace classdesc_access
   };
 }
 
+/// a convenience macro for creating a python module with a single global object
+/// @param name module name
+/// @param object C++ object to expose to python
+#define CLASSDESC_PYTHON_MODULE(name,object)                    \
+  PyModuleDef name = {                                          \
+    PyModuleDef_HEAD_INIT,                                      \
+    #name,                                                      \
+    "Python interface to C++ code",                             \
+    -1,                                                         \
+NULL,                                                           \
+    NULL,                                                       \
+    NULL,                                                       \
+    NULL,                                                       \
+    NULL                                                        \
+  };                                                            \
+                                                                \
+  PyMODINIT_FUNC PyInit_##name()                                  \
+  {                                                               \
+    classdesc::RESTProcess(registry,#object,object);              \
+    auto module=PyModule_Create(&name);                           \
+    if (module)                                                   \
+      {                                                           \
+        PyObjectRef pyObject=CppWrapper::create(#object);         \
+        attachMethods(pyObject,#object);                          \
+        PyModule_AddObject(module, #object, pyObject.release());  \
+      }                                                           \
+    return module;                                                \
+  }                                                             
+  
+
 #endif
