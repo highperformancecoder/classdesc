@@ -100,34 +100,28 @@ assert root.bar.l._insert(5)._properties==[2,3,2,5]
 assert root.bar.l()._properties==[2,3,2,5]
 assert root.bar.l([2,2,2,2])._properties==[2,2,2,2]
 
-#/root/bar/m   
-#
-#/root/bar/m/@size   
-#
-#/root/bar/m/@signature
-#
-#/root/bar/m/@elem/3
-#
-#/root/bar/m/@elem/3
-#5
-#/root/bar/m/@elem/3
-#
-## should throw
-#/root/bar/m/@elem/1
-#
-#/root/bar/m/@insert
-#{"first":1,"second":2}
-#/root/bar/m/@elem/1
-#
-#/root/bar/m/@type
-#
-#/root/bar/m/@list
-#
-#/root/bar/m/@erase
-#1
-#/root/bar/m/
-#
-#/root/bar/m/@keys
+assert root.bar.m()._properties==[{"first":0,"second":5},{"first":3,"second":2}]
+assert len(root.bar.m)==2
+assert root.bar.m._signature==[{"args":[],"ret":"std::map<int,int>"},{"args":["std::map<int,int>"],"ret":"std::map<int,int>"}]
+assert root.bar.m[3]==2
+root.bar.m[3]=5
+assert root.bar.m[3]==5
+
+# should throw
+thrown=False
+try:
+    root.bar.m[1]
+except:
+    thrown=True
+assert thrown
+
+assert root.bar.m._insert({"first":1,"second":2})._properties==[{"first":0,"second":5},{"first":1,"second":2},{"first":3,"second":5}]
+assert root.bar.m[1]==2
+assert root.bar.m._type=="std::map<int,int>"
+assert root.bar.m._list==[".@elem",".@elemNoThrow",".@insert",".@erase",".@size",".@keys"]
+assert root.bar.m._erase(1)._properties==[{"first":0,"second":5},{"first":3,"second":5}]
+assert root.bar.m()._properties==[{"first":0,"second":5},{"first":3,"second":5}]
+assert root.bar.m._keys()._properties==[0,3]
 #
 #/root/bar/ss
 #["hello","foo","bar"]

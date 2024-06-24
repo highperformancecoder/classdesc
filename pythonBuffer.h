@@ -425,7 +425,7 @@ struct CppWrapperType: public PyTypeObject
     static PyObject* call(PyObject* self, PyObject* args, PyObject *kwargs)
     {
       auto cppWrapper=static_cast<CppWrapper*>(self);
-      PythonBuffer arguments(RESTProcessType::array);
+      PythonBuffer arguments(PySequence_Size(args)? RESTProcessType::array: RESTProcessType::null);
       auto command=cppWrapper->command;
       if (containerSpecialCommand(command) && PySequence_Size(args))
         // handle special commands which embed the argument in the path string

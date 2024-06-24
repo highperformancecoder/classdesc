@@ -557,7 +557,7 @@ namespace classdesc
   assignElem(T& obj, const K& k, const REST_PROCESS_BUFFER& x)
   {
     auto iter=obj.emplace(k, typename T::mapped_type()).first;
-    x>>iter->second;
+    convert(iter->second,x);
   }
 
   /// assign \a x if T is a set
