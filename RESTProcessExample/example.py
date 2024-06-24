@@ -54,27 +54,19 @@ assert root.bar.c('hello world')=='hello world'
 assert root.bar.c()=='hello world'
 
 assert root.bar.c1()==['\r','\r']
-#
-#/root/bar/c1/@elem/0
-#
-#/root/bar/c1/@elem/0
-#"x"
-#/root/bar/c1
-#
-#/root/bar/ef
-#
-#/root/bar/ef
-#"eb"
-#/root/bar/ef
-#
-#/root/bar/ef
-#"foo"
-#/root/bar/ef
-#
-#/root/bar/ef/@type
-#
-#/root/bar/ef/@list
-#
+assert root.bar.c1[0]=='\r'
+root.bar.c1[0]='x'
+assert root.bar.c1[0]=='x'
+
+assert root.bar.ef()=='ea'
+assert root.bar.ef('eb')=='eb'
+assert root.bar.ef()=='eb'
+# setting an enum to a nonsense value sets it to the default
+assert root.bar.ef('foo')=='ea'
+assert root.bar.ef()=='ea'
+assert root.bar.ef._type()=='::EnumFoo'
+assert root.bar.ef._list==[]
+
 #/root/bar/d
 #
 #/root/bar/d/@size
