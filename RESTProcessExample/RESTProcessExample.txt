@@ -175,7 +175,7 @@ false
 /root/bar/m/@keys
 
 /root/bar/ss
-["hello","foo","bar"]
+[["hello","foo","bar"]]
 /root/bar/ss
 
 /root/bar/um/@insert

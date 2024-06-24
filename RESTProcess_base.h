@@ -601,9 +601,19 @@ namespace classdesc
     {
       REST_PROCESS_BUFFER r;
       if (remainder.empty())
-        {
-          convert(obj, arguments);
-        }
+        switch (arguments.type())
+          {
+          case RESTProcessType::null: break;
+          case RESTProcessType::array:
+            {
+              auto& arr=arguments.array();
+              if (!arr.empty()) convert(obj, REST_PROCESS_BUFFER(arr[0]));
+              break;
+            }
+          default:
+            convert(obj, arguments);
+            break;
+          }
       else if (startsWith(remainder,".@elem"))
         {
           // extract key

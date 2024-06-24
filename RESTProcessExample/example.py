@@ -122,29 +122,22 @@ assert root.bar.m._list==[".@elem",".@elemNoThrow",".@insert",".@erase",".@size"
 assert root.bar.m._erase(1)._properties==[{"first":0,"second":5},{"first":3,"second":5}]
 assert root.bar.m()._properties==[{"first":0,"second":5},{"first":3,"second":5}]
 assert root.bar.m._keys()._properties==[0,3]
-#
-#/root/bar/ss
-#["hello","foo","bar"]
-#/root/bar/ss
-#
-#/root/bar/um/@insert
-#{"first":1,"second":3}
-#/root/bar/um
-#
-#/root/bar/um/@elem/1
-#5
-#/root/bar/um/@elem/1
-#
-#/root/bar/llex
-#
-#/root/bar/llex/@elem/1
-#["baa","baa","blacksheep"]
-#/root/bar/llex
-#
-#/root/bar/llex/@signature
-#
-#/root/bar/llex/@elem/1/@elem/1
-#
+
+assert root.bar.ss(["hello","foo","bar"])._properties==['bar', 'foo', 'hello']
+assert root.bar.ss()._properties==['bar', 'foo', 'hello']
+
+assert root.bar.um._insert({"first":1,"second":3})._properties==[{"first":1,"second":3}]
+assert root.bar.um()._properties==[{"first":1,"second":3}]
+root.bar.um[1]=5
+assert root.bar.um[1]==5
+
+assert root.bar.llex()._properties==[["hello","hello"],["hello","hello"]]
+root.bar.llex[1]=["baa","baa","blacksheep"]
+assert root.bar.llex[1]._properties==["baa","baa","blacksheep"]
+assert root.bar.llex()._properties==[["hello","hello"],["baa","baa","blacksheep"]]
+assert root.bar.llex._signature==[{"args":[],"ret":"std::list<std::list<std::string>>"},{"args":["std::list<std::list<std::string>>"],"ret":"std::list<std::list<std::string>>"}]
+assert root.bar.llex[1][1]=="baa"
+
 ## Should fail
 #/root/bar/iex
 #
