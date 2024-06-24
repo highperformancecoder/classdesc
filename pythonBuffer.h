@@ -574,7 +574,8 @@ struct CppWrapperType: public PyTypeObject
             {
               PyObjectRef r(CppWrapper::create(command));
               PyObject_SetAttrString(r,"_properties",pyResult.release());
-              attachMethods(r, command);
+              if (result.type()==RESTProcessType::object)
+                attachMethods(r, command);
               return r.release();
             }
           }

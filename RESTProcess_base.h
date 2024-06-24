@@ -381,7 +381,7 @@ namespace classdesc
     typename enable_if<Insertable<U>, void>::T
     insert(U& o, const REST_PROCESS_BUFFER& j) {
       typename U::value_type v;
-      j>>v;
+      convert(v,j);
       o.push_back(v);
     }
 
@@ -405,7 +405,7 @@ namespace classdesc
     typename enable_if<Erasable<U>,void>::T
     erase(U& seq, const REST_PROCESS_BUFFER& j)
     {
-      size_t idx{}; j>>idx;
+      size_t idx{}; convert(idx,j);
       if (idx<seq.size())
         {
           auto i=seq.begin();
@@ -500,7 +500,7 @@ namespace classdesc
   void RPAC_insert(T& obj, const REST_PROCESS_BUFFER& arguments)
   {
     typename MutableValueType<typename T::value_type>::type v;
-    arguments>>v;
+    convert(v,arguments);
     if (!obj.insert(v).second)
       throw std::runtime_error("key already exists, not inserted");
   }
@@ -516,7 +516,7 @@ namespace classdesc
   void RPAC_erase(T& obj, const REST_PROCESS_BUFFER& arguments)
   {
     typename T::key_type k;
-    arguments>>k;
+    convert(k,arguments);
     obj.erase(k);
   }
 

@@ -80,42 +80,26 @@ assert root.bar.d1[1]._properties==[6,7,8]
 assert root.bar.d1()._properties==[[0,1,2],[6,7,8]]
 root.bar.d1[1][2]=10
 assert root.bar.d1[1][2]==10
-#/root/bar/h
-#
-#/root/bar/h/@elem/1
-#
-#/root/bar/h/@elem/1
-#3
-#/root/bar/h
-#
-#/root/bar/h/@insert
-#5
-#/root/bar/h
-#
-#/root/bar/h/@erase
-#1
-#/root/bar/h
-#
-#/root/bar/h
-#[2,2,2,2]
-#/root/bar/h/@type
-#
-#/root/bar/h/@list
-#
-#/root/bar/l
-#
-#/root/bar/l/@elem/1
-#
-#/root/bar/l/@elem/1
-#3
-#/root/bar/l
-#
-#/root/bar/l/@insert
-#5
-#/root/bar/l
-#
-#/root/bar/l
-#[2,2,2,2]
+assert root.bar.h()._properties==[2,2,2]
+assert root.bar.h[1]==2
+root.bar.h[1]=3
+assert root.bar.h[1]==3
+assert root.bar.h._insert(5)._properties==[2,3,2,5]
+assert root.bar.h()._properties==[2,3,2,5]
+assert root.bar.h._erase(1)._properties==[2,2,5]
+assert root.bar.h()._properties==[2,2,5]
+assert root.bar.h([2,2,2,2])._properties==[2,2,2,2]
+assert root.bar.h._type=="std::vector<int>"
+assert root.bar.h._list==[".@elem",".@elemNoThrow",".@insert",".@erase",".@size"]
+
+assert root.bar.l()._properties==[2,2,2]
+assert root.bar.l[1]==2
+root.bar.l[1]=3
+assert root.bar.l[1]==3
+assert root.bar.l._insert(5)._properties==[2,3,2,5]
+assert root.bar.l()._properties==[2,3,2,5]
+assert root.bar.l([2,2,2,2])._properties==[2,2,2,2]
+
 #/root/bar/m   
 #
 #/root/bar/m/@size   
