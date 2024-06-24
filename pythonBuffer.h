@@ -550,8 +550,8 @@ struct CppWrapperType: public PyTypeObject
             PyObject_SetAttrString(pyObject, uqMethodName.c_str(), method.release());
           }
         PyObject_SetAttrString(pyObject, "_list", newPyObject(methods));
-        PyObject_SetAttrString(pyObject, "_type", CppWrapper::create(command+".@type"));
-        PyObject_SetAttrString(pyObject, "_signature", CppWrapper::create(command+".@signature"));
+        PyObject_SetAttrString(pyObject, "_type", newPyObject(registry.process(command+".@type",{})));
+        PyObject_SetAttrString(pyObject, "_signature",newPyObject(registry.process(command+".@signature",{})));
       }
     catch (...) { } // do not log, nor report errors back to python - there are too many
     if (PyErr_Occurred())
@@ -567,12 +567,16 @@ struct CppWrapperType: public PyTypeObject
         const PythonBuffer result(registry.process(command, args));
 
         auto pyResult=result.getPyObject();
-        if (result.type()==RESTProcessType::object)
+        switch (result.type())
           {
-            PyObjectRef r(CppWrapper::create(command));
-            PyObject_SetAttrString(r,"_properties",pyResult.release());
-            attachMethods(r, command);
-            return r.release();
+          case RESTProcessType::object:
+          case RESTProcessType::array:
+            {
+              PyObjectRef r(CppWrapper::create(command));
+              PyObject_SetAttrString(r,"_properties",pyResult.release());
+              attachMethods(r, command);
+              return r.release();
+            }
           }
         if (PyErr_Occurred())
           PyErr_Print();

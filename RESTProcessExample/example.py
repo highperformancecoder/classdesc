@@ -23,27 +23,27 @@ assert root.bar.ch()=='M'
 assert near(root.bar.a(),0.1)
 assert near(root.bar.a(0.2),0.2)
 assert near(root.bar.a(),0.2)
-assert root.bar.a._signature()==[{'args': [], 'ret': 'double'}, {'args': ['double'], 'ret': 'double'}]
-assert root.bar.a._type()=='double'
+assert root.bar.a._signature==[{'args': [], 'ret': 'double'}, {'args': ['double'], 'ret': 'double'}]
+assert root.bar.a._type=='double'
 assert root.bar.a._list==[]
 
 assert near(root.bar.af(),0.2)
 assert near(root.bar.af(0.3),0.3)
 assert near(root.bar.af(),0.3)
-assert root.bar.af._signature()==[{'args': [], 'ret': 'float'}, {'args': ['float'], 'ret': 'float'}]
+assert root.bar.af._signature==[{'args': [], 'ret': 'float'}, {'args': ['float'], 'ret': 'float'}]
 
 assert root.bar.b()==3
 assert root.bar.b(1)==1
 assert root.bar.b()==1
-assert root.bar.b._signature()==[{'args': [], 'ret': 'int'}, {'args': ['int'], 'ret': 'int'}]
+assert root.bar.b._signature==[{'args': [], 'ret': 'int'}, {'args': ['int'], 'ret': 'int'}]
 
 assert root.bar.barE()=='a'
-assert root.bar.barE._signature()==[{'args': ['::Bar::BarE'], 'ret': '::Bar::BarE'}, {'args': [], 'ret': '::Bar::BarE'}]
+assert root.bar.barE._signature==[{'args': ['::Bar::BarE'], 'ret': '::Bar::BarE'}, {'args': [], 'ret': '::Bar::BarE'}]
 
 assert root.bar.bf()==False
 assert root.bar.bf(True)==True
 assert root.bar.bf()==True
-assert root.bar.bf._signature()==[{'args': [], 'ret': 'bool'}, {'args': ['bool'], 'ret': 'bool'}]
+assert root.bar.bf._signature==[{'args': [], 'ret': 'bool'}, {'args': ['bool'], 'ret': 'bool'}]
 
 assert root.bar.bt()==True
 assert root.bar.bt(False)==False
@@ -53,7 +53,7 @@ assert root.bar.c()=='\r hello & 123 '
 assert root.bar.c('hello world')=='hello world'
 assert root.bar.c()=='hello world'
 
-assert root.bar.c1()==['\r','\r']
+assert root.bar.c1()._properties==['\r','\r']
 assert root.bar.c1[0]=='\r'
 root.bar.c1[0]='x'
 assert root.bar.c1[0]=='x'
@@ -64,27 +64,22 @@ assert root.bar.ef()=='eb'
 # setting an enum to a nonsense value sets it to the default
 assert root.bar.ef('foo')=='ea'
 assert root.bar.ef()=='ea'
-assert root.bar.ef._type()=='::EnumFoo'
+assert root.bar.ef._type=='::EnumFoo'
 assert root.bar.ef._list==[]
 
-#/root/bar/d
-#
-#/root/bar/d/@size
-#
-#/root/bar/d/@elem/1
-#
-#/root/bar/d/@elem/1
-#5
-#/root/bar/d
-#
+assert root.bar.d()._properties==[0,1,2]
+assert len(root.bar.d)==3
+assert root.bar.d[1]==1
+root.bar.d[1]=5
+assert root.bar.d[1]==5
+
 assert len(root.bar.d1)==2
-assert root.bar.d1[1]==[3,4,5]
+assert root.bar.d1[1]._properties==[3,4,5]
 root.bar.d1[1]=[6,7,8]
-assert root.bar.d1[1]==[6,7,8]
-#/root/bar/d1
-#
-#/root/bar/d1/@elem/1/@elem/2
-#10
+assert root.bar.d1[1]._properties==[6,7,8]
+assert root.bar.d1()._properties==[[0,1,2],[6,7,8]]
+root.bar.d1[1][2]=10
+assert root.bar.d1[1][2]==10
 #/root/bar/h
 #
 #/root/bar/h/@elem/1
