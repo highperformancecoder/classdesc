@@ -138,17 +138,20 @@ assert root.bar.llex()._properties==[["hello","hello"],["baa","baa","blacksheep"
 assert root.bar.llex._signature==[{"args":[],"ret":"std::list<std::list<std::string>>"},{"args":["std::list<std::list<std::string>>"],"ret":"std::list<std::list<std::string>>"}]
 assert root.bar.llex[1][1]=="baa"
 
-## Should fail
-#/root/bar/iex
-#
-#/root/bar/sef
-#
-#/root/bar/sef
-#"eb"
-#/root/bar/sef
-#
-#/root/bar/vs0/@signature
-#
+# Should fail
+thrown=False
+try:
+    root.bar.iex()
+except:
+    thrown=True
+assert thrown
+
+assert root.bar.sef()=='ea'
+assert root.bar.sef('eb')=='eb'
+assert root.bar.sef()=='eb'
+
+assert root.bar.vs0._signature=={"args":[],"ret":"std::string"}
+
 #/root/bar/vs0/
 #
 #/root/bar/shello

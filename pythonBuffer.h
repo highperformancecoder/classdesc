@@ -529,6 +529,12 @@ struct CppWrapperType: public PyTypeObject
     if (!pyObject) return;
     try
       {
+        PyObject_SetAttrString(pyObject, "_type", newPyObject(registry.process(command+".@type",{})));
+        PyObject_SetAttrString(pyObject, "_signature",newPyObject(registry.process(command+".@signature",{})));
+      }
+    catch (...) { } // do not log, nor report errors back to python - there are too many
+    try
+      {
         auto methods=registry.process(command+".@list",{});
         if (methods.type()!=RESTProcessType::array) return;
         for (auto& i: methods.array())
@@ -550,8 +556,6 @@ struct CppWrapperType: public PyTypeObject
             PyObject_SetAttrString(pyObject, uqMethodName.c_str(), method.release());
           }
         PyObject_SetAttrString(pyObject, "_list", newPyObject(methods));
-        PyObject_SetAttrString(pyObject, "_type", newPyObject(registry.process(command+".@type",{})));
-        PyObject_SetAttrString(pyObject, "_signature",newPyObject(registry.process(command+".@signature",{})));
       }
     catch (...) { } // do not log, nor report errors back to python - there are too many
     if (PyErr_Occurred())
