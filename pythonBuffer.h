@@ -486,10 +486,11 @@ struct CppWrapperType: public PyTypeObject
       static int setElem(PyObject* self, PyObject* key, PyObject* val)
       {
         auto cppWrapper=static_cast<CppWrapper*>(self);
+        PythonBuffer args(RESTProcessType::array);
+        args.push_back(val);
         const PyObjectRef r=
           callOnRegistry( cppWrapper->command+".@elem."+write(PythonBuffer(key).get<json_pack_t>()),
-                      PythonBuffer(val)
-                      );
+                      args);
         // on failure, python exception already raised
         return r? 0: -1;
       }

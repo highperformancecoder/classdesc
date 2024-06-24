@@ -104,7 +104,7 @@ false
 /root/bar/d1/@elem/1
 
 /root/bar/d1/@elem/1
-[6,7,8]
+[[6,7,8]]
 /root/bar/d1
 
 /root/bar/d1/@elem/1/@elem/2
@@ -126,7 +126,7 @@ false
 /root/bar/h
 
 /root/bar/h
-[2,2,2,2]
+[[2,2,2,2]]
 /root/bar/h/@type
 
 /root/bar/h/@list
@@ -144,7 +144,7 @@ false
 /root/bar/l
 
 /root/bar/l
-[2,2,2,2]
+[[2,2,2,2]]
 /root/bar/m   
 
 /root/bar/m/@size   
@@ -189,7 +189,7 @@ false
 /root/bar/llex
 
 /root/bar/llex/@elem/1
-["baa","baa","blacksheep"]
+[["baa","baa","blacksheep"]]
 /root/bar/llex
 
 /root/bar/llex/@signature

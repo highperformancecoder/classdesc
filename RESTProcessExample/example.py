@@ -1,4 +1,8 @@
 from pyExample import root
+
+def near(x,y):
+    return abs(x-y)/(abs(x)+abs(y))<1e-4
+    
 root()
 assert root.bar.csi()==20
 
@@ -16,54 +20,40 @@ assert root.bar.si()==10
 assert root.bar1.f.si()==10
 assert root.bar.ch()=='M'
 
-assert root.bar.a()==0.1
-assert root.bar.a(0.2)==0.2
-assert root.bar.a()==0.2
+assert near(root.bar.a(),0.1)
+assert near(root.bar.a(0.2),0.2)
+assert near(root.bar.a(),0.2)
 assert root.bar.a._signature()==[{'args': [], 'ret': 'double'}, {'args': ['double'], 'ret': 'double'}]
 assert root.bar.a._type()=='double'
 assert root.bar.a._list==[]
 
-#/root/bar/af
-#
-#/root/bar/af
-#0.3
-#/root/bar/af
-#
-#/root/bar/af/@signature
-#
-#/root/bar/b
-#
-#/root/bar/b
-#1
-#/root/bar/b
-#
-#/root/bar/b/@signature
-#
-#/root/bar/barE
-#
-#/root/bar/barE/@signature
-#
-#/root/bar/bf
-#
-#/root/bar/bf
-#true
-#/root/bar/bf
-#
-#/root/bar/bf/@signature
-#
-#/root/bar/bt
-#
-#/root/bar/bt
-#false
-#/root/bar/bt
-#
-#/root/bar/c
-#
-#/root/bar/c
-#"hello world"
-#/root/bar/c
-#
-#/root/bar/c1
+assert near(root.bar.af(),0.2)
+assert near(root.bar.af(0.3),0.3)
+assert near(root.bar.af(),0.3)
+assert root.bar.af._signature()==[{'args': [], 'ret': 'float'}, {'args': ['float'], 'ret': 'float'}]
+
+assert root.bar.b()==3
+assert root.bar.b(1)==1
+assert root.bar.b()==1
+assert root.bar.b._signature()==[{'args': [], 'ret': 'int'}, {'args': ['int'], 'ret': 'int'}]
+
+assert root.bar.barE()=='a'
+assert root.bar.barE._signature()==[{'args': ['::Bar::BarE'], 'ret': '::Bar::BarE'}, {'args': [], 'ret': '::Bar::BarE'}]
+
+assert root.bar.bf()==False
+assert root.bar.bf(True)==True
+assert root.bar.bf()==True
+assert root.bar.bf._signature()==[{'args': [], 'ret': 'bool'}, {'args': ['bool'], 'ret': 'bool'}]
+
+assert root.bar.bt()==True
+assert root.bar.bt(False)==False
+assert root.bar.bt()==False
+
+assert root.bar.c()=='\r hello & 123 '
+assert root.bar.c('hello world')=='hello world'
+assert root.bar.c()=='hello world'
+
+assert root.bar.c1()==['\r','\r']
 #
 #/root/bar/c1/@elem/0
 #
@@ -95,12 +85,10 @@ assert root.bar.a._list==[]
 #5
 #/root/bar/d
 #
-#/root/bar/d1/@size
-#
-#/root/bar/d1/@elem/1
-#
-#/root/bar/d1/@elem/1
-#[6,7,8]
+assert len(root.bar.d1)==2
+assert root.bar.d1[1]==[3,4,5]
+root.bar.d1[1]=[6,7,8]
+assert root.bar.d1[1]==[6,7,8]
 #/root/bar/d1
 #
 #/root/bar/d1/@elem/1/@elem/2
