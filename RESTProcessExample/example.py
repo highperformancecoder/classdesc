@@ -151,28 +151,21 @@ assert root.bar.sef('eb')=='eb'
 assert root.bar.sef()=='eb'
 
 assert root.bar.vs0._signature=={"args":[],"ret":"std::string"}
+assert root.bar.vs0()==' hello'
+assert root.bar.shello()=='hello'
+assert root.bar.seqLength([1,2,3])==3
+assert root.bar.name()=='Bar'
+assert root.bar.overloadExample(2,3)==5
+#assert root.bar.overloadExample()._properties['a']==0.2
 
-#/root/bar/vs0/
-#
-#/root/bar/shello
-#
-#/root/bar/seqLength
-#[[1,2,3]]
-#/root/bar/name
-#
-#/root/bar/overloadExample
-#
-#/root/bar/barE
-#
-#/root/bar/barE 
-#"b"
-#/root/bar/globE
-#
-#/root/bar1/foo
-#
-#/root/bar1/fooRef/b
-#
-#/root/bar1/f/name
+assert root.bar.barE()=='a'
+assert root.bar.barE('b')=='b'
+assert root.bar.globE()=='ga'
+
+# object return type not handled quite right.
+assert root.bar1.foo()._properties['a']==0.1
+assert root.bar1.fooRef()._properties['b']==2
+assert root.bar1.f.name()=='Foo'
 #
 #/root/bar1/vFoo
 #
