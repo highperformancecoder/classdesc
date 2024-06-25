@@ -26,6 +26,7 @@
 #include <json_pack_base.h>
 #include "signature.h"
 #include <deque>
+#include <numeric>
 #include <Python.h>
 
 
@@ -550,8 +551,9 @@ struct CppWrapperType: public PyTypeObject
                 // make special commands representable in python
                 replace(uqMethodName.begin(),uqMethodName.end(),'@','_');
               }
-            else
-              {  // and recurse
+            else if (std::accumulate(command.begin(),command.end(),0.0,
+                                     [](double x,char c){return x+(c=='.');})<5)
+              {  // and recurse to a limited extent, to prevent loops caused by references
                 attachMethods(method, command+methodName);
               }
             PyObject_SetAttrString(pyObject, uqMethodName.c_str(), method.release());

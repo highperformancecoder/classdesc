@@ -11,6 +11,7 @@ def expectThrow(f):
         thrown=True
     assert thrown
 
+# causes segfault when run non-interactively
 #assert root()._type=='::Root'
 assert root.bar.csi()==20
 
@@ -149,25 +150,24 @@ assert root.bar.shello()=='hello'
 assert root.bar.seqLength([1,2,3])==3
 assert root.bar.name()=='Bar'
 assert root.bar.overloadExample(2,3)==5
-#assert root.bar.overloadExample()._properties['a']==0.2
+assert root.bar.overloadExample().a()==0.2
 
 assert root.bar.barE()=='a'
 assert root.bar.barE('b')=='b'
 assert root.bar.globE()=='ga'
 
-# object return type not handled quite right.
-#assert root.bar1.foo()._properties['a']==0.1
-#assert root.bar1.fooRef()._properties['b']==2
+assert root.bar1.foo().a()==0.1
+assert root.bar1.fooRef().b()==2
 assert root.bar1.f.name()=='Foo'
 
 assert root.bar1.vFoo[1]._properties['b']==1
 expectThrow(lambda: root.bar1.vFoo[10])
 
-#assert root.bar1.foo.b(3)==3
-#assert root.bar1.foo.b()==2
-#assert root.bar1.fooRef.b(3)==3
-#assert root.bar1.fooRef.b()==3
-#assert root.bar1.foo.b()==3
+assert root.bar1.foo.b(3)==3
+assert root.bar1.foo.b()==2
+assert root.bar1.fooRef.b(3)==3
+assert root.bar1.fooRef.b()==3
+assert root.bar1.foo.b()==3
 
 assert root.bar1.sfoop()==None
 
@@ -178,7 +178,7 @@ assert root.defaultless.bar()==2
 #
 root.getFB1()
 #
-# assert root.getFB1.f.b()==0
+assert root.getFB1.f.b()==0
 #
 ## enum enumerator listing
 #/@enum/@list

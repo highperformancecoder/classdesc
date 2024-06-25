@@ -1070,8 +1070,29 @@ namespace classdesc
     REST_PROCESS_BUFFER signature() const override {return functionSignature<F>();}
     unsigned matchScore(const REST_PROCESS_BUFFER& arguments) const override
     {return classdesc::matchScore<F>(arguments);}
-    REST_PROCESS_BUFFER list() const override {return REST_PROCESS_BUFFER(RESTProcessType::array);}
-    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER("function");}
+
+    template <class U>
+    typename enable_if<
+      And<
+        is_default_constructible<remove_reference<U>>,
+        Not<is_void<U>>
+        >,REST_PROCESS_BUFFER>::T
+    slist() const {
+      typename remove_reference<U>::type x;
+      return RESTProcessObject<U>(x).list();
+    }
+    // for now, we cannot extract the lists of a non-default constructible return type
+    template <class U>
+    typename enable_if<
+      Not<
+        And<
+          is_default_constructible<remove_reference<U>>,
+          Not<is_void<U>>
+          >>,REST_PROCESS_BUFFER>::T
+    slist() const {return REST_PROCESS_BUFFER(RESTProcessType::array);}
+    
+    REST_PROCESS_BUFFER list() const override {return slist<R>();}
+    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<R>());}
     bool isObject() const override {return false;}
     bool isConst() const override {return FunctionalIsConst<F>::value;}
     unsigned arity() const override {return functional::Arity<F>::value;}

@@ -233,31 +233,32 @@ namespace classdesc
                     r<<array;
                     return r;
                   }
-                else if (tail==".@list")
-                  return REST_PROCESS_BUFFER(REST_PROCESS_BUFFER::Array());
-                else if (tail==".@type")
-                  return REST_PROCESS_BUFFER("overloaded function");
-                else
-                  {
-                    // sort function overloads by best match
-                    auto cmp=[&](RESTProcessFunctionBase*x, RESTProcessFunctionBase*y)
-                      {return x->matchScore(jin)<y->matchScore(jin);};
-                    std::set<RESTProcessFunctionBase*, decltype(cmp)> sortedOverloads{cmp};
-                    for (auto i=r.first; i!=r.second; ++i)
-                      if (auto j=dynamic_cast<RESTProcessFunctionBase*>(i->second.get()))
-                        sortedOverloads.insert(j);
-                    auto& bestOverload=*sortedOverloads.begin();
-                    if (bestOverload->matchScore(jin) >=
-                        RESTProcessFunctionBase::maxMatchScore)
-                      throw std::runtime_error("No suitable matching overload found");
-                    if (sortedOverloads.size()>1)
-                      { // ambiguous overload detection
-                        auto i=sortedOverloads.begin(); i++;
-                        if ((*i)->matchScore(jin)==bestOverload->matchScore(jin))
-                          throw std::runtime_error("Ambiguous resolution of overloaded function");
-                      }
-                    return bestOverload->process(tail, jin);
+//                else if (tail==".@list")
+//                  return REST_PROCESS_BUFFER(REST_PROCESS_BUFFER::Array());
+//                else if (tail==".@type")
+//                  return REST_PROCESS_BUFFER("overloaded function");
+                // sort function overloads by best match
+                auto cmp=[&](RESTProcessFunctionBase*x, RESTProcessFunctionBase*y)
+                {return x->matchScore(jin)<y->matchScore(jin);};
+                std::set<RESTProcessFunctionBase*, decltype(cmp)> sortedOverloads{cmp};
+                for (auto i=r.first; i!=r.second; ++i)
+                  if (auto j=dynamic_cast<RESTProcessFunctionBase*>(i->second.get()))
+                    sortedOverloads.insert(j);
+                auto& bestOverload=*sortedOverloads.begin();
+                if (bestOverload->matchScore(jin) >=
+                    RESTProcessFunctionBase::maxMatchScore)
+                  throw std::runtime_error("No suitable matching overload found");
+                if (sortedOverloads.size()>1)
+                  { // ambiguous overload detection
+                    auto i=sortedOverloads.begin(); i++;
+                    if ((*i)->matchScore(jin)==bestOverload->matchScore(jin))
+                      throw std::runtime_error("Ambiguous resolution of overloaded function");
                   }
+                if (tail==".@list")
+                  return bestOverload->list();
+                if (tail==".@type")
+                  return bestOverload->type();
+                return bestOverload->process(tail, jin);
               }
             }
         }
