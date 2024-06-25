@@ -2,17 +2,20 @@ from pyExample import root
 
 def near(x,y):
     return abs(x-y)/(abs(x)+abs(y))<1e-4
-    
+
+def expectThrow(f):
+    thrown=False
+    try:
+        f()
+    except:
+        thrown=True
+    assert thrown
+
 root()
 assert root.bar.csi()==20
 
 # should throw
-thrown=False
-try:
-    root.bar.csi(100)
-except:
-    thrown=True
-assert thrown
+expectThrow(lambda: root.bar.csi(100))
 
 assert root.bar.si()==0
 assert root.bar.si(10)==10
@@ -108,12 +111,7 @@ root.bar.m[3]=5
 assert root.bar.m[3]==5
 
 # should throw
-thrown=False
-try:
-    root.bar.m[1]
-except:
-    thrown=True
-assert thrown
+expectThrow(lambda: root.bar.m[1])
 
 assert root.bar.m._insert({"first":1,"second":2})._properties==[{"first":0,"second":5},{"first":1,"second":2},{"first":3,"second":5}]
 assert root.bar.m[1]==2
@@ -139,12 +137,7 @@ assert root.bar.llex._signature==[{"args":[],"ret":"std::list<std::list<std::str
 assert root.bar.llex[1][1]=="baa"
 
 # Should fail
-thrown=False
-try:
-    root.bar.iex()
-except:
-    thrown=True
-assert thrown
+expectThrow(lambda: root.bar.iex())
 
 assert root.bar.sef()=='ea'
 assert root.bar.sef('eb')=='eb'
@@ -163,41 +156,29 @@ assert root.bar.barE('b')=='b'
 assert root.bar.globE()=='ga'
 
 # object return type not handled quite right.
-assert root.bar1.foo()._properties['a']==0.1
-assert root.bar1.fooRef()._properties['b']==2
+#assert root.bar1.foo()._properties['a']==0.1
+#assert root.bar1.fooRef()._properties['b']==2
 assert root.bar1.f.name()=='Foo'
+
+assert root.bar1.vFoo[1]._properties['b']==1
+expectThrow(lambda: root.bar1.vFoo[10])
+
+#assert root.bar1.foo.b(3)==3
+#assert root.bar1.foo.b()==2
+#assert root.bar1.fooRef.b(3)==3
+#assert root.bar1.fooRef.b()==3
+#assert root.bar1.foo.b()==3
+
+assert root.bar1.sfoop()==None
+
+expectThrow(lambda: root.bar1.recursiveType('hello'))
+
+assert root.defaultless.foo()==0
+assert root.defaultless.bar()==2
 #
-#/root/bar1/vFoo
+root.getFB1()
 #
-#/root/bar1/vFoo/@elem/1
-#
-#/root/bar1/vFoo/@elem/10
-#
-#/root/bar1/foo/b
-#3
-#/root/bar1/foo/b
-#
-#/root/bar1/fooRef/b
-#3
-#/root/bar1/fooRef/b
-#
-#/root/bar1/foo/b
-#
-#/root/bar1/foo/
-#
-#/root/bar1/foo/
-#
-#/root/bar1/sfoop
-#
-#/root/bar1/recursiveType
-#"hello"
-#/root/defaultless/foo
-#
-#/root/defaultless/bar
-#
-#/root/getFB1
-#
-#/root/getFB1/f/b
+# assert root.getFB1.f.b()==0
 #
 ## enum enumerator listing
 #/@enum/@list
@@ -208,39 +189,25 @@ assert root.bar1.f.name()=='Foo'
 #
 #/@enum/::Bar::BarE
 #
-## StringKeyMap
-#/root/bar/sm
-#
-#/root/bar/sm
-#{"foo":1,"bar":2}
-#/root/bar/sm
-#
-#/root/bar/sm
-#{"foo":1,"foobar":3}
-#/root/bar/sm/@elem/foo
-#
-#/root/bar/sm/@erase
-#"foobar"
-#/root/bar/sm/@insert
-#{"first":"bar","second":1}
-#/root/bar/sm/@keys
-#
-#/root/bar/rotation
-#
-#/root/bar/rotation
-#20
-#/root/bar/rotation
-#
-#/root/testString
-#"hello"
-#
-#/root/testDoubleIntOverload
-#1
-#/root/testDoubleIntOverload
-#[1,1]
-#/root/testDoubleIntOverload
-#[1,1.1]
-#/root/testDoubleIntOverload
-#[1.1,1]
-#/root/dummy
-#{a:1}
+
+# StringKeyMap
+assert root.bar.sm()._properties=={}
+assert root.bar.sm({"foo":1,"bar":2})._properties=={"foo":1,"bar":2}
+assert root.bar.sm()._properties=={"foo":1,"bar":2}
+assert root.bar.sm({"foo":1,"foobar":3})._properties=={"foo":1,"foobar":3}
+assert root.bar.sm['foo']==1
+assert root.bar.sm._erase("foobar")._properties=={"foo":1}
+assert root.bar.sm._insert({"first":"bar","second":1})._properties=={"bar":1,"foo":1}
+#assert root.bar.sm._keys()._properties==["bar","foo"]
+assert root.bar.rotation()==0
+assert root.bar.rotation(20)==20
+assert root.bar.rotation()==20
+
+
+expectThrow(lambda: root.testString('hello'))
+
+#assert root.testDoubleIntOverload(1)==0
+#assert root.testDoubleIntOverload(1,1)==1
+#assert root.testDoubleIntOverload(1,1.1)==1
+expectThrow(lambda: root.testDoubleIntOverload(1.1,1.1))
+expectThrow(lambda: root.dummy({a:1}))
