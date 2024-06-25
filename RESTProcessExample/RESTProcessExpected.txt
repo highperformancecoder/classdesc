@@ -146,10 +146,8 @@
 /root/testString=>Exception: cannot unpack to char*, please use string instead
 command doesn't starts with /
 /root/testDoubleIntOverload=>0
-null
 /root/testDoubleIntOverload=>1
-null
 /root/testDoubleIntOverload=>1
-null
 /root/testDoubleIntOverload=>Exception: No suitable matching overload found
 /root/dummy=>Exception: cannot call this function
+/root/voidReturn=>null

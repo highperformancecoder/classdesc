@@ -184,8 +184,9 @@ struct Root
   Root(): bar(3), bar1(2) {}
   void dummy(DD& x) {}
   std::string testString(const char* s) {return s;}
-  void testDoubleIntOverload(int a) {std::cout<< 0<<std::endl;}
-  void testDoubleIntOverload(int a,double x) {std::cout <<1<<std::endl;}
+  int testDoubleIntOverload(int a) {return 0;}
+  int testDoubleIntOverload(int a,double x) {return 1;}
+  void voidReturn() {}
 };
 
 #include "RESTProcessExample.cd"

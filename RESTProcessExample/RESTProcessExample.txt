@@ -306,3 +306,5 @@ false
 [1.1,1]
 /root/dummy
 {a:1}
+/root/voidReturn
+
