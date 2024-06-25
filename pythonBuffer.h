@@ -526,11 +526,12 @@ struct CppWrapperType: public PyTypeObject
 
   void attachMethods(PyObjectRef& pyObject, const std::string& command)
   {
-    if (!pyObject) return;
+    // don't attach methods to special functions, as it causes spurious behaviour
+    if (!pyObject||command.find('@')!=string::npos) return;
     try
       {
-        PyObject_SetAttrString(pyObject, "_type", newPyObject(registry.process(command+".@type",{})));
         PyObject_SetAttrString(pyObject, "_signature",newPyObject(registry.process(command+".@signature",{})));
+        PyObject_SetAttrString(pyObject, "_type", newPyObject(registry.process(command+".@type",{})));
       }
     catch (...) { } // do not log, nor report errors back to python - there are too many
     try

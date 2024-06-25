@@ -11,7 +11,7 @@ def expectThrow(f):
         thrown=True
     assert thrown
 
-#root()
+#assert root()._type=='::Root'
 assert root.bar.csi()==20
 
 # should throw
@@ -198,7 +198,7 @@ assert root.bar.sm({"foo":1,"foobar":3})._properties=={"foo":1,"foobar":3}
 assert root.bar.sm['foo']==1
 assert root.bar.sm._erase("foobar")._properties=={"foo":1}
 assert root.bar.sm._insert({"first":"bar","second":1})._properties=={"bar":1,"foo":1}
-#assert root.bar.sm._keys()._properties==["bar","foo"]
+assert root.bar.sm._keys()._properties==["bar","foo"]
 assert root.bar.rotation()==0
 assert root.bar.rotation(20)==20
 assert root.bar.rotation()==20
