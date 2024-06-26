@@ -1,4 +1,4 @@
-from pyExample import root
+from pyExample import root,enum
 
 def near(x,y):
     return abs(x-y)/(abs(x)+abs(y))<1e-4
@@ -175,20 +175,15 @@ expectThrow(lambda: root.bar1.recursiveType('hello'))
 
 assert root.defaultless.foo()==0
 assert root.defaultless.bar()==2
-#
+
 root.getFB1()
-#
 assert root.getFB1.f.b()==0
-#
-## enum enumerator listing
-#/@enum/@list
-#
-#/@enum/::EnumFoo
-#
-#/@enum/::GlobE
-#
-#/@enum/::Bar::BarE
-#
+
+# enum enumerator listing
+assert list(enum.keys())==['::Bar::BarE', '::EnumFoo', '::GlobE']
+assert enum['::EnumFoo']==['ea', 'eb', 'ec', 'ed']
+assert enum['::GlobE']==['ga', 'gb']
+assert enum['::Bar::BarE']==['a', 'b']
 
 # StringKeyMap
 assert root.bar.sm()._properties=={}

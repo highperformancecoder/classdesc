@@ -601,7 +601,28 @@ struct CppWrapperType: public PyTypeObject
         return nullptr;
       }
   }
+
+  template <class T>
+  void initModule(PyObject* module, const char* objName, T& object)
+  {
+    assert(module);
+    classdesc::RESTProcess(registry,objName,object);
+    PyObjectRef pyObject=CppWrapper::create(objName);
+    attachMethods(pyObject,objName);
+    PyModule_AddObject(module, objName, pyObject.release());
+    /* enum reflection */
+    PyObjectRef enummer=PyDict_New();
+    auto enumList=registry.process("@enum.@list",{});
+    for (auto& i: enumList.array())
+      {
+        string name=i.get_str();
+        PyDict_SetItemString(enummer, name.c_str(),
+                             newPyObjectJson(registry.process("@enum."+name,{})));
+      }
+    PyModule_AddObject(module, "enum", enummer.release());
+  }
 }
+
 
 namespace classdesc_access
 {
@@ -623,25 +644,19 @@ namespace classdesc_access
     #name,                                                      \
     "Python interface to C++ code",                             \
     -1,                                                         \
-NULL,                                                           \
+    NULL,                                                       \
     NULL,                                                       \
     NULL,                                                       \
     NULL,                                                       \
     NULL                                                        \
   };                                                            \
                                                                 \
-  PyMODINIT_FUNC PyInit_##name()                                  \
-  {                                                               \
-    classdesc::RESTProcess(registry,#object,object);              \
-    auto module=PyModule_Create(&name);                           \
-    if (module)                                                   \
-      {                                                           \
-        PyObjectRef pyObject=CppWrapper::create(#object);         \
-        attachMethods(pyObject,#object);                          \
-        PyModule_AddObject(module, #object, pyObject.release());  \
-      }                                                           \
-    return module;                                                \
-  }                                                             
+  PyMODINIT_FUNC PyInit_##name()                                \
+  {                                                             \
+  auto module=PyModule_Create(&name);                           \
+  if (module) initModule(module, #object, object);              \
+  return module;                                                \
+}                                                             
   
 
 #endif
