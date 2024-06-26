@@ -525,45 +525,50 @@ struct CppWrapperType: public PyTypeObject
     Py_XINCREF(cppWrapperType.tp_dict);
   }
 
-  void attachMethods(PyObjectRef& pyObject, const std::string& command)
+  /// track and limit recursion of these methods, to avoid inite recursion caused by references 
+  struct LimitRecursion
   {
-    // don't attach methods to special functions, as it causes spurious behaviour
-    if (!pyObject||command.find('@')!=string::npos) return;
-    try
-      {
-        PyObject_SetAttrString(pyObject, "_signature",newPyObject(registry.process(command+".@signature",{})));
-        PyObject_SetAttrString(pyObject, "_type", newPyObject(registry.process(command+".@type",{})));
-      }
-    catch (...) { } // do not log, nor report errors back to python - there are too many
-    try
-      {
-        auto methods=registry.process(command+".@list",{});
-        if (methods.type()!=RESTProcessType::array) return;
-        for (auto& i: methods.array())
-          {
+    int recur;
+    LimitRecursion(int recur=0): recur(recur+1) {}
+    void attachMethods(PyObjectRef& pyObject, const std::string& command)
+    {
+      // don't attach methods to special functions, as it causes spurious behaviour
+      if (!pyObject||command.find('@')!=string::npos) return;
+      try
+        {
+          PyObject_SetAttrString(pyObject, "_signature",newPyObject(registry.process(command+".@signature",{})));
+          PyObject_SetAttrString(pyObject, "_type", newPyObject(registry.process(command+".@type",{})));
+        }
+      catch (...) { } // do not log, nor report errors back to python - there are too many
+      try
+        {
+          auto methods=registry.process(command+".@list",{});
+          if (methods.type()!=RESTProcessType::array) return;
+          for (auto& i: methods.array())
+            {
 
-            const string& methodName(i.get_str());
-            auto uqMethodName=methodName.substr(1); // remove leading '.'
-            if (uqMethodName.find('.')!=string::npos) continue; // ignore recursive commands
-            PyObjectRef method{CppWrapper::create(command+methodName)};
-            if (uqMethodName.find('@')!=string::npos)
-              {
-                // make special commands representable in python
-                replace(uqMethodName.begin(),uqMethodName.end(),'@','_');
-              }
-            else if (std::accumulate(command.begin(),command.end(),0.0,
-                                     [](double x,char c){return x+(c=='.');})<5)
-              {  // and recurse to a limited extent, to prevent loops caused by references
-                attachMethods(method, command+methodName);
-              }
-            PyObject_SetAttrString(pyObject, uqMethodName.c_str(), method.release());
-          }
-        PyObject_SetAttrString(pyObject, "_list", newPyObject(methods));
-      }
-    catch (...) { } // do not log, nor report errors back to python - there are too many
-    if (PyErr_Occurred())
-      PyErr_Print();
-  }
+              const string& methodName(i.get_str());
+              auto uqMethodName=methodName.substr(1); // remove leading '.'
+              if (uqMethodName.find('.')!=string::npos) continue; // ignore recursive commands
+              PyObjectRef method{CppWrapper::create(command+methodName)};
+              if (uqMethodName.find('@')!=string::npos)
+                {
+                  // make special commands representable in python
+                  replace(uqMethodName.begin(),uqMethodName.end(),'@','_');
+                }
+              else if (recur<5)
+                {  // and recurse to a limited extent, to prevent loops caused by references
+                  LimitRecursion(recur).attachMethods(method, command+methodName);
+                }
+              PyObject_SetAttrString(pyObject, uqMethodName.c_str(), method.release());
+            }
+          PyObject_SetAttrString(pyObject, "_list", newPyObject(methods));
+        }
+      catch (...) { } // do not log, nor report errors back to python - there are too many
+      if (PyErr_Occurred())
+        PyErr_Print();
+    }
+  };
 
 
   PyObject* callOnRegistry(const string& command, const PythonBuffer& arguments)
@@ -582,7 +587,7 @@ struct CppWrapperType: public PyTypeObject
               PyObjectRef r(CppWrapper::create(command));
               PyObject_SetAttrString(r,"_properties",pyResult.release());
               if (result.type()==RESTProcessType::object)
-                attachMethods(r, command);
+                LimitRecursion().attachMethods(r, command);
               return r.release();
             }
           }
@@ -608,7 +613,7 @@ struct CppWrapperType: public PyTypeObject
     assert(module);
     classdesc::RESTProcess(registry,objName,object);
     PyObjectRef pyObject=CppWrapper::create(objName);
-    attachMethods(pyObject,objName);
+    LimitRecursion().attachMethods(pyObject,objName);
     PyModule_AddObject(module, objName, pyObject.release());
     /* enum reflection */
     PyObjectRef enummer=PyDict_New();
