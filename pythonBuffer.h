@@ -24,6 +24,7 @@
 #define CLASSDESC_PYTHON_BUFFER_H
 
 #include <json_pack_base.h>
+#include <RESTProcess_base.h>
 #include "signature.h"
 #include <deque>
 #include <numeric>
@@ -32,7 +33,7 @@
 
 namespace classdesc
 {
-  // per compile unit registry
+   // per compile unit registry
   namespace {
     RESTProcess_t registry;
   }
@@ -644,24 +645,24 @@ namespace classdesc_access
 /// @param name module name
 /// @param object C++ object to expose to python
 #define CLASSDESC_PYTHON_MODULE(name,object)                    \
-  PyModuleDef name = {                                          \
-    PyModuleDef_HEAD_INIT,                                      \
-    #name,                                                      \
-    "Python interface to C++ code",                             \
-    -1,                                                         \
-    NULL,                                                       \
-    NULL,                                                       \
-    NULL,                                                       \
-    NULL,                                                       \
-    NULL                                                        \
-  };                                                            \
-                                                                \
   PyMODINIT_FUNC PyInit_##name()                                \
   {                                                             \
-  auto module=PyModule_Create(&name);                           \
-  if (module) initModule(module, #object, object);              \
-  return module;                                                \
-}                                                             
+    static PyModuleDef module_##name = {                        \
+      PyModuleDef_HEAD_INIT,                                    \
+      #name,                                                    \
+      "Python interface to C++ code",                           \
+      -1,                                                       \
+      NULL,                                                     \
+      NULL,                                                     \
+      NULL,                                                     \
+      NULL,                                                     \
+      NULL                                                      \
+    };                                                          \
+                                                                \
+    auto module=PyModule_Create(&module_##name);                \
+    if (module) initModule(module, #object, object);            \
+    return module;                                              \
+  }                                                  
   
 
 #endif

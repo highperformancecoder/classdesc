@@ -15,6 +15,7 @@
 #include <stdexcept>
 
 #ifndef REST_PROCESS_BUFFER
+#include <json_pack_base.h>
 #define REST_PROCESS_BUFFER json_pack_t
 #endif
 
@@ -921,6 +922,7 @@ namespace classdesc
   typename enable_if<
     And<
     is_object<T>,
+      Not<is_abstract<T>>,
       Not<is_default_constructible<typename remove_reference<T>::type>>
       >, bool>::T
   matches(const REST_PROCESS_BUFFER& x)
