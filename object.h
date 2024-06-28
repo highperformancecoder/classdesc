@@ -29,9 +29,9 @@ namespace classdesc
   {
     typedef int TypeID;
     virtual TypeID type() const=0;
-    static object* create(TypeID);
-    virtual object* clone() const=0;
-    object* cloneT() const {return clone();}
+    static classdesc::object* create(TypeID);
+    virtual classdesc::object* clone() const=0;
+    classdesc::object* cloneT() const {return clone();}
     virtual void pack(pack_t& b) const=0;
     virtual void unpack(pack_t& b)=0;
     virtual ~object() {}
@@ -86,7 +86,7 @@ namespace classdesc
         }
       return t;
     }
-    virtual object* clone() const {
+    virtual classdesc::object* clone() const {
       return new This(*dynamic_cast<const This*>(this));}
     /// same as clone(), but returning fully typed pointer
     This *cloneT() const {return dynamic_cast<This*>(clone());} 
