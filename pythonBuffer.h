@@ -33,11 +33,19 @@
 
 namespace classdesc
 {
-   // per compile unit registry
-  namespace {
-    RESTProcess_t registry;
+  // map of registries, one per module
+  inline std::map<std::string, RESTProcess_t>& registries()
+  {
+    static std::map<std::string, RESTProcess_t> registries;
+    return registries;
   }
 
+  namespace
+  {
+    // reference to per compile unit registry
+    RESTProcess_t* registry=nullptr;
+  }
+  
   /// @{ utility python object constructors
   inline PyObject* newPyObject(const bool& x) {if (x) Py_RETURN_TRUE; Py_RETURN_FALSE;}
   template <class T> inline typename enable_if<And<is_integral<T>, Not<is_same<T,bool>>>, PyObject*>::T
@@ -476,7 +484,7 @@ struct CppWrapperType: public PyTypeObject
       static Py_ssize_t size(PyObject* self)
       {
         auto cppWrapper=static_cast<CppWrapper*>(self);
-        return registry.process(cppWrapper->command+".@size",{}).get_uint64();
+        return registry->process(cppWrapper->command+".@size",{}).get_uint64();
       }
 
       static PyObject* getElem(PyObject* self, PyObject* key)
@@ -537,13 +545,13 @@ struct CppWrapperType: public PyTypeObject
       if (!pyObject||command.find('@')!=string::npos) return;
       try
         {
-          PyObject_SetAttrString(pyObject, "_signature",newPyObject(registry.process(command+".@signature",{})));
-          PyObject_SetAttrString(pyObject, "_type", newPyObject(registry.process(command+".@type",{})));
+          PyObject_SetAttrString(pyObject, "_signature",newPyObject(registry->process(command+".@signature",{})));
+          PyObject_SetAttrString(pyObject, "_type", newPyObject(registry->process(command+".@type",{})));
         }
       catch (...) { } // do not log, nor report errors back to python - there are too many
       try
         {
-          auto methods=registry.process(command+".@list",{});
+          auto methods=registry->process(command+".@list",{});
           if (methods.type()!=RESTProcessType::array) return;
           for (auto& i: methods.array())
             {
@@ -577,7 +585,7 @@ struct CppWrapperType: public PyTypeObject
     try
       {
         auto args=arguments.get<json_pack_t>();
-        const PythonBuffer result(registry.process(command, args));
+        const PythonBuffer result(registry->process(command, args));
 
         auto pyResult=result.getPyObject();
         switch (result.type())
@@ -612,18 +620,19 @@ struct CppWrapperType: public PyTypeObject
   void initModule(PyObject* module, const char* objName, T& object)
   {
     assert(module);
-    classdesc::RESTProcess(registry,objName,object);
+    classdesc::RESTProcess(*registry,objName,object);
     PyObjectRef pyObject=CppWrapper::create(objName);
     LimitRecursion().attachMethods(pyObject,objName);
     PyModule_AddObject(module, objName, pyObject.release());
-    /* enum reflection */
+
+    // enum reflection
     PyObjectRef enummer=PyDict_New();
-    auto enumList=registry.process("@enum.@list",{});
+    auto enumList=registry->process("@enum.@list",{});
     for (auto& i: enumList.array())
       {
         string name=i.get_str();
         PyDict_SetItemString(enummer, name.c_str(),
-                             newPyObjectJson(registry.process("@enum."+name,{})));
+                             newPyObjectJson(registry->process("@enum."+name,{})));
       }
     PyModule_AddObject(module, "enum", enummer.release());
   }
@@ -644,24 +653,25 @@ namespace classdesc_access
 /// a convenience macro for creating a python module with a single global object
 /// @param name module name
 /// @param object C++ object to expose to python
-#define CLASSDESC_PYTHON_MODULE(name,object)                    \
-  PyMODINIT_FUNC PyInit_##name()                                \
-  {                                                             \
-    static PyModuleDef module_##name = {                        \
-      PyModuleDef_HEAD_INIT,                                    \
-      #name,                                                    \
-      "Python interface to C++ code",                           \
-      -1,                                                       \
-      NULL,                                                     \
-      NULL,                                                     \
-      NULL,                                                     \
-      NULL,                                                     \
-      NULL                                                      \
-    };                                                          \
-                                                                \
-    auto module=PyModule_Create(&module_##name);                \
-    if (module) initModule(module, #object, object);            \
-    return module;                                              \
+#define CLASSDESC_PYTHON_MODULE(name,object)                       \
+  PyMODINIT_FUNC PyInit_##name()                                   \
+  {                                                                \
+    static PyModuleDef module_##name = {                           \
+    PyModuleDef_HEAD_INIT,                                         \
+    #name,                                                         \
+    "Python interface to C++ code",                                \
+    -1,                                                            \
+    nullptr,                                                       \
+    nullptr,                                                       \
+    nullptr,                                                       \
+    nullptr,                                                       \
+    nullptr                                                        \
+    };                                                             \
+                                                                   \
+    auto module=PyModule_Create(&module_##name);                   \
+    registry=&registries()[#name];                                 \
+    if (module) initModule(module, #object, object);               \
+    return module;                                                 \
   }                                                  
   
 
