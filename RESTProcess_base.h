@@ -244,11 +244,23 @@ namespace classdesc
   
     REST_PROCESS_BUFFER process(const std::string& query, const REST_PROCESS_BUFFER& jin);
 
-      /// define all arguments of \a F
+    /// define all arguments of \a F
     template <class F> void defineFunctionArgTypes()
     {
       DefineFunctionArgTypes<F,functional::Arity<F>::value>::define(*this);
     }
+
+    /// adds a factory function for creating objects of type \a
+    /// T.
+    /// @tparam T type of objects this factory will create
+    /// @tparam Args are the types of arguments to be passed to T's constructor
+    /// @param typeName alias for the factory - usually the unqualified type name
+    /// @param callback an optional callback that is run whenever a new object is created
+    /// The factory gets called with a string argument giving the new
+    /// objects name in the registry, followed by the arguments for
+    /// T's constructor, if any
+    template <class T, class... Args> void addFactory
+    (const std::string& typeName,const std::function<void(const std::string& objName)>& callback=nullptr);
   };
 
   

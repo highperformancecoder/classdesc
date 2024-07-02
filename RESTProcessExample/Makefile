@@ -1,6 +1,6 @@
 .SUFFIXES: .c .cc .o .d .h .cd
 OBJS=RESTProcessExample.o SimpleBufferExample.o pyExample.o
-CFLAGS=-g -I.. -I. -I../json5_parser/json5_parser -I/usr/local/include -fPIC -DUSE_UNROLLED -pthread
+CFLAGS=-g -I.. -I. -I../json5_parser/json5_parser -I/usr/local/include -fPIC -pthread
 LIBS+=-L/usr/local/lib64 -lboost_thread -lpthread
 VPATH=..
 EXES=RESTProcess SimpleBuffer pyExample.so

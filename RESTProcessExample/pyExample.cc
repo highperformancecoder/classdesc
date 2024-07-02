@@ -6,4 +6,9 @@ Root root;
 const int Foo::csi;
 int Foo::si;
 
-CLASSDESC_PYTHON_MODULE(pyExample,root)
+
+CLASSDESC_ADD_GLOBAL(root);
+CLASSDESC_DECLARE_TYPE(Foo,int);
+CLASSDESC_DECLARE_TYPE(Root);
+CLASSDESC_PYTHON_MODULE(pyExample);
+

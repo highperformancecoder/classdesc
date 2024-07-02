@@ -171,7 +171,7 @@ assert root.bar1.foo.b()==3
 
 assert root.bar1.sfoop()==None
 
-expectThrow(lambda: root.bar1.recursiveType('hello'))
+assert root.bar1.recursiveType('hello')._properties['f']['b']==3
 
 assert root.defaultless.foo()==0
 assert root.defaultless.bar()==2
@@ -199,7 +199,7 @@ assert root.bar.rotation(20)==20
 assert root.bar.rotation()==20
 
 
-expectThrow(lambda: root.testString('hello'))
+assert root.testString('hello')=='hello'
 
 assert root.testDoubleIntOverload(1)==0
 assert root.testDoubleIntOverload(1,1)==1
@@ -207,3 +207,11 @@ assert root.testDoubleIntOverload(1,1.1)==1
 expectThrow(lambda: root.testDoubleIntOverload(1.1,1.1))
 expectThrow(lambda: root.dummy({a:1}))
 assert root.voidReturn()==None
+
+# test type factories
+from pyExample import *
+Foo("foo",2)
+Root("root2")
+from pyExample import *
+assert foo.b()==2
+assert root2.bar.b()==3

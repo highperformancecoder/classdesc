@@ -34,16 +34,17 @@
 namespace classdesc
 {
   // map of registries, one per module
-  inline std::map<std::string, RESTProcess_t>& registries()
+  inline std::map<std::string, RESTProcess_t*>& registries()
   {
-    static std::map<std::string, RESTProcess_t> registries;
+    static std::map<std::string, RESTProcess_t*> registries;
     return registries;
   }
 
   namespace
   {
-    // reference to per compile unit registry
-    RESTProcess_t* registry=nullptr;
+    // per compile unit registry
+    RESTProcess_t registry;
+    PyObject* pythonModule=nullptr;
   }
   
   /// @{ utility python object constructors
@@ -484,7 +485,7 @@ struct CppWrapperType: public PyTypeObject
       static Py_ssize_t size(PyObject* self)
       {
         auto cppWrapper=static_cast<CppWrapper*>(self);
-        return registry->process(cppWrapper->command+".@size",{}).get_uint64();
+        return registry.process(cppWrapper->command+".@size",{}).get_uint64();
       }
 
       static PyObject* getElem(PyObject* self, PyObject* key)
@@ -545,13 +546,13 @@ struct CppWrapperType: public PyTypeObject
       if (!pyObject||command.find('@')!=string::npos) return;
       try
         {
-          PyObject_SetAttrString(pyObject, "_signature",newPyObject(registry->process(command+".@signature",{})));
-          PyObject_SetAttrString(pyObject, "_type", newPyObject(registry->process(command+".@type",{})));
+          PyObject_SetAttrString(pyObject, "_signature",newPyObject(registry.process(command+".@signature",{})));
+          PyObject_SetAttrString(pyObject, "_type", newPyObject(registry.process(command+".@type",{})));
         }
       catch (...) { } // do not log, nor report errors back to python - there are too many
       try
         {
-          auto methods=registry->process(command+".@list",{});
+          auto methods=registry.process(command+".@list",{});
           if (methods.type()!=RESTProcessType::array) return;
           for (auto& i: methods.array())
             {
@@ -585,7 +586,7 @@ struct CppWrapperType: public PyTypeObject
     try
       {
         auto args=arguments.get<json_pack_t>();
-        const PythonBuffer result(registry->process(command, args));
+        const PythonBuffer result(registry.process(command, args));
 
         auto pyResult=result.getPyObject();
         switch (result.type())
@@ -616,25 +617,43 @@ struct CppWrapperType: public PyTypeObject
       }
   }
 
-  template <class T>
-  void initModule(PyObject* module, const char* objName, T& object)
+    /// 
+    template <class T, class... Args> struct DeclareType
+    {
+      DeclareType(const string& typeName) {
+        registry.addFactory<T,Args...>(typeName,[](const string& name){
+          PyObjectRef pyObject=CppWrapper::create(name);
+          LimitRecursion().attachMethods(pyObject,name);
+          PyModule_AddObject(pythonModule, name.c_str(), pyObject.release());
+        });
+      }
+    };
+
+  void initModule()
   {
-    assert(module);
-    classdesc::RESTProcess(*registry,objName,object);
-    PyObjectRef pyObject=CppWrapper::create(objName);
-    LimitRecursion().attachMethods(pyObject,objName);
-    PyModule_AddObject(module, objName, pyObject.release());
+    assert(pythonModule);
+    // grab all toplevel objects already installed
+    std::set<std::string> topLevelNames;
+    for (auto& i: registry)
+      if (!i.first.empty() && i.first[0]!='@')
+        topLevelNames.insert(i.first.substr(0,i.first.find('.')));
+    for (auto& i: topLevelNames)
+      {
+        PyObjectRef pyObject=CppWrapper::create(i);
+        LimitRecursion().attachMethods(pyObject,i);
+        PyModule_AddObject(pythonModule, i.c_str(), pyObject.release());
+      }
 
     // enum reflection
     PyObjectRef enummer=PyDict_New();
-    auto enumList=registry->process("@enum.@list",{});
+    auto enumList=registry.process("@enum.@list",{});
     for (auto& i: enumList.array())
       {
         string name=i.get_str();
         PyDict_SetItemString(enummer, name.c_str(),
-                             newPyObjectJson(registry->process("@enum."+name,{})));
+                             newPyObjectJson(registry.process("@enum."+name,{})));
       }
-    PyModule_AddObject(module, "enum", enummer.release());
+    PyModule_AddObject(pythonModule, "enum", enummer.release());
   }
 }
 
@@ -653,7 +672,7 @@ namespace classdesc_access
 /// a convenience macro for creating a python module with a single global object
 /// @param name module name
 /// @param object C++ object to expose to python
-#define CLASSDESC_PYTHON_MODULE(name,object)                       \
+#define CLASSDESC_PYTHON_MODULE(name)                       \
   PyMODINIT_FUNC PyInit_##name()                                   \
   {                                                                \
     static PyModuleDef module_##name = {                           \
@@ -668,11 +687,24 @@ namespace classdesc_access
     nullptr                                                        \
     };                                                             \
                                                                    \
-    auto module=PyModule_Create(&module_##name);                   \
-    registry=&registries()[#name];                                 \
-    if (module) initModule(module, #object, object);               \
-    return module;                                                 \
-  }                                                  
-  
+    registries()[#name]=&registry;                                 \
+    pythonModule=PyModule_Create(&module_##name);                  \
+    if (pythonModule) initModule();                                \
+    return pythonModule;                                           \
+  }                                                 
+
+/// Add a global object into the registry. \a object is also used as
+/// the name this object will be referred to from Python, so must be
+/// unqualified at the macro call.
+#define CLASSDESC_ADD_GLOBAL(object)            \
+  static int add_global_##object=(classdesc::RESTProcess(classdesc::registry,#object,object), 0);
+
+/// Add a type foundry or factory into the registry. \a type is also
+/// used as the name this object will be referred to from Python, so
+/// must be unqualified at the macro call. The following optional
+/// arguments are a list of types of arguments passed to the
+/// constructor, if any.
+#define CLASSDESC_DECLARE_TYPE(type,...)                           \
+  static classdesc::DeclareType<type __VA_OPT__(,) __VA_ARGS__> declareType_##type(#type);
 
 #endif

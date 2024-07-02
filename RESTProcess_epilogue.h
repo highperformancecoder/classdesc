@@ -233,10 +233,6 @@ namespace classdesc
                     r<<array;
                     return r;
                   }
-//                else if (tail==".@list")
-//                  return REST_PROCESS_BUFFER(REST_PROCESS_BUFFER::Array());
-//                else if (tail==".@type")
-//                  return REST_PROCESS_BUFFER("overloaded function");
                 // sort function overloads by best match
                 auto cmp=[&](RESTProcessFunctionBase*x, RESTProcessFunctionBase*y)
                 {return x->matchScore(jin)<y->matchScore(jin);};
@@ -275,6 +271,27 @@ namespace classdesc
   {}
   
   template <class T> RESTProcess_t::RESTProcess_t(T&obj) {populateFromObj(*this,obj);}
+
+  template <class T> struct RESTProcessHeapObject:  public RESTProcessPtr<std::unique_ptr<T>>
+  {
+    std::unique_ptr<T> obj;
+    RESTProcessHeapObject(): RESTProcessPtr<std::unique_ptr<T>>(obj) {}
+  };
+  
+  template <class T, class...A> void RESTProcess_t::addFactory
+  (const string& typeName,const std::function<void(const std::string& objName)>& callback)
+  {
+    std::function<void(const std::string& name, A... args)> factory=
+      [this,callback](const std::string& name, A... args) {
+      auto rp=std::make_unique<RESTProcessHeapObject<T>>();
+      rp->obj=std::make_unique<T>(std::forward<A>(args)...);
+      add(name,rp.release());
+      callback(name);
+    };
+    
+    add(typeName, new RESTProcessFunction<decltype(factory),void>(factory));
+  }
+
 }
 
 namespace classdesc_access
