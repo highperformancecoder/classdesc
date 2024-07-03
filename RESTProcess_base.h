@@ -11,6 +11,7 @@
 /// A classdesc descriptor to generate virtual xrap processing calls
 #include "function.h"
 #include "multiArray.h"
+#include "object.h"
 #include <map>
 #include <stdexcept>
 
@@ -24,6 +25,12 @@ namespace classdesc
   /// interface for the REST processor
   class RESTProcessBase
   {
+  protected:
+    /// implementation of upcasting to a classdesc::object
+    template <class T> typename enable_if<is_base_of<object,T>, object*>::T
+    getClassdescObjectImpl(T& obj) {return &obj;}
+    template <class T> typename enable_if<Not<is_base_of<object,T>>, object*>::T
+    getClassdescObjectImpl(T& obj) {return nullptr;}    
   public:
     virtual ~RESTProcessBase() {}
     /// perform the REST operation, with \a remainder being the query string and \a arguments as body text
@@ -38,6 +45,8 @@ namespace classdesc
     template <class F> REST_PROCESS_BUFFER functionSignature() const;
     /// returns a pointer to the underlying object if it is one of type T, otherwise null
     template <class T> T* getObject();
+    /// returns a classdesc object is referring to an object derived from classdesc::object
+    virtual object* getClassdescObject() {return nullptr;}
     /// true if this is an object, not a function
     virtual bool isObject() const {return false;}
     /// true if this is a const object, a const member function or static/free function
@@ -325,6 +334,7 @@ namespace classdesc
     REST_PROCESS_BUFFER signature() const override;
     REST_PROCESS_BUFFER list() const override;
     REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
+    object* getClassdescObject() override {return getClassdescObjectImpl(obj);}
     bool isObject() const override {return true;}
     bool isConst() const override {return std::is_const<T>::value;}
   };
@@ -711,6 +721,7 @@ namespace classdesc
         return REST_PROCESS_BUFFER(json5_parser::mArray());
     }
     REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
+    object* getClassdescObject() override {return ptr? getClassdescObjectImpl(*ptr): nullptr;}
   };
 
   template <class T>
@@ -726,6 +737,7 @@ namespace classdesc
       else return REST_PROCESS_BUFFER(json5_parser::mArray());
     }
     REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<std::weak_ptr<T> >());}
+    object* getClassdescObject() override {return ptr? getClassdescObjectImpl(*ptr): nullptr;}
   };
 
   
