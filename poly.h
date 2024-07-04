@@ -208,4 +208,6 @@ namespace std
 {
   template <class T, class TT> void swap(classdesc::poly<T,TT>& x,classdesc::poly<T,TT>& y) {x.swap(y);}
 }
+
+#include "poly.cd"
 #endif
