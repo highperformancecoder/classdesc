@@ -526,9 +526,10 @@ struct CppWrapperType: public PyTypeObject
       tp_as_mapping=&mappingMethods;
       PyType_Ready(this);
     }
-  } cppWrapperType;
+  };
 
-  CppWrapper::CppWrapper(const string& command): command(command) {
+  inline CppWrapper::CppWrapper(const string& command): command(command) {
+    static CppWrapperType cppWrapperType;
     ob_refcnt=1;
     ob_type=&cppWrapperType;
     methods.emplace("__dict__",cppWrapperType.tp_dict);
@@ -581,7 +582,7 @@ struct CppWrapperType: public PyTypeObject
   };
 
 
-  PyObject* callOnRegistry(const string& command, const PythonBuffer& arguments)
+  inline PyObject* callOnRegistry(const string& command, const PythonBuffer& arguments)
   {
     try
       {
@@ -629,31 +630,34 @@ struct CppWrapperType: public PyTypeObject
       }
     };
 
-  void initModule()
+  namespace
   {
-    assert(pythonModule);
-    // grab all toplevel objects already installed
-    std::set<std::string> topLevelNames;
-    for (auto& i: registry)
-      if (!i.first.empty() && i.first[0]!='@')
-        topLevelNames.insert(i.first.substr(0,i.first.find('.')));
-    for (auto& i: topLevelNames)
-      {
-        PyObjectRef pyObject=CppWrapper::create(i);
-        LimitRecursion().attachMethods(pyObject,i);
-        PyModule_AddObject(pythonModule, i.c_str(), pyObject.release());
-      }
-
-    // enum reflection
-    PyObjectRef enummer=PyDict_New();
-    auto enumList=registry.process("@enum.@list",{});
-    for (auto& i: enumList.array())
-      {
-        string name=i.get_str();
-        PyDict_SetItemString(enummer, name.c_str(),
-                             newPyObjectJson(registry.process("@enum."+name,{})));
-      }
-    PyModule_AddObject(pythonModule, "enum", enummer.release());
+    inline void initModule()
+    {
+      assert(pythonModule);
+      // grab all toplevel objects already installed
+      std::set<std::string> topLevelNames;
+      for (auto& i: registry)
+        if (!i.first.empty() && i.first[0]!='@')
+          topLevelNames.insert(i.first.substr(0,i.first.find('.')));
+      for (auto& i: topLevelNames)
+        {
+          PyObjectRef pyObject=CppWrapper::create(i);
+          LimitRecursion().attachMethods(pyObject,i);
+          PyModule_AddObject(pythonModule, i.c_str(), pyObject.release());
+        }
+      
+      // enum reflection
+      PyObjectRef enummer=PyDict_New();
+      auto enumList=registry.process("@enum.@list",{});
+      for (auto& i: enumList.array())
+        {
+          string name=i.get_str();
+          PyDict_SetItemString(enummer, name.c_str(),
+                               newPyObjectJson(registry.process("@enum."+name,{})));
+        }
+      PyModule_AddObject(pythonModule, "enum", enummer.release());
+    }
   }
 }
 
