@@ -41,6 +41,8 @@ else #standalone test
 fi
 CC=${CC:-g++}
 
+touch poly.cd
+
 cat >should-fail.cc <<EOF
 #include <ref.h>
 #include "classdesc_epilogue.h"
@@ -55,10 +57,10 @@ int main()
 }
 EOF
 
-g++ -DOP="==" -DTR1  -I$here should-fail.cc &>/dev/null
+g++ -DOP="==" -DTR1  -I$here -I. should-fail.cc &>/dev/null
 if test $? -eq 0; then fail; fi
 
-g++ -DOP="!=" -DTR1  -I$here should-fail.cc &>/dev/null
+g++ -DOP="!=" -DTR1  -I$here -I.  should-fail.cc &>/dev/null
 if test $? -eq 0; then fail; fi
 
 cat >should-fail.cc <<EOF
@@ -77,10 +79,10 @@ int main()
 }
 EOF
 
-g++ -DOP="==" -DTR1  -I$here should-fail.cc
+g++ -DOP="==" -DTR1  -I$here -I.  should-fail.cc
 if test $? -eq 0; then fail; fi
 
-g++ -DOP="!=" -DTR1 -I$here should-fail.cc
+g++ -DOP="!=" -DTR1 -I$here -I.  should-fail.cc
 if test $? -eq 0; then fail; fi
 
 cat >should-succeed.cc <<EOF
@@ -109,7 +111,7 @@ int main()
 }
 EOF
 
-g++ -DTR1  -I$here -o a.out should-succeed.cc
+g++ -DTR1  -I$here  -I. -o a.out should-succeed.cc
 if test $? -ne 0; then fail; fi
 
 ./a.out
