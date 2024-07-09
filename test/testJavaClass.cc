@@ -10,6 +10,7 @@
   Test things like the equality operator and streaming is reversible
 */
 
+#include "pack_stl.h"
 #include "javaClass.h"
 #include "javaClass_serialisation.h"
 #include "javaClass.cd"

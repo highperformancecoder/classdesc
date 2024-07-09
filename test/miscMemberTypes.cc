@@ -7,6 +7,7 @@
 */
 
 #include "pack_base.h"
+#include "pack_stl.h"
 #include "miscMemberTypes.h"
 #include "classdesc_epilogue.h"
 

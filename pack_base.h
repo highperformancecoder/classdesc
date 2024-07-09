@@ -746,8 +746,6 @@ CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(unpack)
 CLASSDESC_FUNCTION_NOP(pack)
 CLASSDESC_FUNCTION_NOP(unpack)
 
-#include "pack_stl.h"
-
 #ifdef _CLASSDESC
 #pragma omit pack classdesc::string
 #pragma omit pack eco_strstream

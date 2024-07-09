@@ -9,6 +9,8 @@
 #ifndef PACK_EPILOGUE_H
 #define PACK_EPILOGUE_H
 
+#include "pack_stl.h"
+
 namespace classdesc_access
 {
   namespace cd=classdesc;
