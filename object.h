@@ -73,7 +73,7 @@ namespace classdesc
   
   */
   template <class This, class Base=object>
-  struct Object: virtual public Base 
+  struct Object: public Base 
   {
     /// warning, this method should not be called before main() in any
     /// other module than the one declaring classdesc::factory

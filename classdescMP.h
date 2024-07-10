@@ -20,7 +20,7 @@
 //#undef SEEK_END
 #include <mpi.h>
 #include <stdexcept>
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 
 namespace classdesc
@@ -432,8 +432,7 @@ namespace classdesc
   {
 #if MPI_DEBUG
     /* enable this piece of code for debugging under gdb */
-    char buf[1];
-    if (myid==0) gets(buf);
+    if (myid==0) std::getchar();
     MPI_Barrier(MPI_COMM_WORLD);
 #endif
     if (myid()>0)
@@ -494,8 +493,7 @@ namespace classdesc
     MPI_Comm_size(MPI_COMM_WORLD,&nprocs);
 #if MPI_DEBUG
     /* enable this piece of code for debugging under gdb */
-    char buf[1];
-    if (myid==0) gets(buf);
+    if (myid==0) std::getchar();
     MPI_Barrier(MPI_COMM_WORLD);
 #endif
   }
