@@ -124,7 +124,8 @@ unpack(classdesc::unpack_t& b, const classdesc::string& d, classdesc::shared_ptr
   b>>t;
   if (t)
     {
-      a.reset(classdesc::object::create(t-1));
+      std::shared_ptr<classdesc::object> tmp(classdesc::object::create(t-1));
+      a=std::dynamic_pointer_cast<T>(std::move(tmp));
       a->unpack(b);
     }
 }
@@ -138,9 +139,9 @@ unpack(classdesc::unpack_t& b, const classdesc::string& d, const classdesc::shar
   if (t)
     {
 #if defined(__cplusplus) && __cplusplus>=201103L
-      std::unique_ptr<T> a(classdesc::object::create(t-1));
+      std::unique_ptr<classdesc::object> a(classdesc::object::create(t-1));
 #else
-      std::auto_ptr<T> a(classdesc::object::create(t-1));
+      std::auto_ptr<classdesc::object> a(classdesc::object::create(t-1));
 #endif
       a->unpack(b);
     }
