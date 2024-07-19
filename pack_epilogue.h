@@ -11,6 +11,10 @@
 
 #include "pack_stl.h"
 
+#include "use_mbr_pointers.h"
+CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(pack)
+CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(unpack)
+
 namespace classdesc_access
 {
   namespace cd=classdesc;

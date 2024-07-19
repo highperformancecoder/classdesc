@@ -16,6 +16,7 @@ namespace std
   };
 }
 
+#include "pack_stl.h"
 #include "c++Features.h"
 #include "classdesc_epilogue.h"
 

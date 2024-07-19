@@ -13,12 +13,13 @@
 #include "function.h"
 
 #define CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(descriptor)               \
+  using classdesc::descriptor;                                          \
   namespace classdesc {                                                 \
     template<class C, class T>                                          \
     typename enable_if<And<is_member_object_pointer<T>,                 \
               Not<functional::is_nonmember_function_ptr<T> > >,void>::T \
     descriptor(descriptor##_t& b, const string& d, C& o, T y)           \
-    {descriptor(b,d,o.*y);}                                             \
+    {::descriptor(b,d,o.*y);}                                           \
                                                                         \
     /* for static object members */                                     \
     template<class C, class T>                                          \
@@ -26,7 +27,7 @@
                  And<Not<is_base_of<is_const_static,C> >,               \
                      is_object<T> >,void>::T                            \
       descriptor(descriptor##_t& b, const string& d, C&, T* y)          \
-      {descriptor(b,d,*y);}                                             \
+    {::descriptor(b,d,*y);}                                             \
   }  
 
 // do nothing for function objects - suitable for all serialisation descriptors

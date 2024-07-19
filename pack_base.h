@@ -13,6 +13,8 @@
 #ifndef PACK_BASE_H
 #define PACK_BASE_H
 #include "classdesc.h"
+#include "function.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -701,6 +703,26 @@ namespace classdesc
   void unpack(pack_t& targ, const string& desc, R (C::*&arg)(A1))
   {targ.unpackraw((char*)&arg,sizeof(arg));}
 
+  template<class C, class T>
+  typename enable_if<And<is_member_object_pointer<T>,
+                         Not<functional::is_nonmember_function_ptr<T> > >,void>::T 
+  pack(pack_t& b, const string& d, C& o, T y);
+  template<class C, class T>
+  typename enable_if<And<is_member_object_pointer<T>,
+                         Not<functional::is_nonmember_function_ptr<T> > >,void>::T 
+  unpack(unpack_t& b, const string& d, C& o, T y);
+
+  template<class C, class T>
+  typename enable_if<
+    And<Not<is_base_of<is_const_static,C> >,
+        is_object<T> >,void>::T
+  pack(pack_t& b, const string& d, C&, T* y);
+  template<class C, class T>
+  typename enable_if<
+    And<Not<is_base_of<is_const_static,C> >,
+        is_object<T> >,void>::T
+  unpack(unpack_t& b, const string& d, C&, T* y);
+
   /// const static support. No need to stream
   template <class T>
   void pack(pack_t& targ, const string& desc, is_const_static i, T t)
@@ -735,16 +757,14 @@ namespace classdesc
 
 }
 
+#include "use_mbr_pointers.h"
+CLASSDESC_FUNCTION_NOP(pack)
+CLASSDESC_FUNCTION_NOP(unpack)
+
 using classdesc::pack;
 using classdesc::unpack;
 using classdesc::pack_onbase;
 using classdesc::unpack_onbase;
-
-#include "use_mbr_pointers.h"
-CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(pack)
-CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(unpack)
-CLASSDESC_FUNCTION_NOP(pack)
-CLASSDESC_FUNCTION_NOP(unpack)
 
 #ifdef _CLASSDESC
 #pragma omit pack classdesc::string
