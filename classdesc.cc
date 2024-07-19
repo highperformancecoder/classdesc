@@ -193,14 +193,16 @@ struct MemberSig
   MemberSig(string d, string r, string a, string p, string n, Type t):
     declName(d), returnType(r), argList(a), prefix(p), name(n), type(t) {}
   string declare() {
+    // If qualified type, the typename qualifier required
+    auto rType=returnType.find("::")!=string::npos? "typename "+returnType: returnType;
     switch (type)
       {
       case none:
-        return returnType+"("+prefix+"*"+declName+")("+argList+")=&"+prefix+name+";";
+        return rType+"("+prefix+"*"+declName+")("+argList+")=&"+prefix+name+";";
       case is_const:
-        return returnType+"("+prefix+"*"+declName+")("+argList+") const=&"+prefix+name+";";
+        return rType+"("+prefix+"*"+declName+")("+argList+") const=&"+prefix+name+";";
       case is_static:
-        return returnType+"(*"+declName+")("+argList+")=&"+prefix+name+";";
+        return rType+"(*"+declName+")("+argList+")=&"+prefix+name+";";
       case is_constructor:
         return "void (*"+declName+")("+argList+")=0;";
       default: assert(false); return ""; // should never be executed, - statement to silence warning
