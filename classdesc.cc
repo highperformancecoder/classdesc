@@ -194,7 +194,7 @@ struct MemberSig
     declName(d), returnType(r), argList(a), prefix(p), name(n), type(t) {}
   string declare() {
     // If qualified type, the typename qualifier required
-    auto rType=returnType.find("::")!=string::npos && returnType.find("typename ")==string::npos? "typename "+returnType: returnType;
+    string rType=returnType.find("::")!=string::npos && returnType.find("typename ")==string::npos? "typename "+returnType: returnType;
     switch (type)
       {
       case none:

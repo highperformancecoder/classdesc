@@ -636,8 +636,8 @@ inline std::ostream& operator<<(std::ostream& o, const json5_parser::mValue& x)
 
 namespace classdesc_access
 {
-  template <class T> struct access_json_pack;
-  template <class T> struct access_json_unpack;
+  template <class T, class Enable=void> struct access_json_pack;
+  template <class T, class Enable=void> struct access_json_unpack;
 }
 
 #include "use_mbr_pointers.h"

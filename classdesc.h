@@ -146,6 +146,10 @@ namespace classdesc
   using std::is_copy_constructible;
   using std::is_assignable;
 
+  // useful utility for SFINAE calculations
+  // See https://isocpp.org/files/papers/N3911.pdf
+  template <typename... > using void_t = void;
+  
   // missing from std, so supply here in classdesc
   template <class T, class... Args>
   std::unique_ptr<T> make_unique(Args... args)
@@ -320,6 +324,10 @@ namespace classdesc
     static const bool value=true;};
  
 #if defined(__cplusplus) && __cplusplus>=201103L
+  template <class T, class=void> struct is_iterator: public false_type {};
+  template <class T> struct is_iterator<T, void_t<typename std::iterator_traits<T>::iterator_category>>:
+    public true_type {};
+
   template <class K, class V, class H, class P, class A> 
   struct is_associative_container<std::unordered_map<K,V,H,P,A> > {
     static const bool value=true;};

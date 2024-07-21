@@ -1291,7 +1291,7 @@ namespace classdesc
 
 namespace classdesc_access
 {
-  template <class T> struct access_RESTProcess;
+  template <class T, class Enable=void> struct access_RESTProcess;
 }
 
 namespace std

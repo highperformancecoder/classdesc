@@ -74,9 +74,19 @@ namespace classdesc_access
 {
   namespace cd=classdesc;
 
+#if defined(__cplusplus) && __cplusplus>=201103L  
+  // nobble iterators
+  template <class T>
+  struct access_json_pack<T, cd::void_t<typename std::iterator_traits<T>::value_type>>:
+    public cd::NullDescriptor<cd::json_pack_t> {};
+  template <class T>
+  struct access_json_unpack<T, cd::void_t<typename std::iterator_traits<T>::value_type>>:
+    public cd::NullDescriptor<cd::json_unpack_t> {};
+#endif
+  
 #ifndef JSON_PACK_NO_FALL_THROUGH_TO_STREAMING
   // fall through to streaming operators
-  template <class T>
+  template <class T,class Enable>
   struct access_json_pack
   {
   public:
@@ -88,7 +98,7 @@ namespace classdesc_access
     }
   };
 
-  template <class T>
+  template <class T,class Enable>
   struct access_json_unpack
   {
   public:

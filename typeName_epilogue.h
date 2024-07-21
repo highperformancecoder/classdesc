@@ -26,6 +26,14 @@ namespace classdesc
   enable_if<And<Not<is_const<T> >,is_integral<T> >,std::string>::T
   typeNamep() {return integralTypeName<T>();}
 
+#if defined(__cplusplus) && __cplusplus>=201103L  
+  template <class T>
+  struct tn<T, void_t<typename std::iterator_traits<T>::value_type>>
+  {
+    static std::string name() {return "iterator";}
+  };
+#endif
+  
   template <class T> typename
   enable_if<
     And<
@@ -39,9 +47,8 @@ namespace classdesc
   typeNamep() {return "const "+typeName<typename remove_const<T>::type>();}
 
   template <class T>
-  typename enable_if<And<Not<is_function<T> >, Not<is_member_function_pointer<T> > >,  std::string>::T
+  typename enable_if<And<Not<is_function<T> >,Not<is_member_function_pointer<T> > >,  std::string>::T
   typeName() {return typeNamep<T>();}
-
   
 #if defined(__cplusplus) && __cplusplus>=201103L
   template <class T>

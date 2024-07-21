@@ -47,6 +47,10 @@ namespace classdesc_access
   struct access_RESTProcess<cd::PolyPack<T>>: 
     public cd::NullDescriptor<cd::RESTProcess_t> {};
 
+  template <class T>
+  struct access_RESTProcess<T, cd::void_t<typename std::iterator_traits<T>::value_type>>:
+    public cd::NullDescriptor<cd::RESTProcess_t> {};
+
 }
 
 namespace classdesc

@@ -22,8 +22,8 @@ namespace classdesc_access
   template <class T> struct access_unpack;
   template <class T> struct access_xml_pack;
   template <class T> struct access_xml_unpack;
-  template <class T> struct access_json_pack;
-  template <class T> struct access_json_unpack;
+  template <class T, class Enable> struct access_json_pack;
+  template <class T, class Enable> struct access_json_unpack;
   template <class T> struct access_random_init;
 }
 
@@ -39,8 +39,8 @@ namespace classdesc_access
   friend struct classdesc_access::access_unpack<type>;                  \
   friend struct classdesc_access::access_xml_pack<type>;                \
   friend struct classdesc_access::access_xml_unpack<type>;              \
-  friend struct classdesc_access::access_json_pack<type>;               \
-  friend struct classdesc_access::access_json_unpack<type>;             \
+  friend struct classdesc_access::access_json_pack<type,void>;          \
+  friend struct classdesc_access::access_json_unpack<type,void>;        \
   friend struct classdesc_access::access_random_init<type>
 
 // for backward compatibility. Deprecated.
