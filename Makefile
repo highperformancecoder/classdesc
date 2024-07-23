@@ -53,6 +53,11 @@ OS=MINGW
 XDR=
 endif
 
+ifeq ($(findstring Darwin,$(OS)),Darwin)
+# Apple has removed TR1, but not set the C++ standard :P
+FLAGS+=-std=c++11
+endif
+
 FLAGS+=-I/usr/X11R6/include
 
 ifdef XDR
