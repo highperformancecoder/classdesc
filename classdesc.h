@@ -52,11 +52,12 @@ namespace std
 #endif
 
 
-  /*
-    Classdesc is now dependent on TR1. These can either
-    be obtained from the compiler's standard library, or from Boost.
-    TODO: check that this works with Boost!
-  */
+#if defined(__cplusplus) && __cplusplus<201103L
+/*
+  Classdesc is now dependent on TR1. These can either
+  be obtained from the compiler's standard library, or from Boost.
+  TODO: check that this works with Boost!
+*/
 #ifdef TR1
 #include <tr1/type_traits>
 #if !defined(__ICC) || __ICC > 1100    //tr1 shared_ptr impl not functional with icc 10.1
@@ -65,6 +66,7 @@ namespace std
 #elif BOOST_TR1
 #include <boost/tr1/type_traits.hpp>
 #include <boost/tr1/memory.hpp>
+#endif
 #endif
 
 /** \namespace classdesc \brief Contains definitions related to
