@@ -66,7 +66,7 @@ LIBS+=-ldl
 endif
 
 ifdef AEGIS
-CFLAGS+=-Werror -Wall -Wno-unused-variable 
+CFLAGS+=-Werror -Wall -Wno-unused-variable -Wno-unused-function 
 CPLUSPLUS+=-std=c++98
 endif
 

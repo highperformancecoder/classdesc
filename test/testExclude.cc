@@ -16,7 +16,7 @@ int main()
 {
   pack_t b;
   foo f;
-  shared_ptr<bar> barPtr=make_shared<bar>();
+  shared_ptr<bar> barPtr(new bar);
   f.unpackable=barPtr.get();
   f.unpackable->barfoo();
   f.foosbar.barfoo();

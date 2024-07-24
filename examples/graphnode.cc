@@ -28,10 +28,10 @@ using namespace classdesc;
 int foonode::nodecntr=0;
 
 // register in static object to get around leak detector
-vector<shared_ptr<foonode>> store;
+vector<shared_ptr<foonode> > store;
 
 foonode* newFoonode() {
-  store.push_back(make_shared<foonode>());
+  store.push_back(shared_ptr<foonode>(new foonode));
   return store.back().get();
 }
 

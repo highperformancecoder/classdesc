@@ -124,8 +124,12 @@ unpack(classdesc::unpack_t& b, const classdesc::string& d, classdesc::shared_ptr
   b>>t;
   if (t)
     {
-      std::shared_ptr<classdesc::object> tmp(classdesc::object::create(t-1));
-      a=std::dynamic_pointer_cast<T>(std::move(tmp));
+      classdesc::shared_ptr<classdesc::object> tmp(classdesc::object::create(t-1));
+#if defined(__cplusplus) && __cplusplus>=201103L
+      a=classdesc::dynamic_pointer_cast<T>(std::move(tmp));
+#else
+      a=classdesc::dynamic_pointer_cast<T>(tmp);
+#endif
       a->unpack(b);
     }
 }

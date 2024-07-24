@@ -143,7 +143,8 @@ namespace classdesc
 
   using std::shared_ptr;
   using std::weak_ptr;
-
+  using std::dynamic_pointer_cast;
+  
   using std::is_default_constructible;
   using std::is_copy_constructible;
   using std::is_assignable;
@@ -229,6 +230,7 @@ namespace classdesc
 #if (!defined(__ICC) || __ICC > 1100)
   using std::tr1::shared_ptr;
   using std::tr1::weak_ptr;
+  using std::tr1::dynamic_pointer_cast;
 #endif
 
   // fake these using TR1 counterparts (which are conservative)
@@ -421,15 +423,15 @@ namespace classdesc
   ///@}
 
   /// transfer the constness property of T to U
-  template <class T, class U, bool c=std::is_const<T>::value> struct transfer_const;
+  template <class T, class U, bool c=is_const<T>::value> struct transfer_const;
   template <class T, class U> struct transfer_const<T,U,true>
   {
-    typedef typename std::add_const<U>::type type;
+    typedef typename add_const<U>::type type;
   };
 
   template <class T, class U> struct transfer_const<T,U,false>
   {
-    typedef typename std::remove_const<U>::type type;
+    typedef typename remove_const<U>::type type;
   };
 
   /// utility macro for declaring if a type has a particular member of

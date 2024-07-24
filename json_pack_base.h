@@ -44,9 +44,10 @@ namespace classdesc
       json_pack_error("json object %s not found", name.c_str()) {}
   };
 
-  const inline std::map<json5_parser::Value_type,RESTProcessType::Type>& RESTProcessTypeJSONMap()
+  typedef std::map<json5_parser::Value_type,RESTProcessType::Type> RESTProcessTypeJSONMap_t;
+  const inline RESTProcessTypeJSONMap_t& RESTProcessTypeJSONMap()
   {
-    static std::map<json5_parser::Value_type,RESTProcessType::Type> jsonMap;
+    static RESTProcessTypeJSONMap_t jsonMap;
     if (jsonMap.empty())
       {
         jsonMap[json5_parser::obj_type]=RESTProcessType::object;
@@ -63,21 +64,23 @@ namespace classdesc
   /// convert a json5_parser::Value_type to a RESTProcessType::Type
   inline RESTProcessType::Type Json5ParserTypeToRESTProcessType(json5_parser::Value_type type)
   {
-    auto r=RESTProcessTypeJSONMap().find(type);
+    RESTProcessTypeJSONMap_t::const_iterator r=RESTProcessTypeJSONMap().find(type);
     if (r!=RESTProcessTypeJSONMap().end()) return r->second;
     return RESTProcessType::null;
   }
-  
+
   /// convert a RESTProcessType::Type to a json5_parser::Value_type
   inline json5_parser::Value_type RESTProcessTypeToJson5ParserType(RESTProcessType::Type type)
   {
-    static std::map<RESTProcessType::Type,json5_parser::Value_type> jsonMap;
+    typedef std::map<RESTProcessType::Type,json5_parser::Value_type> Map;
+    static Map jsonMap;
     if (jsonMap.empty())
       {
-        auto& m=RESTProcessTypeJSONMap();
-        for (auto& i: m) jsonMap.emplace(i.second,i.first);
+        const RESTProcessTypeJSONMap_t& m=RESTProcessTypeJSONMap();
+        for (RESTProcessTypeJSONMap_t::const_iterator i=m.begin(); i!=m.end(); ++i)
+          jsonMap.insert(std::make_pair(i->second,i->first));
       }
-    auto r=jsonMap.find(type);
+    Map::const_iterator r=jsonMap.find(type);
     if (r!=jsonMap.end()) return r->second;
     return json5_parser::null_type;
   };
