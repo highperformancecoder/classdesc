@@ -1,0 +1,27 @@
+name: CI Tests - Debug
+
+on: [pull_request,push]
+
+jobs:
+  Regression-test:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu_ver: [20.04]
+
+    name: ubuntu-${{ matrix.ubuntu_ver }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run regression tests
+        run: |
+          make AEGIS=1 TRAVIS=1 sure
+
+
