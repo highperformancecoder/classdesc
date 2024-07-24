@@ -27,9 +27,9 @@ namespace classdesc
   {
   protected:
     /// implementation of upcasting to a classdesc::object
-    template <class T> typename enable_if<is_base_of<object,T>, object*>::T
+    template <class T> typename enable_if<is_base_of<object,T>, const object*>::T
     getClassdescObjectImpl(T& obj) {return &obj;}
-    template <class T> typename enable_if<Not<is_base_of<object,T>>, object*>::T
+    template <class T> typename enable_if<Not<is_base_of<object,T>>, const object*>::T
     getClassdescObjectImpl(T& obj) {return nullptr;}    
   public:
     virtual ~RESTProcessBase() {}
@@ -45,8 +45,10 @@ namespace classdesc
     template <class F> REST_PROCESS_BUFFER functionSignature() const;
     /// returns a pointer to the underlying object if it is one of type T, otherwise null
     template <class T> T* getObject();
-    /// returns a classdesc object is referring to an object derived from classdesc::object
+    /// @{ returns a classdesc object is referring to an object derived from classdesc::object
     virtual object* getClassdescObject() {return nullptr;}
+    virtual const object* getConstClassdescObject() {return nullptr;}
+    /// @}
     /// true if this is an object, not a function
     virtual bool isObject() const {return false;}
     /// true if this is a const object, a const member function or static/free function
@@ -334,7 +336,11 @@ namespace classdesc
     REST_PROCESS_BUFFER signature() const override;
     REST_PROCESS_BUFFER list() const override;
     REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
-    object* getClassdescObject() override {return getClassdescObjectImpl(obj);}
+    object* getClassdescObject() override {
+      if (is_const<T>::value) return nullptr;
+      return const_cast<object*>(getClassdescObjectImpl(obj));
+    }
+    const object* getConstClassdescObject() override {return getClassdescObjectImpl(obj);}
     bool isObject() const override {return true;}
     bool isConst() const override {return std::is_const<T>::value;}
   };
@@ -721,7 +727,11 @@ namespace classdesc
         return REST_PROCESS_BUFFER(json5_parser::mArray());
     }
     REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
-    object* getClassdescObject() override {return ptr? getClassdescObjectImpl(*ptr): nullptr;}
+    object* getClassdescObject() override {
+      if (!ptr || is_const<typename T::element_type>::value) return nullptr;
+      return const_cast<object*>(getClassdescObjectImpl(*ptr));
+    }
+    const object* getConstClassdescObject() override {return ptr? getClassdescObjectImpl(*ptr): nullptr;}
   };
 
   template <class T>
@@ -737,7 +747,15 @@ namespace classdesc
       else return REST_PROCESS_BUFFER(json5_parser::mArray());
     }
     REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<std::weak_ptr<T> >());}
-    object* getClassdescObject() override {return ptr? getClassdescObjectImpl(*ptr): nullptr;}
+    object* getClassdescObject() override {
+      auto p=ptr.lock();
+      if (!p || is_const<typename T::element_type>::value) return nullptr;
+      return const_cast<object*>(getClassdescObjectImpl(*p));
+    }
+    const object* getConstClassdescObject() override  {
+      auto p=ptr.lock();
+      return p? getClassdescObjectImpl(*p): nullptr;
+    }
   };
 
   

@@ -266,13 +266,13 @@ namespace classdesc
   template <class T> struct enable_if_c<false,T> {};
   /// controlled template specialisation: stolen from boost::enable_if. 
   /** 
-  \a Cond is a condition class inheriting from \c
-     std::tr1::true_type or std::tr1::false_type
+      \a Cond is a condition class inheriting from \c
+      std::tr1::true_type or std::tr1::false_type
   */
   template <class Cond, class T=void> struct enable_if: 
     public enable_if_c<Cond::value,T> {};
 
-  #undef True
+#undef True
   // NB - implementation of C++11 std::conditional
   template <bool C, class True, class F>
   struct conditional
@@ -316,7 +316,7 @@ namespace classdesc
   template <class K, class V, class C, class A> 
   struct is_associative_container<std::map<K,V,C,A> > {
     static const bool value=true;};
-   template <class T, class C, class A> 
+  template <class T, class C, class A> 
   struct is_associative_container<std::multiset<T,C,A> > {
     static const bool value=true;};
   template <class K, class V, class C, class A> 
@@ -348,7 +348,7 @@ namespace classdesc
   /// determines if T is a container
   template <class T> struct is_container {
     static const bool value=
-    is_sequence<T>::value||is_associative_container<T>::value;
+      is_sequence<T>::value||is_associative_container<T>::value;
   };
 
   /// true_type if T is a StringKeyMap
@@ -418,16 +418,28 @@ namespace classdesc
   {static const bool value=X==Y;};
   ///@}
 
+  /// transfer the constness property of T to U
+  template <class T, class U, bool c=std::is_const<T>::value> struct transfer_const;
+  template <class T, class U> struct transfer_const<T,U,true>
+  {
+    typedef typename std::add_const<U>::type type;
+  };
+
+  template <class T, class U> struct transfer_const<T,U,false>
+  {
+    typedef typename std::remove_const<U>::type type;
+  };
+
   /// utility macro for declaring if a type has a particular member of
   /// type \a Sig
-#define CLASSDESC_HAS_MEMBER(mem)                                 \
-  template <class T, class Sig>                                   \
-  struct has_member_##mem                                         \
-  {                                                               \
-    template <class U, Sig> struct SFINAE {};                     \
-    template <class U> static char test(SFINAE<U,&U::mem>*);      \
-    template <class U> static int test(...);                      \
-    const static bool value=sizeof(test<T>(0))==sizeof(char);     \
+#define CLASSDESC_HAS_MEMBER(mem)                               \
+  template <class T, class Sig>                                 \
+  struct has_member_##mem                                       \
+  {                                                             \
+    template <class U, Sig> struct SFINAE {};                   \
+    template <class U> static char test(SFINAE<U,&U::mem>*);    \
+    template <class U> static int test(...);                    \
+    const static bool value=sizeof(test<T>(0))==sizeof(char);   \
   };
 
   // handle resize on nonresizable containers such as std::array
@@ -467,21 +479,21 @@ namespace classdesc
   
 
   
-//  template <class T>
-//  typename enable_if<is_sequence<T>,void>::T
-//  resize(T& x, std::size_t n) {x.resize(n);}
-//#if defined(__cplusplus) && __cplusplus>=201103L
-//  template <class T, std::size_t N>
-//  void resize(std::array<T,N>& x, std::size_t n) {}
-//#endif
+  //  template <class T>
+  //  typename enable_if<is_sequence<T>,void>::T
+  //  resize(T& x, std::size_t n) {x.resize(n);}
+  //#if defined(__cplusplus) && __cplusplus>=201103L
+  //  template <class T, std::size_t N>
+  //  void resize(std::array<T,N>& x, std::size_t n) {}
+  //#endif
   
 
   /// has default constructor, and is copiable 
 
   // is_assignable doesn't seem to be working correctly yet
-//  template <class T> struct is_dca: 
-//    public And<And<is_default_constructible<T>, is_copy_constructible<T> >,
-//               is_assignable<T,T> > {};
+  //  template <class T> struct is_dca: 
+  //    public And<And<is_default_constructible<T>, is_copy_constructible<T> >,
+  //               is_assignable<T,T> > {};
   template <class T> struct is_dca: 
     public And<is_default_constructible<T>, is_copy_constructible<T> > {};
 
@@ -502,7 +514,7 @@ namespace classdesc
 
   template <class T> struct is_rvalue<const T&>: public is_rvalue<T> {};
 
-    /// @}
+  /// @}
     
   /// base class for exceptions thrown by classdesc
   struct exception: std::runtime_error
@@ -513,13 +525,13 @@ namespace classdesc
 #if defined(__cplusplus) && __cplusplus>=201103L
   template <class Tp, class EqualTo>
   struct has_equality_operator_impl
-  {
-    template <class U, class V>
-    static auto test(U*) -> decltype(std::declval<U>() == std::declval<V>());
-    template <typename, typename>
-    static auto test(...) -> std::false_type;
-    using type=typename std::is_same<bool, decltype(test<Tp, EqualTo>(0))>::type;
-  };
+    {
+      template <class U, class V>
+      static auto test(U*) -> decltype(std::declval<U>() == std::declval<V>());
+      template <typename, typename>
+      static auto test(...) -> std::false_type;
+      using type=typename std::is_same<bool, decltype(test<Tp, EqualTo>(0))>::type;
+    };
   template <class T, class EqualTo=T>
   struct has_equality_operator: public has_equality_operator_impl<T,EqualTo>::type {};
 
@@ -535,7 +547,7 @@ namespace classdesc
   template <class T>
   typename enable_if<
     And<Not<is_function<T> >, Not<is_member_function_pointer<T> > >,
-        std::string>::T  typeName();
+    std::string>::T  typeName();
 
 #if defined(__cplusplus) && __cplusplus>=201103L
   // handle variadic arguments
@@ -543,7 +555,7 @@ namespace classdesc
   template <class T> std::string varTn() {return typeName<T>();}
 #endif
   
- ///@{ a string representation of the type
+  ///@{ a string representation of the type
   template <> inline std::string typeName<void>()    {return "void";}
   template <> inline std::string typeName<bool>()    {return "bool";}
   template <> inline std::string typeName<char>()    {return "char";}
@@ -644,7 +656,7 @@ namespace classdesc
   };
 #endif
   
- template <class T,class A> struct tn<std::vector<T,A> >
+  template <class T,class A> struct tn<std::vector<T,A> >
   {
     static std::string name()
     {return "std::vector<"+typeName<T>()+">";}
@@ -1002,7 +1014,7 @@ namespace classdesc
     typename enable_if<is_integral<U>,const T*>::T
     operator+(U x) const {return val+x;}
     std::ptrdiff_t operator-(const T* x) const {return val-x;}
- };
+  };
 
   template <class T, class U>
   typename enable_if<is_integral<U>,T*>::T
