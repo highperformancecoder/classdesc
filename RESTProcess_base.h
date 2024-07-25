@@ -22,6 +22,9 @@
 
 namespace classdesc
 {
+  class RESTProcessBase;
+  using RPPtr=std::shared_ptr<RESTProcessBase>;
+  
   /// interface for the REST processor
   class RESTProcessBase
   {
@@ -34,15 +37,17 @@ namespace classdesc
   public:
     virtual ~RESTProcessBase() {}
     /// perform the REST operation, with \a remainder being the query string and \a arguments as body text
-    virtual REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments)=0;
+    /// result of operation is returned as an object, and can be serialised into REST_PROCESS_BUFFER using asBuffer
+    virtual RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments)=0;
+    virtual REST_PROCESS_BUFFER asBuffer() const=0;
     /// return signature(s) of the operations
-    virtual REST_PROCESS_BUFFER signature() const=0;
+    virtual RPPtr signature() const=0;
     /// return list of subcommands to this
-    virtual REST_PROCESS_BUFFER list() const=0;
+    virtual RPPtr list() const=0;
     /// return type name of this
-    virtual REST_PROCESS_BUFFER type() const=0;
+    virtual RPPtr type() const=0;
     /// return signature for a function type F
-    template <class F> REST_PROCESS_BUFFER functionSignature() const;
+    template <class F> RPPtr functionSignature() const;
     /// returns a pointer to the underlying object if it is one of type T, otherwise null
     template <class T> T* getObject();
     /// @{ returns a classdesc object is referring to an object derived from classdesc::object
@@ -51,6 +56,8 @@ namespace classdesc
     /// @}
     /// true if this is an object, not a function
     virtual bool isObject() const {return false;}
+    /// if this is a reference object, then convert this to a value object. Otherwise, return null
+    virtual RPPtr toValue() const {return nullptr;}
     /// true if this is a const object, a const member function or static/free function
     virtual bool isConst() const {return false;}
     /// arity if this is a function, 0 otherwise
@@ -70,6 +77,7 @@ namespace classdesc
     virtual ~RESTProcessFunctionBase() {}
     /// returns how good the match is with arguments, less is best
     virtual unsigned matchScore(const REST_PROCESS_BUFFER& arguments) const=0;
+    REST_PROCESS_BUFFER asBuffer() const override {return {};}
   };
 
   inline void convert(char& y, const string& x)
@@ -253,7 +261,7 @@ namespace classdesc
       emplace(d,std::unique_ptr<RESTProcessBase>(rp));
     }
   
-    REST_PROCESS_BUFFER process(const std::string& query, const REST_PROCESS_BUFFER& jin);
+    std::shared_ptr<classdesc::RESTProcessBase> process(const std::string& query, const REST_PROCESS_BUFFER& jin);
 
     /// define all arguments of \a F
     template <class F> void defineFunctionArgTypes()
@@ -276,7 +284,7 @@ namespace classdesc
 
   
   template <class T>
-  inline REST_PROCESS_BUFFER mapAndProcess(const string& query, const REST_PROCESS_BUFFER& arguments, T& a)
+  inline RPPtr mapAndProcess(const string& query, const REST_PROCESS_BUFFER& arguments, T& a)
   {
     RESTProcess_t map;
     RESTProcess(map,"",a);
@@ -292,7 +300,7 @@ namespace classdesc
   }
 
   template <class T>
-  inline typename enable_if<is_default_constructible<T>,REST_PROCESS_BUFFER>::T
+  inline typename enable_if<is_default_constructible<T>,RPPtr>::T
   mapAndProcessDummy(const string& query, const REST_PROCESS_BUFFER& arguments)
   {
     T dummy{};
@@ -300,20 +308,27 @@ namespace classdesc
   }
 
   template <class T>
-  inline typename enable_if<Not<is_default_constructible<T>>,REST_PROCESS_BUFFER>::T
+  inline typename enable_if<Not<is_default_constructible<T>>,RPPtr>::T
   mapAndProcessDummy(const string& query, const REST_PROCESS_BUFFER& arguments)
   {
     throw std::runtime_error(typeName<T>()+" is not default constructible, but requested element doesn't exist");
   }
+
+  template <class T> struct RESTProcessObject;
+  template <class T> inline
+  typename enable_if<is_copy_constructible<T>,RPPtr>::T
+  toObjectValueImpl(const RESTProcessObject<T>&);
+  template <class T> inline
+  typename enable_if<Not<is_copy_constructible<T>>,RPPtr>::T
+  toObjectValueImpl(const RESTProcessObject<T>&) {return nullptr;}
 
   /// handle setting and getting of objects
   template <class T> struct RESTProcessObject: public RESTProcessBase
   {
     T& obj;
     RESTProcessObject(T& obj): obj(obj) {}
-    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
+    std::shared_ptr<classdesc::RESTProcessBase> process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
     {
-      REST_PROCESS_BUFFER r;
       if (remainder.empty())
         {
           switch (arguments.type())
@@ -329,13 +344,14 @@ namespace classdesc
               convert(obj, arguments);
               break;
             }
-          return r<<obj;
+          return std::make_shared<RESTProcessObject>(obj);
         }
       return mapAndProcess(remainder, arguments, obj);
     }
-    REST_PROCESS_BUFFER signature() const override;
-    REST_PROCESS_BUFFER list() const override;
-    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
+    REST_PROCESS_BUFFER asBuffer() const override {REST_PROCESS_BUFFER r; return r<<obj;}
+    RPPtr signature() const override;
+    RPPtr list() const override;
+    RPPtr type() const override;
     object* getClassdescObject() override {
       if (is_const<T>::value) return nullptr;
       return const_cast<object*>(getClassdescObjectImpl(obj));
@@ -343,8 +359,45 @@ namespace classdesc
     const object* getConstClassdescObject() override {return getClassdescObjectImpl(obj);}
     bool isObject() const override {return true;}
     bool isConst() const override {return std::is_const<T>::value;}
+    RPPtr toValue() const override {return toObjectValueImpl(*this);}
   };
 
+  /// same as \a RESTProcessObject, but internally stores the object. T must be copy constructible or moveable
+  template <class T> struct RESTProcessValueObject: public RESTProcessObject<T>
+  {
+    T actual;
+  public:
+    template <class... Args>
+    RESTProcessValueObject(Args&&... args): RESTProcessObject<T>(actual), actual(std::forward<Args>(args)...) {}
+    RPPtr toValue() const override {return nullptr;}
+  };
+
+  template <class T> inline
+  typename enable_if<is_copy_constructible<T>,RPPtr>::T
+  toObjectValueImpl(const RESTProcessObject<T>& x) 
+  {return std::make_shared<RESTProcessValueObject<T>>(x.obj);}
+  
+  template <class T>
+  RPPtr makeRESTProcessValueObject(T&& obj)
+  {return std::make_shared<RESTProcessValueObject<typename std::remove_reference<T>::type>>(std::forward<T>(obj));}
+  // specialization for string and string vector to allow
+   RPPtr makeRESTProcessValueObject(const char* s)
+  {return std::make_shared<RESTProcessValueObject<std::string>>(s);}
+  RPPtr makeRESTProcessValueObject(const std::initializer_list<std::string>& init)
+  {return std::make_shared<RESTProcessValueObject<std::vector<std::string>>>(init);}
+ 
+  /// class that represents the void, or null object
+  class RESTProcessVoid: public RESTProcessBase
+  {
+    std::shared_ptr<RESTProcessBase> process(const string&, const REST_PROCESS_BUFFER&) override
+    {return std::make_shared<RESTProcessVoid>();}
+    REST_PROCESS_BUFFER asBuffer() const override {return {};}
+    RPPtr signature() const override {return makeRESTProcessValueObject({});}
+    RPPtr list() const override {return makeRESTProcessValueObject({});}
+    RPPtr type() const override {return makeRESTProcessValueObject("void");}
+    bool isConst() const override {return true;}
+  };
+  
   template <class T> T* RESTProcessBase::getObject()
   {
     if (auto p=dynamic_cast<RESTProcessObject<T>*>(this))
@@ -452,60 +505,27 @@ namespace classdesc
     
   public:
     RESTProcessSequence(T& obj): obj(obj) {}
-    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
-    {
-      REST_PROCESS_BUFFER r;
-      if (remainder.empty())
-          switch (arguments.type())
-            {
-            case RESTProcessType::null: break;
-            case RESTProcessType::array:
-              {
-                auto& arr=arguments.array();
-                if (!arr.empty()) convert(obj, REST_PROCESS_BUFFER(arr[0]));
-                break;
-              }
-            default:
-              convert(obj, arguments);
-              break;
-            }
-      else if (startsWith(remainder,".@elem"))
-        {
-          // extract idx
-          auto idxStart=find(remainder.begin()+1, remainder.end(), '.');
-          if (idxStart==remainder.end())
-            throw std::runtime_error("no index");
-          auto idxEnd=find(idxStart+1, remainder.end(), '.');
-          size_t idx=stoi(string(idxStart+1, idxEnd));
-          if (idx>=obj.size())
-            {
-              if (startsWith(remainder,".@elemNoThrow"))
-                return mapAndProcessDummy<typename T::value_type>(string(idxEnd,remainder.end()), arguments);
-              else
-                throw std::runtime_error("idx out of bounds");
-            }
-          auto i=obj.begin();
-          std::advance(i, idx);
-          return mapAndProcess(string(idxEnd,remainder.end()), arguments, *i);
-        }
-      else if (startsWith(remainder,".@insert"))
-        insert(obj, arguments);
-      else if (startsWith(remainder,".@erase"))
-        erase(obj, arguments);
-      else if (startsWith(remainder,".@size"))
-        return r<<obj.size();
-      else
-        return RESTProcess_t(obj).process(remainder,arguments); // treat as an object, not container
-      return r<<obj;
-    }
-    REST_PROCESS_BUFFER signature() const override;
-    REST_PROCESS_BUFFER list() const override {
-      std::vector<string> array{".@elem",".@elemNoThrow",".@insert",".@erase",".@size"};
-      return REST_PROCESS_BUFFER(array);
-    }
-    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
+    std::shared_ptr<classdesc::RESTProcessBase> process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
+    RPPtr signature() const override;
+    RPPtr list() const override
+    {return makeRESTProcessValueObject({".@elem",".@elemNoThrow",".@insert",".@erase",".@size"});}
+    RPPtr type() const override {return makeRESTProcessValueObject(typeName<T>());}
+    REST_PROCESS_BUFFER asBuffer() const override {REST_PROCESS_BUFFER r; return r<<obj;}
+    RPPtr toValue() const override;
   };
 
+  template <class T> struct RESTProcessValueSequence: public RESTProcessSequence<T>
+  {
+    T actual;
+  public:
+    template <class... Args>
+    RESTProcessValueSequence(Args&&... args): RESTProcessSequence<T>(actual), actual(std::forward<Args>(args)...) {}
+    RPPtr toValue() const override {return nullptr;}
+  };
+  
+  template <class T> RPPtr RESTProcessSequence<T>::toValue() const
+  {return std::make_shared<RESTProcessValueSequence<T>>(obj);}
+  
   template <class T>
   typename enable_if<is_sequence<T>, void>::T
   RESTProcessp(RESTProcess_t& repo, const string& d, T& a)
@@ -626,86 +646,28 @@ namespace classdesc
     
   public:
     RESTProcessAssociativeContainer(T& obj): obj(obj) {}
-    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
-    {
-      REST_PROCESS_BUFFER r;
-      if (remainder.empty())
-        switch (arguments.type())
-          {
-          case RESTProcessType::null: break;
-          case RESTProcessType::array:
-            {
-              auto& arr=arguments.array();
-              if (!arr.empty()) convert(obj, REST_PROCESS_BUFFER(arr[0]));
-              break;
-            }
-          default:
-            convert(obj, arguments);
-            break;
-          }
-      else if (startsWith(remainder,".@elem"))
-        {
-          // extract key
-          auto keyStart=find(remainder.begin()+1, remainder.end(), '.');
-          if (keyStart!=remainder.end())
-            {
-              ++keyStart;
-              auto keyEnd=keyStart;
-              typename T::key_type key;
-              if (strchr("\"'{[",*keyStart)) // JSON leadin
-                {
-                  json_pack_t jsonKey;
-                  read_range(keyEnd,remainder.end(),static_cast<json5_parser::mValue&>(jsonKey));
-                  jsonKey>>key;
-                }
-              else
-                {
-                  keyEnd=find(keyStart, remainder.end(), '.');
-                  assignRawStringToKey(key, std::string(keyStart, keyEnd));
-                }
-
-              string tail(keyEnd,remainder.end());
-              if (tail.empty() && arguments.type()!=RESTProcessType::null)
-                assignElem(obj, key, arguments);
-              auto i=obj.find(key);
-              if (i==obj.end())
-                {
-                  if (startsWith(remainder,".@elemNoThrow"))
-                    return mapAndProcessDummy<typename T::value_type>(tail, arguments);
-                  else
-                    throw std::runtime_error("key "+std::string(keyStart, keyEnd)+" not found");
-                }
-              else if (tail.empty())
-                return r<<elem_of(i);
-              auto eoi=elem_of(i);
-              return mapAndProcess(tail, arguments, eoi);
-            }
-        }
-      else if (startsWith(remainder,".@insert"))
-        RPAC_insert(obj,arguments);
-      else if (startsWith(remainder,".@erase"))
-        RPAC_erase(obj,arguments);
-      else if (startsWith(remainder,".@size"))
-        return r<<obj.size();
-      else if (startsWith(remainder,".@keys"))
-        {
-          std::vector<typename T::key_type> keys;
-          for (auto& i: obj)
-            keys.push_back(keyOf(i));
-          return r<<keys;
-        }
-      else
-        return RESTProcess_t(obj).process(remainder,arguments); // treat as an object, not container
-      return r<<obj;
-    }
-    REST_PROCESS_BUFFER signature() const override;
-    REST_PROCESS_BUFFER list() const override {
-      std::vector<string> array{".@elem",".@elemNoThrow",".@insert",".@erase",".@size",".@keys"};
-      return REST_PROCESS_BUFFER(array);
-    }
-    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
+    RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
+    RPPtr signature() const override;
+    RPPtr list() const override
+    {return makeRESTProcessValueObject({".@elem",".@elemNoThrow",".@insert",".@erase",".@size",".@keys"});}
+    RPPtr type() const override {return makeRESTProcessValueObject(typeName<T>());}
+    REST_PROCESS_BUFFER asBuffer() const override {REST_PROCESS_BUFFER r; return r<<obj;}
+    RPPtr toValue() const override;
   };
 
+  template <class T> struct RESTProcessValueAssociativeContainer: public RESTProcessAssociativeContainer<T>
+  {
+    T actual;
+  public:
+    template <class... Args>
+    RESTProcessValueAssociativeContainer(Args&&... args):
+      RESTProcessAssociativeContainer<T>(actual), actual(std::forward<Args>(args)...) {}
+    RPPtr toValue() const override {return nullptr;}
+  };
+
+  template <class T> RPPtr RESTProcessAssociativeContainer<T>::toValue() const
+  {return std::make_shared<RESTProcessValueAssociativeContainer<T>>(obj);}
+  
   template <class T>
   typename enable_if<is_associative_container<T>, void>::T
   RESTProcessp(RESTProcess_t& repo, const string& d, T& a)
@@ -718,20 +680,24 @@ namespace classdesc
   {
     T& ptr;
     RESTProcessPtr(T& ptr): ptr(ptr) {}
-    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
-    REST_PROCESS_BUFFER signature() const override;
-    REST_PROCESS_BUFFER list() const override {
+    RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
+    RPPtr signature() const override;
+    RPPtr list() const override {
       if (ptr)
         return const_cast<RESTProcessPtr<T>*>(this)->process(".@list",{});
       else
-        return REST_PROCESS_BUFFER(json5_parser::mArray());
+        return makeRESTProcessValueObject({});
     }
-    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
+    RPPtr type() const override {return makeRESTProcessValueObject(typeName<T>());}
     object* getClassdescObject() override {
       if (!ptr || is_const<typename T::element_type>::value) return nullptr;
       return const_cast<object*>(getClassdescObjectImpl(*ptr));
     }
     const object* getConstClassdescObject() override {return ptr? getClassdescObjectImpl(*ptr): nullptr;}
+    REST_PROCESS_BUFFER asBuffer() const override {
+      REST_PROCESS_BUFFER r;
+      return ptr? (r<<*ptr): r;
+    }
   };
 
   template <class T>
@@ -739,12 +705,12 @@ namespace classdesc
   {
     T& ptr;
     RESTProcessWeakPtr(T& ptr): ptr(ptr) {}
-    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
-    REST_PROCESS_BUFFER signature() const override;
-    REST_PROCESS_BUFFER list() const override {
+    RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
+    RPPtr signature() const override;
+    RPPtr list() const override {
       if (auto p=ptr.lock())
         return RESTProcessObject<typename T::element_type>(*p).list();
-      else return REST_PROCESS_BUFFER(json5_parser::mArray());
+      return makeRESTProcessValueObject({});
     }
     REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<std::weak_ptr<T> >());}
     object* getClassdescObject() override {
@@ -804,7 +770,7 @@ namespace classdesc
   typename enable_if<
     And<functional::AllArgs<F, functional::ArgAcceptable>,
         is_reference<typename functional::Return<F>::T>>,
-    REST_PROCESS_BUFFER>::T
+    RPPtr>::T
   callFunction(const string& remainder, const REST_PROCESS_BUFFER& arguments, F f)
   {
     JSONBuffer argBuf(arguments);
@@ -828,8 +794,7 @@ namespace classdesc
               convert(r,arguments);
             break;
           }
-        REST_PROCESS_BUFFER rj;
-        return rj<<r;
+        return std::make_shared<RESTProcessObject<typename functional::Return<F>::T>>(r);
       }
     RESTProcess_t map;
     RESTProcess(map,"",r);
@@ -842,37 +807,36 @@ namespace classdesc
         And<
           Not<is_void<typename functional::Return<F>::T>>,
         Not<is_reference<typename functional::Return<F>::T>>>>,
-    REST_PROCESS_BUFFER>::T
+    RPPtr>::T
   callFunction(const string& remainder, const REST_PROCESS_BUFFER& arguments, F f)
   {
     JSONBuffer argBuf(arguments);
     auto r=functional::callOnBuffer(argBuf,f);
     if (remainder.empty())
-      {
-        REST_PROCESS_BUFFER rj;
-        return rj<<r;
-      }
+      return makeRESTProcessValueObject(std::move(r));
     RESTProcess_t map;
     RESTProcess(map,"",r);
-    return map.process(remainder, arguments);
+    auto rp=map.process(remainder, arguments);
+    if (auto v=rp->toValue()) return v; // create a copy of the return value
+    return rp;
   }
   
   template <class F>
   typename enable_if<
     And<functional::AllArgs<F, functional::ArgAcceptable>,
         is_void<typename functional::Return<F>::T>>,
-    REST_PROCESS_BUFFER>::T
+    RPPtr>::T
   callFunction(const string& remainder, const REST_PROCESS_BUFFER& arguments, F f)
   {
     JSONBuffer argBuf(arguments);
     functional::callOnBuffer(argBuf,f);
-    return {};
+    return std::make_shared<RESTProcessVoid>();
   }
 
   
   // don't do anything if we cannot create or copy an argument
   template <class F>
-  typename enable_if<Not<functional::AllArgs<F, functional::ArgAcceptable>>, REST_PROCESS_BUFFER>::T
+  typename enable_if<Not<functional::AllArgs<F, functional::ArgAcceptable>>, RPPtr>::T
   callFunction(const string& remainder, const REST_PROCESS_BUFFER& arguments, F f)
   {throw std::runtime_error("cannot call this function");}
   
@@ -1108,10 +1072,10 @@ namespace classdesc
     RESTProcessFunction(F f): f(f) {}
     
 
-    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
+    RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
     {return callFunction(remainder, arguments, f);}
     
-    REST_PROCESS_BUFFER signature() const override {return functionSignature<F>();}
+    RPPtr signature() const override {return functionSignature<F>();}
     unsigned matchScore(const REST_PROCESS_BUFFER& arguments) const override
     {return classdesc::matchScore<F>(arguments);}
 
@@ -1120,7 +1084,7 @@ namespace classdesc
       And<
         is_default_constructible<remove_reference<U>>,
         Not<is_void<U>>
-        >,REST_PROCESS_BUFFER>::T
+        >,RPPtr>::T
     slist() const {
       typename remove_reference<U>::type x;
       return RESTProcessObject<U>(x).list();
@@ -1132,11 +1096,11 @@ namespace classdesc
         And<
           is_default_constructible<remove_reference<U>>,
           Not<is_void<U>>
-          >>,REST_PROCESS_BUFFER>::T
-    slist() const {return REST_PROCESS_BUFFER(RESTProcessType::array);}
+          >>,RPPtr>::T
+    slist() const {return makeRESTProcessValueObject({});}
     
-    REST_PROCESS_BUFFER list() const override {return slist<R>();}
-    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<R>());}
+    RPPtr list() const override {return slist<R>();}
+    RPPtr type() const override {return makeRESTProcessValueObject(typeName<R>());}
     bool isObject() const override {return false;}
     bool isConst() const override {return FunctionalIsConst<F>::value;}
     unsigned arity() const override {return functional::Arity<F>::value;}
@@ -1148,15 +1112,15 @@ namespace classdesc
     F f;
   public:
     RESTProcessFunction(F f): f(f) {}
-    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
+    RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
     {
       throw std::runtime_error("currently unable to call functions returning unique_ptr");
     }
-    REST_PROCESS_BUFFER signature() const override {return functionSignature<F>();}
+    RPPtr signature() const override {return functionSignature<F>();}
     unsigned matchScore(const REST_PROCESS_BUFFER& arguments) const override
     {return classdesc::matchScore<F>(arguments);}
-    REST_PROCESS_BUFFER list() const override {return REST_PROCESS_BUFFER(json5_parser::mArray());}
-    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<F>());}
+    RPPtr list() const override {return makeRESTProcessValueObject({});}
+    RPPtr type() const override {return makeRESTProcessValueObject(typeName<F>());}
   };
 
   template <class T, class F>
@@ -1186,11 +1150,10 @@ namespace classdesc
     E& e;
   public:
     RESTProcessEnum(E& e): e(e) {}
-    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
+    RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
     {
-      REST_PROCESS_BUFFER r;
       if (remainder=="@type")
-        return r<<typeName<E>();
+        return makeRESTProcessValueObject(typeName<E>());
       else if (remainder=="@signature")
         return signature();
       else if (arguments.type()==RESTProcessType::string)
@@ -1203,20 +1166,22 @@ namespace classdesc
           string tmp; json_pack_t(arguments.array()[0])>>tmp;
           convert(e, enum_keys<E>()(tmp));
         }
-      return r<<enum_keys<E>()(e);
+      return makeRESTProcessValueObject(enum_keys<E>()(e));
     }
-    REST_PROCESS_BUFFER signature() const override;
-    REST_PROCESS_BUFFER list() const override {return REST_PROCESS_BUFFER(json5_parser::mArray());}
-    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<E>());}
+    RPPtr signature() const override;
+    RPPtr list() const override {return makeRESTProcessValueObject({});}
+    RPPtr type() const override {return makeRESTProcessValueObject(typeName<E>());}
+    REST_PROCESS_BUFFER asBuffer() const {return REST_PROCESS_BUFFER(enum_keys<E>()(e));}
   };
 
   template <class E>
   class EnumerateEnumerators: public RESTProcessBase
   {
-    REST_PROCESS_BUFFER process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
-    REST_PROCESS_BUFFER signature() const override {return REST_PROCESS_BUFFER("{ret: \"vector<string>\", args: []}");}
-    REST_PROCESS_BUFFER list() const override {return REST_PROCESS_BUFFER(json5_parser::mArray());}
-    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER("function");}
+    RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
+    RPPtr signature() const override;
+    RPPtr list() const override {return makeRESTProcessValueObject({});}
+    RPPtr type() const override {return makeRESTProcessValueObject("function");}
+    REST_PROCESS_BUFFER asBuffer() const override {return {};}
   };
 
   /// @{ define type dependent information in repository
@@ -1270,17 +1235,6 @@ namespace classdesc
     static const size_t value=functional::Arity<void(*)(Args...)>::value;
   };
 
-//  template <class A, class... Args>
-//  struct NumArgs<A,Args...>
-//  {
-//    static const size_t value=1+NumArgs<Args...>::value;
-//  };
-//
-//  template <> struct NumArgs<>
-//  {
-//    static const size_t value=0;
-//  };
-  
   template <class T, class... Args>
   struct RESTProcessMultiArray:
     public MultiArray<T,NumArgs<Args...>::value>,
@@ -1321,12 +1275,6 @@ namespace std
 
 #include "use_mbr_pointers.h"
 CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(RESTProcess);
-
-//#ifdef _CLASSDESC
-//#pragma omit RESTProcess classdesc::MultiArray 
-//#pragma omit json_pack classdesc::MultiArray 
-//#pragma omit json_unpack classdesc::MultiArray 
-//#endif
 
 using classdesc::RESTProcess;       
 using classdesc::RESTProcess_onbase;       

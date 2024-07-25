@@ -305,11 +305,11 @@ namespace classdesc
   json_packp(json_unpack_t& o, const string& d, const T& a, dummy<0> dum=0)
   {
     using namespace json5_parser;
-    o.objectify();
     if (d=="")
       o=json_pack_t(valueof(a));
     else
       {
+        o.objectify();
         try
           {
             json5_parser::mValue& parent=json_find(o,head(d));

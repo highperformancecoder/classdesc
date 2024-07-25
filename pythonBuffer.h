@@ -487,7 +487,9 @@ namespace classdesc
         static Py_ssize_t size(PyObject* self)
         {
           auto cppWrapper=static_cast<CppWrapper*>(self);
-          return registry.process(cppWrapper->command+".@size",{}).get_uint64();
+          auto sp=registry.process(cppWrapper->command+".@size",{})->getObject<size_t>();
+          assert(sp);
+          return *sp;
         }
 
         static PyObject* getElem(PyObject* self, PyObject* key)
@@ -549,13 +551,13 @@ namespace classdesc
         if (!pyObject||command.find('@')!=string::npos) return;
         try
           {
-            PyObject_SetAttrString(pyObject, "_signature",newPyObject(registry.process(command+".@signature",{})));
-            PyObject_SetAttrString(pyObject, "_type", newPyObject(registry.process(command+".@type",{})));
+            PyObject_SetAttrString(pyObject, "_signature",newPyObject(registry.process(command+".@signature",{})->asBuffer()));
+            PyObject_SetAttrString(pyObject, "_type", newPyObject(registry.process(command+".@type",{})->asBuffer()));
           }
         catch (...) { } // do not log, nor report errors back to python - there are too many
         try
           {
-            auto methods=registry.process(command+".@list",{});
+            auto methods=registry.process(command+".@list",{})->asBuffer();
             if (methods.type()!=RESTProcessType::array) return;
             for (auto& i: methods.array())
               {
@@ -589,7 +591,7 @@ namespace classdesc
       try
         {
           auto args=arguments.get<json_pack_t>();
-          const PythonBuffer result(registry.process(command, args));
+          const PythonBuffer result(registry.process(command, args)->asBuffer());
 
           auto pyResult=result.getPyObject();
           switch (result.type())
@@ -649,12 +651,12 @@ namespace classdesc
       
       // enum reflection
       PyObjectRef enummer=PyDict_New();
-      auto enumList=registry.process("@enum.@list",{});
+      auto enumList=registry.process("@enum.@list",{})->asBuffer();
       for (auto& i: enumList.array())
         {
           string name=i.get_str();
           PyDict_SetItemString(enummer, name.c_str(),
-                               newPyObjectJson(registry.process("@enum."+name,{})));
+                               newPyObjectJson(registry.process("@enum."+name,{})->asBuffer()));
         }
       PyModule_AddObject(pythonModule, "enum", enummer.release());
     }

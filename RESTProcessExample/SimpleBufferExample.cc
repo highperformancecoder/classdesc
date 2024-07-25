@@ -65,7 +65,7 @@ int main()
                 read(t,jin);
               cout << toREST(cmd) <<"=>";
               SimpleBuffer args(jin);
-              auto ret=boost::apply_visitor(ToJsonVisitor(), registry.process(cmd, args));
+              auto ret=boost::apply_visitor(ToJsonVisitor(), registry.process(cmd, args)->asBuffer());
               write(ret,cout,json5_parser::remove_trailing_zeros);
               cout << endl;
             }

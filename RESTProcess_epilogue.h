@@ -56,70 +56,66 @@ namespace classdesc_access
 namespace classdesc
 {
   template <class T> 
-  REST_PROCESS_BUFFER RESTProcessObject<T>::signature() const
+  RPPtr RESTProcessObject<T>::signature() const
   {
-    REST_PROCESS_BUFFER r;
-    std::vector<Signature> signature
-      {{typeName<T>(),{}},{typeName<T>(),{typeName<T>()}}};
-    return r<<signature;
+    auto tn=typeName<T>();
+    return makeRESTProcessValueObject(std::vector<Signature>{{tn,{}},{tn,{tn}}});
   }
 
   template <class T> 
-  REST_PROCESS_BUFFER RESTProcessPtr<T>::signature() const
+  RPPtr RESTProcessPtr<T>::signature() const
   {
-    REST_PROCESS_BUFFER r;
     auto tn=typeName<typename T::element_type>();
-    std::vector<Signature> signature{{tn,{}},{tn,{tn}}};
-    return r<<signature;
+    return makeRESTProcessValueObject(std::vector<Signature>{{tn,{}},{tn,{tn}}});
   }
   
   template <class T> 
-  REST_PROCESS_BUFFER RESTProcessWeakPtr<T>::signature() const
+  RPPtr RESTProcessWeakPtr<T>::signature() const
   {
-    json_pack_t r;
     auto tn=typeName<T>();
-    std::vector<Signature> signature{{tn,{}},{tn,{tn}}};
-    return REST_PROCESS_BUFFER(r<<signature);
+    return makeRESTProcessValueObject(std::vector<Signature>{{tn,{}},{tn,{tn}}});
   }
 
   template <class T> 
-  REST_PROCESS_BUFFER RESTProcessSequence<T>::signature() const
+  RPPtr RESTProcessSequence<T>::signature() const
   {
-    REST_PROCESS_BUFFER r;
     auto tn=typeName<T>();
-    std::vector<Signature> signature{{tn,{}},{tn,{tn}}};
-    return REST_PROCESS_BUFFER(r<<signature);
+    return makeRESTProcessValueObject(std::vector<Signature>{{tn,{}},{tn,{tn}}});
   }
 
   template <class T> 
-  REST_PROCESS_BUFFER RESTProcessAssociativeContainer<T>::signature() const
+  RPPtr RESTProcessAssociativeContainer<T>::signature() const
   {
-    REST_PROCESS_BUFFER r;
     auto tn=typeName<T>();
-    std::vector<Signature> signature{{tn,{}},{tn,{tn}}};
-    return REST_PROCESS_BUFFER(r<<signature);
+    return makeRESTProcessValueObject(std::vector<Signature>{{tn,{}},{tn,{tn}}});
   }
 
   template <class E> 
-  REST_PROCESS_BUFFER RESTProcessEnum<E>::signature() const
+  RPPtr RESTProcessEnum<E>::signature() const
   {
-    REST_PROCESS_BUFFER r;
-    std::vector<Signature> signature
-      {{"std::string",{}},{"std::string",{"std::string"}}};
-    return REST_PROCESS_BUFFER(r<<signature);
+    return makeRESTProcessValueObject(std::vector<Signature>{{"std::string",{}},{"std::string",{"std::string"}}});
   }
 
+  template <class E> 
+  RPPtr EnumerateEnumerators<E>::signature() const
+  {
+    return makeRESTProcessValueObject(std::vector<Signature>{{"vector<string>",{}}});
+  }
+  
   template <class T> 
-  REST_PROCESS_BUFFER RESTProcessObject<T>::list() const
+  RPPtr RESTProcessObject<T>::list() const
   {
     RESTProcess_t map;
     RESTProcess(map,"",obj);
-    REST_PROCESS_BUFFER::Array array;
+    std::vector<string> array;
     for (auto& i:map)
       if (!i.first.empty())
         array.emplace_back(i.first);
-    return REST_PROCESS_BUFFER(array);
+    return makeRESTProcessValueObject(std::move(array));
   }
+
+  template <class T> 
+  RPPtr RESTProcessObject<T>::type() const {return makeRESTProcessValueObject(typeName<T>());}
 
   
   template <class F, int N=functional::Arity<F>::value >
@@ -134,10 +130,9 @@ namespace classdesc
 
   
   template <class F>
-  REST_PROCESS_BUFFER RESTProcessBase::functionSignature() const
+  RPPtr RESTProcessBase::functionSignature() const
   {
-    REST_PROCESS_BUFFER r;
-    return REST_PROCESS_BUFFER(r<<Signature{typeName<typename functional::Return<F>::T>(), Args<F>()});
+    return makeRESTProcessValueObject(Signature{typeName<typename functional::Return<F>::T>(), Args<F>()});
   }
 
   template <class T>
@@ -149,7 +144,132 @@ namespace classdesc
   }
 
   template <class T>
-  REST_PROCESS_BUFFER RESTProcessPtr<T>::process(const string& remainder, const REST_PROCESS_BUFFER& arguments)
+  RPPtr RESTProcessSequence<T>::process(const string& remainder, const REST_PROCESS_BUFFER& arguments)
+  {
+      if (remainder.empty())
+          switch (arguments.type())
+            {
+            case RESTProcessType::null: break;
+            case RESTProcessType::array:
+              {
+                auto& arr=arguments.array();
+                if (!arr.empty()) convert(obj, REST_PROCESS_BUFFER(arr[0]));
+                break;
+              }
+            default:
+              convert(obj, arguments);
+              break;
+            }
+      else if (startsWith(remainder,".@elem"))
+        {
+          // extract idx
+          auto idxStart=find(remainder.begin()+1, remainder.end(), '.');
+          if (idxStart==remainder.end())
+            throw std::runtime_error("no index");
+          auto idxEnd=find(idxStart+1, remainder.end(), '.');
+          size_t idx=stoi(string(idxStart+1, idxEnd));
+          if (idx>=obj.size())
+            {
+              if (startsWith(remainder,".@elemNoThrow"))
+                return mapAndProcessDummy<typename T::value_type>(string(idxEnd,remainder.end()), arguments);
+              else
+                throw std::runtime_error("idx out of bounds");
+            }
+          auto i=obj.begin();
+          std::advance(i, idx);
+          auto r=mapAndProcess(string(idxEnd,remainder.end()), arguments, *i);
+          // if we're processing MultiArrays, convert return to a value type as the iterator here will be invalidated out of scope
+          if (std::is_base_of<MultiArrayIterator, decltype(i)>::value)
+            if (auto v=r->toValue())
+              return v;
+          return r;
+        }
+      else if (startsWith(remainder,".@insert"))
+        insert(obj, arguments);
+      else if (startsWith(remainder,".@erase"))
+        erase(obj, arguments);
+      else if (startsWith(remainder,".@size"))
+        return makeRESTProcessValueObject(obj.size());
+      else
+        return RESTProcess_t(obj).process(remainder,arguments); // treat as an object, not container
+      return std::make_shared<RESTProcessSequence>(obj);
+    }
+
+  template <class T>
+  RPPtr RESTProcessAssociativeContainer<T>::process(const string& remainder, const REST_PROCESS_BUFFER& arguments)
+  {
+    if (remainder.empty())
+      switch (arguments.type())
+        {
+        case RESTProcessType::null: break;
+        case RESTProcessType::array:
+          {
+            auto& arr=arguments.array();
+            if (!arr.empty()) convert(obj, REST_PROCESS_BUFFER(arr[0]));
+            break;
+          }
+        default:
+          convert(obj, arguments);
+          break;
+        }
+    else if (startsWith(remainder,".@elem"))
+      {
+        // extract key
+        auto keyStart=find(remainder.begin()+1, remainder.end(), '.');
+        if (keyStart!=remainder.end())
+          {
+            ++keyStart;
+            auto keyEnd=keyStart;
+            typename T::key_type key;
+            if (strchr("\"'{[",*keyStart)) // JSON leadin
+              {
+                json_pack_t jsonKey;
+                read_range(keyEnd,remainder.end(),static_cast<json5_parser::mValue&>(jsonKey));
+                jsonKey>>key;
+              }
+            else
+              {
+                keyEnd=find(keyStart, remainder.end(), '.');
+                assignRawStringToKey(key, std::string(keyStart, keyEnd));
+              }
+
+            string tail(keyEnd,remainder.end());
+            if (tail.empty() && arguments.type()!=RESTProcessType::null)
+              assignElem(obj, key, arguments);
+            auto i=obj.find(key);
+            if (i==obj.end())
+              {
+                if (startsWith(remainder,".@elemNoThrow"))
+                  return mapAndProcessDummy<typename T::value_type>(tail, arguments);
+                else
+                  throw std::runtime_error("key "+std::string(keyStart, keyEnd)+" not found");
+              }
+            else if (tail.empty())
+              return makeRESTProcessValueObject(elem_of(i));
+            auto eoi=elem_of(i);
+            return mapAndProcess(tail, arguments, eoi);
+          }
+      }
+    else if (startsWith(remainder,".@insert"))
+      RPAC_insert(obj,arguments);
+    else if (startsWith(remainder,".@erase"))
+      RPAC_erase(obj,arguments);
+    else if (startsWith(remainder,".@size"))
+      return makeRESTProcessValueObject(obj.size());
+    else if (startsWith(remainder,".@keys"))
+      {
+        std::vector<typename T::key_type> keys;
+        for (auto& i: obj)
+          keys.push_back(keyOf(i));
+        return makeRESTProcessValueObject(std::move(keys));
+      }
+    else
+      return RESTProcess_t(obj).process(remainder,arguments); // treat as an object, not container
+    return std::make_shared<RESTProcessAssociativeContainer>(obj);
+  }
+
+  template <class T>
+  RPPtr RESTProcessPtr<T>::process(const string& remainder, const REST_PROCESS_BUFFER& arguments)
   {
     if (ptr)
       return rProcess(*ptr, remainder, arguments);
@@ -158,17 +278,16 @@ namespace classdesc
   }
 
   template <class E>
-  REST_PROCESS_BUFFER EnumerateEnumerators<E>::process
+  RPPtr EnumerateEnumerators<E>::process
   (const string& remainder, const REST_PROCESS_BUFFER& arguments)
     {
       auto& enumerators=enum_keys<E>();
-      std::vector<string> tmp(enumerators.sbegin(), enumerators.send());
-      return REST_PROCESS_BUFFER(tmp);
+      return makeRESTProcessValueObject(std::vector<string>(enumerators.sbegin(), enumerators.send()));
     }
 
   
   template <class T>
-  REST_PROCESS_BUFFER RESTProcessWeakPtr<T>::process
+  RPPtr RESTProcessWeakPtr<T>::process
   (const string& remainder, const REST_PROCESS_BUFFER& arguments)
   {
     if (auto p=ptr.lock())
@@ -177,7 +296,7 @@ namespace classdesc
       return {};
   }
 
-  inline REST_PROCESS_BUFFER RESTProcess_t::process(const std::string& query, const REST_PROCESS_BUFFER& jin)
+  inline RPPtr RESTProcess_t::process(const std::string& query, const REST_PROCESS_BUFFER& jin)
     {
       string cmd=query;
 
@@ -187,9 +306,7 @@ namespace classdesc
           for (auto& i: *this)
             if (i.first.find("@enum")==0)
               enums.push_back(i.first.substr(6));
-          REST_PROCESS_BUFFER r;
-          r<<enums;
-          return r;
+          return makeRESTProcessValueObject(std::move(enums));
         }
 
       for (auto cmdEnd=query.length(); ;
@@ -230,12 +347,11 @@ namespace classdesc
                     std::vector<Signature> array;
                     for (; r.first!=r.second; ++r.first)
                       {
-                        array.emplace_back();
-                        r.first->second->signature()>>array.back();
+                        auto sig=r.first->second->signature();
+                        assert(sig->getObject<Signature>());
+                        array.push_back(*sig->getObject<Signature>());
                       }
-                    REST_PROCESS_BUFFER r;
-                    r<<array;
-                    return r;
+                    return makeRESTProcessValueObject(std::move(array));
                   }
                 // sort function overloads by best match
                 auto cmp=[&](RESTProcessFunctionBase*x, RESTProcessFunctionBase*y)

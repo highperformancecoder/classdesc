@@ -62,7 +62,7 @@ int main()
               if (!t.empty())
                 read(t,jin);
               cout << toREST(cmd) <<"=>";
-              write(registry.process(cmd, jin),cout,json5_parser::remove_trailing_zeros);
+              write(registry.process(cmd, jin)->asBuffer(),cout,json5_parser::remove_trailing_zeros);
               cout << endl;
             }
           catch (const std::exception& ex)

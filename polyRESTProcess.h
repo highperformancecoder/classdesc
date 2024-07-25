@@ -35,7 +35,7 @@ namespace classdesc
   };
 
   template <class T>
-  typename enable_if<is_base_of<PolyRESTProcessBase, T>, REST_PROCESS_BUFFER>::T
+  typename enable_if<is_base_of<PolyRESTProcessBase, T>, RPPtr>::T
   rProcess(T& a, const string& remainder, const REST_PROCESS_BUFFER& arguments)
   {
     RESTProcess_t r;
@@ -44,11 +44,11 @@ namespace classdesc
     if (i!=r.end())
       return i->second->process(remainder,arguments);
     else
-      return {};
+      return std::make_shared<RESTProcessVoid>();
   }
 
   template <class T>
-  typename enable_if<Not<is_base_of<PolyRESTProcessBase, T>>, REST_PROCESS_BUFFER>::T
+  typename enable_if<Not<is_base_of<PolyRESTProcessBase, T>>, RPPtr>::T
   rProcess(T& a, const string& remainder, const REST_PROCESS_BUFFER& arguments)
   {
     return RESTProcessObject<T>(a).process(remainder, arguments);
