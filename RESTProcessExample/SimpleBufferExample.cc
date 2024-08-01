@@ -11,6 +11,7 @@
 #define REST_PROCESS_BUFFER SimpleBuffer
 
 #include "RESTProcessExample.h"
+#include "SimpleBuffer.cd"
 #include "classdesc_epilogue.h"
 
 using namespace classdesc;

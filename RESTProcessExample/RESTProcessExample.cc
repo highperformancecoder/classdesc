@@ -6,6 +6,7 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
+#include "json_pack_base.h"
 #include "RESTProcessExample.h"
 #include "classdesc_epilogue.h"
 #include "RESTProcess_epilogue.h"

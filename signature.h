@@ -21,5 +21,4 @@ namespace classdesc
   };
 }
 
-#include "signature.cd"
 #endif

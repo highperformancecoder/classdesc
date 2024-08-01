@@ -250,6 +250,15 @@ namespace classdesc
     return b;
   }
 }
-\
 
+namespace classdesc_access
+{
+  namespace cd=classdesc;
+  template <>
+  struct access_json_unpack<cd::SimpleBuffer>
+  {
+  public:
+    void operator()(cd::json_unpack_t& b, const cd::string& d, cd::SimpleBuffer& a)
+    {a=b;}
+  };
 #endif

@@ -56,66 +56,88 @@ namespace classdesc_access
 namespace classdesc
 {
   template <class T> 
-  RPPtr RESTProcessObject<T>::signature() const
+  std::vector<Signature> RESTProcessObject<T>::signature() const
   {
     auto tn=typeName<T>();
-    return makeRESTProcessValueObject(std::vector<Signature>{{tn,{}},{tn,{tn}}});
+    return std::vector<Signature>{{tn,{}},{tn,{tn}}};
   }
 
   template <class T> 
-  RPPtr RESTProcessPtr<T>::signature() const
+  std::vector<Signature> RESTProcessPtr<T>::signature() const
   {
     auto tn=typeName<typename T::element_type>();
-    return makeRESTProcessValueObject(std::vector<Signature>{{tn,{}},{tn,{tn}}});
+    return {{tn,{}},{tn,{tn}}};
   }
   
   template <class T> 
-  RPPtr RESTProcessWeakPtr<T>::signature() const
+  std::vector<Signature> RESTProcessWeakPtr<T>::signature() const
   {
     auto tn=typeName<T>();
-    return makeRESTProcessValueObject(std::vector<Signature>{{tn,{}},{tn,{tn}}});
+    return {{tn,{}},{tn,{tn}}};
   }
 
   template <class T> 
-  RPPtr RESTProcessSequence<T>::signature() const
+  std::vector<Signature> RESTProcessSequence<T>::signature() const
   {
     auto tn=typeName<T>();
-    return makeRESTProcessValueObject(std::vector<Signature>{{tn,{}},{tn,{tn}}});
+    return {{tn,{}},{tn,{tn}}};
   }
 
   template <class T> 
-  RPPtr RESTProcessAssociativeContainer<T>::signature() const
+  std::vector<Signature> RESTProcessAssociativeContainer<T>::signature() const
   {
     auto tn=typeName<T>();
-    return makeRESTProcessValueObject(std::vector<Signature>{{tn,{}},{tn,{tn}}});
+    return {{tn,{}},{tn,{tn}}};
   }
 
   template <class E> 
-  RPPtr RESTProcessEnum<E>::signature() const
+  std::vector<Signature> RESTProcessEnum<E>::signature() const
   {
-    return makeRESTProcessValueObject(std::vector<Signature>{{"std::string",{}},{"std::string",{"std::string"}}});
+    return {{"std::string",{}},{"std::string",{"std::string"}}};
   }
 
   template <class E> 
-  RPPtr EnumerateEnumerators<E>::signature() const
+  std::vector<Signature> EnumerateEnumerators<E>::signature() const
   {
-    return makeRESTProcessValueObject(std::vector<Signature>{{"vector<string>",{}}});
+    return {{"vector<string>",{}}};
   }
   
   template <class T> 
-  RPPtr RESTProcessObject<T>::list() const
+  RESTProcess_t RESTProcessObject<T>::list() const
   {
     RESTProcess_t map;
     RESTProcess(map,"",obj);
-    std::vector<string> array;
-    for (auto& i:map)
-      if (!i.first.empty())
-        array.emplace_back(i.first);
-    return makeRESTProcessValueObject(std::move(array));
+    return map;
   }
+  
+  RESTProcess_t RESTProcessOverloadedFunction::list() const {return {};}
 
+  template <class T>
+  RESTProcess_t RESTProcessSequence<T>::list() const {
+    RESTProcess_t map;
+    map.add(".@elem", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessSequence<T>::elem)));
+    map.add(".@insert", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessSequence<T>::pushBack)));
+    map.add(".@erase", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessSequence<T>::eraseElem)));
+    map.add(".@size", new RESTProcessFunction(functional::bindMethod(obj,&T::size)));
+    return map;
+  }
+  
+  template <class T>
+  RESTProcess_t RESTProcessAssociativeContainer<T>::list() const {
+    RESTProcess_t map;
+    map.add(".@elem", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::elem)));
+//            ([this](const typename T::key_type& k){
+//              return elem_of(obj.emplace(k).first);
+//            }));
+    // map.add(".@insert", new RESTProcessFunction(bind_method(obj,&T::push_back)));
+    map.add(".@erase", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::erase)));
+    map.add(".@size", new RESTProcessFunction(functional::bindMethod(obj,&T::size)));
+    map.add(".@size", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::keys)));
+    return map;
+  }
+  
   template <class T> 
-  RPPtr RESTProcessObject<T>::type() const {return makeRESTProcessValueObject(typeName<T>());}
+  std::string RESTProcessObject<T>::type() const {return typeName<T>();}
 
   
   template <class F, int N=functional::Arity<F>::value >
@@ -130,9 +152,9 @@ namespace classdesc
 
   
   template <class F>
-  RPPtr RESTProcessBase::functionSignature() const
+  Signature RESTProcessBase::functionSignature() const
   {
-    return makeRESTProcessValueObject(Signature{typeName<typename functional::Return<F>::T>(), Args<F>()});
+    return {typeName<typename functional::Return<F>::T>(), Args<F>()};
   }
 
   template <class T>
@@ -143,6 +165,28 @@ namespace classdesc
     repo.add(d, new RESTProcessObject<T>(obj));
   }
 
+  RPPtr RESTProcessOverloadedFunction::process(const string& remainder, const REST_PROCESS_BUFFER& arguments)
+  {
+    // sort function overloads by best match
+    auto cmp=[&](RESTProcessFunctionBase*x, RESTProcessFunctionBase*y)
+    {return x->matchScore(arguments)<y->matchScore(arguments);};
+    std::set<RESTProcessFunctionBase*, decltype(cmp)> sortedOverloads{cmp};
+    for (auto& i: overloadedFunctions)
+      if (auto j=dynamic_cast<RESTProcessFunctionBase*>(i.get()))
+        sortedOverloads.insert(j);
+    auto& bestOverload=*sortedOverloads.begin();
+    if (bestOverload->matchScore(arguments) >=
+        RESTProcessFunctionBase::maxMatchScore)
+      throw std::runtime_error("No suitable matching overload found");
+    if (sortedOverloads.size()>1)
+      { // ambiguous overload detection
+        auto i=sortedOverloads.begin(); i++;
+        if ((*i)->matchScore(arguments)==bestOverload->matchScore(arguments))
+          throw std::runtime_error("Ambiguous resolution of overloaded function");
+      }
+    return bestOverload->process(remainder, arguments);
+  }
+  
   template <class T>
   RPPtr RESTProcessSequence<T>::process(const string& remainder, const REST_PROCESS_BUFFER& arguments)
   {
@@ -329,11 +373,18 @@ namespace classdesc
               {
                 auto r=find(cmd);
                 if (tail==".@signature")
-                  return r->second->signature();
+                  return makeRESTProcessValueObject(r->second->signature());
                 else if (tail==".@list")
-                  return r->second->list();
+                  {
+                    auto map=r->second->list();
+                    std::vector<string> array;
+                    for (auto& i:map)
+                      if (!i.first.empty())
+                        array.emplace_back(i.first);
+                    return makeRESTProcessValueObject(std::move(array));
+                  }
                 else if (tail==".@type")
-                  return r->second->type();
+                  return makeRESTProcessValueObject(r->second->type());
                 else if (cmdEnd || dynamic_cast<RESTProcessWrapperBase*>(r->second.get()))
                   return r->second->process(tail, jin);
                 else
@@ -348,8 +399,7 @@ namespace classdesc
                     for (; r.first!=r.second; ++r.first)
                       {
                         auto sig=r.first->second->signature();
-                        assert(sig->getObject<Signature>());
-                        array.push_back(*sig->getObject<Signature>());
+                        array.insert(array.end(), sig.begin(), sig.end());
                       }
                     return makeRESTProcessValueObject(std::move(array));
                   }
@@ -371,9 +421,9 @@ namespace classdesc
                       throw std::runtime_error("Ambiguous resolution of overloaded function");
                   }
                 if (tail==".@list")
-                  return bestOverload->list();
+                  return makeRESTProcessValueObject(bestOverload->list());
                 if (tail==".@type")
-                  return bestOverload->type();
+                  return makeRESTProcessValueObject(bestOverload->type());
                 return bestOverload->process(tail, jin);
               }
             }
@@ -424,6 +474,16 @@ namespace classdesc_access
     void operator()(cd::RESTProcess_t& r, const cd::string& d, const std::function<F>& a)
     {r.add(d, new cd::RESTProcessFunction<std::function<F>>(a));}
   };
+#endif
+
+#ifdef JSON_PACK_BASE_H
+  template <>
+  struct access_RESTProcess<cd::json_pack_t>: public cd::NullDescriptor<cd::RESTProcess_t> {};
+#endif
+  
+#ifdef OBJECT_H
+  template <>
+  struct access_RESTProcess<cd::object>: public cd::NullDescriptor<cd::RESTProcess_t> {};
 #endif
 }
     

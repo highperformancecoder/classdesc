@@ -12,11 +12,15 @@
 #include "function.h"
 #include "multiArray.h"
 #include "object.h"
+#include "signature.h"
+
 #include <map>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 #ifndef REST_PROCESS_BUFFER
-#include <json_pack_base.h>
+#include "json_pack_base.h"
 #define REST_PROCESS_BUFFER json_pack_t
 #endif
 
@@ -24,6 +28,8 @@ namespace classdesc
 {
   class RESTProcessBase;
   using RPPtr=std::shared_ptr<RESTProcessBase>;
+
+  struct RESTProcess_t;
   
   /// interface for the REST processor
   class RESTProcessBase
@@ -41,13 +47,15 @@ namespace classdesc
     virtual RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments)=0;
     virtual REST_PROCESS_BUFFER asBuffer() const=0;
     /// return signature(s) of the operations
-    virtual RPPtr signature() const=0;
+    virtual std::vector<Signature> signature() const=0;
     /// return list of subcommands to this
-    virtual RPPtr list() const=0;
+    virtual RESTProcess_t list() const=0;
     /// return type name of this
-    virtual RPPtr type() const=0;
+    virtual std::string type() const=0;
+    /// populate \a map from the object wrapped by this, if any
+    virtual void populate(RESTProcess_t& map) const {}
     /// return signature for a function type F
-    template <class F> RPPtr functionSignature() const;
+    template <class F> Signature functionSignature() const;
     /// returns a pointer to the underlying object if it is one of type T, otherwise null
     template <class T> T* getObject();
     /// @{ returns a classdesc object is referring to an object derived from classdesc::object
@@ -80,6 +88,23 @@ namespace classdesc
     REST_PROCESS_BUFFER asBuffer() const override {return {};}
   };
 
+  struct RESTProcessOverloadedFunction: public RESTProcessBase
+  {
+    std::vector<std::shared_ptr<RESTProcessFunctionBase>> overloadedFunctions; 
+    RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
+    REST_PROCESS_BUFFER asBuffer() const {return {};}
+    std::vector<Signature> signature() const {
+      std::vector<Signature> r;
+      for (auto& i: overloadedFunctions) {
+        auto s=i->signature();
+        r.insert(r.end(),s.begin(),s.end());
+      }
+      return r;
+    }
+    RESTProcess_t list() const;
+    std::string type() const {return "overloaded function";}
+  };
+  
   inline void convert(char& y, const string& x)
   {
     if (x.size()!=1)
@@ -240,25 +265,41 @@ namespace classdesc
   template <class F, int N> struct DefineFunctionArgTypes;
 
   /// REST processor registry 
-  struct RESTProcess_t: public std::multimap<std::string, std::unique_ptr<RESTProcessBase> >
+  struct RESTProcess_t: public std::map<std::string, RPPtr >
   {
     RESTProcess_t()=default;
     /// populate this map with the members of \a obj. T must be a
     /// classdescified type, otherwise this is equivalent to a default
     /// contructor
     template <class T> RESTProcess_t(T& obj);
+    /// Construct from an object that RPPPtr wraps
+    RESTProcess_t(const RPPtr& p) {p->populate(*this);}
     /// ownership of \a rp is passed
     void add(string d, RESTProcessBase* rp)
     {
       // for objects, ensure any previous entries of this key are deleted
       erase(d);
-      emplace(d,std::unique_ptr<RESTProcessBase>(rp));
+      emplace(d,rp);
     }
     /// ownership of \a rp is passed
     void add(string d, RESTProcessFunctionBase* rp)
     {
-      // for overloadable functions, allow multiple entries for this key
-      emplace(d,std::unique_ptr<RESTProcessBase>(rp));
+      auto i=find(d);
+      if (i==end())
+        emplace(d,rp);
+      else
+        {
+          if (auto functions=dynamic_cast<RESTProcessOverloadedFunction*>(i->second.get()))
+            functions->overloadedFunctions.emplace_back(rp);
+          else
+            {
+              auto firstFunction=dynamic_pointer_cast<RESTProcessFunctionBase>(i->second);
+              auto functs=std::make_shared<RESTProcessOverloadedFunction>();
+              if (firstFunction) functs->overloadedFunctions.push_back(std::move(firstFunction));
+              functs->overloadedFunctions.emplace_back(rp);
+              emplace(d,functs);
+            }
+        }
     }
   
     std::shared_ptr<classdesc::RESTProcessBase> process(const std::string& query, const REST_PROCESS_BUFFER& jin);
@@ -349,9 +390,10 @@ namespace classdesc
       return mapAndProcess(remainder, arguments, obj);
     }
     REST_PROCESS_BUFFER asBuffer() const override {REST_PROCESS_BUFFER r; return r<<obj;}
-    RPPtr signature() const override;
-    RPPtr list() const override;
-    RPPtr type() const override;
+    std::vector<Signature> signature() const override;
+    RESTProcess_t list() const override;
+    std::string type() const override;
+    void populate(RESTProcess_t& map) const override {RESTProcess(map,"",obj);}
     object* getClassdescObject() override {
       if (is_const<T>::value) return nullptr;
       return const_cast<object*>(getClassdescObjectImpl(obj));
@@ -392,9 +434,9 @@ namespace classdesc
     std::shared_ptr<RESTProcessBase> process(const string&, const REST_PROCESS_BUFFER&) override
     {return std::make_shared<RESTProcessVoid>();}
     REST_PROCESS_BUFFER asBuffer() const override {return {};}
-    RPPtr signature() const override {return makeRESTProcessValueObject({});}
-    RPPtr list() const override {return makeRESTProcessValueObject({});}
-    RPPtr type() const override {return makeRESTProcessValueObject("void");}
+    std::vector<Signature> signature() const override {return {};}
+    RESTProcess_t list() const override {return {};}
+    std::string type() const override {return "void";}
     bool isConst() const override {return true;}
   };
   
@@ -502,14 +544,44 @@ namespace classdesc
     {
       throw std::runtime_error("cannot erase from this sequence");
     }
+
+    typename T::value_type& elem(size_t idx) {
+      if (idx<obj.size()) {
+          auto i=obj.begin();
+          std::advance(i, idx);
+          return *i;
+        }
+      throw std::runtime_error("idx out of bounds");
+    }
+
+    void pushBack(const typename T::value_type& v) {
+      push_back(obj, v);
+    }
+
+    template <class U>
+    typename enable_if<has_member_erase<U,typename U::iterator(U::*)(typename U::iterator)>,void>::T
+    erase(U& o,typename U::iterator i) {o.erase(i);}
+    
+    template <class U>
+    typename enable_if<Not<has_member_erase<U,typename U::iterator(U::*)(typename U::iterator)>>,void>::T
+    erase(U& o,typename U::iterator i) {}
+    
+    
+    void eraseElem(size_t idx) {
+      auto i=obj.begin();
+      std::advance(i, idx);
+      erase(obj,i);
+    }
+
+    
     
   public:
     RESTProcessSequence(T& obj): obj(obj) {}
     std::shared_ptr<classdesc::RESTProcessBase> process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
-    RPPtr signature() const override;
-    RPPtr list() const override
-    {return makeRESTProcessValueObject({".@elem",".@elemNoThrow",".@insert",".@erase",".@size"});}
-    RPPtr type() const override {return makeRESTProcessValueObject(typeName<T>());}
+    std::vector<Signature> signature() const override;
+    RESTProcess_t list() const override;
+    //{return makeRESTProcessValueObject({".@elem",".@elemNoThrow",".@insert",".@erase",".@size"});}
+    std::string type() const override {return typeName<T>();}
     REST_PROCESS_BUFFER asBuffer() const override {REST_PROCESS_BUFFER r; return r<<obj;}
     RPPtr toValue() const override;
   };
@@ -629,28 +701,67 @@ namespace classdesc
   typename enable_if<is_const<T>, void>::T
   assignElem(T& obj, const K& k,const REST_PROCESS_BUFFER& x) {}
 
-  
+  template <class T, class Enable=void> struct MappedType;
+  template <class T> struct MappedType // for maps
+  <T, typename enable_if<is_pair<typename T::value_type>, void>::T>
+  {using type=typename T::mapped_type;};
+
+  template <class T> struct MappedType // for sets
+  <T, typename enable_if<Not<is_pair<typename T::value_type>>, void>::T>
+  {using type=const typename T::value_type;};
+
+
+  template <class T>
+  typename enable_if<is_pair<typename T::value_type>, typename T::value_type>::T
+  makeElement(const typename T::key_type& k) {return {k,{}};}
+  template <class T>
+  typename enable_if<Not<is_pair<typename T::value_type>>, typename T::value_type>::T
+  makeElement(const typename T::key_type& k) {return k;}
+    
   template <class T> class RESTProcessAssociativeContainer: public RESTProcessWrapperBase
   {
     T& obj;
 
     /// get element if a map
     template <class I>
-    typename enable_if<is_pair<typename std::iterator_traits<I>::value_type>, typename std::iterator_traits<I>::value_type::second_type>::T
-    elem_of(const I& i) {return i->second;}
+    typename enable_if<is_pair<typename std::iterator_traits<I>::value_type>, typename std::iterator_traits<I>::value_type::second_type&>::T
+    elem_of(const I& i) const {return i->second;}
 
     /// get element if a set
     template <class I>
-    typename enable_if<Not<is_pair<typename std::iterator_traits<I>::value_type>>, typename std::iterator_traits<I>::value_type>::T
-    elem_of(const I& i) {return *i;}
+    typename enable_if<Not<is_pair<typename std::iterator_traits<I>::value_type>>,
+                       const typename std::iterator_traits<I>::value_type&>::T
+    elem_of(const I& i) const {return *i;}
+
+    typename MappedType<T>::type& elem(const typename T::key_type& k) 
+    {return elem_of(obj.emplace(makeElement<T>(k)).first);}
+
+    void erase(const typename T::key_type& k) {obj.erase(k);}
+
+//    /// get key if a map
+//    template <class I>
+//    typename enable_if<is_pair<typename std::iterator_traits<I>::value_type>, typename std::iterator_traits<I>::value_type::second_type>::T
+//    key_of(const I& i) {return i->first;}
+//
+//    /// get element if a set
+//    template <class I>
+//    typename enable_if<Not<is_pair<typename std::iterator_traits<I>::value_type>>, typename std::iterator_traits<I>::value_type>::T
+//    key_of(const I& i) {return *i;}
+
+    std::vector<typename T::key_type> keys() {
+      std::vector<typename T::key_type> k;
+      for (auto& i: obj)
+        k.emplace_back(keyOf(i));
+      return k;
+    }
     
   public:
     RESTProcessAssociativeContainer(T& obj): obj(obj) {}
     RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
-    RPPtr signature() const override;
-    RPPtr list() const override
-    {return makeRESTProcessValueObject({".@elem",".@elemNoThrow",".@insert",".@erase",".@size",".@keys"});}
-    RPPtr type() const override {return makeRESTProcessValueObject(typeName<T>());}
+    std::vector<Signature> signature() const override;
+    RESTProcess_t list() const override;
+    //{return makeRESTProcessValueObject({".@elem",".@elemNoThrow",".@insert",".@erase",".@size",".@keys"});}
+    std::string type() const override {return typeName<T>();}
     REST_PROCESS_BUFFER asBuffer() const override {REST_PROCESS_BUFFER r; return r<<obj;}
     RPPtr toValue() const override;
   };
@@ -681,14 +792,14 @@ namespace classdesc
     T& ptr;
     RESTProcessPtr(T& ptr): ptr(ptr) {}
     RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
-    RPPtr signature() const override;
-    RPPtr list() const override {
+    std::vector<Signature> signature() const override;
+    RESTProcess_t list() const override {
       if (ptr)
         return const_cast<RESTProcessPtr<T>*>(this)->process(".@list",{});
       else
-        return makeRESTProcessValueObject({});
+        return {};
     }
-    RPPtr type() const override {return makeRESTProcessValueObject(typeName<T>());}
+    std::string type() const override {return typeName<T>();}
     object* getClassdescObject() override {
       if (!ptr || is_const<typename T::element_type>::value) return nullptr;
       return const_cast<object*>(getClassdescObjectImpl(*ptr));
@@ -706,13 +817,13 @@ namespace classdesc
     T& ptr;
     RESTProcessWeakPtr(T& ptr): ptr(ptr) {}
     RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
-    RPPtr signature() const override;
-    RPPtr list() const override {
+    std::vector<Signature> signature() const override;
+    RESTProcess_t list() const override {
       if (auto p=ptr.lock())
         return RESTProcessObject<typename T::element_type>(*p).list();
-      return makeRESTProcessValueObject({});
+      return {};
     }
-    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<std::weak_ptr<T> >());}
+    std::string type() const override {return typeName<std::weak_ptr<T> >();}
     object* getClassdescObject() override {
       auto p=ptr.lock();
       if (!p || is_const<typename T::element_type>::value) return nullptr;
@@ -927,9 +1038,10 @@ namespace classdesc
   template <class T>
   typename enable_if<
     And<
-    is_object<T>,
+      is_object<T>,
       Not<is_abstract<T>>,
-      Not<is_default_constructible<typename remove_reference<T>::type>>
+      Not<is_default_constructible<typename remove_reference<T>::type>>,
+      Not<is_container<T>>
       >, bool>::T
   matches(const REST_PROCESS_BUFFER& x)
   {return false;}
@@ -1075,16 +1187,17 @@ namespace classdesc
     RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
     {return callFunction(remainder, arguments, f);}
     
-    RPPtr signature() const override {return functionSignature<F>();}
+    std::vector<Signature> signature() const override {return {functionSignature<F>()};}
+    
     unsigned matchScore(const REST_PROCESS_BUFFER& arguments) const override
     {return classdesc::matchScore<F>(arguments);}
 
     template <class U>
     typename enable_if<
       And<
-        is_default_constructible<remove_reference<U>>,
+        is_default_constructible<typename remove_reference<U>::type>,
         Not<is_void<U>>
-        >,RPPtr>::T
+        >,RESTProcess_t>::T
     slist() const {
       typename remove_reference<U>::type x;
       return RESTProcessObject<U>(x).list();
@@ -1094,13 +1207,13 @@ namespace classdesc
     typename enable_if<
       Not<
         And<
-          is_default_constructible<remove_reference<U>>,
+          is_default_constructible<typename remove_reference<U>::type>,
           Not<is_void<U>>
-          >>,RPPtr>::T
-    slist() const {return makeRESTProcessValueObject({});}
+          >>,RESTProcess_t>::T
+    slist() const {return {};}
     
-    RPPtr list() const override {return slist<R>();}
-    RPPtr type() const override {return makeRESTProcessValueObject(typeName<R>());}
+    RESTProcess_t list() const override {return slist<R>();}
+    std::string type() const override {return typeName<R>();}
     bool isObject() const override {return false;}
     bool isConst() const override {return FunctionalIsConst<F>::value;}
     unsigned arity() const override {return functional::Arity<F>::value;}
@@ -1155,7 +1268,7 @@ namespace classdesc
       if (remainder=="@type")
         return makeRESTProcessValueObject(typeName<E>());
       else if (remainder=="@signature")
-        return signature();
+        return makeRESTProcessValueObject(signature());
       else if (arguments.type()==RESTProcessType::string)
         {
           string tmp; arguments>>tmp;
@@ -1168,9 +1281,9 @@ namespace classdesc
         }
       return makeRESTProcessValueObject(enum_keys<E>()(e));
     }
-    RPPtr signature() const override;
-    RPPtr list() const override {return makeRESTProcessValueObject({});}
-    RPPtr type() const override {return makeRESTProcessValueObject(typeName<E>());}
+    std::vector<Signature> signature() const override;
+    RESTProcess_t list() const override {return {};}
+    std::string type() const override {return typeName<E>();}
     REST_PROCESS_BUFFER asBuffer() const {return REST_PROCESS_BUFFER(enum_keys<E>()(e));}
   };
 
@@ -1178,9 +1291,9 @@ namespace classdesc
   class EnumerateEnumerators: public RESTProcessBase
   {
     RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
-    RPPtr signature() const override;
-    RPPtr list() const override {return makeRESTProcessValueObject({});}
-    RPPtr type() const override {return makeRESTProcessValueObject("function");}
+    std::vector<Signature> signature() const override;
+    RESTProcess_t list() const override {return {};}
+    std::string type() const override {return "function";}
     REST_PROCESS_BUFFER asBuffer() const override {return {};}
   };
 

@@ -126,6 +126,7 @@ struct Bar1
   Bar1(int i): f(i), g(2), barfoo(ec), vFoo(2,Foo(1)) {}
   Foo foo() {return f;}
   Foo& fooRef() {return f;}
+  Foo& vFooElem(int i) {return vFoo[i];}
   Foo* foop() {return &f;} // should be ignored, as can't determine ownership
   static Foo* sfoop() {return nullptr;}// should be ignored, as can't determine ownership
   static Foo* sfoop(int) {return nullptr;}// should be ignored, as can't determine ownership
