@@ -101,6 +101,8 @@ namespace classdesc
 
     template <class T>
     SimpleBuffer& operator=(const T& x) {Super::operator=(x); return *this;}
+    SimpleBuffer& operator=(int64_t x) {Super::operator=(double(x)); return *this;}
+    SimpleBuffer& operator=(uint64_t x) {Super::operator=(double(x)); return *this;}
     
     /// return type conforms to the sequence concept
     const Array& array() const {
@@ -249,16 +251,13 @@ namespace classdesc
     b=tmp;
     return b;
   }
+
+  template <>
+  std::string typeName<SimpleBuffer>() {return "SimpleBuffer";}
 }
 
-namespace classdesc_access
-{
-  namespace cd=classdesc;
-  template <>
-  struct access_json_unpack<cd::SimpleBuffer>
-  {
-  public:
-    void operator()(cd::json_unpack_t& b, const cd::string& d, cd::SimpleBuffer& a)
-    {a=b;}
-  };
+// need to define this explicitly - see SimpleBuffer.cc
+#pragma omit json_pack classdesc::SimpleBuffer
+#pragma omit json_unpack classdesc::SimpleBuffer
+#pragma omit RESTProcess classdesc::SimpleBuffer
 #endif

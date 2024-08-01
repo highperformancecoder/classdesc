@@ -11,7 +11,16 @@
 #define REST_PROCESS_BUFFER SimpleBuffer
 
 #include "RESTProcessExample.h"
-#include "SimpleBuffer.cd"
+//#include "SimpleBuffer.cd"
+
+namespace classdesc_access
+{
+  namespace cd=classdesc;
+  template <>  struct access_json_pack<cd::SimpleBuffer>: public cd::NullDescriptor<cd::json_pack_t> {};
+  template <>  struct access_json_unpack<cd::SimpleBuffer>: public cd::NullDescriptor<cd::json_unpack_t> {};
+  template <>  struct access_RESTProcess<cd::SimpleBuffer>: public cd::NullDescriptor<cd::RESTProcess_t> {};
+}
+
 #include "classdesc_epilogue.h"
 
 using namespace classdesc;

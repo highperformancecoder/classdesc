@@ -116,8 +116,9 @@ namespace classdesc
   RESTProcess_t RESTProcessSequence<T>::list() const {
     RESTProcess_t map;
     map.add(".@elem", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessSequence<T>::elem)));
-    map.add(".@insert", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessSequence<T>::pushBack)));
+    map.add(".@elemNoThrow", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessSequence<T>::elemNoThrow)));
     map.add(".@erase", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessSequence<T>::eraseElem)));
+    map.add(".@insert", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessSequence<T>::pushBack)));
     map.add(".@size", new RESTProcessFunction(functional::bindMethod(obj,&T::size)));
     return map;
   }
@@ -125,14 +126,13 @@ namespace classdesc
   template <class T>
   RESTProcess_t RESTProcessAssociativeContainer<T>::list() const {
     RESTProcess_t map;
+    // duplicates here for backward compatibility
     map.add(".@elem", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::elem)));
-//            ([this](const typename T::key_type& k){
-//              return elem_of(obj.emplace(k).first);
-//            }));
-    // map.add(".@insert", new RESTProcessFunction(bind_method(obj,&T::push_back)));
+    map.add(".@elemNoThrow", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::elem)));
+    map.add(".@insert", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::elem)));
     map.add(".@erase", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::erase)));
     map.add(".@size", new RESTProcessFunction(functional::bindMethod(obj,&T::size)));
-    map.add(".@size", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::keys)));
+    map.add(".@keys", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::keys)));
     return map;
   }
   

@@ -297,7 +297,7 @@ namespace classdesc
               auto functs=std::make_shared<RESTProcessOverloadedFunction>();
               if (firstFunction) functs->overloadedFunctions.push_back(std::move(firstFunction));
               functs->overloadedFunctions.emplace_back(rp);
-              emplace(d,functs);
+              i->second=functs;
             }
         }
     }
@@ -488,6 +488,19 @@ namespace classdesc
   inline bool startsWith(const std::string& x, const std::string& prefix)
   {return x.size()>=prefix.size() && equal(prefix.begin(), prefix.end(), x.begin());}
 
+  template <class U>
+  typename enable_if<is_default_constructible<typename U::value_type>, typename U::value_type&>::T
+  dummyRef() {
+    static typename U::value_type dummy;
+    return dummy;
+  }
+
+  template <class U>
+  typename enable_if<Not<is_default_constructible<typename U::value_type>>, typename U::value_type&>::T
+  dummyRef() {
+    throw std::runtime_error(typeName<typename U::value_type>()+" is not default constructible, but requested element doesn't exist");
+  }
+
   // sequences
   template <class T> class RESTProcessSequence: public RESTProcessWrapperBase
   {
@@ -545,15 +558,23 @@ namespace classdesc
       throw std::runtime_error("cannot erase from this sequence");
     }
 
+    // common element extraction code - assumes index is in bounds
+    typename T::value_type& elemCommon(size_t idx) {
+      auto i=obj.begin();
+      std::advance(i, idx);
+      return *i;
+    }
+
     typename T::value_type& elem(size_t idx) {
-      if (idx<obj.size()) {
-          auto i=obj.begin();
-          std::advance(i, idx);
-          return *i;
-        }
+      if (idx<obj.size()) return elemCommon(idx);
       throw std::runtime_error("idx out of bounds");
     }
 
+    typename T::value_type& elemNoThrow(size_t idx) {
+      if (idx<obj.size()) return elemCommon(idx);
+      return dummyRef<T>();
+    }
+      
     void pushBack(const typename T::value_type& v) {
       push_back(obj, v);
     }
