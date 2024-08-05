@@ -219,14 +219,16 @@ namespace classdesc
               else
                 throw std::runtime_error("idx out of bounds");
             }
-          auto i=obj.begin();
-          std::advance(i, idx);
-          auto r=mapAndProcess(string(idxEnd,remainder.end()), arguments, *i);
-          // if we're processing MultiArrays, convert return to a value type as the iterator here will be invalidated out of scope
-          if (std::is_base_of<MultiArrayIterator, decltype(i)>::value)
-            if (auto v=r->toValue())
-              return v;
-          return r;
+          return {};
+//          auto i=obj.begin();
+//          std::advance(i, idx);
+//          auto ip=*i;
+//          auto r=mapAndProcess(string(idxEnd,remainder.end()), arguments, ip);
+//          // if we're processing MultiArrays, convert return to a value type as the iterator here will be invalidated out of scope
+//          if (std::is_base_of<MultiArrayIterator, decltype(i)>::value)
+//            if (auto v=r->toValue())
+//              return v;
+//          return r;
         }
       else if (startsWith(remainder,".@insert"))
         insert(obj, arguments);

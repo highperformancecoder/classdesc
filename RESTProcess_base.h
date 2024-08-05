@@ -70,6 +70,17 @@ namespace classdesc
     virtual bool isConst() const {return false;}
     /// arity if this is a function, 0 otherwise
     virtual unsigned arity() const {return 0;}
+    virtual size_t size() const {
+      throw std::runtime_error("not a container");
+    }
+    /// @{ indexing for containers
+    virtual RPPtr getElem(const REST_PROCESS_BUFFER& index) {
+      throw std::runtime_error("Indexing not supported");
+    }
+    virtual RPPtr setElem(const REST_PROCESS_BUFFER& index, const REST_PROCESS_BUFFER& value) {
+      throw std::runtime_error("Indexing not supported");
+    }
+    /// @}
   };
 
   /// marker for containers and pointers that wrap
@@ -197,7 +208,12 @@ namespace classdesc
   }
 
   template <class X>
-  typename enable_if<And<is_sequence<X>,Not<is_const<X>>>, void>::T
+  typename enable_if<
+    And<
+      Not<is_base_of<MultiArrayBase,X>>,
+      is_sequence<X>,
+      Not<is_const<X>>
+      >, void>::T
   convert(X& x, const REST_PROCESS_BUFFER& j)
   {
     if (j.type()==RESTProcessType::array)
@@ -213,6 +229,37 @@ namespace classdesc
       }
   }
   
+  template <class T,int R>
+  void convert(MultiArray<T,R>& x, const REST_PROCESS_BUFFER& j)
+  {
+    if (j.type()==RESTProcessType::array)
+      {
+        auto arr=j.array();
+        auto xi=x.begin();
+        for (auto& ai: arr)
+          {
+            if (xi==x.end()) break;
+            auto target=*xi++;
+            convert(target, REST_PROCESS_BUFFER(ai));
+          }
+      }
+  }
+
+  template <class T>
+  void convert(MultiArray<T,1>& x, const REST_PROCESS_BUFFER& j)
+  {
+    if (j.type()==RESTProcessType::array)
+      {
+        auto arr=j.array();
+        auto xi=x.begin();
+        for (auto& ai: arr)
+          {
+            if (xi==x.end()) break;
+            REST_PROCESS_BUFFER(ai) >> *xi++;
+          }
+      }
+  }
+ 
   template <class X>
   typename enable_if<And<is_associative_container<X>,Not<is_const<X>>>, void>::T
   convert(X& x, const REST_PROCESS_BUFFER& j)
@@ -333,7 +380,13 @@ namespace classdesc
       {
         auto i=map.find("");
         if (i!=map.end())
-          return i->second->process("",arguments);
+          {
+            auto r=i->second->process("",arguments);
+//            if (std::is_base_of<MultiArrayBase, decltype(a)>::value)
+//              if (auto v=r->toValue())
+//                return v;
+            return r;
+          }
         else
           return {};
       }
@@ -565,11 +618,6 @@ namespace classdesc
       return *i;
     }
 
-    typename T::value_type& elem(size_t idx) {
-      if (idx<obj.size()) return elemCommon(idx);
-      throw std::runtime_error("idx out of bounds");
-    }
-
     typename T::value_type& elemNoThrow(size_t idx) {
       if (idx<obj.size()) return elemCommon(idx);
       return dummyRef<T>();
@@ -594,7 +642,13 @@ namespace classdesc
       erase(obj,i);
     }
 
-    
+
+  protected:
+    typename T::value_type& elem(size_t idx) {
+      if (idx<obj.size()) return elemCommon(idx);
+      throw std::runtime_error("idx out of bounds");
+    }
+
     
   public:
     RESTProcessSequence(T& obj): obj(obj) {}
@@ -605,6 +659,17 @@ namespace classdesc
     std::string type() const override {return typeName<T>();}
     REST_PROCESS_BUFFER asBuffer() const override {REST_PROCESS_BUFFER r; return r<<obj;}
     RPPtr toValue() const override;
+    RPPtr getElem(const REST_PROCESS_BUFFER& index) {
+      size_t idx; index>>idx;
+      return std::make_shared<RESTProcessObject<typename T::value_type>>(elem(idx));
+    }
+    RPPtr setElem(const REST_PROCESS_BUFFER& index, const REST_PROCESS_BUFFER& value) {
+      size_t idx; index>>idx;
+      auto& v=elem(idx);
+      value>>v;
+      return std::make_shared<RESTProcessObject<typename T::value_type>>(v);
+    }
+    size_t size() const override {return obj.size();}
   };
 
   template <class T> struct RESTProcessValueSequence: public RESTProcessSequence<T>
@@ -615,14 +680,87 @@ namespace classdesc
     RESTProcessValueSequence(Args&&... args): RESTProcessSequence<T>(actual), actual(std::forward<Args>(args)...) {}
     RPPtr toValue() const override {return nullptr;}
   };
+
+  template <class T> struct RESTProcessMultiArray: public RESTProcessBase
+  {
+    T actual;
+  public:
+    template <class... Args>
+    RESTProcessMultiArray(Args&&... args): actual(std::forward<Args>(args)...) {}
+    RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override {
+      // TODO - reuse sequence code to extract the slice
+      return std::make_shared<RESTProcessVoid>();
+    }
+    REST_PROCESS_BUFFER asBuffer() const override {
+      REST_PROCESS_BUFFER r;
+      return r<<actual;
+    }
+    /// return signature(s) of the operations
+    std::vector<Signature> signature() const override {return {};}
+    /// return list of subcommands to this
+    RESTProcess_t list() const override {return {};}
+    /// return type name of this
+    std::string type() const override {return "typeName<T>()";}
+    RPPtr getElem(const REST_PROCESS_BUFFER& index) override {
+      size_t idx; index>>idx;
+      if (idx<actual.size())
+        return std::make_shared<RESTProcessMultiArray<typename T::value_type>>(actual[idx]);
+      return std::make_shared<RESTProcessVoid>();
+    }
+    RPPtr setElem(const REST_PROCESS_BUFFER& index, const REST_PROCESS_BUFFER& value) override {
+      size_t idx; index>>idx;
+      if (idx<actual.size())
+        {
+          auto elem=actual[idx];
+          convert(elem,value);
+          return std::make_shared<RESTProcessMultiArray<typename T::value_type>>(elem);
+        }
+      return std::make_shared<RESTProcessVoid>();
+    }
+    
+    size_t size() const override {return actual.size();}
+
+  };
+
+  template <class T> struct RESTProcessMultiArray<classdesc::MultiArray<T,1>>:
+    public RESTProcessSequence<classdesc::MultiArray<T,1>>
+  {
+    MultiArray<T,1> actual;
+  public:
+    template <class... Args>
+    RESTProcessMultiArray(Args&&... args): RESTProcessSequence<classdesc::MultiArray<T,1>>(actual), actual(std::forward<Args>(args)...) {}
+    RPPtr getElem(const REST_PROCESS_BUFFER& index) {
+      size_t idx; index>>idx;
+      return std::make_shared<RESTProcessObject<T>>(this->elem(idx));
+    }
+    RPPtr setElem(const REST_PROCESS_BUFFER& index, const REST_PROCESS_BUFFER& value) {
+      size_t idx; index>>idx;
+      auto& v=this->elem(idx);
+      value>>v;
+      return std::make_shared<RESTProcessObject<T>>(v);
+    }
+    
+    RPPtr toValue() const override {return nullptr;}
+  };
+
+  
   
   template <class T> RPPtr RESTProcessSequence<T>::toValue() const
   {return std::make_shared<RESTProcessValueSequence<T>>(obj);}
   
   template <class T>
-  typename enable_if<is_sequence<T>, void>::T
+  typename enable_if<
+    And<
+      is_sequence<T>,
+      Not<is_base_of<MultiArrayBase,T>>
+      >, void>::T
   RESTProcessp(RESTProcess_t& repo, const string& d, T& a)
   {repo.add(d, new RESTProcessSequence<T>(a));}
+
+  template <class T>
+  typename enable_if<is_base_of<MultiArrayBase,T>, void>::T
+  RESTProcessp(RESTProcess_t& repo, const string& d, T& a)
+  {repo.add(d, new RESTProcessValueSequence<T>(a));}
 
   /// used for removing const attributes of an associative container's value_type
   template <class T>
@@ -759,16 +897,6 @@ namespace classdesc
 
     void erase(const typename T::key_type& k) {obj.erase(k);}
 
-//    /// get key if a map
-//    template <class I>
-//    typename enable_if<is_pair<typename std::iterator_traits<I>::value_type>, typename std::iterator_traits<I>::value_type::second_type>::T
-//    key_of(const I& i) {return i->first;}
-//
-//    /// get element if a set
-//    template <class I>
-//    typename enable_if<Not<is_pair<typename std::iterator_traits<I>::value_type>>, typename std::iterator_traits<I>::value_type>::T
-//    key_of(const I& i) {return *i;}
-
     std::vector<typename T::key_type> keys() {
       std::vector<typename T::key_type> k;
       for (auto& i: obj)
@@ -781,10 +909,20 @@ namespace classdesc
     RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
     std::vector<Signature> signature() const override;
     RESTProcess_t list() const override;
-    //{return makeRESTProcessValueObject({".@elem",".@elemNoThrow",".@insert",".@erase",".@size",".@keys"});}
     std::string type() const override {return typeName<T>();}
     REST_PROCESS_BUFFER asBuffer() const override {REST_PROCESS_BUFFER r; return r<<obj;}
     RPPtr toValue() const override;
+    RPPtr getElem(const REST_PROCESS_BUFFER& index) {
+      typename T::key_type idx; index>>idx;
+      return std::make_shared<RESTProcessObject<typename MappedType<T>::type>>(elem(idx));
+    }
+    RPPtr setElem(const REST_PROCESS_BUFFER& index, const REST_PROCESS_BUFFER& value) {
+      typename T::key_type idx; index>>idx;
+      auto& v=elem(idx);
+      value>>v;
+      return std::make_shared<RESTProcessObject<typename MappedType<T>::type>>(v);
+    }
+    size_t size() const override {return obj.size();}
   };
 
   template <class T> struct RESTProcessValueAssociativeContainer: public RESTProcessAssociativeContainer<T>
@@ -1369,21 +1507,19 @@ namespace classdesc
     static const size_t value=functional::Arity<void(*)(Args...)>::value;
   };
 
+  
   template <class T, class... Args>
-  struct RESTProcessMultiArray:
-    public MultiArray<T,NumArgs<Args...>::value>,
-    public RESTProcessSequence<MultiArray<T,NumArgs<Args...>::value>>
+  struct RESTProcessMultiArrayFromC: public RESTProcessMultiArray<MultiArray<T,NumArgs<Args...>::value>>
   {
     static const size_t rank=NumArgs<Args...>::value;
-    typedef MultiArray<T,rank> MA;
-    RESTProcessMultiArray(T* data, Args... dims):
-      MA(data,dims...), RESTProcessSequence<MA>(static_cast<MA&>(*this)) {}
+    RESTProcessMultiArrayFromC(T* data, Args... dims):
+      RESTProcessMultiArray<MultiArray<T,rank>>(data,dims...) {}
   };
   
   template <class T, class... Args>
   void RESTProcess(RESTProcess_t& r, const string& d, is_array, T& a, int dims, Args... args)
   {
-    r.add(d, new RESTProcessMultiArray<T,Args...>(&a, args...));
+    r.add(d, new RESTProcessMultiArrayFromC<T,Args...>(&a, args...));
   }
 
   template <class T>

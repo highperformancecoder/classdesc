@@ -401,18 +401,21 @@ namespace classdesc
       return b;
     }
 
-  namespace
-  {
     /// call \a command on \a registry with \a arguments
     /// returns a python object representing function's return value.
     PyObject* callOnRegistry(const RPPtr& command, const string& remainder, const PythonBuffer& arguments);
-    
-    /// C++ wrapper to default initialise the PyObject
-    struct CppPyObject: public PyObject
-    {
-      CppPyObject() {memset(this,0,sizeof(PyObject));}
-    };
+
+  /// C++ wrapper to default initialise the PyObject
+  struct CppPyObject: public PyObject
+  {
+    CppPyObject() {memset(this,0,sizeof(PyObject));}
+  };
   
+  
+  class CppWrapper;
+  void attachRegistryObjects(const RESTProcess_t& registry, CppWrapper& object,const std::string& prefix);
+
+    
     struct CppWrapper: public CppPyObject
     {
       const bool special; // if true, command takes a key as an argument
@@ -420,12 +423,43 @@ namespace classdesc
       std::map<string, PyObjectRef> methods;
       static CppWrapper* create(const RPPtr& command, bool special) {return new CppWrapper(command,special);}
       CppWrapper(CppWrapper&&)=default;
+
+      static PyObject* list(CppWrapper* self, PyObject*)
+      {
+        auto methods=self->command->list();
+        std::vector<string> methodList;
+        for (auto& i: methods)
+          if (!i.first.empty()) // don't include top level object
+            methodList.push_back(i.first);
+        return PythonBuffer(methodList).getPyObject().release();
+      }
+      static PyObject* properties(CppWrapper* self, PyObject*)
+      {
+        return PythonBuffer(self->command->asBuffer()).getPyObject().release();
+      }
+      static PyObject* signature(CppWrapper* self, PyObject*)
+      {
+        return PythonBuffer(self->command->signature()).getPyObject().release();
+      }
+      static PyObject* type(CppWrapper* self, PyObject*)
+      {
+        return PythonBuffer(self->command->type()).getPyObject().release();
+      }
+      
     private:
       CppWrapper(const RPPtr& command,bool special); // private to force creation on heap
       CppWrapper(const CppWrapper&)=delete;
       void operator=(const CppWrapper&)=delete;
     };
 
+    static PyMethodDef cppWrapperMethods[]={
+      {"_list",(PyCFunction)CppWrapper::list,METH_NOARGS,"List of members/methods of this object"},
+      {"_properties",(PyCFunction)CppWrapper::properties,METH_NOARGS,"Return current state of this object"},
+      {"_signature",(PyCFunction)CppWrapper::signature,METH_NOARGS,"Signatures of all method overloads"},
+      {"_type",(PyCFunction)CppWrapper::type,METH_NOARGS,"Object type"},
+      {nullptr, nullptr, 0, nullptr}
+    };
+      
     struct CppWrapperType: public PyTypeObject
     {
       // container commands that take a key as as an argument
@@ -466,8 +500,7 @@ namespace classdesc
             Py_INCREF(i->second);
             return i->second;
           }
-        PyErr_SetString(PyExc_AttributeError, "Method not found");
-        return nullptr;
+        return PyObject_GenericGetAttr(self,attr);
       }
     
       static int setAttro(PyObject* self, PyObject* name, PyObject* attr)
@@ -488,28 +521,40 @@ namespace classdesc
       {
         static Py_ssize_t size(PyObject* self)
         {
-          auto cppWrapper=static_cast<CppWrapper*>(self);
-          auto sp=cppWrapper->command->process(".@size",{})->getObject<size_t>();
-          assert(sp);
-          return *sp;
+          try
+            {
+              auto cppWrapper=static_cast<CppWrapper*>(self);
+              return cppWrapper->command->size();
+            }
+          catch (const std::exception& ex)
+            {
+              PyErr_SetString(PyExc_RuntimeError, ex.what());
+              return 0;
+            }
         }
 
         static PyObject* getElem(PyObject* self, PyObject* key)
         {
           auto cppWrapper=static_cast<CppWrapper*>(self);
-          PythonBuffer r(cppWrapper->command->process(".@elem."+write(PythonBuffer(key).get<json_pack_t>()), {})->asBuffer());
-          return r.getPyObject();
+          try
+            {
+              auto result=cppWrapper->command->getElem(PythonBuffer(key).get<json_pack_t>());
+              return CppWrapper::create(result, false);
+            }
+          catch (const std::exception& ex)
+            {
+              PyErr_SetString(PyExc_RuntimeError, ex.what());
+              return nullptr;
+            }
         }
     
         static int setElem(PyObject* self, PyObject* key, PyObject* val)
         {
+          auto cppWrapper=static_cast<CppWrapper*>(self);
           try
             {
-              auto cppWrapper=static_cast<CppWrapper*>(self);
-              PythonBuffer args(RESTProcessType::array);
-              args.push_back(val);
-              cppWrapper->command->process(".@elem."+write(PythonBuffer(key).get<json_pack_t>()),
-                                           args.get<json_pack_t>());
+              cppWrapper->command->setElem(PythonBuffer(key).get<json_pack_t>(),
+                                           PythonBuffer(val).get<json_pack_t>());
               return 0;
             }
           catch (const std::exception& ex)
@@ -525,12 +570,13 @@ namespace classdesc
           mp_ass_subscript=setElem; // support for []=
         }
       } mappingMethods;
-      
+
       CppWrapperType()
       {
         memset(this,0,sizeof(PyTypeObject));
         Py_INCREF(this);
         tp_name="CppWrapperType";
+        tp_methods=cppWrapperMethods;
         tp_call=call;
         tp_basicsize=sizeof(CppWrapper);
         tp_dealloc=deleteCppWrapper;
@@ -545,54 +591,26 @@ namespace classdesc
       static CppWrapperType cppWrapperType;
       ob_refcnt=1;
       ob_type=&cppWrapperType;
-      methods.emplace("__dict__",cppWrapperType.tp_dict);
-      Py_XINCREF(cppWrapperType.tp_dict);
     }
 
-    /// track and limit recursion of these methods, to avoid infinite recursion caused by references 
-    struct LimitRecursion
+    inline void attachRegistryObjects(const RESTProcess_t& registry, CppWrapper& object,const std::string& prefix)
     {
-      int recur;
-      LimitRecursion(int recur=0): recur(recur+1) {}
-      void attachMethods(PyObjectRef& pyObject, const RESTProcessBase& command)
-      {
-        if (!pyObject) return;
-        json_pack_t j; j<<command.signature();
-        PyObject_SetAttrString(pyObject, "_signature",newPyObject(j));
-        PyObject_SetAttrString(pyObject, "_type", newPyObject(command.type()));
-
-        try
+      for (auto& i: registry)
+        {
+          std::string_view key(i.first);
+          if (i.second && key.substr(0,prefix.length())==prefix)
           {
-            auto map=command.list();
-            std::vector<std::string> methods;
-            for (auto& i: map)
-              {
-                methods.push_back(i.first);
-                const string& methodName(i.first);
-                auto uqMethodName=i.first.substr(1); // remove leading '.'
-                if (uqMethodName.find('.')!=string::npos) continue; // ignore recursive commands
-                bool special=uqMethodName.find('@')!=string::npos;
-                PyObjectRef method{CppWrapper::create(i.second, special)};
-                if (special)
-                  {
-                    // make special commands representable in python
-                    replace(uqMethodName.begin(),uqMethodName.end(),'@','_');
-                  }
-                else if (recur<5)
-                  {  // and recurse to a limited extent, to prevent loops caused by references
-                    LimitRecursion(recur).attachMethods(method, *i.second);
-                  }
-                PyObject_SetAttrString(pyObject, uqMethodName.c_str(), method.release());
-              }
-            PyObject_SetAttrString(pyObject, "_list", newPyObject(methods));
+            std::string method(key.substr(prefix.length()));
+            if (method.find('.')!=std::string::npos) continue;
+            bool special=method[0]=='@';
+            auto methodObject=CppWrapper::create(i.second, special);
+            attachRegistryObjects(registry, *methodObject, i.first+".");
+            if (special) method[0]='_';
+            PyObject_SetAttrString(&object,method.c_str(),methodObject);
           }
-        catch (...) { } // do not log, nor report errors back to python - there are too many
-        if (PyErr_Occurred())
-          PyErr_Print();
-      }
-    };
-
-
+        }
+    }
+    
     inline PyObject* callOnRegistry(const RPPtr& command, const std::string& remainder, const PythonBuffer& arguments)
     {
       try
@@ -606,11 +624,10 @@ namespace classdesc
             case RESTProcessType::object:
             case RESTProcessType::array:
               {
-                PyObjectRef r(CppWrapper::create(result, false));
-                PyObject_SetAttrString(r,"_properties",pyResult.release());
-                if (resultBuffer.type()==RESTProcessType::object)
-                  LimitRecursion().attachMethods(r, *result);
-                return r.release();
+                auto r=CppWrapper::create(result, false);
+                PyObjectRef ref(r);
+                attachRegistryObjects(result->list(),*r,".");
+                return ref.release();
               }
             }
           if (PyErr_Occurred())
@@ -629,14 +646,15 @@ namespace classdesc
         }
     }
 
-    /// 
+    /// declare a factory object for a given type
     template <class T, class... Args> struct DeclareType
     {
       DeclareType(const string& typeName) {
         registry.addFactory<T,Args...>(typeName,[](const std::string& name){
           auto object=std::make_shared<RESTProcessValueObject<T>>();
-          PyObjectRef pyObject=CppWrapper::create(object,false);
-          LimitRecursion().attachMethods(pyObject,*object);
+          auto cppObject=CppWrapper::create(object,false);
+          PyObjectRef pyObject(cppObject);
+          attachRegistryObjects(object->list(), *cppObject, ".");
           PyModule_AddObject(pythonModule, name.c_str(), pyObject.release());
         });
       }
@@ -645,17 +663,12 @@ namespace classdesc
     inline void initModule()
     {
       assert(pythonModule);
-//      // grab all toplevel objects already installed
-//      std::set<RESTProcess_t> topLevelNames;
-//      for (auto& i: registry)
-//        if (!i.first.empty() && i.first[0]!='@')
-//          topLevelNames.insert(i.first.substr(0,i.first.find('.')));
       for (auto& i: registry)
-        {
+        { // loop over toplevel registry objects
           if (!i.second || i.first.empty() || i.first.find('.')!=std::string::npos || i.first[0]=='@') continue;
-          PyObjectRef pyObject=CppWrapper::create(i.second, false);
-          LimitRecursion().attachMethods(pyObject,*i.second);
-          PyModule_AddObject(pythonModule, i.first.c_str(), pyObject.release());
+          auto pyObject=CppWrapper::create(i.second, false);
+          attachRegistryObjects(registry, *pyObject, i.first+".");
+          PyModule_AddObject(pythonModule, i.first.c_str(), pyObject);
         }
       
       // enum reflection
@@ -669,7 +682,6 @@ namespace classdesc
         }
       PyModule_AddObject(pythonModule, "enum", enummer.release());
     }
-  }
 }
 
 

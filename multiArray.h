@@ -15,12 +15,13 @@ namespace classdesc
     template <class T, int Rank> class MultiArray;
   template <class T, int R> void advance(MultiArray<T,R>& a, std::ptrdiff_t n);
 
-  /// base class of iterator for metaprogramming
+  /// base classes for metaprogramming
+  struct MultiArrayBase{};
   struct MultiArrayIterator{};
   
   // turn a pointer back into multidimensional array
   template <class T, int Rank>
-  class MultiArray
+  class MultiArray: public MultiArrayBase
   {
     T* m_data;
     size_t dim[Rank];
@@ -61,6 +62,7 @@ namespace classdesc
   public:
     typedef MultiArray<T,Rank-1> value_type;
     typedef size_t size_type;
+    static const int rank=Rank;
     /// Create a MultiArray given data and dimensions passed as arguments
     /// 
     template <class... Args>
@@ -126,7 +128,7 @@ namespace classdesc
   };
 
   template <class T>
-  class MultiArray<T, 1>
+  class MultiArray<T, 1>: public MultiArrayBase
   {
     T* m_data;
     size_t m_size;
