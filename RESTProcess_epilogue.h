@@ -464,6 +464,32 @@ namespace classdesc
     add(typeName, new RESTProcessFunction<decltype(factory),void>(factory));
   }
 
+  template <class T>
+  typename enable_if<
+    And<
+      Not<is_container<T>>,
+      Not<is_smart_ptr<T>>
+      >, RPPtr>::T makeRESTProcessRef(T& obj)
+  {return std::make_shared<RESTProcessObject<T>>(obj);}
+
+  template <class T>
+  typename enable_if<
+    And<
+      is_sequence<T>,
+      Not<is_base_of<MultiArrayBase,T>>
+      >,  RPPtr>::T
+  makeRESTProcessRef(T& obj)
+  {return std::make_shared<RESTProcessSequence<T>>(obj);}
+
+  template <class T>
+  typename enable_if<is_base_of<MultiArrayBase,T>, RPPtr>::T
+  makeRESTProcessRef(T& obj)
+  {return std::make_shared<RESTProcessMultiArray<T>>(obj);}
+
+  template <class T>
+  typename enable_if<is_smart_ptr<T>, RPPtr>::T
+  makeRESTProcessRef(T& obj)
+  {return std::make_shared<RESTProcessPtr<T>>(obj);}
 }
 
 namespace classdesc_access

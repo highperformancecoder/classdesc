@@ -30,6 +30,12 @@
 #include <numeric>
 #include <Python.h>
 
+#define CLASSDESC_PY_EXCEPTION_ABSORB(ret)              \
+  catch (const std::exception& ex)                      \
+    {                                                   \
+      PyErr_SetString(PyExc_RuntimeError, ex.what());   \
+      return ret;                                       \
+    }
 
 namespace classdesc
 {
@@ -425,26 +431,68 @@ namespace classdesc
       CppWrapper(CppWrapper&&)=default;
 
       static PyObject* list(CppWrapper* self, PyObject*)
-      {
-        auto methods=self->command->list();
-        std::vector<string> methodList;
-        for (auto& i: methods)
-          if (!i.first.empty()) // don't include top level object
-            methodList.push_back(i.first);
-        return PythonBuffer(methodList).getPyObject().release();
-      }
+        try
+          {
+            auto methods=self->command->list();
+            std::vector<string> methodList;
+            for (auto& i: methods)
+              if (!i.first.empty()) // don't include top level object
+                methodList.push_back(i.first);
+            return PythonBuffer(methodList).getPyObject().release();
+          }
+      CLASSDESC_PY_EXCEPTION_ABSORB(nullptr);
+      
       static PyObject* properties(CppWrapper* self, PyObject*)
-      {
-        return PythonBuffer(self->command->asBuffer()).getPyObject().release();
-      }
+        try
+          {
+            return PythonBuffer(self->command->asBuffer()).getPyObject().release();
+          }
+      CLASSDESC_PY_EXCEPTION_ABSORB(nullptr);
+      
       static PyObject* signature(CppWrapper* self, PyObject*)
-      {
-        return PythonBuffer(self->command->signature()).getPyObject().release();
-      }
+        try
+          {
+            return PythonBuffer(self->command->signature()).getPyObject().release();
+          }
+      CLASSDESC_PY_EXCEPTION_ABSORB(nullptr);
+      
       static PyObject* type(CppWrapper* self, PyObject*)
-      {
-        return PythonBuffer(self->command->type()).getPyObject().release();
-      }
+        try
+          {
+            return PythonBuffer(self->command->type()).getPyObject().release();
+          }
+       CLASSDESC_PY_EXCEPTION_ABSORB(nullptr);
+     
+      static PyObject* insert(CppWrapper* self, PyObject* value)
+        try
+          {
+            self->command->insert(PythonBuffer(value).get<json_pack_t>());
+            return Py_None;
+          }
+      CLASSDESC_PY_EXCEPTION_ABSORB(nullptr);
+
+      static PyObject* erase(CppWrapper* self, PyObject* key)
+        try
+          {
+            self->command->erase(PythonBuffer(key).get<json_pack_t>());
+            return Py_None;
+          }
+      CLASSDESC_PY_EXCEPTION_ABSORB(nullptr);
+
+      static PyObject* contains(CppWrapper* self, PyObject* key)
+      try
+        {
+          return PythonBuffer(self->command->contains(PythonBuffer(key).get<json_pack_t>()))
+            .getPyObject().release();
+        }
+      CLASSDESC_PY_EXCEPTION_ABSORB(nullptr);
+
+      static PyObject* keys(CppWrapper* self, PyObject*)
+        try
+          {
+            return PythonBuffer(self->command->keys()->asBuffer()).getPyObject().release();
+          }
+      CLASSDESC_PY_EXCEPTION_ABSORB(nullptr);
       
     private:
       CppWrapper(const RPPtr& command,bool special); // private to force creation on heap
@@ -457,6 +505,10 @@ namespace classdesc
       {"_properties",(PyCFunction)CppWrapper::properties,METH_NOARGS,"Return current state of this object"},
       {"_signature",(PyCFunction)CppWrapper::signature,METH_NOARGS,"Signatures of all method overloads"},
       {"_type",(PyCFunction)CppWrapper::type,METH_NOARGS,"Object type"},
+      {"insert",(PyCFunction)CppWrapper::insert,METH_O,"Object type"},
+      {"erase",(PyCFunction)CppWrapper::erase,METH_O,"Object type"},
+      {"keys",(PyCFunction)CppWrapper::keys,METH_NOARGS,"Object type"},
+      {"contains",(PyCFunction)CppWrapper::contains,METH_O,"Object type"},
       {nullptr, nullptr, 0, nullptr}
     };
       
@@ -473,8 +525,10 @@ namespace classdesc
       static PyObject* call(PyObject* self, PyObject* args, PyObject *kwargs)
       {
         auto cppWrapper=static_cast<CppWrapper*>(self);
-        PythonBuffer arguments(PySequence_Size(args)? RESTProcessType::array: RESTProcessType::null);
         auto command=cppWrapper->command;
+        if (command->isObject() && PySequence_Size(args)==0)
+          return CppWrapper::properties(cppWrapper,nullptr);
+        PythonBuffer arguments(PySequence_Size(args)? RESTProcessType::array: RESTProcessType::null);
         std::string remainder;
         if (cppWrapper->special && PySequence_Size(args))
           // handle special commands which embed the argument in the path string
@@ -526,11 +580,7 @@ namespace classdesc
               auto cppWrapper=static_cast<CppWrapper*>(self);
               return cppWrapper->command->size();
             }
-          catch (const std::exception& ex)
-            {
-              PyErr_SetString(PyExc_RuntimeError, ex.what());
-              return 0;
-            }
+          CLASSDESC_PY_EXCEPTION_ABSORB(0);
         }
 
         static PyObject* getElem(PyObject* self, PyObject* key)

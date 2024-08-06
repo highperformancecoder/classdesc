@@ -70,19 +70,50 @@ namespace classdesc
     virtual bool isConst() const {return false;}
     /// arity if this is a function, 0 otherwise
     virtual unsigned arity() const {return 0;}
-    virtual size_t size() const {
-      throw std::runtime_error("not a container");
-    }
-    /// @{ indexing for containers
-    virtual RPPtr getElem(const REST_PROCESS_BUFFER& index) {
-      throw std::runtime_error("Indexing not supported");
-    }
-    virtual RPPtr setElem(const REST_PROCESS_BUFFER& index, const REST_PROCESS_BUFFER& value) {
-      throw std::runtime_error("Indexing not supported");
-    }
-    /// @}
+    /// size if this is a container, 0 otherwise
+    virtual size_t size() const {return 0; }
+    /// get element by position for sequences, by key for associative containers
+    virtual RPPtr getElem(const REST_PROCESS_BUFFER&);
+    /// sets element indexed/keyed by \a index to \a value
+    /// @return updated element
+    virtual RPPtr setElem(const REST_PROCESS_BUFFER& index, const REST_PROCESS_BUFFER& value)
+    {return getElem(index);}
+    /// append to end of a sequence, or inserts key into an associative container 
+    virtual void insert(const REST_PROCESS_BUFFER& value) {}
+    /// erase an element - by position for sequences, by key for associative containers
+    virtual void erase(const REST_PROCESS_BUFFER& index) {}
+    /// returns true if an associative container contains \a key
+    virtual bool contains(const REST_PROCESS_BUFFER& key) const {return false;}
+    /// returns a list of keys if this is an associative container, otherwise void
+    virtual RPPtr keys() const;
   };
 
+
+  /// @{ create an appropriate RESTProcess object referring to the argument.
+  template <class T>
+  typename enable_if<
+    And<
+      Not<is_container<T>>,
+      Not<is_smart_ptr<T>>
+      >, RPPtr>::T makeRESTProcessRef(T& obj);
+
+  template <class T>
+  typename enable_if<
+    And<
+      is_sequence<T>,
+      Not<is_base_of<MultiArrayBase,T>>
+      >,  RPPtr>::T
+  makeRESTProcessRef(T& obj);
+
+  template <class T>
+  typename enable_if<is_base_of<MultiArrayBase,T>, RPPtr>::T
+  makeRESTProcessRef(T& obj);
+
+  template <class T>
+  typename enable_if<is_smart_ptr<T>, RPPtr>::T
+  makeRESTProcessRef(T& obj);
+  /// @}
+  
   /// marker for containers and pointers that wrap
   class RESTProcessWrapperBase: public RESTProcessBase {};
   
@@ -451,8 +482,8 @@ namespace classdesc
       if (is_const<T>::value) return nullptr;
       return const_cast<object*>(getClassdescObjectImpl(obj));
     }
-    const object* getConstClassdescObject() override {return getClassdescObjectImpl(obj);}
     bool isObject() const override {return true;}
+    const object* getConstClassdescObject() override {return getClassdescObjectImpl(obj);}
     bool isConst() const override {return std::is_const<T>::value;}
     RPPtr toValue() const override {return toObjectValueImpl(*this);}
   };
@@ -492,7 +523,13 @@ namespace classdesc
     std::string type() const override {return "void";}
     bool isConst() const override {return true;}
   };
-  
+
+  RPPtr RESTProcessBase::getElem(const REST_PROCESS_BUFFER&)
+  {return std::make_shared<RESTProcessVoid>();}
+
+  RPPtr RESTProcessBase::keys() const
+  {return std::make_shared<RESTProcessVoid>();}
+ 
   template <class T> T* RESTProcessBase::getObject()
   {
     if (auto p=dynamic_cast<RESTProcessObject<T>*>(this))
@@ -572,7 +609,7 @@ namespace classdesc
     insert(U& o, const REST_PROCESS_BUFFER& j) {
       typename U::value_type v;
       convert(v,j);
-      o.push_back(v);
+      push_back(o,v);
     }
 
     template <class U>
@@ -628,15 +665,16 @@ namespace classdesc
     }
 
     template <class U>
-    typename enable_if<has_member_erase<U,typename U::iterator(U::*)(typename U::iterator)>,void>::T
+    typename enable_if<has_member_erase<U,typename U::iterator(U::*)(typename U::const_iterator)>,void>::T
     erase(U& o,typename U::iterator i) {o.erase(i);}
     
     template <class U>
-    typename enable_if<Not<has_member_erase<U,typename U::iterator(U::*)(typename U::iterator)>>,void>::T
+    typename enable_if<Not<has_member_erase<U,typename U::iterator(U::*)(typename U::const_iterator)>>,void>::T
     erase(U& o,typename U::iterator i) {}
     
     
     void eraseElem(size_t idx) {
+      if (idx>=size()) return;
       auto i=obj.begin();
       std::advance(i, idx);
       erase(obj,i);
@@ -659,17 +697,23 @@ namespace classdesc
     std::string type() const override {return typeName<T>();}
     REST_PROCESS_BUFFER asBuffer() const override {REST_PROCESS_BUFFER r; return r<<obj;}
     RPPtr toValue() const override;
+    bool isObject() const override {return true;}
     RPPtr getElem(const REST_PROCESS_BUFFER& index) {
       size_t idx; index>>idx;
-      return std::make_shared<RESTProcessObject<typename T::value_type>>(elem(idx));
+      return makeRESTProcessRef(elem(idx));
     }
     RPPtr setElem(const REST_PROCESS_BUFFER& index, const REST_PROCESS_BUFFER& value) {
       size_t idx; index>>idx;
       auto& v=elem(idx);
       value>>v;
-      return std::make_shared<RESTProcessObject<typename T::value_type>>(v);
+      return makeRESTProcessRef(v);
     }
     size_t size() const override {return obj.size();}
+    void insert(const REST_PROCESS_BUFFER& value) override {insert(obj,value);}
+    void erase(const REST_PROCESS_BUFFER& index) override {
+      size_t idx; index>>idx;
+      eraseElem(idx);
+    }
   };
 
   template <class T> struct RESTProcessValueSequence: public RESTProcessSequence<T>
@@ -701,6 +745,7 @@ namespace classdesc
     RESTProcess_t list() const override {return {};}
     /// return type name of this
     std::string type() const override {return "typeName<T>()";}
+    bool isObject() const override {return true;}
     RPPtr getElem(const REST_PROCESS_BUFFER& index) override {
       size_t idx; index>>idx;
       if (idx<actual.size())
@@ -717,9 +762,7 @@ namespace classdesc
         }
       return std::make_shared<RESTProcessVoid>();
     }
-    
     size_t size() const override {return actual.size();}
-
   };
 
   template <class T> struct RESTProcessMultiArray<classdesc::MultiArray<T,1>>:
@@ -739,7 +782,7 @@ namespace classdesc
       value>>v;
       return std::make_shared<RESTProcessObject<T>>(v);
     }
-    
+    size_t size() const override {return actual.size();}
     RPPtr toValue() const override {return nullptr;}
   };
 
@@ -895,15 +938,6 @@ namespace classdesc
     typename MappedType<T>::type& elem(const typename T::key_type& k) 
     {return elem_of(obj.emplace(makeElement<T>(k)).first);}
 
-    void erase(const typename T::key_type& k) {obj.erase(k);}
-
-    std::vector<typename T::key_type> keys() {
-      std::vector<typename T::key_type> k;
-      for (auto& i: obj)
-        k.emplace_back(keyOf(i));
-      return k;
-    }
-    
   public:
     RESTProcessAssociativeContainer(T& obj): obj(obj) {}
     RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
@@ -912,17 +946,30 @@ namespace classdesc
     std::string type() const override {return typeName<T>();}
     REST_PROCESS_BUFFER asBuffer() const override {REST_PROCESS_BUFFER r; return r<<obj;}
     RPPtr toValue() const override;
+    bool isObject() const override {return true;}
     RPPtr getElem(const REST_PROCESS_BUFFER& index) {
       typename T::key_type idx; index>>idx;
-      return std::make_shared<RESTProcessObject<typename MappedType<T>::type>>(elem(idx));
+      return makeRESTProcessRef(elem(idx));
     }
     RPPtr setElem(const REST_PROCESS_BUFFER& index, const REST_PROCESS_BUFFER& value) {
       typename T::key_type idx; index>>idx;
       auto& v=elem(idx);
       value>>v;
-      return std::make_shared<RESTProcessObject<typename MappedType<T>::type>>(v);
+      return makeRESTProcessRef(v);
     }
     size_t size() const override {return obj.size();}
+    void insert(const REST_PROCESS_BUFFER& value) override {RPAC_insert(obj,value);}
+    void erase(const REST_PROCESS_BUFFER& index) override {RPAC_erase(obj,index);}
+    bool contains(const REST_PROCESS_BUFFER& index) const override {
+      typename T::key_type k; convert(k,index);
+      return obj.count(k);
+    }
+    RPPtr keys() const override {
+      std::vector<typename T::key_type> k;
+      for (auto& i: obj)
+        k.emplace_back(keyOf(i));
+      return makeRESTProcessValueObject(std::move(k));
+    }
   };
 
   template <class T> struct RESTProcessValueAssociativeContainer: public RESTProcessAssociativeContainer<T>

@@ -11,8 +11,7 @@ def expectThrow(f):
         thrown=True
     assert thrown
 
-# causes segfault when run non-interactively
-#assert root()._type=='::Root'
+assert root._type()=='::Root'
 assert root.bar.csi()==20
 
 # should throw
@@ -57,7 +56,7 @@ assert root.bar.c()=='\r hello & 123 '
 assert root.bar.c('hello world')=='hello world'
 assert root.bar.c()=='hello world'
 
-assert root.bar.c1._properties()==['\r','\r']
+assert root.bar.c1()==['\r','\r']
 assert root.bar.c1[0]()=='\r'
 root.bar.c1[0]='x'
 assert root.bar.c1[0]()=='x'
@@ -71,7 +70,7 @@ assert root.bar.ef()=='ea'
 assert root.bar.ef._type()=='::EnumFoo'
 assert root.bar.ef._list()==[]
 
-assert root.bar.d._properties()==[0,1,2]
+assert root.bar.d()==[0,1,2]
 assert len(root.bar.d)==3
 assert root.bar.d[1]()==1
 root.bar.d[1]=5
@@ -81,62 +80,63 @@ assert len(root.bar.d1)==2
 #assert root.bar.d1[1]()==[3,4,5]
 root.bar.d1[1]=[6,7,8]
 #assert root.bar.d1[1]()==[6,7,8]
-assert root.bar.d1._properties()==[[0,1,2],[6,7,8]]
+assert root.bar.d1()==[[0,1,2],[6,7,8]]
 root.bar.d1[1][2]=10
 assert root.bar.d1[1][2]()==10
-assert root.bar.h._properties()==[2,2,2]
+assert root.bar.h()==[2,2,2]
 assert root.bar.h[1]()==2
 root.bar.h[1]=3
 assert root.bar.h[1]()==3
-#assert root.bar.h._insert(5)._properties()==[2,3,2,5]
-#assert root.bar.h._properties()==[2,3,2,5]
-#assert root.bar.h._erase(1)._properties()==[2,2,5]
-#assert root.bar.h._properties()==[2,2,5]
-#assert root.bar.h([2,2,2,2])==[2,2,2,2]
+root.bar.h.insert(5)
+assert root.bar.h()==[2,3,2,5]
+root.bar.h.erase(1)
+assert root.bar.h()==[2,2,5]
+assert root.bar.h([2,2,2,2])()==[2,2,2,2]
 assert root.bar.h._type()=="std::vector<int>"
 assert root.bar.h._list()==[".@elem",".@elemNoThrow",".@erase",".@insert",".@size"]
 
-#assert root.bar.l()==[2,2,2]
+assert root.bar.l()==[2,2,2]
 assert root.bar.l[1]()==2
 root.bar.l[1]=3
 assert root.bar.l[1]()==3
-#assert root.bar.l._insert(5)._properties()==[2,3,2,5]
-#assert root.bar.l()._properties()==[2,3,2,5]
-#assert root.bar.l([2,2,2,2])==[2,2,2,2]
+root.bar.l.insert(5)
+assert root.bar.l()==[2,3,2,5]
+assert root.bar.l([2,2,2,2])()==[2,2,2,2]
 
-#assert root.bar.m()==[{"first":0,"second":5},{"first":3,"second":2}]
+assert root.bar.m()==[{"first":0,"second":5},{"first":3,"second":2}]
 assert len(root.bar.m)==2
 assert root.bar.m._signature()==[{"args":[],"ret":"std::map<int,int>"},{"args":["std::map<int,int>"],"ret":"std::map<int,int>"}]
 assert root.bar.m[3]()==2
 root.bar.m[3]=5
 assert root.bar.m[3]()==5
 
-# should throw - actually this inserts. Need to test contains method
-#expectThrow(lambda: root.bar.m[1])
-
-#assert root.bar.m._insert({"first":1,"second":2})._properties==[{"first":0,"second":5},{"first":1,"second":2},{"first":3,"second":5}]
-root.bar.m[1]=2
+root.bar.m.insert({"first":1,"second":2})
 assert root.bar.m[1]()==2
+assert root.bar.m.contains(1)
+root.bar.m[10]=2
+assert root.bar.m[10]()==2
+assert root.bar.m.contains(10)
 assert root.bar.m._type()=="std::map<int,int>"
 assert root.bar.m._list()==[".@elem",".@elemNoThrow",".@erase",".@insert",".@keys",".@size"]
-#assert root.bar.m._erase(1)._properties()==[{"first":0,"second":5},{"first":3,"second":5}]
-#assert root.bar.m()._properties()==[{"first":0,"second":5},{"first":3,"second":5}]
-#assert root.bar.m._keys()._properties()==[0,3]
+root.bar.m.erase(1)
+root.bar.m.erase(10)
+assert root.bar.m()==[{"first":0,"second":5},{"first":3,"second":5}]
+assert root.bar.m.keys()==[0,3]
 
-#assert root.bar.ss(["hello","foo","bar"])==['bar', 'foo', 'hello']
-#assert root.bar.ss()==['bar', 'foo', 'hello']
+assert root.bar.ss(["hello","foo","bar"])()==['bar', 'foo', 'hello']
+assert root.bar.ss()==['bar', 'foo', 'hello']
 
-#assert root.bar.um._insert({"first":1,"second":3})._properties==[{"first":1,"second":3}]
-#assert root.bar.um()._properties()==[{"first":1,"second":3}]
+root.bar.um.insert({"first":1,"second":3})
+assert root.bar.um()==[{"first":1,"second":3}]
 root.bar.um[1]=5
 assert root.bar.um[1]()==5
 
-#assert root.bar.llex()==[["hello","hello"],["hello","hello"]]
+assert root.bar.llex()==[["hello","hello"],["hello","hello"]]
 root.bar.llex[1]=["baa","baa","blacksheep"]
-#assert root.bar.llex[1]()==["baa","baa","blacksheep"]
-#assert root.bar.llex()==[["hello","hello"],["baa","baa","blacksheep"]]
+assert root.bar.llex[1]()==["baa","baa","blacksheep"]
+assert root.bar.llex()==[["hello","hello"],["baa","baa","blacksheep"]]
 assert root.bar.llex._signature()==[{"args":[],"ret":"std::list<std::list<std::string>>"},{"args":["std::list<std::list<std::string>>"],"ret":"std::list<std::list<std::string>>"}]
-#assert root.bar.llex[1][1]=="baa"
+assert root.bar.llex[1][1]()=="baa"
 
 # Should fail
 expectThrow(lambda: root.bar.iex())
@@ -187,14 +187,16 @@ assert enum['::GlobE']==['ga', 'gb']
 assert enum['::Bar::BarE']==['a', 'b']
 
 # StringKeyMap
-assert root.bar.sm._properties()=={}
+assert root.bar.sm()=={}
 assert root.bar.sm({"foo":1,"bar":2})._properties()=={"foo":1,"bar":2}
-assert root.bar.sm()._properties()=={"foo":1,"bar":2}
+assert root.bar.sm()=={"foo":1,"bar":2}
 assert root.bar.sm({"foo":1,"foobar":3})._properties()=={"foo":1,"foobar":3}
 assert root.bar.sm['foo']()==1
-#assert root.bar.sm._erase("foobar")._properties()=={"foo":1}
-#assert root.bar.sm._insert({"first":"bar","second":1})._properties()=={"bar":1,"foo":1}
-#assert root.bar.sm._keys()._properties()==["bar","foo"]
+assert root.bar.sm.contains("foobar")
+root.bar.sm.erase("foobar")
+assert not root.bar.sm.contains("foobar")
+root.bar.sm.insert({"first":"bar","second":1})
+assert root.bar.sm.keys()==["bar","foo"]
 assert root.bar.rotation()==0
 assert root.bar.rotation(20)==20
 assert root.bar.rotation()==20
