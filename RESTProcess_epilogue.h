@@ -444,12 +444,6 @@ namespace classdesc
   
   template <class T> RESTProcess_t::RESTProcess_t(T&obj) {populateFromObj(*this,obj);}
 
-  template <class T> struct RESTProcessHeapObject:  public RESTProcessPtr<std::unique_ptr<T>>
-  {
-    std::unique_ptr<T> obj;
-    RESTProcessHeapObject(): RESTProcessPtr<std::unique_ptr<T>>(obj) {}
-  };
-  
   template <class T, class...A> void RESTProcess_t::addFactory
   (const string& typeName,const std::function<void(const std::string& objName)>& callback)
   {

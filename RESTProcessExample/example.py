@@ -77,9 +77,9 @@ root.bar.d[1]=5
 assert root.bar.d[1]()==5
 
 assert len(root.bar.d1)==2
-#assert root.bar.d1[1]()==[3,4,5]
+assert root.bar.d1[1]()==[3,4,5]
 root.bar.d1[1]=[6,7,8]
-#assert root.bar.d1[1]()==[6,7,8]
+assert root.bar.d1[1]()==[6,7,8]
 assert root.bar.d1()==[[0,1,2],[6,7,8]]
 root.bar.d1[1][2]=10
 assert root.bar.d1[1][2]()==10
@@ -164,15 +164,15 @@ assert root.bar1.f.name()=='Foo'
 assert root.bar1.vFoo[1]._properties()['b']==1
 expectThrow(lambda: root.bar1.vFoo[10])
 
-#assert root.bar1.foo.b(3)==3
-#assert root.bar1.foo.b()==2
-#assert root.bar1.fooRef.b(3)==3
-#assert root.bar1.fooRef.b()==3
-#assert root.bar1.foo.b()==3
+assert root.bar1.foo().b(3)==3
+assert root.bar1.foo().b()==2
+assert root.bar1.fooRef().b(3)==3
+assert root.bar1.fooRef().b()==3
+assert root.bar1.foo().b()==3
 
 assert root.bar1.sfoop()==None
 
-assert root.bar1.recursiveType('hello')._properties()['f']['b']==2
+assert root.bar1.recursiveType('hello')._properties()['f']['b']==3
 
 assert root.defaultless.foo()==0
 assert root.defaultless.bar()==2
@@ -213,8 +213,7 @@ assert root.voidReturn()==None
 
 # test type factories
 from pyExample import *
-Foo("foo",2)
-Root("root2")
-from pyExample import *
+foo=Foo(2)
+fb=FooBar1()
 assert foo.b()==2
-assert root2.bar.b()==3
+assert fb.f.b()==0

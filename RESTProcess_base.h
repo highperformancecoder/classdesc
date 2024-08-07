@@ -12,6 +12,7 @@
 #include "function.h"
 #include "multiArray.h"
 #include "object.h"
+#include "polyRESTProcessBase.h"
 #include "signature.h"
 
 #include <map>
@@ -991,6 +992,22 @@ namespace classdesc
   {
     repo.add(d, new RESTProcessAssociativeContainer<T>(a));
   }
+
+  template <class T>
+  typename enable_if<is_base_of<PolyRESTProcessBase, T>, RESTProcess_t>::T
+  rMap(T& x) {
+    RESTProcess_t r;
+    x.RESTProcess(r,"");
+    return r;
+  }
+  
+  template <class T>
+  typename enable_if<Not<is_base_of<PolyRESTProcessBase, T>>, RESTProcess_t>::T
+  rMap(T& x) {
+    RESTProcess_t r;
+    RESTProcess(r,"",x);
+    return r;
+  }
   
   template <class T>
   struct RESTProcessPtr: public RESTProcessWrapperBase
@@ -1001,7 +1018,7 @@ namespace classdesc
     std::vector<Signature> signature() const override;
     RESTProcess_t list() const override {
       if (ptr)
-        return const_cast<RESTProcessPtr<T>*>(this)->process(".@list",{});
+        return rMap(*ptr);
       else
         return {};
     }
@@ -1385,8 +1402,8 @@ namespace classdesc
   template <class F, class R=typename functional::Return<F>::T>
   class RESTProcessFunction: public RESTProcessFunctionBase
   {
-    F f;
   public:
+    F f;
     RESTProcessFunction(F f): f(f) {}
     
 
@@ -1428,18 +1445,19 @@ namespace classdesc
   template <class F, class R>
   class RESTProcessFunction<F, std::unique_ptr<R>>: public RESTProcessFunctionBase
   {
-    F f;
   public:
+    F f;
     RESTProcessFunction(F f): f(f) {}
     RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
     {
       throw std::runtime_error("currently unable to call functions returning unique_ptr");
     }
-    RPPtr signature() const override {return functionSignature<F>();}
+    std::vector<Signature> signature() const override
+    {return {functionSignature<F>()};}
     unsigned matchScore(const REST_PROCESS_BUFFER& arguments) const override
     {return classdesc::matchScore<F>(arguments);}
-    RPPtr list() const override {return makeRESTProcessValueObject({});}
-    RPPtr type() const override {return makeRESTProcessValueObject(typeName<F>());}
+    RESTProcess_t list() const override {return {};}
+    std::string type() const override {return typeName<F>();}
   };
 
   template <class T, class F>
@@ -1576,6 +1594,19 @@ namespace classdesc
   typename enable_if<is_smart_ptr<T>, void>::T 
   RESTProcessp(RESTProcess_t& repo, const std::string& d, T& a)
   {repo.add(d, new RESTProcessPtr<T>(a));}
+
+  template <class T> struct RESTProcessHeapObject:  public RESTProcessPtr<std::unique_ptr<T>>
+  {
+    std::unique_ptr<T> obj;
+    RESTProcessHeapObject(): RESTProcessPtr<std::unique_ptr<T>>(obj) {}
+    RESTProcessHeapObject(std::unique_ptr<T>&& o): RESTProcessPtr<std::unique_ptr<T>>(obj), obj(std::move(o)) {}
+    bool isObject() const override {return true;}
+  };
+
+  template <class T> std::shared_ptr<RESTProcessHeapObject<T>>
+  makeRESTProcessHeapObject(std::unique_ptr<T>&& obj)
+  {return std::make_shared<RESTProcessHeapObject<T>>(std::move(obj));}
+
 }
 
 namespace classdesc_access

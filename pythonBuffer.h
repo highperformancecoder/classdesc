@@ -696,17 +696,33 @@ namespace classdesc
         }
     }
 
+  template <class F>
+  struct RESTProcessFactory: public RESTProcessFunction<F>
+  {
+    RESTProcessFactory(F f): RESTProcessFunction<F>(f) {}
+    RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override
+    {
+      JSONBuffer argBuf(arguments);
+      // f is expected to return a unique_ptr
+      return makeRESTProcessHeapObject
+        (std::move(functional::callOnBuffer(argBuf,RESTProcessFunction<F>::f)));
+    }
+  };
+  
     /// declare a factory object for a given type
     template <class T, class... Args> struct DeclareType
     {
+      static std::unique_ptr<T> factory(Args... args)
+      {return std::make_unique<T>(std::forward<Args>(args)...);}
       DeclareType(const string& typeName) {
-        registry.addFactory<T,Args...>(typeName,[](const std::string& name){
-          auto object=std::make_shared<RESTProcessValueObject<T>>();
-          auto cppObject=CppWrapper::create(object,false);
-          PyObjectRef pyObject(cppObject);
-          attachRegistryObjects(object->list(), *cppObject, ".");
-          PyModule_AddObject(pythonModule, name.c_str(), pyObject.release());
-        });
+        registry.add(typeName, new RESTProcessFactory<decltype(&factory)>(factory));
+        //        registry.addFactory<T,Args...>(typeName,[](const std::string& name){
+//          auto object=std::make_shared<RESTProcessValueObject<T>>();
+//          auto cppObject=CppWrapper::create(object,false);
+//          PyObjectRef pyObject(cppObject);
+//          attachRegistryObjects(object->list(), *cppObject, ".");
+//          PyModule_AddObject(pythonModule, name.c_str(), pyObject.release());
+//        });
       }
     };
 
