@@ -65,8 +65,6 @@ namespace classdesc
     /// @}
     /// true if this is an object, not a function
     virtual bool isObject() const {return false;}
-    /// if this is a reference object, then convert this to a value object. Otherwise, return null
-    virtual RPPtr toValue() const {return nullptr;}
     /// true if this is a const object, a const member function or static/free function
     virtual bool isConst() const {return false;}
     /// arity if this is a function, 0 otherwise
@@ -480,7 +478,6 @@ namespace classdesc
     bool isObject() const override {return true;}
     const object* getConstClassdescObject() override {return getClassdescObjectImpl(obj);}
     bool isConst() const override {return std::is_const<T>::value;}
-    RPPtr toValue() const override {return toObjectValueImpl(*this);}
   };
 
   /// same as \a RESTProcessObject, but internally stores the object. T must be copy constructible or moveable
@@ -490,7 +487,6 @@ namespace classdesc
   public:
     template <class... Args>
     RESTProcessValueObject(Args&&... args): RESTProcessObject<T>(actual), actual(std::forward<Args>(args)...) {}
-    RPPtr toValue() const override {return nullptr;}
   };
 
   template <class T> inline
@@ -690,7 +686,6 @@ namespace classdesc
     RESTProcess_t list() const override;
     std::string type() const override {return typeName<T>();}
     REST_PROCESS_BUFFER asBuffer() const override {REST_PROCESS_BUFFER r; return r<<obj;}
-    RPPtr toValue() const override;
     bool isObject() const override {return true;}
     RPPtr getElem(const REST_PROCESS_BUFFER& index) {
       size_t idx; index>>idx;
@@ -716,7 +711,6 @@ namespace classdesc
   public:
     template <class... Args>
     RESTProcessValueSequence(Args&&... args): RESTProcessSequence<T>(actual), actual(std::forward<Args>(args)...) {}
-    RPPtr toValue() const override {return nullptr;}
   };
 
   template <class T> struct RESTProcessMultiArray: public RESTProcessBase
@@ -771,13 +765,9 @@ namespace classdesc
       return std::make_shared<RESTProcessObject<T>>(v);
     }
     size_t size() const override {return actual.size();}
-    RPPtr toValue() const override {return nullptr;}
   };
 
   
-  
-  template <class T> RPPtr RESTProcessSequence<T>::toValue() const
-  {return std::make_shared<RESTProcessValueSequence<T>>(obj);}
   
   template <class T>
   typename enable_if<
@@ -933,7 +923,6 @@ namespace classdesc
     RESTProcess_t list() const override;
     std::string type() const override {return typeName<T>();}
     REST_PROCESS_BUFFER asBuffer() const override {REST_PROCESS_BUFFER r; return r<<obj;}
-    RPPtr toValue() const override;
     bool isObject() const override {return true;}
     RPPtr getElem(const REST_PROCESS_BUFFER& index) {
       typename T::key_type idx; index>>idx;
@@ -967,12 +956,8 @@ namespace classdesc
     template <class... Args>
     RESTProcessValueAssociativeContainer(Args&&... args):
       RESTProcessAssociativeContainer<T>(actual), actual(std::forward<Args>(args)...) {}
-    RPPtr toValue() const override {return nullptr;}
   };
 
-  template <class T> RPPtr RESTProcessAssociativeContainer<T>::toValue() const
-  {return std::make_shared<RESTProcessValueAssociativeContainer<T>>(obj);}
-  
   template <class T>
   typename enable_if<is_associative_container<T>, void>::T
   RESTProcessp(RESTProcess_t& repo, const string& d, T& a)
@@ -1137,9 +1122,7 @@ namespace classdesc
       return makeRESTProcessValueObject(std::move(r));
     RESTProcess_t map;
     RESTProcess(map,"",r);
-    auto rp=map.process(remainder, arguments);
-    if (auto v=rp->toValue()) return v; // create a copy of the return value
-    return rp;
+    return map.process(remainder, arguments);
   }
   
   template <class F>

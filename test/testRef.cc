@@ -7,7 +7,6 @@
 */
 
 #include "poly.h"
-//#include "ref.cd"
 #include "testRef.h"
 #include "testRef.cd"
 #include "classdesc_epilogue.h"
