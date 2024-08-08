@@ -19,6 +19,29 @@ namespace classdesc_access
 {
   namespace cd=classdesc;
 
+#ifdef CLASSDESC_OBJECT_H
+    template <> struct access_pack<classdesc::object>: public cd::NullDescriptor<cd::pack_t>{};
+  template <> struct access_unpack<classdesc::object>: public cd::NullDescriptor<cd::pack_t>{};
+
+  template <class T, class B> 
+  struct access_pack<classdesc::Object<T, B> >
+  {
+    template <class U>
+    void operator()(cd::pack_t& b, const cd::string& d, U& a) 
+    {pack(b,d,cd::base_cast<B>::cast(a));}
+  };
+
+  template <class T, class B> 
+  struct access_unpack<classdesc::Object<T, B> >
+  {
+    template <class U>
+    void operator()(cd::unpack_t& b, const cd::string& d, U& a) 
+    {unpack(b,d,cd::base_cast<B>::cast(a));}
+  };
+
+
+#endif
+  
   // const arg versions
   template <class T>
   struct access_pack<const T>
@@ -153,6 +176,7 @@ namespace classdesc_access
       unpack(b,d,a.fmap);
     }
   };
+
 #endif
 
 }

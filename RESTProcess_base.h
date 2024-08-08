@@ -142,8 +142,8 @@ namespace classdesc
       }
       return r;
     }
-    RESTProcess_t list() const;
-    std::string type() const {return "overloaded function";}
+    RESTProcess_t list() const override;
+    std::string type() const override {return "overloaded function";}
   };
   
   inline void convert(char& y, const string& x)
@@ -498,9 +498,9 @@ namespace classdesc
   RPPtr makeRESTProcessValueObject(T&& obj)
   {return std::make_shared<RESTProcessValueObject<typename std::remove_reference<T>::type>>(std::forward<T>(obj));}
   // specialization for string and string vector to allow
-   RPPtr makeRESTProcessValueObject(const char* s)
+  inline RPPtr makeRESTProcessValueObject(const char* s)
   {return std::make_shared<RESTProcessValueObject<std::string>>(s);}
-  RPPtr makeRESTProcessValueObject(const std::initializer_list<std::string>& init)
+  inline RPPtr makeRESTProcessValueObject(const std::initializer_list<std::string>& init)
   {return std::make_shared<RESTProcessValueObject<std::vector<std::string>>>(init);}
  
   /// class that represents the void, or null object
@@ -515,10 +515,10 @@ namespace classdesc
     bool isConst() const override {return true;}
   };
 
-  RPPtr RESTProcessBase::getElem(const REST_PROCESS_BUFFER&)
+  inline RPPtr RESTProcessBase::getElem(const REST_PROCESS_BUFFER&)
   {return std::make_shared<RESTProcessVoid>();}
 
-  RPPtr RESTProcessBase::keys() const
+  inline RPPtr RESTProcessBase::keys() const
   {return std::make_shared<RESTProcessVoid>();}
  
   template <class T> T* RESTProcessBase::getObject()

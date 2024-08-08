@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef OBJECT_H
-#define OBJECT_H
+#ifndef CLASSDESC_OBJECT_H
+#define CLASSDESC_OBJECT_H
 #include "classdesc.h"
 #include "pack_base.h"
 
@@ -102,7 +102,7 @@ namespace classdesc
 
   template <> struct tn<object> {static string name() {return "object";}};
   template <class T, class B> struct tn<Object<T,B>>
-  {std:: string name() {return "Object<"+typeName<T>()+">"+typeName<B>+">";}};
+  {static std:: string name() {return "Object<"+typeName<T>()+">"+typeName<B>()+">";}};
   
 }
 
@@ -155,31 +155,6 @@ unpack(classdesc::unpack_t& b, const classdesc::string& d, const classdesc::shar
     }
 }
 
-
-namespace classdesc_access
-{
-  namespace cd=classdesc;
-
-  template <> struct access_pack<classdesc::object>: public cd::NullDescriptor<cd::pack_t>{};
-  template <> struct access_unpack<classdesc::object>: public cd::NullDescriptor<cd::pack_t>{};
-
-  template <class T, class B> 
-  struct access_pack<classdesc::Object<T, B> >
-  {
-    template <class U>
-    void operator()(cd::pack_t& b, const cd::string& d, U& a) 
-    {pack(b,d,cd::base_cast<B>::cast(a));}
-  };
-
-  template <class T, class B> 
-  struct access_unpack<classdesc::Object<T, B> >
-  {
-    template <class U>
-    void operator()(cd::unpack_t& b, const cd::string& d, U& a) 
-    {unpack(b,d,cd::base_cast<B>::cast(a));}
-  };
-
-}
 
 #ifdef _CLASSDESC
 #pragma omit pack classdesc::object

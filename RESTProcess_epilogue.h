@@ -51,6 +51,20 @@ namespace classdesc_access
   struct access_RESTProcess<T, cd::void_t<typename std::iterator_traits<T>::value_type>>:
     public cd::NullDescriptor<cd::RESTProcess_t> {};
 
+#ifdef CLASSDESC_OBJECT_H
+  template <>
+  struct access_RESTProcess<cd::object>: public cd::NullDescriptor<cd::RESTProcess_t> {};
+
+  template <class T, class B>
+  struct access_RESTProcess<cd::Object<T,B>>
+  {
+    template <class U>
+    void operator()(cd::RESTProcess_t& repo, const std::string& d, U& a)
+    {
+      ::RESTProcess(repo,d, cd::base_cast<B>::cast(a));
+    }
+  };
+#endif
 }
 
 namespace classdesc
@@ -110,7 +124,7 @@ namespace classdesc
     return map;
   }
   
-  RESTProcess_t RESTProcessOverloadedFunction::list() const {return {};}
+  inline RESTProcess_t RESTProcessOverloadedFunction::list() const {return {};}
 
   template <class T>
   RESTProcess_t RESTProcessSequence<T>::list() const {
@@ -165,7 +179,7 @@ namespace classdesc
     repo.add(d, new RESTProcessObject<T>(obj));
   }
 
-  RPPtr RESTProcessOverloadedFunction::process(const string& remainder, const REST_PROCESS_BUFFER& arguments)
+  inline RPPtr RESTProcessOverloadedFunction::process(const string& remainder, const REST_PROCESS_BUFFER& arguments)
   {
     // sort function overloads by best match
     auto cmp=[&](RESTProcessFunctionBase*x, RESTProcessFunctionBase*y)
