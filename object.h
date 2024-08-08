@@ -101,7 +101,7 @@ namespace classdesc
   {static const bool value=is_base_of<object,T>::value;};
 
   template <> struct tn<object> {static string name() {return "object";}};
-  template <class T, class B> struct tn<Object<T,B>>
+  template <class T, class B> struct tn<Object<T,B> >
   {static std:: string name() {return "Object<"+typeName<T>()+">"+typeName<B>()+">";}};
   
 }
