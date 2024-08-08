@@ -412,13 +412,7 @@ namespace classdesc
       {
         auto i=map.find("");
         if (i!=map.end())
-          {
-            auto r=i->second->process("",arguments);
-//            if (std::is_base_of<MultiArrayBase, decltype(a)>::value)
-//              if (auto v=r->toValue())
-//                return v;
-            return r;
-          }
+          return i->second->process("",arguments);
         else
           return {};
       }
@@ -691,10 +685,9 @@ namespace classdesc
     
   public:
     RESTProcessSequence(T& obj): obj(obj) {}
-    std::shared_ptr<classdesc::RESTProcessBase> process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
+    RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
     std::vector<Signature> signature() const override;
     RESTProcess_t list() const override;
-    //{return makeRESTProcessValueObject({".@elem",".@elemNoThrow",".@insert",".@erase",".@size"});}
     std::string type() const override {return typeName<T>();}
     REST_PROCESS_BUFFER asBuffer() const override {REST_PROCESS_BUFFER r; return r<<obj;}
     RPPtr toValue() const override;
@@ -732,19 +725,13 @@ namespace classdesc
   public:
     template <class... Args>
     RESTProcessMultiArray(Args&&... args): actual(std::forward<Args>(args)...) {}
-    RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override {
-      // TODO - reuse sequence code to extract the slice
-      return std::make_shared<RESTProcessVoid>();
-    }
+    RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
     REST_PROCESS_BUFFER asBuffer() const override {
       REST_PROCESS_BUFFER r;
       return r<<actual;
     }
-    /// return signature(s) of the operations
     std::vector<Signature> signature() const override {return {};}
-    /// return list of subcommands to this
     RESTProcess_t list() const override {return {};}
-    /// return type name of this
     std::string type() const override {return "typeName<T>()";}
     bool isObject() const override {return true;}
     RPPtr getElem(const REST_PROCESS_BUFFER& index) override {

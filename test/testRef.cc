@@ -10,7 +10,6 @@
 //#include "ref.cd"
 #include "testRef.h"
 #include "testRef.cd"
-#include "object.cd"
 #include "classdesc_epilogue.h"
 using namespace classdesc;
 

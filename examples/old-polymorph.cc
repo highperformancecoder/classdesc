@@ -8,7 +8,6 @@
 
 #include "old-polymorph.h"
 #include "old-polymorph.cd"
-#include "object.cd"
 #include "pack_stream.h"
 #include "classdesc_epilogue.h"
 

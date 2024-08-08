@@ -186,11 +186,12 @@ namespace classdesc
       }
     return bestOverload->process(remainder, arguments);
   }
-  
+
   template <class T>
-  RPPtr RESTProcessSequence<T>::process(const string& remainder, const REST_PROCESS_BUFFER& arguments)
+  RPPtr sequenceProcess(T& obj, const string& remainder, const REST_PROCESS_BUFFER& arguments)
   {
       if (remainder.empty())
+        {
           switch (arguments.type())
             {
             case RESTProcessType::null: break;
@@ -204,42 +205,71 @@ namespace classdesc
               convert(obj, arguments);
               break;
             }
-      else if (startsWith(remainder,".@elem"))
-        {
-          // extract idx
-          auto idxStart=find(remainder.begin()+1, remainder.end(), '.');
-          if (idxStart==remainder.end())
-            throw std::runtime_error("no index");
-          auto idxEnd=find(idxStart+1, remainder.end(), '.');
-          size_t idx=stoi(string(idxStart+1, idxEnd));
-          if (idx>=obj.size())
-            {
-              if (startsWith(remainder,".@elemNoThrow"))
-                return mapAndProcessDummy<typename T::value_type>(string(idxEnd,remainder.end()), arguments);
-              else
-                throw std::runtime_error("idx out of bounds");
-            }
-          return {};
-//          auto i=obj.begin();
-//          std::advance(i, idx);
-//          auto ip=*i;
-//          auto r=mapAndProcess(string(idxEnd,remainder.end()), arguments, ip);
-//          // if we're processing MultiArrays, convert return to a value type as the iterator here will be invalidated out of scope
-//          if (std::is_base_of<MultiArrayIterator, decltype(i)>::value)
-//            if (auto v=r->toValue())
-//              return v;
-//          return r;
+          return makeRESTProcessRef(obj);
         }
-      else if (startsWith(remainder,".@insert"))
-        insert(obj, arguments);
-      else if (startsWith(remainder,".@erase"))
-        erase(obj, arguments);
       else if (startsWith(remainder,".@size"))
         return makeRESTProcessValueObject(obj.size());
-      else
-        return RESTProcess_t(obj).process(remainder,arguments); // treat as an object, not container
-      return std::make_shared<RESTProcessSequence>(obj);
+      return RESTProcess_t(obj).process(remainder,arguments); // treat as an object, not container
     }
+
+  template <class T> std::tuple<typename T::iterator, string::size_type>
+  elemImpl(T& obj, const string& remainder, const REST_PROCESS_BUFFER& arguments)
+  {
+    // extract idx
+    assert(remainder.length()>2);
+    auto idxStart=remainder.find('.',1);
+    if (idxStart==string::npos)
+      throw std::runtime_error("no index");
+    auto idxEnd=remainder.find('.', idxStart+1);
+    if (idxEnd==string::npos) idxEnd=remainder.length();
+    size_t idx=stoi(remainder.substr(idxStart+1, idxEnd));
+    if (idx>=obj.size())
+      {
+        // @elemNoThrow doesn't throw out of bounds error, but may throw invalid index
+        if (startsWith(remainder,".@elemNoThrow"))
+          return {obj.end(),string::npos};
+        throw std::runtime_error("idx out of bounds");
+      }
+    auto i=obj.begin();
+    std::advance(i, idx);
+    return {i,idxEnd};
+  }
+  
+  template <class T> RPPtr RESTProcessSequence<T>::process(const string& remainder, const REST_PROCESS_BUFFER& arguments)
+  {
+      if (startsWith(remainder,".@elem"))
+        {
+          auto [i, idxEnd]=elemImpl(obj,remainder,arguments);
+          if (i==obj.end()) return std::make_shared<RESTProcessVoid>();
+          return mapAndProcess(remainder.substr(idxEnd), arguments, *i);
+        }
+      if (startsWith(remainder,".@insert"))
+        {
+          insert(obj, arguments);
+          return makeRESTProcessRef(obj);
+        }
+      if (startsWith(remainder,".@erase"))
+        {
+          erase(obj, arguments);
+          return makeRESTProcessRef(obj);
+        }
+      return sequenceProcess(obj,remainder,arguments);
+  }
+
+  template <class T> RPPtr RESTProcessMultiArray<T>::process(const string& remainder, const REST_PROCESS_BUFFER& arguments)
+  {
+    if (startsWith(remainder,".@elem"))
+      {
+        auto [i, idxEnd]=elemImpl(actual,remainder,arguments);
+        if (i==actual.end()) return std::make_shared<RESTProcessVoid>();
+        auto r=mapAndProcess(remainder.substr(idxEnd), arguments, *i);
+        if (idxEnd==remainder.length() && T::rank>1)
+          // create a copy of the MultiArray iterator before it goes out of scope
+          return std::make_shared<RESTProcessMultiArray<typename T::iterator::value_type>>(*i);
+        return r;
+      }
+    return sequenceProcess(actual,remainder,arguments);
+  }
 
   template <class T>
   RPPtr RESTProcessAssociativeContainer<T>::process(const string& remainder, const REST_PROCESS_BUFFER& arguments)

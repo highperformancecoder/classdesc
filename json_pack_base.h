@@ -306,7 +306,10 @@ namespace classdesc
   {
     using namespace json5_parser;
     if (d=="")
-      o=json_pack_t(valueof(a));
+      {
+        json_pack_t tmp(valueof(a));
+        o=tmp;
+      }
     else
       {
         o.objectify();
