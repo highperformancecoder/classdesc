@@ -67,7 +67,7 @@ namespace classdesc
 #pragma omit dump classdesc::xml_pack_error
 #endif
 
-  class xml_pack_error : public exception 
+  class xml_pack_error : public std::exception 
   {
     std::string msg;
   public:

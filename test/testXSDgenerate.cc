@@ -8,7 +8,6 @@
 
 #include "xml_pack_base.h"
 #include "xml_unpack_base.h"
-#include "xml_unpack_base.cd"
 #include "testXMLcd.h"
 #include "testXMLcd.cd"
 #include "classdesc_epilogue.h"
