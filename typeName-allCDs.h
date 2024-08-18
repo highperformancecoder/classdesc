@@ -1,3 +1,5 @@
+#ifndef CLASSDESC_typeName_allCDS_H
+#define CLASSDESC_typeName_allCDS_H
 #ifdef CLASSDESC_MULTIARRAY_H
 #include "multiArray-typeName.cd"
 #endif
@@ -18,4 +20,5 @@
 #endif
 #ifdef CLASSDESC_STRINGKEYMAP_H
 #include "stringKeyMap-typeName.cd"
+#endif
 #endif

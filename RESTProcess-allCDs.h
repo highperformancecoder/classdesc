@@ -1,3 +1,5 @@
+#ifndef CLASSDESC_RESTProcess_allCDS_H
+#define CLASSDESC_RESTProcess_allCDS_H
 #ifdef CLASSDESC_MULTIARRAY_H
 #include "multiArray-RESTProcess.cd"
 #endif
@@ -18,4 +20,5 @@
 #endif
 #ifdef CLASSDESC_STRINGKEYMAP_H
 #include "stringKeyMap-RESTProcess.cd"
+#endif
 #endif

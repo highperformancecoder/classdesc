@@ -1,3 +1,5 @@
+#ifndef CLASSDESC_json_pack_allCDS_H
+#define CLASSDESC_json_pack_allCDS_H
 #ifdef CLASSDESC_MULTIARRAY_H
 #include "multiArray-json_pack.cd"
 #endif
@@ -18,4 +20,5 @@
 #endif
 #ifdef CLASSDESC_STRINGKEYMAP_H
 #include "stringKeyMap-json_pack.cd"
+#endif
 #endif

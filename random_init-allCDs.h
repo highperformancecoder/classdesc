@@ -1,3 +1,5 @@
+#ifndef CLASSDESC_random_init_allCDS_H
+#define CLASSDESC_random_init_allCDS_H
 #ifdef CLASSDESC_MULTIARRAY_H
 #include "multiArray-random_init.cd"
 #endif
@@ -18,4 +20,5 @@
 #endif
 #ifdef CLASSDESC_STRINGKEYMAP_H
 #include "stringKeyMap-random_init.cd"
+#endif
 #endif

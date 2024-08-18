@@ -162,7 +162,7 @@ else
 	cp -f $(EXES)  $(PREFIX)/bin
 endif
 	cp -f fix-privates $(PREFIX)/bin
-	cp -f $(INCLUDES) $(PREFIX)/include
+	cp -f $(INCLUDES) *.cd $(PREFIX)/include
 #	-ln -s $(PREFIX)/include/pack_base.h $(PREFIX)/include/unpack_base.h
 #	cp -r $(SYSINCLUDES) $(PREFIX)
 
@@ -191,7 +191,7 @@ dist:
 	sh makeDist.sh
 
 # cd file generation rules
-$(DESCRIPTORS:%=%-allCDs.h): Makefile
+$(DESCRIPTORS:%=%-allCDs.h): Makefile createCDs.sh
 	createCDs.sh $(subst -allCDs.h,,$@) $(CDHEADERS)
 
 %-dump.cd: %.h

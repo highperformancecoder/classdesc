@@ -152,7 +152,8 @@ namespace classdesc
     bool same(const MultiArray& x) const {return m_data==x.m_data;}
   };
 
-  template <class T, int N> struct is_sequence<MultiArray<T,N>>: public true_type {};
+  template <class T, int N> struct is_sequence<classdesc::MultiArray<T,N>>:
+    public true_type {};
   
   /// friended advance function for use in iterators
   template <class T, int R>

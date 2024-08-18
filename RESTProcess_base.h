@@ -1600,5 +1600,4 @@ CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(RESTProcess);
 using classdesc::RESTProcess;       
 using classdesc::RESTProcess_onbase;       
 
-#include "RESTProcess_base.cd"
 #endif

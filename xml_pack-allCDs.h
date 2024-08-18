@@ -1,3 +1,5 @@
+#ifndef CLASSDESC_xml_pack_allCDS_H
+#define CLASSDESC_xml_pack_allCDS_H
 #ifdef CLASSDESC_MULTIARRAY_H
 #include "multiArray-xml_pack.cd"
 #endif
@@ -18,4 +20,5 @@
 #endif
 #ifdef CLASSDESC_STRINGKEYMAP_H
 #include "stringKeyMap-xml_pack.cd"
+#endif
 #endif
