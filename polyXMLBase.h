@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef POLYXMLBASE_H
-#define POLYXMLBASE_H
+#ifndef CLASSDESC_POLYXMLBASE_H
+#define CLASSDESC_POLYXMLBASE_H
 
 #include "xml_pack_base.h"
 #include "xml_unpack_base.h"

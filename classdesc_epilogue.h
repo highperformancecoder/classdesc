@@ -26,35 +26,35 @@ namespace
 
 #include "typeName_epilogue.h"
 
-#ifdef PACK_BASE_H
+#ifdef CLASSDESC_PACK_BASE_H
 #include "pack_epilogue.h"
 #endif
 
-#ifdef XML_COMMON_H
+#ifdef CLASSDESC_XML_COMMON_H
 #include "xml_pack_epilogue.h"
 #endif
 
-#ifdef DUMP_BASE_H
+#ifdef CLASSDESC_DUMP_BASE_H
 #include "dump_epilogue.h"
 #endif
 
-#ifdef JAVACLASS_BASE_H
+#ifdef CLASSDESC_JAVACLASS_BASE_H
 #include "javaClass_epilogue.h"
 #endif
 
-#ifdef JSON_PACK_BASE_H
+#ifdef CLASSDESC_JSON_PACK_BASE_H
 #include "json_pack_epilogue.h"
 #endif
 
-#ifdef RANDOM_INIT_BASE_H
+#ifdef CLASSDESC_RANDOM_INIT_BASE_H
 #include "random_init_epilogue.h"
 #endif
 
-#ifdef PYTHON_BASE_H
+#ifdef CLASSDESC_PYTHON_BASE_H
 #include "python_epilogue.h"
 #endif
 
-#ifdef RESTPROCESS_H
+#ifdef CLASSDESC_RESTPROCESS_BASE_H
 #include "RESTProcess_epilogue.h"
 #endif
 

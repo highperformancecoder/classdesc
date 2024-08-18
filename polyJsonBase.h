@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef POLYJSONBASE_H
-#define POLYJSONBASE_H
+#ifndef CLASSDESC_POLYJSONBASE_H
+#define CLASSDESC_POLYJSONBASE_H
 
 
 namespace classdesc

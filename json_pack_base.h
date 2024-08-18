@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef JSON_PACK_BASE_H
-#define JSON_PACK_BASE_H
+#ifndef CLASSDESC_JSON_PACK_BASE_H
+#define CLASSDESC_JSON_PACK_BASE_H
 #include "classdesc.h"
 #define JSON5_PARSER_MVALUE_ENABLED
 #define BOOST_BIND_GLOBAL_PLACEHOLDERS

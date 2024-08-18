@@ -10,8 +10,8 @@
   \brief Metaprogramming support for processing functions of multiple arguments
 */
 
-#ifndef FUNCTION_H
-#define FUNCTION_H
+#ifndef CLASSDESC_FUNCTION_H
+#define CLASSDESC_FUNCTION_H
 #include "classdesc.h"
 #include <string>
 #include <utility>

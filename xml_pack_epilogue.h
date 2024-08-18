@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef XML_PACK_EPILOGUE_H
-#define XML_PACK_EPILOGUE_H
+#ifndef CLASSDESC_XML_PACK_EPILOGUE_H
+#define CLASSDESC_XML_PACK_EPILOGUE_H
 #include <typeName_epilogue.h>
 #include "polyAccessXMLPack.h"
 #include "xml_pack-allCDs.h"
@@ -20,7 +20,7 @@ namespace classdesc
 
 namespace classdesc_access
 {
-#ifdef XML_PACK_BASE_H
+#ifdef CLASSDESC_XML_PACK_BASE_H
   template <class T> struct access_xml_pack
   {
     //This routine uses operator << if defined
@@ -29,7 +29,7 @@ namespace classdesc_access
   };
 #endif
 
-#ifdef XML_UNPACK_BASE_H
+#ifdef CLASSDESC_XML_UNPACK_BASE_H
   //This routine uses operator >> if defined
   template <class T> struct access_xml_unpack
   {
@@ -66,7 +66,7 @@ namespace classdesc
 
 namespace classdesc
 {
-#ifdef XML_PACK_BASE_H
+#ifdef CLASSDESC_XML_PACK_BASE_H
   template <class T> typename
   enable_if<AllOtherXMLPackpTypes<T>, void >::T
   xml_packp(xml_pack_t& t,const string& d, T& a, dummy<0> dum=0)
@@ -76,7 +76,7 @@ namespace classdesc
   }
 #endif  
 
-#ifdef XML_UNPACK_BASE_H
+#ifdef CLASSDESC_XML_UNPACK_BASE_H
  template <class T> typename
   enable_if<AllOtherXMLPackpTypes<T>, void >::T
   xml_unpackp(xml_unpack_t& t,const string& d,T& a, dummy<0> dum=0)
@@ -97,7 +97,7 @@ namespace classdesc
   {}
 #endif
 
-#ifdef XML_PACK_BASE_H
+#ifdef CLASSDESC_XML_PACK_BASE_H
   template <class T> void xml_pack(xml_pack_t& t,const string& d, T& a)
   {
     xml_packp(t,d,a);
@@ -113,7 +113,7 @@ namespace classdesc
 
 #endif
   
-#ifdef XML_UNPACK_BASE_H
+#ifdef CLASSDESC_XML_UNPACK_BASE_H
   template <class T> void xml_unpack(xml_unpack_t& t,const string& d,T& a)
   {
     xml_unpackp(t,d,a);
@@ -127,42 +127,15 @@ namespace classdesc
 namespace classdesc_access
 {
   namespace cd=classdesc;
-  // support for polymorphic types, if loaded
-//#ifdef NEW_POLY_H
-//#ifdef XML_PACK_BASE_H
-//  template <class T> struct access_xml_pack<cd::PolyBase<T> >: 
-//    public cd::NullDescriptor<cd::xml_pack_t> {};
-//  template <class T, class B> struct access_xml_pack<cd::Poly<T,B> >
-//  {
-//    template <class U>
-//    void operator()(cd::xml_pack_t& t, const cd::string& d, U& a)
-//    {
-//      xml_pack(t,d,cd::base_cast<B>::cast(a));
-//    }
-//  };
-//#endif
-//#ifdef XML_UNPACK_BASE_H
-//  template <class T> struct access_xml_unpack<cd::PolyBase<T> >: 
-//    public cd::NullDescriptor<cd::xml_unpack_t> {};
-//  template <class T, class B> struct access_xml_unpack<cd::Poly<T,B> >
-//  {
-//    template <class U>
-//    void operator()(cd::xml_unpack_t& t, const cd::string& d, U& a)
-//    {
-//      xml_unpack(t,d,cd::base_cast<B>::cast(a));
-//    }
-//  };
-//#endif
-//#endif
 
-#ifdef POLYPACKBASE_H
-#ifdef XML_PACK_BASE_H
+#ifdef CLASSDESC_POLYPACKBASE_H
+#ifdef CLASSDESC_XML_PACK_BASE_H
   template <> struct access_xml_pack<cd::PolyPackBase>: 
     public cd::NullDescriptor<cd::xml_pack_t> {};
   template <class T> struct access_xml_pack<cd::PolyPack<T> >: 
     public cd::NullDescriptor<cd::xml_pack_t> {};
 #endif
-#ifdef XML_UNPACK_BASE_H
+#ifdef CLASSDESC_XML_UNPACK_BASE_H
    template <> struct access_xml_unpack<cd::PolyPackBase>: 
     public cd::NullDescriptor<cd::xml_unpack_t> {};
   template <class T> struct access_xml_unpack<cd::PolyPack<T> >: 
@@ -170,14 +143,14 @@ namespace classdesc_access
 #endif
 #endif
 
-#ifdef POLYJSONBASE_H
-#ifdef XML_PACK_BASE_H
+#ifdef CLASSDESC_POLYJSONBASE_H
+#ifdef CLASSDESC_XML_PACK_BASE_H
   template <> struct access_xml_pack<cd::PolyJsonBase>: 
     public cd::NullDescriptor<cd::xml_pack_t> {};
   template <class T> struct access_xml_pack<cd::PolyJson<T> >: 
     public cd::NullDescriptor<cd::xml_pack_t> {};
 #endif
-#ifdef XML_UNPACK_BASE_H
+#ifdef CLASSDESC_XML_UNPACK_BASE_H
   template <> struct access_xml_unpack<cd::PolyJsonBase>: 
     public cd::NullDescriptor<cd::xml_unpack_t> {};
   template <class T> struct access_xml_unpack<cd::PolyJson<T> >: 
@@ -185,14 +158,14 @@ namespace classdesc_access
 #endif
 #endif
 
-#ifdef POLYXMLBASE_H
-#ifdef XML_PACK_BASE_H
+#ifdef CLASSDESC_POLYXMLBASE_H
+#ifdef CLASSDESC_XML_PACK_BASE_H
   template <> struct access_xml_pack<cd::PolyXMLBase>: 
     public cd::NullDescriptor<cd::xml_pack_t> {};
   template <class T> struct access_xml_pack<cd::PolyXML<T> >: 
     public cd::NullDescriptor<cd::xml_pack_t> {};
 #endif
-#ifdef XML_UNPACK_BASE_H
+#ifdef CLASSDESC_XML_UNPACK_BASE_H
   template <> struct access_xml_unpack<cd::PolyXMLBase>: 
     public cd::NullDescriptor<cd::xml_unpack_t> {};
   template <class T> struct access_xml_unpack<cd::PolyXML<T> >: 
@@ -200,8 +173,8 @@ namespace classdesc_access
 #endif
 #endif
 
-#ifdef REF_H
-#ifdef XML_PACK_BASE_H
+#ifdef CLASSDESC_REF_H
+#ifdef CLASSDESC_XML_PACK_BASE_H
   template <class T> struct access_xml_pack<cd::ref<T> >
   {
     void operator()(cd::xml_pack_t& x, const cd::string& d, cd::ref<T>& a)
@@ -211,7 +184,7 @@ namespace classdesc_access
   };
 #endif
 
-#ifdef XML_UNPACK_BASE_H
+#ifdef CLASSDESC_XML_UNPACK_BASE_H
   template <class T> struct access_xml_unpack<cd::ref<T> >
   {
     void operator()(cd::xml_unpack_t& x, const cd::string& d, cd::ref<T>& a)
@@ -223,7 +196,7 @@ namespace classdesc_access
 #endif
 #endif
 
-#ifdef XML_PACK_BASE_H
+#ifdef CLASSDESC_XML_PACK_BASE_H
   template<class T>
   struct access_xml_pack<T*>
   {
@@ -234,7 +207,7 @@ namespace classdesc_access
   };
 #endif
 
-#ifdef XML_UNPACK_BASE_H
+#ifdef CLASSDESC_XML_UNPACK_BASE_H
   template<class T>
   struct access_xml_unpack<T*>
   {

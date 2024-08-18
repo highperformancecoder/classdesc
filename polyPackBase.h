@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef POLYPACKBASE_H
-#define POLYPACKBASE_H
+#ifndef CLASSDESC_POLYPACKBASE_H
+#define CLASSDESC_POLYPACKBASE_H
 
 ////#include "polyBase.h"
 #include "pack_base.h"

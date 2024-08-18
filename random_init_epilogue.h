@@ -6,9 +6,10 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef RANDOM_INIT_EPILOGUE_H
-#define RANDOM_INIT_EPILOGUE_H
+#ifndef CLASSDESC_RANDOM_INIT_EPILOGUE_H
+#define CLASSDESC_RANDOM_INIT_EPILOGUE_H
 #include "classdesc.h"
+#include "random_init-allCDs.h"
 
 namespace classdesc_access
 {
@@ -76,21 +77,21 @@ namespace classdesc_access
 #endif
   
 
-#ifdef POLYPACKBASE_H
+#ifdef CLASSDESC_POLYPACKBASE_H
   template <> struct access_random_init<cd::PolyPackBase>: 
     public cd::NullDescriptor<cd::random_init_t> {};
   template <class T> struct access_random_init<cd::PolyPack<T> >: 
     public cd::NullDescriptor<cd::random_init_t> {};
 #endif
 
-#ifdef POLYJSONBASE_H
+#ifdef CLASSDESC_POLYJSONBASE_H
   template <> struct access_random_init<cd::PolyJsonBase>: 
     public cd::NullDescriptor<cd::random_init_t> {};
   template <class T> struct access_random_init<cd::PolyJson<T> >: 
     public cd::NullDescriptor<cd::random_init_t> {};
 #endif
 
-#ifdef POLYXMLBASE_H
+#ifdef CLASSDESC_POLYXMLBASE_H
   template <> struct access_random_init<cd::PolyXMLBase>: 
     public cd::NullDescriptor<cd::random_init_t> {};
   template <class T> struct access_random_init<cd::PolyXML<T> >: 

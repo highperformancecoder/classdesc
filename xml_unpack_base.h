@@ -10,8 +10,8 @@
 \brief XML deserialisation descriptor
 */
 
-#ifndef XML_UNPACK_BASE_H
-#define XML_UNPACK_BASE_H
+#ifndef CLASSDESC_XML_UNPACK_BASE_H
+#define CLASSDESC_XML_UNPACK_BASE_H
 #include <map>
 #include <iostream>
 #include <sstream>

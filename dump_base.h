@@ -10,8 +10,8 @@
    \brief textual representation descriptor
 */
 
-#ifndef DUMP_BASE_H
-#define DUMP_BASE_H
+#ifndef CLASSDESC_DUMP_BASE_H
+#define CLASSDESC_DUMP_BASE_H
 
 #include <iostream>
 #include <sstream>

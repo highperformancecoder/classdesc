@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef RANDOM_INIT_BASE_H
-#define RANDOM_INIT_BASE_H
+#ifndef CLASSDESC_RANDOM_INIT_BASE_H
+#define CLASSDESC_RANDOM_INIT_BASE_H
 #include "classdesc.h"
 #include <sstream>
 #include <limits>

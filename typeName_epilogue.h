@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef TYPENAME_EPILOGUE_H
-#define TYPENAME_EPILOGUE_H
+#ifndef CLASSDESC_TYPENAME_EPILOGUE_H
+#define CLASSDESC_TYPENAME_EPILOGUE_H
 #include "classdesc.h"
 #include "typeName-allCDs.h"
 

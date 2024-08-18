@@ -10,8 +10,8 @@
 \brief serialisation for standard containers
 */
 
-#ifndef PACK_STL_H
-#define PACK_STL_H
+#ifndef CLASSDESC_PACK_STL_H
+#define CLASSDESC_PACK_STL_H
 
 #include "pack_base.h"
 

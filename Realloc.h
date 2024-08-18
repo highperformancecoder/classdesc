@@ -12,8 +12,8 @@
    a version of their choice.
 */
 #include <iostream>
-#ifndef REALLOC_H
-#define REALLOC_H
+#ifndef CLASSDESC_REALLOC_H
+#define CLASSDESC_REALLOC_H
 #include <cstdlib>
 namespace classdesc
 {

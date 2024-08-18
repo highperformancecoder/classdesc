@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef FACTORY_H
-#define FACTORY_H
+#ifndef CLASSDESC_FACTORY_H
+#define CLASSDESC_FACTORY_H
 #include "classdesc.h"
 #include <sstream>
 

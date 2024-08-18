@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef PYTHON_BASE_H
-#define PYTHON_BASE_H
+#ifndef CLASSDESC_PYTHON_BASE_H
+#define CLASSDESC_PYTHON_BASE_H
 #include <boost/python/detail/wrap_python.hpp>
 #include "classdesc.h"
 

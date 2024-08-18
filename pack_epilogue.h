@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef PACK_EPILOGUE_H
-#define PACK_EPILOGUE_H
+#ifndef CLASSDESC_PACK_EPILOGUE_H
+#define CLASSDESC_PACK_EPILOGUE_H
 
 #include "pack-allCDs.h"
 #include "pack_stl.h"
@@ -71,7 +71,7 @@ namespace classdesc_access
 //                 cd::dummy<1> dum=0)
 //  {access_pack<cd::associative_container<T> >()(buf,desc,arg);}
   
-#ifdef PACK_STL_H
+#ifdef CLASSDESC_PACK_STL_H
   // handle containers from the generic access_ classes
 //  template <class T>
 //  struct access_pack
@@ -126,7 +126,7 @@ namespace classdesc_access
 //  };
 //#endif
 
-#ifdef POLYPACKBASE_H
+#ifdef CLASSDESC_POLYPACKBASE_H
   template <> struct access_pack<cd::PolyPackBase>: 
     public cd::NullDescriptor<cd::pack_t> {};
   template <> struct access_unpack<cd::PolyPackBase>: 
@@ -137,7 +137,7 @@ namespace classdesc_access
     public cd::NullDescriptor<cd::unpack_t> {};
 #endif
 
-#ifdef POLYJSONBASE_H
+#ifdef CLASSDESC_POLYJSONBASE_H
   template <> struct access_pack<cd::PolyJsonBase>: 
     public cd::NullDescriptor<cd::pack_t> {};
   template <> struct access_unpack<cd::PolyJsonBase>: 
@@ -148,7 +148,7 @@ namespace classdesc_access
     public cd::NullDescriptor<cd::unpack_t> {};
 #endif
 
-#ifdef POLYXMLBASE_H
+#ifdef CLASSDESC_POLYXMLBASE_H
   template <> struct access_pack<cd::PolyXMLBase>: 
     public cd::NullDescriptor<cd::pack_t> {};
   template <> struct access_unpack<cd::PolyXMLBase>: 
@@ -159,7 +159,7 @@ namespace classdesc_access
     public cd::NullDescriptor<cd::unpack_t> {};
 #endif
 
-#ifdef FACTORY_H
+#ifdef CLASSDESC_FACTORY_H
   template <class T, class U> struct access_pack<cd::Factory<T,U> > 
   {
     void operator()(cd::pack_t& b,const cd::string& d, cd::Factory<T,U>& a)

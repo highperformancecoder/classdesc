@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef DUMP_EPILOGUE_H
-#define DUMP_EPILOGUE_H
+#ifndef CLASSDESC_DUMP_EPILOGUE_H
+#define CLASSDESC_DUMP_EPILOGUE_H
 
 
 #include <iostream>
@@ -75,28 +75,28 @@ namespace classdesc_access
 //    public cd::NullDescriptor<cd::dump_t> {};
 //#endif
 
-#ifdef POLYPACKBASE_H
+#ifdef CLASSDESC_POLYPACKBASE_H
   template <> struct access_dump<cd::PolyPackBase>: 
     public cd::NullDescriptor<cd::dump_t> {};
   template <class T> struct access_dump<cd::PolyPack<T> >: 
     public cd::NullDescriptor<cd::dump_t> {};
 #endif
 
-#ifdef POLYJSONBASE_H
+#ifdef CLASSDESC_POLYJSONBASE_H
   template <> struct access_dump<cd::PolyJsonBase>: 
     public cd::NullDescriptor<cd::dump_t> {};
   template <class T> struct access_dump<cd::PolyJson<T> >: 
     public cd::NullDescriptor<cd::dump_t> {};
 #endif
 
-#ifdef POLYXMLBASE_H
+#ifdef CLASSDESC_POLYXMLBASE_H
   template <> struct access_dump<cd::PolyXMLBase>: 
     public cd::NullDescriptor<cd::dump_t> {};
   template <class T> struct access_dump<cd::PolyXML<T> >: 
     public cd::NullDescriptor<cd::dump_t> {};
 #endif
 
-#ifdef FACTORY_H
+#ifdef CLASSDESC_FACTORY_H
   template <class T, class U> struct access_dump<cd::Factory<T,U> > 
   {
     void operator()(cd::dump_t& b,const cd::string& d, cd::Factory<T,U>& a)

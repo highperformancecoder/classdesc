@@ -12,7 +12,7 @@
 
 namespace classdesc
 {
-#ifdef POLYPACKBASE_H
+#ifdef CLASSDESC_POLYPACKBASE_H
   template <class T>
   typename enable_if<is_base_of<PolyPackBase, typename T::element_type> >::T
   pack_smart_ptr(pack_t& x, const string& d, const T& a, 
@@ -43,7 +43,7 @@ namespace classdesc
       pack(x,d,*a);
   }
   
-#ifdef POLYPACKBASE_H
+#ifdef CLASSDESC_POLYPACKBASE_H
   template <class T>
   typename enable_if<is_base_of<PolyPackBase, typename T::element_type> >::T
   unpack_smart_ptr(unpack_t& x, const string& d, T& a, dummy<0> dum=0)

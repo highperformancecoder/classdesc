@@ -11,8 +11,8 @@
 
   generates a java class file describing the interface of a C++ object
 */
-#ifndef JAVACLASS_BASE_H
-#define JAVACLASS_BASE_H
+#ifndef CLASSDESC_JAVACLASS_BASE_H
+#define CLASSDESC_JAVACLASS_BASE_H
 
 #include "javaClass.h"
 #include "javaClassDescriptor.h"

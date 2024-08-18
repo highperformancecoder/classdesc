@@ -11,8 +11,8 @@
 
    This descriptor is deprecated in favour of std::tr1::::is_base_of
 */
-#ifndef ISA_H
-#define ISA_H
+#ifndef CLASSDESC_ISA_BASE_H
+#define CLASSDESC_ISA_BASE_H
 #include <typeinfo>
 #include <set>
 #include "classdesc.h"

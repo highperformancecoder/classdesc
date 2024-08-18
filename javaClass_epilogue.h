@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef JAVACLASS_EPILOGUE_H
-#define JAVACLASS_EPILOGUE_H
+#ifndef CLASSDESC_JAVACLASS_EPILOGUE_H
+#define CLASSDESC_JAVACLASS_EPILOGUE_H
 
 namespace classdesc
 {

@@ -10,8 +10,8 @@
 \brief XML serialisation descriptor
 */
 
-#ifndef XML_PACK_BASE_H
-#define XML_PACK_BASE_H
+#ifndef CLASSDESC_XML_PACK_BASE_H
+#define CLASSDESC_XML_PACK_BASE_H
 #include <cmath>
 #include <iostream>
 #include <iomanip>

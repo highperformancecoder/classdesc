@@ -9,8 +9,8 @@
 /**\file
    \brief Java classfile representation
 */
-#ifndef JAVACLASS_H
-#define JAVACLASS_H
+#ifndef CLASSDESC_JAVACLASS_H
+#define CLASSDESC_JAVACLASS_H
 
 #ifdef _CLASSDESC
 #pragma omit pack classdesc::u2

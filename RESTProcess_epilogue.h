@@ -5,13 +5,14 @@
 
   Open source licensed under the MIT license. See LICENSE for details.
 */
-#ifndef RESTPROCESS_EPILOGUE_H
-#define RESTPROCESS_EPILOGUE_H
+#ifndef CLASSDESC_RESTPROCESS_EPILOGUE_H
+#define CLASSDESC_RESTPROCESS_EPILOGUE_H
 #include "RESTProcess_base.h"
 #include "signature.h"
 #include "multiArray.h"
 #include "polyPackBase.h"
 #include "polyRESTProcess.h"
+#include "RESTProcess-allCDs.h"
 
 namespace classdesc_access
 {
@@ -565,48 +566,12 @@ namespace classdesc_access
   };
 #endif
 
-#ifdef JSON_PACK_BASE_H
+#ifdef CLASSDESC_JSON_PACK_BASE_H
   template <>
   struct access_RESTProcess<cd::json_pack_t>: public cd::NullDescriptor<cd::RESTProcess_t> {};
-  //  template <>
-//  struct access_RESTProcess<cd::RESTProcessBase>: public cd::NullDescriptor<cd::RESTProcess_t> {};
-//  template <>
-//  struct access_json_pack<cd::RESTProcessBase>: public cd::NullDescriptor<cd::json_pack_t> {};
-//  template <>
-//  struct access_json_unpack<cd::RESTProcessBase>: public cd::NullDescriptor<cd::json_unpack_t> {};
 #endif
-  
-#ifdef OBJECT_H
-  template <>
-  struct access_RESTProcess<cd::object>: public cd::NullDescriptor<cd::RESTProcess_t> {};
-#endif
-  
+
 }
     
-
-#ifdef CLASSDESC_MULTIARRAY_H
-#include "multiArray-RESTProcess.cd"
-#endif
-
-#ifdef CLASSDESC_OBJECT_H
-#include "object-RESTProcess.cd"
-#endif
-
-#ifdef CLASSDESC_POLY_BASE_H
-#include "polyBase-RESTProcess.cd"
-#endif
-
-#ifdef CLASSDESC_POLYRESTPROCESSBASE_H
-#include "polyRESTProcessBase-RESTProcess.cd"
-#endif
-
-#ifdef CLASSDESC_POLYRESTPROCESS_H
-#include "polyRESTProcess-RESTProcess.cd"
-#endif
-
-#ifdef CLASSDESC_SIGNATURE_H
-#include "signature-RESTProcess.cd"
-#endif
-
 
 #endif

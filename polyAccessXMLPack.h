@@ -6,13 +6,13 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef POLY_ACCESS_XML_PACK_H
-#define POLY_ACCESS_XML_PACK_H
+#ifndef CLASSDESC_POLY_ACCESS_XML_PACK_H
+#define CLASSDESC_POLY_ACCESS_XML_PACK_H
 
 namespace classdesc
 {
-#ifdef XML_PACK_BASE_H
-#ifdef POLYXMLBASE_H
+#ifdef CLASSDESC_XML_PACK_BASE_H
+#ifdef CLASSDESC_POLYXMLBASE_H
   // polymorphic version
   template <class T>
   typename enable_if<is_base_of<PolyXMLBase, typename T::element_type>, void>::T
@@ -68,8 +68,8 @@ namespace classdesc
 
 #endif
 
-#ifdef XML_UNPACK_BASE_H
-#ifdef POLYXMLBASE_H
+#ifdef CLASSDESC_XML_UNPACK_BASE_H
+#ifdef CLASSDESC_POLYXMLBASE_H
     // polymorphic version
   template <class T>
   typename enable_if<is_base_of<PolyXMLBase, typename T::element_type>, void>::T
@@ -107,7 +107,7 @@ namespace classdesc
   }
 
   // const argument versions of above
-#ifdef POLYXMLBASE_H
+#ifdef CLASSDESC_POLYXMLBASE_H
     // polymorphic version
   template <class T>
   typename enable_if<is_base_of<PolyXMLBase, typename T::element_type>, void>::T
@@ -146,7 +146,7 @@ namespace classdesc_access
 {
   namespace cd = classdesc;
 
-#ifdef XML_PACK_BASE_H
+#ifdef CLASSDESC_XML_PACK_BASE_H
   template <class T>
   struct access_xml_pack<cd::shared_ptr<T> >
   {
@@ -180,7 +180,7 @@ namespace classdesc_access
 #endif
 #endif
   
-#ifdef XML_UNPACK_BASE_H
+#ifdef CLASSDESC_XML_UNPACK_BASE_H
   template <class T>
   struct access_xml_unpack<cd::shared_ptr<T> >
   {

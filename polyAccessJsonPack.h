@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef POLY_ACCESS_JSON_PACK_H
-#define POLY_ACCESS_JSON_PACK_H
+#ifndef CLASSDESC_POLY_ACCESS_JSON_PACK_H
+#define CLASSDESC_POLY_ACCESS_JSON_PACK_H
 
 namespace classdesc
 {
@@ -19,7 +19,7 @@ namespace classdesc
     ~ResetThrowOnErrorOnExit() {x.throw_on_error=prev;}
   };
 
-#ifdef POLYJSONBASE_H
+#ifdef CLASSDESC_POLYJSONBASE_H
   // polymorphic version
   template <class T>
   typename enable_if<is_base_of<PolyJsonBase, typename T::element_type>, void>::T
@@ -47,7 +47,7 @@ namespace classdesc
       ::json_pack(x,d,*a);
   }
 
-#ifdef POLYJSONBASE_H
+#ifdef CLASSDESC_POLYJSONBASE_H
   template <class T>
   struct is_poly_constructible:
     public is_base_of<PolyJsonBase, typename T::element_type> {};

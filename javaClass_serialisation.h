@@ -9,8 +9,8 @@
 /**\file
 \brief serialisation for javaClass
 */
-#ifndef JAVACLASS_SERIALISATION_H
-#define JAVACLASS_SERIALISATION_H
+#ifndef CLASSDESC_JAVACLASS_SERIALISATION_H
+#define CLASSDESC_JAVACLASS_SERIALISATION_H
 
 #include <vector>
 #include <string>

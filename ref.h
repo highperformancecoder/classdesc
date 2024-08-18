@@ -10,8 +10,8 @@
 \brief Reference counted smart pointer classes
 */
 
-#ifndef REF_H
-#define REF_H
+#ifndef CLASSDESC_REF_H
+#define CLASSDESC_REF_H
 #include "pack_base.h"
 #include "pack_graph.h"
 #include "function.h"

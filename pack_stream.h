@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef PACK_STREAM_H
-#define PACK_STREAM_H
+#ifndef CLASSDESC_PACK_STREAM_H
+#define CLASSDESC_PACK_STREAM_H
 #include "pack_base.h"
 
 namespace classdesc

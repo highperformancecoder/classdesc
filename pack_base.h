@@ -10,8 +10,8 @@
    \brief serialisation descriptor
 */
 
-#ifndef PACK_BASE_H
-#define PACK_BASE_H
+#ifndef CLASSDESC_PACK_BASE_H
+#define CLASSDESC_PACK_BASE_H
 #include "classdesc.h"
 #include "function.h"
 

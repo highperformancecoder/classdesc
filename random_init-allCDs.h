@@ -15,6 +15,9 @@
 #ifdef CLASSDESC_POLYRESTPROCESSBASE_H
 #include "polyRESTProcessBase-random_init.cd"
 #endif
+#ifdef CLASSDESC_RESTPROCESS_BASE_H
+#include "RESTProcess_base-random_init.cd"
+#endif
 #ifdef CLASSDESC_SIGNATURE_H
 #include "signature-random_init.cd"
 #endif

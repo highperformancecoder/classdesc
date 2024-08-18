@@ -15,6 +15,9 @@
 #ifdef CLASSDESC_POLYRESTPROCESSBASE_H
 #include "polyRESTProcessBase-dump.cd"
 #endif
+#ifdef CLASSDESC_RESTPROCESS_BASE_H
+#include "RESTProcess_base-dump.cd"
+#endif
 #ifdef CLASSDESC_SIGNATURE_H
 #include "signature-dump.cd"
 #endif

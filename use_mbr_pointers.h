@@ -8,8 +8,8 @@
 /**\file\brief
  defines overloads supporting -use_mbr_pointers, when old style object descriptors provided
 */
-#ifndef USE_MBR_POINTERS_H
-#define USE_MBR_POINTERS_H
+#ifndef CLASSDESC_USE_MBR_POINTERS_H
+#define CLASSDESC_USE_MBR_POINTERS_H
 #include "function.h"
 
 #define CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(descriptor)               \

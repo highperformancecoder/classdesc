@@ -10,8 +10,8 @@
 \brief serialisation for dynamic structures (graphs/trees and so on)
 */
 
-#ifndef PACK_GRAPH_H
-#define PACK_GRAPH_H
+#ifndef CLASSDESC_PACK_GRAPH_H
+#define CLASSDESC_PACK_GRAPH_H
 
 #include <vector>
 #include <map>

@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef JSON_PACK_EPILOGUE_H
-#define JSON_PACK_EPILOGUE_H
+#ifndef CLASSDESC_JSON_PACK_EPILOGUE_H
+#define CLASSDESC_JSON_PACK_EPILOGUE_H
 #include "classdesc.h"
 #include <sstream>
 #include "json_pack-allCDs.h"
@@ -183,7 +183,7 @@ namespace classdesc_access
 //  };
 //#endif
 
-#ifdef POLYPACKBASE_H
+#ifdef CLASSDESC_POLYPACKBASE_H
   template <> struct access_json_pack<cd::PolyPackBase>: 
     public cd::NullDescriptor<cd::json_pack_t> {};
   template <> struct access_json_unpack<cd::PolyPackBase>: 
@@ -194,7 +194,7 @@ namespace classdesc_access
     public cd::NullDescriptor<cd::json_unpack_t> {};
 #endif
 
-#ifdef POLYJSONBASE_H
+#ifdef CLASSDESC_POLYJSONBASE_H
   template <> struct access_json_pack<cd::PolyJsonBase>: 
     public cd::NullDescriptor<cd::json_pack_t> {};
   template <> struct access_json_unpack<cd::PolyJsonBase>: 
@@ -205,7 +205,7 @@ namespace classdesc_access
     public cd::NullDescriptor<cd::json_unpack_t> {};
 #endif
 
-#ifdef POLYXMLBASE_H
+#ifdef CLASSDESC_POLYXMLBASE_H
   template <> struct access_json_pack<cd::PolyXMLBase>: 
     public cd::NullDescriptor<cd::json_pack_t> {};
   template <> struct access_json_unpack<cd::PolyXMLBase>: 

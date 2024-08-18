@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef RESTPROCESS_H
-#define RESTPROCESS_H
+#ifndef CLASSDESC_RESTPROCESS_BASE_H
+#define CLASSDESC_RESTPROCESS_BASE_H
 /// A classdesc descriptor to generate virtual xrap processing calls
 #include "function.h"
 #include "multiArray.h"
