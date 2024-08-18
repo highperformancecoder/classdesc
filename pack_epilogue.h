@@ -9,6 +9,7 @@
 #ifndef PACK_EPILOGUE_H
 #define PACK_EPILOGUE_H
 
+#include "pack-allCDs.h"
 #include "pack_stl.h"
 
 #include "use_mbr_pointers.h"
@@ -183,4 +184,5 @@ namespace classdesc_access
 #include "polyAccessPack.h"
 #include "pack_stream.h"
 #include "pack_stl.h"
+
 #endif

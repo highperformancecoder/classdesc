@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef SIGNATURE_H
-#define SIGNATURE_H
+#ifndef CLASSDESC_SIGNATURE_H
+#define CLASSDESC_SIGNATURE_H
 #include <string>
 #include <vector>
 namespace classdesc

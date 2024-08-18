@@ -5,6 +5,10 @@ CPLUSPLUS=g++
 # -I/usr/include/tirpc is needed for Fedora
 FLAGS=-g -I. -I/usr/include/tirpc
 
+CDHEADERS=multiArray object polyBase polyRESTProcess polyRESTProcessBase signature stringKeyMap
+DESCRIPTORS=dump pack json_pack random_init RESTProcess xml_pack typeName
+CDFILES=$(foreach d,$(DESCRIPTORS),$(foreach h,$(CDHEADERS),$(h)-$(d).cd))
+
 ifdef GCOV
 GCOV_FLAGS+=-fprofile-arcs -ftest-coverage
 FLAGS+=-fprofile-arcs -ftest-coverage
@@ -97,7 +101,7 @@ else
 XDRPACK=
 endif
 
-build: $(EXES)  $(XDRPACK) functiondb.h unpack_base.h json_unpack_base.h 
+build: $(EXES) $(DESCRIPTORS:%=%-allCDs.h) $(CDFILES) $(XDRPACK) functiondb.h unpack_base.h json_unpack_base.h 
 
 unpack_base.h:
 	-ln -s pack_base.h unpack_base.h
@@ -130,7 +134,7 @@ functiondb.h: functiondb.sh
 	bash $< >$@
 
 clean: 
-	rm -f *.o  *~ "\#*\#" core *.exh *.exc *.d *,D *.exe
+	rm -f *.o  *~ "\#*\#" core *.cd *.exh *.exc *.d *,D *.exe
 	rm -rf $(EXES) include-paths cxx_repository
 	cd mpi-examples && $(MAKE) clean
 	cd examples && $(MAKE) clean
@@ -185,6 +189,31 @@ travis-test: build
 
 dist:
 	sh makeDist.sh
+
+# cd file generation rules
+$(DESCRIPTORS:%=%-allCDs.h): Makefile
+	createCDs.sh $(subst -allCDs.h,,$@) $(CDHEADERS)
+
+%-dump.cd: %.h
+	classdesc  -nodef -onbase -i $< dump >$@
+
+%-pack.cd: %.h
+	classdesc  -nodef -onbase -i $< pack unpack >$@
+
+%-json_pack.cd: %.h
+	classdesc  -nodef -onbase -i $< json_pack json_unpack >$@
+
+%-xml_pack.cd: %.h
+	classdesc  -nodef -onbase -i $< xml_pack xml_unpack >$@
+
+%-random_init.cd: %.h
+	classdesc  -nodef -onbase -i $< random_init >$@
+
+%-RESTProcess.cd: %.h
+	classdesc  -nodef -onbase -i $< RESTProcess >$@
+
+%-typeName.cd: %.h
+	classdesc  -nodef -typeName -i $<  >$@
 
 # install documentation on SourceForge
 DOCPREFIX=web.sf.net:/home/project-web/classdesc/htdocs/doc

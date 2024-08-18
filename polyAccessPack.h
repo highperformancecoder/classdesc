@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef POLY_ACCESS_PACK_H
-#define POLY_ACCESS_PACK_H
+#ifndef CLASSDESC_POLY_ACCESS_PACK_H
+#define CLASSDESC_POLY_ACCESS_PACK_H
 #include "polyPackBase.h"
 
 namespace classdesc

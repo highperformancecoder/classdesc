@@ -629,9 +629,4 @@ CLASSDESC_FUNCTION_NOP(xml_unpack)
 using classdesc::xml_unpack;
 using classdesc::xml_unpack_onbase;
 
-#ifndef XML_COMMON_CD
-#define XML_COMMON_CD
-#include "xml_common.cd"
-#endif
-
 #endif

@@ -10,6 +10,7 @@
 #define XML_PACK_EPILOGUE_H
 #include <typeName_epilogue.h>
 #include "polyAccessXMLPack.h"
+#include "xml_pack-allCDs.h"
 
 namespace classdesc
 {
@@ -244,7 +245,5 @@ namespace classdesc_access
   };
 #endif
 }
-
-
 
 #endif

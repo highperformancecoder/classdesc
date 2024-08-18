@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef POLYRESTPROCESSBASE_H
-#define POLYRESTPROCESSBASE_H
+#ifndef CLASSDESC_POLYRESTPROCESSBASE_H
+#define CLASSDESC_POLYRESTPROCESSBASE_H
 namespace classdesc
 {
   struct RESTProcess_t;

@@ -1,0 +1,21 @@
+#ifdef CLASSDESC_MULTIARRAY_H
+#include "multiArray-random_init.cd"
+#endif
+#ifdef CLASSDESC_OBJECT_H
+#include "object-random_init.cd"
+#endif
+#ifdef CLASSDESC_POLYBASE_H
+#include "polyBase-random_init.cd"
+#endif
+#ifdef CLASSDESC_POLYRESTPROCESS_H
+#include "polyRESTProcess-random_init.cd"
+#endif
+#ifdef CLASSDESC_POLYRESTPROCESSBASE_H
+#include "polyRESTProcessBase-random_init.cd"
+#endif
+#ifdef CLASSDESC_SIGNATURE_H
+#include "signature-random_init.cd"
+#endif
+#ifdef CLASSDESC_STRINGKEYMAP_H
+#include "stringKeyMap-random_init.cd"
+#endif

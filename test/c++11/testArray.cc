@@ -2,6 +2,7 @@
 #include "pack_base.h"
 #include "json_pack_base.h"
 #include "xml_pack_base.h"
+#include "xml_unpack_base.h"
 #include "xsd_generate_base.h"
 #include "dump_base.h"
 #include "random_init_base.h"

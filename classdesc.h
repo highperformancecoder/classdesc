@@ -473,11 +473,11 @@ namespace classdesc
               <T,void (T::*)(const typename T::value_type&)> > {};
   
   template <class T>
-  typename enable_if<has_push_back<T>, void>::T
+  typename enable_if<And<has_push_back<T>,Not<is_const<T> > >, void>::T
   push_back(T& x, const typename T::value_type& v) {x.push_back(v);}
   
   template <class T>
-  typename enable_if<Not<has_push_back<T> >, void>::T
+  typename enable_if<Or<Not<has_push_back<T> >,is_const<T> >, void>::T
   push_back(T& x, const typename T::value_type& v) {} 
 
   

@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef MULTIARRAY_H
-#define MULTIARRAY_H
+#ifndef CLASSDESC_MULTIARRAY_H
+#define CLASSDESC_MULTIARRAY_H
 #include <assert.h>
 
 namespace classdesc
@@ -159,22 +159,22 @@ namespace classdesc
   void advance(MultiArray<T,R>& a, std::ptrdiff_t n)
   {a.m_data+=n;}
 
-  template <class T, int R>
-  struct tn<MultiArray<T,R>>
-  {
-    static string name() {return "classdesc::MultiArray<"+typeName<T>()+","+std::to_string(R)+">";}
-  };
-
-  template <class T>
-  struct tn<T, 
-            typename enable_if<
-              And<is_base_of<MultiArrayIterator,T>, Not<is_same<MultiArrayIterator,T>>>,
-              void>::T>
-  {
-    static string name() {
-      return typeName<typename T::value_type>()+"::iterator";
-    }
-  };
+//  template <class T, int R>
+//  struct tn<MultiArray<T,R>>
+//  {
+//    static string name() {return "classdesc::MultiArray<"+typeName<T>()+","+std::to_string(R)+">";}
+//  };
+//
+//  template <class T>
+//  struct tn<T, 
+//            typename enable_if<
+//              And<is_base_of<MultiArrayIterator,T>, Not<is_same<MultiArrayIterator,T>>>,
+//              void>::T>
+//  {
+//    static string name() {
+//      return typeName<typename T::value_type>()+"::iterator";
+//    }
+//  };
 
   
 

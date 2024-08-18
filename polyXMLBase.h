@@ -37,17 +37,29 @@ namespace classdesc
 
   };
 
-  template <> struct tn<PolyXMLBase>
+  template <> struct tn<classdesc::PolyXMLBase>
   {
     static std::string name()
     {return "classdesc::PolyXMLBase";}
   };
-  template <class T> struct tn<PolyXML<T> >
+  template <class T> struct tn<classdesc::PolyXML<T> >
   {
     static std::string name()
     {return "classdesc::PolyXML<"+typeName<T>()+">";}
   };
 }
+
+#define CLASSDESC_TYPENAME___classdesc__tn__classdesc____PolyXMLBase___
+#define CLASSDESC_TYPENAME___classdesc__tn__classdesc____PolyXML___T_____
+#define CLASSDESC_TYPENAME___classdesc__PolyXML_T_
+#ifdef CLASSDESC_
+#pragma omit json_pack classdesc::PolyXMLBase
+#pragma omit json_unpack classdesc::PolyXMLBase
+#pragma omit RESTProcess classdesc::PolyXMLBase
+#pragma omit json_pack classdesc::PolyXML
+#pragma omit json_unpack classdesc::PolyXML
+#pragma omit RESTProcess classdesc::PolyXML
+#endif
 
 #endif
       

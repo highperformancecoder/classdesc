@@ -31,6 +31,10 @@ namespace classdesc
   using RPPtr=std::shared_ptr<RESTProcessBase>;
 
   struct RESTProcess_t;
+
+  template <class T>
+  typename enable_if<Not<functional::is_nonmember_function_ptr<T>>, void>::T
+  RESTProcess(RESTProcess_t&, const std::string&, T&);
   
   /// interface for the REST processor
   class RESTProcessBase
@@ -133,8 +137,8 @@ namespace classdesc
   {
     std::vector<std::shared_ptr<RESTProcessFunctionBase>> overloadedFunctions; 
     RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
-    REST_PROCESS_BUFFER asBuffer() const {return {};}
-    std::vector<Signature> signature() const {
+    REST_PROCESS_BUFFER asBuffer() const override {return {};}
+    std::vector<Signature> signature() const override {
       std::vector<Signature> r;
       for (auto& i: overloadedFunctions) {
         auto s=i->signature();
@@ -379,7 +383,7 @@ namespace classdesc
         }
     }
   
-    std::shared_ptr<classdesc::RESTProcessBase> process(const std::string& query, const REST_PROCESS_BUFFER& jin);
+    inline RPPtr process(const std::string& query, const REST_PROCESS_BUFFER& jin);
 
     /// define all arguments of \a F
     template <class F> void defineFunctionArgTypes()
@@ -400,22 +404,8 @@ namespace classdesc
     (const std::string& typeName,const std::function<void(const std::string& objName)>& callback=nullptr);
   };
 
-  
   template <class T>
-  inline RPPtr mapAndProcess(const string& query, const REST_PROCESS_BUFFER& arguments, T& a)
-  {
-    RESTProcess_t map;
-    RESTProcess(map,"",a);
-    if (query.empty())
-      {
-        auto i=map.find("");
-        if (i!=map.end())
-          return i->second->process("",arguments);
-        else
-          return {};
-      }
-    return map.process(query,arguments);
-  }
+  RPPtr mapAndProcess(const string& query, const REST_PROCESS_BUFFER& arguments, T& a);
 
   template <class T>
   inline typename enable_if<is_default_constructible<T>,RPPtr>::T
@@ -504,7 +494,7 @@ namespace classdesc
   {return std::make_shared<RESTProcessValueObject<std::vector<std::string>>>(init);}
  
   /// class that represents the void, or null object
-  class RESTProcessVoid: public RESTProcessBase
+  struct RESTProcessVoid: public RESTProcessBase
   {
     std::shared_ptr<RESTProcessBase> process(const string&, const REST_PROCESS_BUFFER&) override
     {return std::make_shared<RESTProcessVoid>();}
@@ -532,27 +522,21 @@ namespace classdesc
   template <class T>
   struct is_classdescGenerated:
     public And<
-    And<
-      is_class<T>,
-      Not<is_container<T>>
-      >,
-    Not<is_smart_ptr<T>>
+    is_class<T>,
+    Not<is_container<T>>,
+    Not<is_smart_ptr<T>>,
+    Not<is_string<T>>
     > {};
   
-  /// descriptor for generating building REST processing registry
-  template <class T>
-  typename enable_if<Not<functional::is_nonmember_function_ptr<T>>, void>::T
-  RESTProcess(RESTProcess_t& r, const string& d, T& a) {RESTProcessp(r,d,a);}
-
   
   template <class T>
   void RESTProcessp(RESTProcess_t& repo, const string& d, Exclude<T>& a)
   {}
 
   template <class T>
-  typename enable_if<is_fundamental<T>, void>::T
+  typename enable_if<Or<is_fundamental<T>,is_string<T>>, void>::T
   RESTProcessp(RESTProcess_t& repo, const string& d, T& a)
-  {repo.add(d, new RESTProcessObject<T>(a));}
+  {repo.emplace(d, makeRESTProcessRef(a));}
 
   template <class T>
   void RESTProcessp(RESTProcess_t& repo, const string& d, T* a)
@@ -572,7 +556,7 @@ namespace classdesc
   template <class U>
   typename enable_if<is_default_constructible<typename U::value_type>, typename U::value_type&>::T
   dummyRef() {
-    static typename U::value_type dummy;
+    static typename U::value_type dummy{};
     return dummy;
   }
 
@@ -640,13 +624,13 @@ namespace classdesc
     }
 
     // common element extraction code - assumes index is in bounds
-    typename T::value_type& elemCommon(size_t idx) {
+    typename transfer_const<T, typename T::value_type>::type& elemCommon(size_t idx) {
       auto i=obj.begin();
       std::advance(i, idx);
       return *i;
     }
 
-    typename T::value_type& elemNoThrow(size_t idx) {
+    typename transfer_const<T, typename T::value_type>::type& elemNoThrow(size_t idx) {
       if (idx<obj.size()) return elemCommon(idx);
       return dummyRef<T>();
     }
@@ -658,6 +642,9 @@ namespace classdesc
     template <class U>
     typename enable_if<has_member_erase<U,typename U::iterator(U::*)(typename U::const_iterator)>,void>::T
     erase(U& o,typename U::iterator i) {o.erase(i);}
+
+    template <class U>
+    void erase(U& o,typename U::const_iterator i) {}
     
     template <class U>
     typename enable_if<Not<has_member_erase<U,typename U::iterator(U::*)(typename U::const_iterator)>>,void>::T
@@ -673,7 +660,7 @@ namespace classdesc
 
 
   protected:
-    typename T::value_type& elem(size_t idx) {
+    typename transfer_const<T, typename T::value_type>::type& elem(size_t idx) {
       if (idx<obj.size()) return elemCommon(idx);
       throw std::runtime_error("idx out of bounds");
     }
@@ -687,11 +674,11 @@ namespace classdesc
     std::string type() const override {return typeName<T>();}
     REST_PROCESS_BUFFER asBuffer() const override {REST_PROCESS_BUFFER r; return r<<obj;}
     bool isObject() const override {return true;}
-    RPPtr getElem(const REST_PROCESS_BUFFER& index) {
+    RPPtr getElem(const REST_PROCESS_BUFFER& index) override {
       size_t idx; index>>idx;
       return makeRESTProcessRef(elem(idx));
     }
-    RPPtr setElem(const REST_PROCESS_BUFFER& index, const REST_PROCESS_BUFFER& value) {
+    RPPtr setElem(const REST_PROCESS_BUFFER& index, const REST_PROCESS_BUFFER& value) override {
       size_t idx; index>>idx;
       auto& v=elem(idx);
       value>>v;
@@ -884,7 +871,7 @@ namespace classdesc
   template <class T, class Enable=void> struct MappedType;
   template <class T> struct MappedType // for maps
   <T, typename enable_if<is_pair<typename T::value_type>, void>::T>
-  {using type=typename T::mapped_type;};
+  {using type=typename T::value_type::second_type;};
 
   template <class T> struct MappedType // for sets
   <T, typename enable_if<Not<is_pair<typename T::value_type>>, void>::T>
@@ -913,9 +900,22 @@ namespace classdesc
                        const typename std::iterator_traits<I>::value_type&>::T
     elem_of(const I& i) const {return *i;}
 
-    typename MappedType<T>::type& elem(const typename T::key_type& k) 
+    template <class U>
+    typename enable_if<Not<is_const<U>>, typename MappedType<U>::type&>::T elemImpl(const typename U::key_type& k) 
     {return elem_of(obj.emplace(makeElement<T>(k)).first);}
-
+    
+    template <class U>
+    typename enable_if<is_const<U>, typename MappedType<U>::type&>::T elemImpl(const typename U::key_type& k) 
+    {
+      auto i=obj.find(k);
+      if (i==obj.end()) return dummyRef<std::vector<typename MappedType<U>::type>>();
+      return elem_of(i);
+    }
+    
+    typename MappedType<T>::type& elem(const typename T::key_type& k)
+    {return elemImpl<T>(k);}
+    
+    
   public:
     RESTProcessAssociativeContainer(T& obj): obj(obj) {}
     RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments) override;
@@ -924,11 +924,11 @@ namespace classdesc
     std::string type() const override {return typeName<T>();}
     REST_PROCESS_BUFFER asBuffer() const override {REST_PROCESS_BUFFER r; return r<<obj;}
     bool isObject() const override {return true;}
-    RPPtr getElem(const REST_PROCESS_BUFFER& index) {
+    RPPtr getElem(const REST_PROCESS_BUFFER& index) override {
       typename T::key_type idx; index>>idx;
       return makeRESTProcessRef(elem(idx));
     }
-    RPPtr setElem(const REST_PROCESS_BUFFER& index, const REST_PROCESS_BUFFER& value) {
+    RPPtr setElem(const REST_PROCESS_BUFFER& index, const REST_PROCESS_BUFFER& value) override {
       typename T::key_type idx; index>>idx;
       auto& v=elem(idx);
       value>>v;
@@ -1392,7 +1392,7 @@ namespace classdesc
         Not<is_void<U>>
         >,RESTProcess_t>::T
     slist() const {
-      typename remove_reference<U>::type x;
+      typename remove_reference<U>::type x{};
       return RESTProcessObject<U>(x).list();
     }
     // for now, we cannot extract the lists of a non-default constructible return type
@@ -1447,7 +1447,10 @@ namespace classdesc
     repo.defineFunctionArgTypes<F>();
   }
 
-  template <>
+  template <class F> std::shared_ptr<RESTProcessFunction<F>>
+  makeRESTProcessFunction(F f)
+  {return std::make_shared<RESTProcessFunction<F>>(f);}
+  
   inline void RESTProcess(RESTProcess_t& repo, const string& d, const char*& a)
   {repo.add(d,new RESTProcessObject<const char*>(a));}
 
@@ -1478,7 +1481,7 @@ namespace classdesc
     std::vector<Signature> signature() const override;
     RESTProcess_t list() const override {return {};}
     std::string type() const override {return typeName<E>();}
-    REST_PROCESS_BUFFER asBuffer() const {return REST_PROCESS_BUFFER(enum_keys<E>()(e));}
+    REST_PROCESS_BUFFER asBuffer() const override {return REST_PROCESS_BUFFER(enum_keys<E>()(e));}
   };
 
   template <class E>

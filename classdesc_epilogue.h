@@ -54,10 +54,6 @@ namespace
 #include "python_epilogue.h"
 #endif
 
-#ifdef SIGNATURE_H
-#include "signature.cd"
-#endif
-
 #ifdef RESTPROCESS_H
 #include "RESTProcess_epilogue.h"
 #endif

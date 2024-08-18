@@ -709,6 +709,10 @@ namespace classdesc
     {apply_void_fn(f,args);}
   }
 
+#ifdef CLASSDESC_
+#pragma omit typeName functional::bound_method<C,M,R,E>
+#endif
+    
   template <class C, class M, class R, class E>
   struct tn<functional::bound_method<C,M,R,E> >
   {

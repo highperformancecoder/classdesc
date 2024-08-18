@@ -40,6 +40,11 @@ namespace classdesc
     static std::string name()
     {return "classdesc::PolyJson<"+typeName<T>()+">";}
   };
+
+#ifdef _CLASSDESC
+#pragma omit typeName PolyJsonBase
+#pragma omit typeName PolyJson<T>
+#endif 
 }
 
 #endif

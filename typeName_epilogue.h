@@ -9,6 +9,7 @@
 #ifndef TYPENAME_EPILOGUE_H
 #define TYPENAME_EPILOGUE_H
 #include "classdesc.h"
+#include "typeName-allCDs.h"
 
 namespace classdesc
 {
@@ -58,4 +59,5 @@ namespace classdesc
   };
 #endif
 }
+
 #endif

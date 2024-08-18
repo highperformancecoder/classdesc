@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef NEW_POLY_H
-#define NEW_POLY_H
+#ifndef CLASSDESC_POLYBASE_H
+#define CLASSDESC_POLYBASE_H
 #include <classdesc.h>
 
 namespace classdesc
@@ -81,20 +81,6 @@ namespace classdesc
     /// clone has to return a Poly* to satisfy covariance
     Poly* clone() const {return new T(*static_cast<const T*>(this));}
   };
-
-//  template <class T> struct tn<classdesc::PolyBase<T> >
-//  {
-//    static std::string name()
-//    {return "classdesc::PolyBase<"+typeName<T>()+">";}
-//  };
-//  template <class T, class Base> struct tn<classdesc::Poly<T,Base> >
-//  {
-//    static std::string name()
-//    {return "classdesc::Poly<"+typeName<T>()+","+typeName<Base>()+">";}
-//  };
-
-
 }
 
-#include "polyBase.cd"
 #endif

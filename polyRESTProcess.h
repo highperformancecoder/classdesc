@@ -6,11 +6,10 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef POLYRESTPROCESS_H
-#define POLYRESTPROCESS_H
+#ifndef CLASSDESC_POLYRESTPROCESS_H
+#define CLASSDESC_POLYRESTPROCESS_H
 #include "RESTProcess_base.h"
 #include "polyRESTProcessBase.h"
-#include "polyRESTProcessBase.cd"
 
 namespace classdesc
 {
@@ -58,6 +57,5 @@ namespace classdesc
 
 }
 
-#include "polyRESTProcess.cd"
 #endif
       

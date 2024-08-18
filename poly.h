@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef POLY_H
-#define POLY_H
+#ifndef CLASSDESC_POLY_H
+#define CLASSDESC_POLY_H
 // functionality in this file is completely deprecated in favour of
 // the Poly class in Poly.h
 #include "object.h"

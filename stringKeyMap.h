@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef STRINGKEYMAP_H
-#define STRINGKEYMAP_H
+#ifndef CLASSDESC_STRINGKEYMAP_H
+#define CLASSDESC_STRINGKEYMAP_H
 #include <map>
 #include <string>
 #include "classdesc.h"
@@ -178,5 +178,4 @@ namespace classdesc_access
 #pragma omit xml_unpack classdesc::StringKeyMap
 #pragma omit xsd_generate classdesc::StringKeyMap
 #endif
-#include "stringKeyMap.cd"
 #endif

@@ -50,21 +50,6 @@ namespace classdesc_access
   template <class T>
   struct access_RESTProcess<T, cd::void_t<typename std::iterator_traits<T>::value_type>>:
     public cd::NullDescriptor<cd::RESTProcess_t> {};
-
-#ifdef CLASSDESC_OBJECT_H
-  template <>
-  struct access_RESTProcess<cd::object>: public cd::NullDescriptor<cd::RESTProcess_t> {};
-
-  template <class T, class B>
-  struct access_RESTProcess<cd::Object<T,B>>
-  {
-    template <class U>
-    void operator()(cd::RESTProcess_t& repo, const std::string& d, U& a)
-    {
-      ::RESTProcess(repo,d, cd::base_cast<B>::cast(a));
-    }
-  };
-#endif
 }
 
 namespace classdesc
@@ -129,11 +114,11 @@ namespace classdesc
   template <class T>
   RESTProcess_t RESTProcessSequence<T>::list() const {
     RESTProcess_t map;
-    map.add(".@elem", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessSequence<T>::elem)));
-    map.add(".@elemNoThrow", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessSequence<T>::elemNoThrow)));
-    map.add(".@erase", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessSequence<T>::eraseElem)));
-    map.add(".@insert", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessSequence<T>::pushBack)));
-    map.add(".@size", new RESTProcessFunction(functional::bindMethod(obj,&T::size)));
+    map.emplace(".@elem", makeRESTProcessFunction(functional::bindMethod(*this,&RESTProcessSequence<T>::elem)));
+    map.emplace(".@elemNoThrow", makeRESTProcessFunction(functional::bindMethod(*this,&RESTProcessSequence<T>::elemNoThrow)));
+    map.emplace(".@erase", makeRESTProcessFunction(functional::bindMethod(*this,&RESTProcessSequence<T>::eraseElem)));
+    map.emplace(".@insert", makeRESTProcessFunction(functional::bindMethod(*this,&RESTProcessSequence<T>::pushBack)));
+    map.emplace(".@size", makeRESTProcessFunction(functional::bindMethod(obj,&T::size)));
     return map;
   }
   
@@ -141,12 +126,12 @@ namespace classdesc
   RESTProcess_t RESTProcessAssociativeContainer<T>::list() const {
     RESTProcess_t map;
     // duplicates here for backward compatibility
-    map.add(".@elem", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::elem)));
-    map.add(".@elemNoThrow", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::elem)));
-    map.add(".@insert", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::elem)));
-    map.add(".@erase", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::erase)));
-    map.add(".@size", new RESTProcessFunction(functional::bindMethod(obj,&T::size)));
-    map.add(".@keys", new RESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::keys)));
+    map.emplace(".@elem", makeRESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::elem)));
+    map.emplace(".@elemNoThrow", makeRESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::elem)));
+    map.emplace(".@insert", makeRESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::elem)));
+    map.emplace(".@erase", makeRESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::erase)));
+    map.emplace(".@size", makeRESTProcessFunction(functional::bindMethod(obj,&T::size)));
+    map.emplace(".@keys", makeRESTProcessFunction(functional::bindMethod(*this,&RESTProcessAssociativeContainer<T>::keys)));
     return map;
   }
   
@@ -171,11 +156,16 @@ namespace classdesc
     return {typeName<typename functional::Return<F>::T>(), Args<F>()};
   }
 
+  /// descriptor for generating building REST processing registry
+  template <class T>
+  typename enable_if<Not<functional::is_nonmember_function_ptr<T>>, void>::T
+  RESTProcess(RESTProcess_t& r, const string& d, T& a) {RESTProcessp(r,d,a);}
+
   template <class T>
   typename enable_if<is_classdescGenerated<T>, void>::T
   RESTProcessp(RESTProcess_t& repo, string d, T& obj)
   {
-    classdesc_access::access_RESTProcess<typename remove_const<T>::type>()(repo,d,obj);
+    classdesc_access::access_RESTProcess<typename remove_const<T>::type,void>()(repo,d,obj);
     repo.add(d, new RESTProcessObject<T>(obj));
   }
 
@@ -226,7 +216,18 @@ namespace classdesc
       return RESTProcess_t(obj).process(remainder,arguments); // treat as an object, not container
     }
 
-  template <class T> std::tuple<typename T::iterator, string::size_type>
+  template <class T, bool isConst>  struct IteratorSelector;
+  template <class T> struct IteratorSelector<T, true>
+  {
+    using iterator=typename T::const_iterator;
+  };
+  template <class T> struct IteratorSelector<T, false>
+  {
+    using iterator=typename T::iterator;
+  };
+  
+  
+  template <class T> std::tuple<typename IteratorSelector<T,is_const<T>::value>::iterator, string::size_type>
   elemImpl(T& obj, const string& remainder, const REST_PROCESS_BUFFER& arguments)
   {
     // extract idx
@@ -387,7 +388,7 @@ namespace classdesc
   }
 
   inline RPPtr RESTProcess_t::process(const std::string& query, const REST_PROCESS_BUFFER& jin)
-    {
+  {
       string cmd=query;
 
       if (cmd=="@enum.@list")
@@ -467,7 +468,14 @@ namespace classdesc
                       throw std::runtime_error("Ambiguous resolution of overloaded function");
                   }
                 if (tail==".@list")
-                  return makeRESTProcessValueObject(bestOverload->list());
+                  {
+                    auto map=bestOverload->list();
+                    std::vector<std::string> list;
+                    for (auto& i: map)
+                      if (!i.first.empty())
+                        list.push_back(i.first);
+                    return makeRESTProcessValueObject(list);
+                  }
                 if (tail==".@type")
                   return makeRESTProcessValueObject(bestOverload->type());
                 return bestOverload->process(tail, jin);
@@ -476,8 +484,23 @@ namespace classdesc
         }
     }
 
-  
-  
+   template <class T>
+  RPPtr mapAndProcess(const string& query, const REST_PROCESS_BUFFER& arguments, T& a)
+  {
+    RESTProcess_t map;
+    RESTProcess(map,"",a);
+    if (query.empty())
+      {
+        auto i=map.find("");
+        if (i!=map.end())
+          return i->second->process("",arguments);
+        else
+          return {};
+      }
+    return map.process(query,arguments);
+  }
+
+ 
   template <class T> typename enable_if<And<is_class<T>, Not<is_container<T>>>,void>::T
   populateFromObj(RESTProcess_t& r, T&obj)
   {classdesc_access::access_RESTProcess<T>()(r,"",obj);}
@@ -493,8 +516,8 @@ namespace classdesc
   {
     std::function<void(const std::string& name, A... args)> factory=
       [this,callback](const std::string& name, A... args) {
-      auto rp=std::make_unique<RESTProcessHeapObject<T>>();
-      rp->obj=std::make_unique<T>(std::forward<A>(args)...);
+      auto rp=make_unique<RESTProcessHeapObject<T>>();
+      rp->obj=make_unique<T>(std::forward<A>(args)...);
       add(name,rp.release());
       callback(name);
     };
@@ -545,12 +568,45 @@ namespace classdesc_access
 #ifdef JSON_PACK_BASE_H
   template <>
   struct access_RESTProcess<cd::json_pack_t>: public cd::NullDescriptor<cd::RESTProcess_t> {};
+  //  template <>
+//  struct access_RESTProcess<cd::RESTProcessBase>: public cd::NullDescriptor<cd::RESTProcess_t> {};
+//  template <>
+//  struct access_json_pack<cd::RESTProcessBase>: public cd::NullDescriptor<cd::json_pack_t> {};
+//  template <>
+//  struct access_json_unpack<cd::RESTProcessBase>: public cd::NullDescriptor<cd::json_unpack_t> {};
 #endif
   
 #ifdef OBJECT_H
   template <>
   struct access_RESTProcess<cd::object>: public cd::NullDescriptor<cd::RESTProcess_t> {};
 #endif
+  
 }
     
+
+#ifdef CLASSDESC_MULTIARRAY_H
+#include "multiArray-RESTProcess.cd"
+#endif
+
+#ifdef CLASSDESC_OBJECT_H
+#include "object-RESTProcess.cd"
+#endif
+
+#ifdef CLASSDESC_POLY_BASE_H
+#include "polyBase-RESTProcess.cd"
+#endif
+
+#ifdef CLASSDESC_POLYRESTPROCESSBASE_H
+#include "polyRESTProcessBase-RESTProcess.cd"
+#endif
+
+#ifdef CLASSDESC_POLYRESTPROCESS_H
+#include "polyRESTProcess-RESTProcess.cd"
+#endif
+
+#ifdef CLASSDESC_SIGNATURE_H
+#include "signature-RESTProcess.cd"
+#endif
+
+
 #endif
