@@ -5,7 +5,7 @@ CPLUSPLUS=g++
 # -I/usr/include/tirpc is needed for Fedora
 FLAGS=-g -I. -I/usr/include/tirpc
 
-CDHEADERS=multiArray object polyBase polyRESTProcess polyRESTProcessBase RESTProcess_base signature stringKeyMap
+CDHEADERS=multiArray object polyBase polyRESTProcess polyRESTProcessBase polyXMLBase RESTProcess_base signature stringKeyMap xml_pack_base xml_unpack_base
 DESCRIPTORS=dump pack json_pack random_init RESTProcess xml_pack typeName
 CDFILES=$(foreach d,$(DESCRIPTORS),$(foreach h,$(CDHEADERS),$(h)-$(d).cd))
 
@@ -201,16 +201,16 @@ $(DESCRIPTORS:%=%-allCDs.h): Makefile createCDs.sh
 	classdesc  -nodef -onbase -i $< pack unpack >$@
 
 %-json_pack.cd: %.h
-	classdesc  -nodef -onbase -i $< json_pack json_unpack >$@
+	classdesc  -nodef -onbase -respect_private -i $< json_pack json_unpack >$@
 
 %-xml_pack.cd: %.h
-	classdesc  -nodef -onbase -i $< xml_pack xml_unpack >$@
+	classdesc  -nodef -onbase -respect_private -i $< xml_pack xml_unpack >$@
 
 %-random_init.cd: %.h
 	classdesc  -nodef -onbase -i $< random_init >$@
 
 %-RESTProcess.cd: %.h
-	classdesc  -nodef -onbase -i $< RESTProcess >$@
+	classdesc  -nodef -onbase -respect_private -i $< RESTProcess >$@
 
 %-typeName.cd: %.h
 	classdesc  -nodef -typeName -i $<  >$@

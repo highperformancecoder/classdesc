@@ -91,12 +91,12 @@ namespace classdesc_access
     public cd::NullDescriptor<cd::random_init_t> {};
 #endif
 
-#ifdef CLASSDESC_POLYXMLBASE_H
-  template <> struct access_random_init<cd::PolyXMLBase>: 
-    public cd::NullDescriptor<cd::random_init_t> {};
-  template <class T> struct access_random_init<cd::PolyXML<T> >: 
-    public cd::NullDescriptor<cd::random_init_t> {};
-#endif
+//#ifdef CLASSDESC_POLYXMLBASE_H
+//  template <> struct access_random_init<cd::PolyXMLBase>: 
+//    public cd::NullDescriptor<cd::random_init_t> {};
+//  template <class T> struct access_random_init<cd::PolyXML<T> >: 
+//    public cd::NullDescriptor<cd::random_init_t> {};
+//#endif
 
   
 

@@ -23,6 +23,7 @@
 
 #include "xml_common.h"
 #include "classdesc.h"
+#include "classdesc_access.h"
 // for xml_unpack_t serialisation support
 #include "pack_base.h"
 #include "pack_stl.h"
@@ -316,6 +317,7 @@ namespace classdesc
   {
   public:
     typedef std::map<std::string,std::string> ContentMap;
+    CLASSDESC_ACCESS(xml_unpack_t);
   private:
     ContentMap contentMap;
     std::map<std::string,unsigned> tokenCount;

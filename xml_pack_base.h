@@ -21,6 +21,7 @@
 #include <stdarg.h>
 
 #include <classdesc.h>
+#include <classdesc_access.h>
 #include <xml_common.h>
 #include <stdexcept>
 
@@ -96,6 +97,7 @@ namespace classdesc
     }
 
     friend class Tag;
+    CLASSDESC_ACCESS(xml_pack_t);
   public:
     string schema; 
     bool prettyPrint; /// if true, the layout XML in more human friendly form

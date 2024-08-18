@@ -159,18 +159,18 @@ namespace classdesc_access
 #endif
 
 #ifdef CLASSDESC_POLYXMLBASE_H
-#ifdef CLASSDESC_XML_PACK_BASE_H
-  template <> struct access_xml_pack<cd::PolyXMLBase>: 
-    public cd::NullDescriptor<cd::xml_pack_t> {};
-  template <class T> struct access_xml_pack<cd::PolyXML<T> >: 
-    public cd::NullDescriptor<cd::xml_pack_t> {};
-#endif
-#ifdef CLASSDESC_XML_UNPACK_BASE_H
-  template <> struct access_xml_unpack<cd::PolyXMLBase>: 
-    public cd::NullDescriptor<cd::xml_unpack_t> {};
-  template <class T> struct access_xml_unpack<cd::PolyXML<T> >: 
-    public cd::NullDescriptor<cd::xml_unpack_t> {};
-#endif
+//#ifdef CLASSDESC_XML_PACK_BASE_H
+//  template <> struct access_xml_pack<cd::PolyXMLBase>: 
+//    public cd::NullDescriptor<cd::xml_pack_t> {};
+//  template <class T> struct access_xml_pack<cd::PolyXML<T> >: 
+//    public cd::NullDescriptor<cd::xml_pack_t> {};
+//#endif
+//#ifdef CLASSDESC_XML_UNPACK_BASE_H
+//  template <> struct access_xml_unpack<cd::PolyXMLBase>: 
+//    public cd::NullDescriptor<cd::xml_unpack_t> {};
+//  template <class T> struct access_xml_unpack<cd::PolyXML<T> >: 
+//    public cd::NullDescriptor<cd::xml_unpack_t> {};
+//#endif
 #endif
 
 #ifdef CLASSDESC_REF_H

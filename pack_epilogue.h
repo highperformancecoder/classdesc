@@ -148,16 +148,16 @@ namespace classdesc_access
     public cd::NullDescriptor<cd::unpack_t> {};
 #endif
 
-#ifdef CLASSDESC_POLYXMLBASE_H
-  template <> struct access_pack<cd::PolyXMLBase>: 
-    public cd::NullDescriptor<cd::pack_t> {};
-  template <> struct access_unpack<cd::PolyXMLBase>: 
-    public cd::NullDescriptor<cd::unpack_t> {};
-  template <class T> struct access_pack<cd::PolyXML<T> >: 
-    public cd::NullDescriptor<cd::pack_t> {};
-  template <class T> struct access_unpack<cd::PolyXML<T> >: 
-    public cd::NullDescriptor<cd::unpack_t> {};
-#endif
+//#ifdef CLASSDESC_POLYXMLBASE_H
+//  template <> struct access_pack<cd::PolyXMLBase>: 
+//    public cd::NullDescriptor<cd::pack_t> {};
+//  template <> struct access_unpack<cd::PolyXMLBase>: 
+//    public cd::NullDescriptor<cd::unpack_t> {};
+//  template <class T> struct access_pack<cd::PolyXML<T> >: 
+//    public cd::NullDescriptor<cd::pack_t> {};
+//  template <class T> struct access_unpack<cd::PolyXML<T> >: 
+//    public cd::NullDescriptor<cd::unpack_t> {};
+//#endif
 
 #ifdef CLASSDESC_FACTORY_H
   template <class T, class U> struct access_pack<cd::Factory<T,U> > 

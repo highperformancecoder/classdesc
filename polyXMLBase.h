@@ -55,10 +55,8 @@ namespace classdesc
 #ifdef CLASSDESC_
 #pragma omit json_pack classdesc::PolyXMLBase
 #pragma omit json_unpack classdesc::PolyXMLBase
-#pragma omit RESTProcess classdesc::PolyXMLBase
 #pragma omit json_pack classdesc::PolyXML
 #pragma omit json_unpack classdesc::PolyXML
-#pragma omit RESTProcess classdesc::PolyXML
 #endif
 
 #endif

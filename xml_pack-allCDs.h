@@ -15,6 +15,9 @@
 #ifdef CLASSDESC_POLYRESTPROCESSBASE_H
 #include "polyRESTProcessBase-xml_pack.cd"
 #endif
+#ifdef CLASSDESC_POLYXMLBASE_H
+#include "polyXMLBase-xml_pack.cd"
+#endif
 #ifdef CLASSDESC_RESTPROCESS_BASE_H
 #include "RESTProcess_base-xml_pack.cd"
 #endif
@@ -23,5 +26,11 @@
 #endif
 #ifdef CLASSDESC_STRINGKEYMAP_H
 #include "stringKeyMap-xml_pack.cd"
+#endif
+#ifdef CLASSDESC_XML_PACK_BASE_H
+#include "xml_pack_base-xml_pack.cd"
+#endif
+#ifdef CLASSDESC_XML_UNPACK_BASE_H
+#include "xml_unpack_base-xml_pack.cd"
 #endif
 #endif
