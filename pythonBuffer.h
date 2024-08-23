@@ -780,6 +780,7 @@ namespace classdesc_access
     nullptr                                                        \
     };                                                             \
                                                                    \
+    using namespace classdesc;                                     \
     registries()[#name]=&registry;                                 \
     pythonModule=PyModule_Create(&module_##name);                  \
     if (pythonModule) initModule();                                \

@@ -554,16 +554,16 @@ namespace classdesc
   {return x.size()>=prefix.size() && equal(prefix.begin(), prefix.end(), x.begin());}
 
   template <class U>
-  typename enable_if<is_default_constructible<typename U::value_type>, typename U::value_type&>::T
+  typename enable_if<is_default_constructible<U>, U&>::T
   dummyRef() {
-    static typename U::value_type dummy{};
+    static U dummy{};
     return dummy;
   }
 
   template <class U>
-  typename enable_if<Not<is_default_constructible<typename U::value_type>>, typename U::value_type&>::T
+  typename enable_if<Not<is_default_constructible<U>>, U&>::T
   dummyRef() {
-    throw std::runtime_error(typeName<typename U::value_type>()+" is not default constructible, but requested element doesn't exist");
+    throw std::runtime_error(typeName<U>()+" is not default constructible, but requested element doesn't exist");
   }
 
   // sequences
@@ -632,7 +632,7 @@ namespace classdesc
 
     typename transfer_const<T, typename T::value_type>::type& elemNoThrow(size_t idx) {
       if (idx<obj.size()) return elemCommon(idx);
-      return dummyRef<T>();
+      return dummyRef<typename T::value_type>();
     }
       
     void pushBack(const typename T::value_type& v) {
@@ -908,7 +908,7 @@ namespace classdesc
     typename enable_if<is_const<U>, typename MappedType<U>::type&>::T elemImpl(const typename U::key_type& k) 
     {
       auto i=obj.find(k);
-      if (i==obj.end()) return dummyRef<std::vector<typename MappedType<U>::type>>();
+      if (i==obj.end()) return dummyRef<typename MappedType<U>::type>();
       return elem_of(i);
     }
     
