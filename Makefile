@@ -9,6 +9,8 @@ CDHEADERS=multiArray object polyBase polyRESTProcess polyRESTProcessBase polyXML
 DESCRIPTORS=dump pack json_pack random_init RESTProcess xml_pack typeName
 CDFILES=$(foreach d,$(DESCRIPTORS),$(foreach h,$(CDHEADERS),$(h)-$(d).cd))
 
+PATH:=.:$(PATH)
+
 ifdef GCOV
 GCOV_FLAGS+=-fprofile-arcs -ftest-coverage
 FLAGS+=-fprofile-arcs -ftest-coverage
