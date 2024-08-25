@@ -9,8 +9,6 @@ CDHEADERS=multiArray object polyBase polyRESTProcess polyRESTProcessBase polyXML
 DESCRIPTORS=dump pack json_pack random_init RESTProcess xml_pack typeName
 CDFILES=$(foreach d,$(DESCRIPTORS),$(foreach h,$(CDHEADERS),$(h)-$(d).cd))
 
-PATH:=.:$(PATH)
-
 ifdef GCOV
 GCOV_FLAGS+=-fprofile-arcs -ftest-coverage
 FLAGS+=-fprofile-arcs -ftest-coverage
@@ -194,28 +192,28 @@ dist:
 
 # cd file generation rules
 $(DESCRIPTORS:%=%-allCDs.h): Makefile createCDs.sh
-	createCDs.sh $(subst -allCDs.h,,$@) $(CDHEADERS)
+	./createCDs.sh $(subst -allCDs.h,,$@) $(CDHEADERS)
 
 %-dump.cd: %.h
-	classdesc  -nodef -onbase -i $< dump >$@
+	./classdesc  -nodef -onbase -i $< dump >$@
 
 %-pack.cd: %.h
-	classdesc  -nodef -onbase -i $< pack unpack >$@
+	./classdesc  -nodef -onbase -i $< pack unpack >$@
 
 %-json_pack.cd: %.h
-	classdesc  -nodef -onbase -respect_private -i $< json_pack json_unpack >$@
+	./classdesc  -nodef -onbase -respect_private -i $< json_pack json_unpack >$@
 
 %-xml_pack.cd: %.h
-	classdesc  -nodef -onbase -respect_private -i $< xml_pack xml_unpack >$@
+	./classdesc  -nodef -onbase -respect_private -i $< xml_pack xml_unpack >$@
 
 %-random_init.cd: %.h
-	classdesc  -nodef -onbase -i $< random_init >$@
+	./classdesc  -nodef -onbase -i $< random_init >$@
 
 %-RESTProcess.cd: %.h
-	classdesc  -nodef -onbase -respect_private -i $< RESTProcess >$@
+	./classdesc  -nodef -onbase -respect_private -i $< RESTProcess >$@
 
 %-typeName.cd: %.h
-	classdesc  -nodef -typeName -i $<  >$@
+	./classdesc  -nodef -typeName -i $<  >$@
 
 # install documentation on SourceForge
 DOCPREFIX=web.sf.net:/home/project-web/classdesc/htdocs/doc
