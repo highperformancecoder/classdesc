@@ -194,25 +194,25 @@ dist:
 $(DESCRIPTORS:%=%-allCDs.h): Makefile createCDs.sh
 	./createCDs.sh $(subst -allCDs.h,,$@) $(CDHEADERS)
 
-%-dump.cd: %.h
+%-dump.cd: %.h classdesc
 	./classdesc  -nodef -onbase -i $< dump >$@
 
-%-pack.cd: %.h
+%-pack.cd: %.h classdesc
 	./classdesc  -nodef -onbase -i $< pack unpack >$@
 
-%-json_pack.cd: %.h
+%-json_pack.cd: %.h classdesc
 	./classdesc  -nodef -onbase -respect_private -i $< json_pack json_unpack >$@
 
-%-xml_pack.cd: %.h
+%-xml_pack.cd: %.h classdesc 
 	./classdesc  -nodef -onbase -respect_private -i $< xml_pack xml_unpack >$@
 
-%-random_init.cd: %.h
+%-random_init.cd: %.h classdesc
 	./classdesc  -nodef -onbase -i $< random_init >$@
 
-%-RESTProcess.cd: %.h
+%-RESTProcess.cd: %.h classdesc
 	./classdesc  -nodef -onbase -respect_private -i $< RESTProcess >$@
 
-%-typeName.cd: %.h
+%-typeName.cd: %.h classdesc
 	./classdesc  -nodef -typeName -i $<  >$@
 
 # install documentation on SourceForge
