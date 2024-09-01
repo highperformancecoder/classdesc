@@ -172,23 +172,27 @@ namespace classdesc
 
   inline RPPtr RESTProcessOverloadedFunction::process(const string& remainder, const REST_PROCESS_BUFFER& arguments)
   {
-    // sort function overloads by best match
-    auto cmp=[&](RESTProcessFunctionBase*x, RESTProcessFunctionBase*y)
-    {return x->matchScore(arguments)<y->matchScore(arguments);};
-    std::set<RESTProcessFunctionBase*, decltype(cmp)> sortedOverloads{cmp};
+    if (overloadedFunctions.empty()) return std::make_shared<RESTProcessVoid>();
+    auto bestOverload=overloadedFunctions.front();
+    auto bestScore=RESTProcessFunctionBase::maxMatchScore;
+    int bestCount=0;
     for (auto& i: overloadedFunctions)
-      if (auto j=dynamic_cast<RESTProcessFunctionBase*>(i.get()))
-        sortedOverloads.insert(j);
-    auto& bestOverload=*sortedOverloads.begin();
+      {
+        auto score=i->matchScore(arguments);
+        if (score<bestScore)
+          {
+            bestScore=score;
+            bestOverload=i;
+            bestCount=1;
+          }
+        else if (score==bestScore)
+          ++bestCount;
+      }
     if (bestOverload->matchScore(arguments) >=
         RESTProcessFunctionBase::maxMatchScore)
       throw std::runtime_error("No suitable matching overload found");
-    if (sortedOverloads.size()>1)
-      { // ambiguous overload detection
-        auto i=sortedOverloads.begin(); i++;
-        if ((*i)->matchScore(arguments)==bestOverload->matchScore(arguments))
-          throw std::runtime_error("Ambiguous resolution of overloaded function");
-      }
+    if (bestCount>1) // ambiguous overload detection
+      throw std::runtime_error("Ambiguous resolution of overloaded function");
     return bestOverload->process(remainder, arguments);
   }
 

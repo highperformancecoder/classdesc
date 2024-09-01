@@ -1262,23 +1262,47 @@ namespace classdesc
   {return x.type()==RESTProcessType::float_number||x.type()==RESTProcessType::int_number;}
 
   template <class T>
+  typename enable_if<
+    And<is_const<typename remove_reference<T>::type>, is_reference<T>>, bool>::T
+  partiallyMatchable(const REST_PROCESS_BUFFER& x);
+
+  template <class T>
+  typename enable_if<
+    And<
+      Not<is_floating_point<typename remove_reference<T>::type> >,
+      Not<is_container<T> >,
+      Not<And<is_reference<T>,is_const<typename remove_reference<T>::type>>>
+      >, bool>::T
+  partiallyMatchable(const REST_PROCESS_BUFFER& x);
+
+  template <class T>
   typename enable_if<is_container<T>, bool>::T partiallyMatchable(const REST_PROCESS_BUFFER& x)
   {
     if (x.type()==RESTProcessType::array)
       {
         auto arr=x.array();
-        bool r;
-        for (auto& i: arr) r &= partiallyMatchable<typename T::value_type>(i);
+        bool r=true;
+        for (auto& i: arr) r &= partiallyMatchable<typename T::value_type>(REST_PROCESS_BUFFER(i));
         return r;
       }
     return partiallyMatchable<typename T::value_type>(x); // treat a single json object as a single element sequence
   }
 
   template <class T>
-  typename enable_if<And<Not<is_floating_point<typename remove_reference<T>::type> >, Not<is_container<T> > >, bool>::T
+  typename enable_if<
+    And<
+      Not<is_floating_point<typename remove_reference<T>::type> >,
+      Not<is_container<T> >,
+      Not<And<is_reference<T>,is_const<typename remove_reference<T>::type>>>
+      >, bool>::T
   partiallyMatchable(const REST_PROCESS_BUFFER& x)
   {return matches<T>(x);}
 
+  template <class T>
+  typename enable_if<
+    And<is_const<typename remove_reference<T>::type>, is_reference<T>>, bool>::T
+  partiallyMatchable(const REST_PROCESS_BUFFER& x)
+  {return partiallyMatchable<typename remove_const_ref<T>::type>(x);}
 
   template <class T> unsigned argMatchScore(const REST_PROCESS_BUFFER& x)
   {
