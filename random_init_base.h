@@ -44,6 +44,16 @@ namespace classdesc
     a=T(std::numeric_limits<T>::max()*r.rand());
   } 
 
+  inline void random_initp(random_init_t& r, const string&, char& a)
+  {
+    a=char((127-32)*r.rand()+32); // truncate to printable ascii characters
+  } 
+
+  inline void random_initp(random_init_t& r, const string&, wchar_t& a)
+  {
+    a=wchar_t((127-32)*r.rand()+32); // truncate to ascii characters
+  } 
+
   // floating point types need to be truncated to account for rounding
   // in ASCII serialisations
   template <class T> typename

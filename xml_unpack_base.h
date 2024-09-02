@@ -575,6 +575,7 @@ namespace classdesc
     while (e!=eName.c_str() && *(e-1)!=' ' && *(e-1)!=':') e--;
 
     size_t cnt=x.count(d+"."+e);
+    resize(arg,0); // clear container if resizable
     resize(arg,cnt);
     size_t i=0;
     for (typename T::iterator j=arg.begin(); i<cnt && j!=arg.end(); ++i, ++j) 

@@ -40,7 +40,7 @@ namespace classdesc
     if (!isgraph(c))
       {
         std::ostringstream s;
-        s<<"&#"<<int(c)<<";";
+        s<<"&#"<<std::setfill('0')<<std::setw(4)<<int(c)<<";";
         return s.str();
       }
     return std::string(1,c);
