@@ -18,6 +18,7 @@ namespace classdesc
   {
     std::string ret;
     std::vector<std::string> args;
+    bool operator==(const Signature& s) const {return args==s.args;}
   };
 }
 

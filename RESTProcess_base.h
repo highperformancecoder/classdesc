@@ -371,15 +371,31 @@ namespace classdesc
       else
         {
           if (auto functions=dynamic_cast<RESTProcessOverloadedFunction*>(i->second.get()))
-            functions->overloadedFunctions.emplace_back(rp);
+            {
+              // replace if signature the same
+              for (auto& f: functions->overloadedFunctions)
+                if (f->signature()==rp->signature())
+                  {
+                    i->second.reset(rp);
+                    return;
+                  }
+              functions->overloadedFunctions.emplace_back(rp);
+            }
           else
             {
               auto firstFunction=dynamic_pointer_cast<RESTProcessFunctionBase>(i->second);
+              // replace if signature the same
+              if (firstFunction->signature()==rp->signature())
+                {
+                  i->second.reset(rp);
+                  return;
+                }
               auto functs=std::make_shared<RESTProcessOverloadedFunction>();
               if (firstFunction) functs->overloadedFunctions.push_back(std::move(firstFunction));
               functs->overloadedFunctions.emplace_back(rp);
               i->second=functs;
             }
+          
         }
     }
   
@@ -1258,7 +1274,7 @@ namespace classdesc
   //template <class T> bool partiallyMatchable(const json5_parser::mValue& x);
 
   template <class T>
-  typename enable_if<is_floating_point<typename remove_reference<T>::type>, bool>::T partiallyMatchable(const REST_PROCESS_BUFFER& x)
+  typename enable_if<is_floating_point<T>, bool>::T partiallyMatchable(const REST_PROCESS_BUFFER& x)
   {return x.type()==RESTProcessType::float_number||x.type()==RESTProcessType::int_number;}
 
   template <class T>
