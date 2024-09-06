@@ -1122,6 +1122,9 @@ namespace classdesc
     template <> int enumKey<RESTProcessType::Type >(const string& x){return int(enum_keysData<RESTProcessType::Type >::keys(x));}
     template <> string enumKey<RESTProcessType::Type >(int x){return enum_keysData<RESTProcessType::Type >::keys(x);}
   }
+
+  /// and undefined hook to allow logging to console in an emscripten environment.
+  void log(const std::string&);
 }
 
 

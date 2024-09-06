@@ -18,6 +18,7 @@
 #include <stdarg.h>
 #include <vector>
 #include <map>
+#include <cmath>
 
 namespace classdesc
 {
@@ -296,8 +297,20 @@ namespace classdesc
 
   inline json5_parser::mValue valueof(float a)  
   {return json5_parser::mValue(double(a));}
+
   template <> inline float getValue(const json5_parser::mValue& x) 
-  {return x.get_value<double>();}
+  {
+    // treat nulls as nans - JSON.stringify of special values returns "null"
+    if (x.type()==json5_parser::null_type) return std::nan("");
+    return x.get_value<double>();
+  }
+
+  template <> inline double getValue(const json5_parser::mValue& x) 
+  {
+    // treat nulls as nans - JSON.stringify of special values returns "null"
+    if (x.type()==json5_parser::null_type) return std::nan("");
+    return x.get_value<double>();
+  }
 
  // basic types
   template <class T> typename

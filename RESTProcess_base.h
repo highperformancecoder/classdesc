@@ -1272,7 +1272,7 @@ namespace classdesc
 
   template <class T>
   typename enable_if<is_floating_point<T>, bool>::T partiallyMatchable(const REST_PROCESS_BUFFER& x)
-  {return x.type()==RESTProcessType::float_number||x.type()==RESTProcessType::int_number;}
+  {return x.type()==RESTProcessType::float_number||x.type()==RESTProcessType::int_number||x.type()==RESTProcessType::null;}
 
   template <class T>
   typename enable_if<
