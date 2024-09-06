@@ -19,6 +19,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <assert.h>
 
 #ifndef REST_PROCESS_BUFFER
 #include "json_pack_base.h"
@@ -368,35 +369,31 @@ namespace classdesc
       auto i=find(d);
       if (i==end())
         emplace(d,rp);
-      else
+      else if (auto functions=dynamic_cast<RESTProcessOverloadedFunction*>(i->second.get()))
         {
-          if (auto functions=dynamic_cast<RESTProcessOverloadedFunction*>(i->second.get()))
-            {
-              // replace if signature the same
-              for (auto& f: functions->overloadedFunctions)
-                if (f->signature()==rp->signature())
-                  {
-                    i->second.reset(rp);
-                    return;
-                  }
-              functions->overloadedFunctions.emplace_back(rp);
-            }
-          else
-            {
-              auto firstFunction=dynamic_pointer_cast<RESTProcessFunctionBase>(i->second);
-              // replace if signature the same
-              if (firstFunction->signature()==rp->signature())
-                {
-                  i->second.reset(rp);
-                  return;
-                }
-              auto functs=std::make_shared<RESTProcessOverloadedFunction>();
-              if (firstFunction) functs->overloadedFunctions.push_back(std::move(firstFunction));
-              functs->overloadedFunctions.emplace_back(rp);
-              i->second=functs;
-            }
-          
+          // replace if signature the same
+          for (auto& f: functions->overloadedFunctions)
+            if (f->signature()==rp->signature())
+              {
+                i->second.reset(rp);
+                return;
+              }
+          functions->overloadedFunctions.emplace_back(rp);
         }
+      else if (auto firstFunction=dynamic_pointer_cast<RESTProcessFunctionBase>(i->second))
+        {
+          // replace if signature the same
+          if (firstFunction->signature()==rp->signature())
+            {
+              i->second.reset(rp);
+              return;
+            }
+          auto functs=std::make_shared<RESTProcessOverloadedFunction>();
+          if (firstFunction) functs->overloadedFunctions.push_back(std::move(firstFunction));
+          functs->overloadedFunctions.emplace_back(rp);
+          i->second=functs;
+        }
+      else {assert(false);/* should not be here */} 
     }
   
     inline RPPtr process(const std::string& query, const REST_PROCESS_BUFFER& jin);
