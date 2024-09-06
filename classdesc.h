@@ -32,6 +32,11 @@ namespace
 #include <stdexcept>
 #include <memory>
 #include <climits>
+#include <iostream>
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten/console.h>
+#endif
 
 #ifdef __CYGWIN__
 namespace std
@@ -1123,8 +1128,15 @@ namespace classdesc
     template <> string enumKey<RESTProcessType::Type >(int x){return enum_keysData<RESTProcessType::Type >::keys(x);}
   }
 
-  /// and undefined hook to allow logging to console in an emscripten environment.
-  void log(const std::string&);
+  /// allow logging to console in an emscripten environment.
+  inline void log(const std::string& msg)
+  {
+#ifdef __EMSCRIPTEN__
+    emscripten_console_log(msg.c_str());
+#else
+    std::cout<<msg<<std::endl;
+#endif
+  }
 }
 
 
