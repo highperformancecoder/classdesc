@@ -20,6 +20,14 @@
 #include <map>
 #include <cmath>
 
+#if defined(__cplusplus) && __cplusplus<201103L
+#include <math.h>
+namespace std
+{
+  using ::nan;
+}
+#endif
+
 namespace classdesc
 {
   
