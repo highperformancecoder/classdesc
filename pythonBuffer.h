@@ -726,7 +726,7 @@ namespace classdesc
       }
     };
 
-    inline void initModule()
+  inline void initModule(PyObject* pythonModule, RESTProcess_t& registry)
     {
       assert(pythonModule);
       for (auto& i: registry)
@@ -771,7 +771,7 @@ namespace classdesc_access
     static PyModuleDef module_##name = {                           \
     PyModuleDef_HEAD_INIT,                                         \
     #name,                                                         \
-    "Python interface to C++ code",                                \
+    "Python interface to C++ code: "#name,                         \
     -1,                                                            \
     nullptr,                                                       \
     nullptr,                                                       \
@@ -783,7 +783,7 @@ namespace classdesc_access
     using namespace classdesc;                                     \
     registries()[#name]=&registry;                                 \
     pythonModule=PyModule_Create(&module_##name);                  \
-    if (pythonModule) initModule();                                \
+    if (pythonModule) initModule(pythonModule,registry);           \
     return pythonModule;                                           \
   }                                                 
 
