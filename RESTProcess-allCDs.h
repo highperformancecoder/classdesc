@@ -6,6 +6,9 @@
 #ifdef CLASSDESC_OBJECT_H
 #include "object-RESTProcess.cd"
 #endif
+#ifdef CLASSDESC_POLY_H
+#include "poly-RESTProcess.cd"
+#endif
 #ifdef CLASSDESC_POLYBASE_H
 #include "polyBase-RESTProcess.cd"
 #endif

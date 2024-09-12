@@ -6,6 +6,9 @@
 #ifdef CLASSDESC_OBJECT_H
 #include "object-xml_pack.cd"
 #endif
+#ifdef CLASSDESC_POLY_H
+#include "poly-xml_pack.cd"
+#endif
 #ifdef CLASSDESC_POLYBASE_H
 #include "polyBase-xml_pack.cd"
 #endif

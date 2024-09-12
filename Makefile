@@ -5,7 +5,7 @@ CPLUSPLUS=g++
 # -I/usr/include/tirpc is needed for Fedora
 FLAGS=-g -I. -I/usr/include/tirpc
 
-CDHEADERS=multiArray object polyBase polyRESTProcess polyRESTProcessBase polyXMLBase RESTProcess_base signature stringKeyMap xml_pack_base xml_unpack_base
+CDHEADERS=multiArray object poly polyBase polyRESTProcess polyRESTProcessBase polyXMLBase RESTProcess_base signature stringKeyMap xml_pack_base xml_unpack_base
 DESCRIPTORS=dump pack json_pack random_init RESTProcess xml_pack typeName
 CDFILES=$(foreach d,$(DESCRIPTORS),$(foreach h,$(CDHEADERS),$(h)-$(d).cd))
 

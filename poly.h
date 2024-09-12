@@ -8,18 +8,18 @@
 
 #ifndef CLASSDESC_POLY_H
 #define CLASSDESC_POLY_H
-// functionality in this file is completely deprecated in favour of
-// the Poly class in Poly.h
+/// @deprecated functionality in this file is completely deprecated in favour of
+// the Poly class in polyBase.h
 #include "object.h"
 #include "ref.h"
 
 namespace classdesc
 {
 
-  /** empty concrete object type */
+  /**  @deprecated empty concrete object type */
   class Eobject: public Object<Eobject> {};
 
-  /**
+  /** @deprecated
      A simple RTTI system that can be used, reimplemented and passed to polyref
   */
   template <class T=Eobject>
@@ -38,7 +38,7 @@ namespace classdesc
 
   template <class T> std::vector<T*> SimpleTypeTable<T>::data;
 
-  /** polymorphic smart pointer class - copies are deep */
+  /**  @deprecated polymorphic smart pointer class - copies are deep */
   template <class T=Eobject, class TT=SimpleTypeTable<T> >
   class poly
   {
@@ -93,7 +93,7 @@ namespace classdesc
     operator bool() const {return item!=NULL;}
   };
 
-  /** reference counted polymorphic smart pointer class - copies are shallow */
+  /**  @deprecated reference counted polymorphic smart pointer class - copies are shallow */
   template <class T=Eobject, class TT=SimpleTypeTable<T> >
   class polyref: public classdesc::ref<classdesc::poly<T,TT> >
   {
@@ -209,5 +209,4 @@ namespace std
   template <class T, class TT> void swap(classdesc::poly<T,TT>& x,classdesc::poly<T,TT>& y) {x.swap(y);}
 }
 
-#include "poly.cd"
 #endif

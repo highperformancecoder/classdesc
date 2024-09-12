@@ -6,6 +6,9 @@
 #ifdef CLASSDESC_OBJECT_H
 #include "object-dump.cd"
 #endif
+#ifdef CLASSDESC_POLY_H
+#include "poly-dump.cd"
+#endif
 #ifdef CLASSDESC_POLYBASE_H
 #include "polyBase-dump.cd"
 #endif

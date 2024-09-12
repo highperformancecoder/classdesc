@@ -6,6 +6,9 @@
 #ifdef CLASSDESC_OBJECT_H
 #include "object-random_init.cd"
 #endif
+#ifdef CLASSDESC_POLY_H
+#include "poly-random_init.cd"
+#endif
 #ifdef CLASSDESC_POLYBASE_H
 #include "polyBase-random_init.cd"
 #endif

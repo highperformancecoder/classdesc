@@ -6,6 +6,9 @@
 #ifdef CLASSDESC_OBJECT_H
 #include "object-json_pack.cd"
 #endif
+#ifdef CLASSDESC_POLY_H
+#include "poly-json_pack.cd"
+#endif
 #ifdef CLASSDESC_POLYBASE_H
 #include "polyBase-json_pack.cd"
 #endif
