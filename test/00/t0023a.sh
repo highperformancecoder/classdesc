@@ -62,6 +62,10 @@ void p_type(p_t&,const string&,M);
 }
 using classdesc::p_type;
 namespace classdesc_access {
+
+#ifndef CLASSDESC_p___foo
+#define CLASSDESC_p___foo
+#endif
 template <>
 struct access_p< class ::foo* >
 {

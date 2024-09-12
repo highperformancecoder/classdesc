@@ -67,6 +67,10 @@ void p_type(p_t&,const string&,M);
 }
 using classdesc::p_type;
 namespace classdesc_access {
+
+#ifndef CLASSDESC_p___x_T_
+#define CLASSDESC_p___x_T_
+#endif
 template < class T >  struct access_p< struct ::x<T> > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
@@ -118,6 +122,10 @@ void p_type(p_t&,const string&,M);
 }
 using classdesc::p_type;
 namespace classdesc_access {
+
+#ifndef CLASSDESC_p___x_T_
+#define CLASSDESC_p___x_T_
+#endif
 }
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic pop
@@ -158,6 +166,10 @@ void p_type(p_t&,const string&,M);
 }
 using classdesc::p_type;
 namespace classdesc_access {
+
+#ifndef CLASSDESC_p___x_T_
+#define CLASSDESC_p___x_T_
+#endif
 }
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic pop

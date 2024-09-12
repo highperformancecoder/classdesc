@@ -64,7 +64,6 @@ if test $? -ne 0; then fail; fi
 
 cat >testout1 <<EOF
 #include "classdesc.h"
-
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
@@ -77,6 +76,9 @@ void p_type(p_t&,const string&,M);
 }
 using classdesc::p_type;
 namespace classdesc_access {
+#ifndef CLASSDESC_p___foo
+#define CLASSDESC_p___foo
+#endif
 template <> struct access_p< class ::foo > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
@@ -88,6 +90,9 @@ void type(classdesc::p_t& targ, const classdesc::string& desc)
 {
 }
 };
+#ifndef CLASSDESC_p___bar__foo
+#define CLASSDESC_p___bar__foo
+#endif
 template <> struct access_p< class ::bar::foo > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
