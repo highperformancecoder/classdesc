@@ -67,6 +67,10 @@ void p_type(p_t&,const string&,M);
 }
 using classdesc::p_type;
 namespace classdesc_access {
+
+#ifndef CLASSDESC_p___member_entry__void_____
+#define CLASSDESC_p___member_entry__void_____
+#endif
 }
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic pop
