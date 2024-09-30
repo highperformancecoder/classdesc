@@ -802,7 +802,7 @@ namespace {
 /// a convenience macro for creating a python module with a single global object
 /// @param name module name
 /// @param object C++ object to expose to python
-#define CLASSDESC_PYTHON_MODULE(name)                       \
+#define CLASSDESC_PYTHON_MODULE(name)                              \
   PyMODINIT_FUNC PyInit_##name()                                   \
   {                                                                \
     static PyModuleDef module_##name = {                           \
@@ -829,6 +829,10 @@ namespace {
 /// unqualified at the macro call.
 #define CLASSDESC_ADD_GLOBAL(object)            \
   static int add_global_##object=(classdesc::RESTProcess(classdesc::registry,#object,object), 0);
+
+#define CLASSDESC_ADD_FUNCTION(object)            \
+  static int add_global_##object=(classdesc::RESTProcess(classdesc::registry,#object,&object), 0);
+
 
 /// Add a type foundry or factory into the registry. \a type is also
 /// used as the name this object will be referred to from Python, so
