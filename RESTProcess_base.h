@@ -679,6 +679,7 @@ namespace classdesc
         return REST_PROCESS_BUFFER(json5_parser::mArray());
     }
     REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<T>());}
+    bool isObject() const override {return true;}
   };
 
   template <class T>
@@ -694,6 +695,7 @@ namespace classdesc
       else return REST_PROCESS_BUFFER(json5_parser::mArray());
     }
     REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<std::weak_ptr<T> >());}
+    bool isObject() const override {return true;}
   };
 
   
