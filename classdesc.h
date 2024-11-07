@@ -1058,6 +1058,10 @@ namespace classdesc
     bool operator!() const {return !val;}  
   };                                               
 
+  template <class T> struct is_excluded: public false_type {};
+  template <class T> struct is_excluded<Exclude<T> >: public true_type {};
+  
+  
   /// @}
 
   template <class T>

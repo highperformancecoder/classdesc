@@ -381,13 +381,13 @@ namespace classdesc
   RPPtr makeRESTProcessValueObject(T&& obj)
   {return std::make_shared<RESTProcessValueObject<typename std::remove_reference<T>::type>>(std::forward<T>(obj));}
   // specialization for string and string vector to allow
-   RPPtr makeRESTProcessValueObject(const char* s)
+  inline RPPtr makeRESTProcessValueObject(const char* s)
   {return std::make_shared<RESTProcessValueObject<std::string>>(s);}
-  RPPtr makeRESTProcessValueObject(const std::initializer_list<std::string>& init)
+  inline RPPtr makeRESTProcessValueObject(const std::initializer_list<std::string>& init)
   {return std::make_shared<RESTProcessValueObject<std::vector<std::string>>>(init);}
  
   /// class that represents the void, or null object
-  class RESTProcessVoid: public RESTProcessBase
+  struct RESTProcessVoid: public RESTProcessBase
   {
     std::shared_ptr<RESTProcessBase> process(const string&, const REST_PROCESS_BUFFER&) override
     {return std::make_shared<RESTProcessVoid>();}
@@ -712,7 +712,7 @@ namespace classdesc
         return RESTProcessObject<typename T::element_type>(*p).list();
       return makeRESTProcessValueObject({});
     }
-    REST_PROCESS_BUFFER type() const override {return REST_PROCESS_BUFFER(typeName<std::weak_ptr<T> >());}
+    RPPtr type() const override {return makeRESTProcessValueObject(typeName<std::weak_ptr<T> >());}
     object* getClassdescObject() override {
       auto p=ptr.lock();
       if (!p || is_const<typename T::element_type>::value) return nullptr;
@@ -721,6 +721,11 @@ namespace classdesc
     const object* getConstClassdescObject() override  {
       auto p=ptr.lock();
       return p? getClassdescObjectImpl(*p): nullptr;
+    }
+    REST_PROCESS_BUFFER asBuffer() const override {
+      REST_PROCESS_BUFFER r;
+      auto p=ptr.lock();
+      return p? (r<<*p): r;
     }
   };
 
@@ -1082,11 +1087,12 @@ namespace classdesc
     template <class U>
     typename enable_if<
       And<
-        is_default_constructible<remove_reference<U>>,
+        is_default_constructible<typename remove_reference<U>::type>,
+        //Not<is_abstract<typename remove_reference<U>::type>>,
         Not<is_void<U>>
         >,RPPtr>::T
     slist() const {
-      typename remove_reference<U>::type x;
+      typename remove_const<typename remove_reference<U>::type>::type x;
       return RESTProcessObject<U>(x).list();
     }
     // for now, we cannot extract the lists of a non-default constructible return type
@@ -1094,7 +1100,8 @@ namespace classdesc
     typename enable_if<
       Not<
         And<
-          is_default_constructible<remove_reference<U>>,
+          is_default_constructible<typename remove_reference<U>::type>,
+          //Not<is_abstract<typename remove_reference<U>::type>>,
           Not<is_void<U>>
           >>,RPPtr>::T
     slist() const {return makeRESTProcessValueObject({});}
@@ -1171,7 +1178,7 @@ namespace classdesc
     RPPtr signature() const override;
     RPPtr list() const override {return makeRESTProcessValueObject({});}
     RPPtr type() const override {return makeRESTProcessValueObject(typeName<E>());}
-    REST_PROCESS_BUFFER asBuffer() const {return REST_PROCESS_BUFFER(enum_keys<E>()(e));}
+    REST_PROCESS_BUFFER asBuffer() const override {return REST_PROCESS_BUFFER(enum_keys<E>()(e));}
   };
 
   template <class E>

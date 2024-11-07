@@ -22,4 +22,14 @@ namespace classdesc
 }
 
 #include "signature.cd"
+
+#pragma omit RESTProcess classdesc::Signature
+namespace classdesc_access
+{
+#ifdef RESTPROCESS_H // spurious, needed for old Classdesc
+  template <>
+  struct access_RESTProcess<classdesc::Signature>: public classdesc::NullDescriptor<classdesc::RESTProcess_t> {};
+#endif
+}
+
 #endif

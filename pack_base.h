@@ -477,7 +477,7 @@ namespace classdesc
   /// for use in metaprogramming support. Indicate that a given type
   /// is supported explicitly
   template <class T> struct pack_supported: 
-    public Or<is_fundamental<T>,is_container<T> > {};
+    public Or<is_fundamental<T>,is_container<T>,is_excluded<T> > {};
 
 #ifndef THROW_PTR_EXCEPTION
   template <class T>
@@ -755,6 +755,9 @@ namespace classdesc
     a=x;
   }
 
+  template <class T> void pack(pack_t&, const string&, const Exclude<T>&) {}
+  template <class T> void unpack(pack_t&, const string&, const Exclude<T>&) {}
+  
 }
 
 #include "use_mbr_pointers.h"

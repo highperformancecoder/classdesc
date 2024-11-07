@@ -16,11 +16,11 @@
 namespace classdesc
 {
   struct object;
-  typedef std::vector<shared_ptr<object> > Factory;
-  inline Factory& factory()
+  typedef std::vector<shared_ptr<object> > ObjectFactory;
+  inline ObjectFactory& factory()
   {
     // ensure factory is initialised on first use
-    static Factory f;
+    static ObjectFactory f;
     return f;
   }
 
