@@ -477,7 +477,13 @@ namespace classdesc
   /// for use in metaprogramming support. Indicate that a given type
   /// is supported explicitly
   template <class T> struct pack_supported: 
-    public Or<is_fundamental<T>,is_container<T>,is_excluded<T> > {};
+    public Or<
+    Or<
+      is_fundamental<T>,
+      is_container<T>
+      >,
+    is_excluded<T>
+    > {};
 
 #ifndef THROW_PTR_EXCEPTION
   template <class T>
