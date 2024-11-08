@@ -698,6 +698,7 @@ namespace classdesc
       REST_PROCESS_BUFFER r;
       return ptr? (r<<*ptr): r;
     }
+    bool isObject() const override {return true;}
   };
 
   template <class T>
@@ -727,6 +728,7 @@ namespace classdesc
       auto p=ptr.lock();
       return p? (r<<*p): r;
     }
+    bool isObject() const override {return true;}
   };
 
   
