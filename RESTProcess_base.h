@@ -1017,6 +1017,7 @@ namespace classdesc
       REST_PROCESS_BUFFER r;
       return ptr? (r<<*ptr): r;
     }
+    bool isObject() const override {return true;}
   };
 
   template <class T>
@@ -1041,6 +1042,12 @@ namespace classdesc
       auto p=ptr.lock();
       return p? getClassdescObjectImpl(*p): nullptr;
     }
+    REST_PROCESS_BUFFER asBuffer() const override {
+      REST_PROCESS_BUFFER r;
+      auto p=ptr.lock();
+      return p? (r<<*p): r;
+    }
+    bool isObject() const override {return true;}
   };
 
   
@@ -1429,7 +1436,7 @@ namespace classdesc
         Not<is_void<U>>
         >,RESTProcess_t>::T
     slist() const {
-      typename remove_reference<U>::type x{};
+      typename remove_const<typename remove_reference<U>::type>::type x;
       return RESTProcessObject<U>(x).list();
     }
     // for now, we cannot extract the lists of a non-default constructible return type

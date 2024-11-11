@@ -184,6 +184,25 @@ struct type_defined_t: hash_map<string,int>
 
 std::map<std::string, std::vector<std::string> > enum_keys;
 
+// insert a typename keyword on types with :: qualification
+string insertTypename(string type)
+{
+  // replace whitespace characters with space
+  for (size_t i=0; i<type.size(); ++i)
+    if (isspace(type[i]))
+      type[i]=' ';
+  if (type.find("::")==string::npos || type.find("typename ")!=string::npos)
+    return type; // nothing needs to be done
+  
+  type=trimWS(type);
+  static const int constSize=strlen("const ");
+  if (type.find("const ")==0)
+    // insert typename between const and type
+    return "const typename "+type.substr(constSize);
+  else
+    return "typename "+type;
+}
+
 // overloaded member database
 struct MemberSig
 {
@@ -193,16 +212,14 @@ struct MemberSig
   MemberSig(string d, string r, string a, string p, string n, Type t):
     declName(d), returnType(r), argList(a), prefix(p), name(n), type(t) {}
   string declare() {
-    // If qualified type, the typename qualifier required
-    string rType=returnType.find("::")!=string::npos && returnType.find("typename ")==string::npos? "typename "+returnType: returnType;
     switch (type)
       {
       case none:
-        return rType+"("+prefix+"*"+declName+")("+argList+")=&"+prefix+name+";";
+        return insertTypename(returnType)+"("+prefix+"*"+declName+")("+argList+")=&"+prefix+name+";";
       case is_const:
-        return rType+"("+prefix+"*"+declName+")("+argList+") const=&"+prefix+name+";";
+        return insertTypename(returnType)+"("+prefix+"*"+declName+")("+argList+") const=&"+prefix+name+";";
       case is_static:
-        return rType+"(*"+declName+")("+argList+")=&"+prefix+name+";";
+        return insertTypename(returnType)+"(*"+declName+")("+argList+")=&"+prefix+name+";";
       case is_constructor:
         return "void (*"+declName+")("+argList+")=0;";
       default: assert(false); return ""; // should never be executed, - statement to silence warning
