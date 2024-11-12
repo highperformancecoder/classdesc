@@ -30,13 +30,18 @@
 #include <numeric>
 #include <Python.h>
 
-#define CLASSDESC_PY_EXCEPTION_ABSORB(ret)              \
-  catch (const std::exception& ex)                      \
-    {                                                   \
-      PyErr_SetString(PyExc_RuntimeError, ex.what());   \
-      return ret;                                       \
+#define CLASSDESC_PY_EXCEPTION_ABSORB(ret)                              \
+  catch (const std::exception& ex)                                      \
+    {                                                                   \
+      PyErr_SetString(PyExc_RuntimeError, ex.what());                   \
+      return ret;                                                       \
+    }                                                                   \
+  catch (...)                                                           \
+    {                                                                   \
+      PyErr_SetString(PyExc_RuntimeError, "Unknown exception");         \
+      return ret;                                                   \
     }
-
+  
 namespace classdesc
 {
   // map of registries, one per module
@@ -407,10 +412,6 @@ namespace classdesc
     return b;
   }
 
-  /// call \a command on \a registry with \a arguments
-  /// returns a python object representing function's return value.
-  PyObject* callOnRegistry(const RPPtr& command, const string& remainder, const PythonBuffer& arguments);
-
   /// C++ wrapper to default initialise the PyObject
   struct CppPyObject: public PyObject
   {
@@ -421,7 +422,6 @@ namespace classdesc
   class CppWrapper;
   void attachRegistryObjects(const RESTProcess_t& registry, CppWrapper& object,const std::string& prefix);
 
-    
   struct CppWrapper: public CppPyObject
   {
     const bool special; // if true, command takes a key as an argument
@@ -430,6 +430,27 @@ namespace classdesc
     static CppWrapper* create(const RPPtr& command, bool special) {return new CppWrapper(command,special);}
     CppWrapper(CppWrapper&&)=default;
 
+    static PyObject* returnResult(const RPPtr& result)
+    {
+      PythonBuffer resultBuffer(result->asBuffer());
+      auto pyResult=resultBuffer.getPyObject();
+      switch (resultBuffer.type())
+        {
+        case RESTProcessType::object:
+        case RESTProcessType::array:
+          {
+            auto r=CppWrapper::create(result, false);
+            PyObjectRef ref(r);
+            attachRegistryObjects(result->list(),*r,".");
+            return ref.release();
+          }
+        default: break;
+        }
+      if (PyErr_Occurred())
+        PyErr_Print();
+      return pyResult.release();
+    }
+    
     static PyObject* list(CppWrapper* self, PyObject*)
       try
         {
@@ -511,7 +532,7 @@ namespace classdesc
     {"contains",(PyCFunction)CppWrapper::contains,METH_O,"Retrun true/false whether map/set contains a key"},
     {nullptr, nullptr, 0, nullptr}
   };
-      
+
   struct CppWrapperType: public PyTypeObject
   {
     // container commands that take a key as as an argument
@@ -538,7 +559,11 @@ namespace classdesc
           arguments.push_back(PySequence_GetItem(args,i));
       if (PyErr_Occurred())
         PyErr_Print();
-      return callOnRegistry(command, remainder, arguments);
+      try
+        {
+          return CppWrapper::returnResult(command->process(remainder,arguments.get<json_pack_t>()));
+        }
+      CLASSDESC_PY_EXCEPTION_ABSORB(nullptr);
     }
 
     static void deleteCppWrapper(PyObject* x) {
@@ -588,14 +613,9 @@ namespace classdesc
         auto cppWrapper=static_cast<CppWrapper*>(self);
         try
           {
-            auto result=cppWrapper->command->getElem(PythonBuffer(key).get<json_pack_t>());
-            return CppWrapper::create(result, false);
+            return CppWrapper::returnResult(cppWrapper->command->getElem(PythonBuffer(key).get<json_pack_t>()));
           }
-        catch (const std::exception& ex)
-          {
-            PyErr_SetString(PyExc_RuntimeError, ex.what());
-            return nullptr;
-          }
+        CLASSDESC_PY_EXCEPTION_ABSORB(nullptr);
       }
     
       static int setElem(PyObject* self, PyObject* key, PyObject* val)
@@ -665,41 +685,6 @@ namespace classdesc
       }
   }
     
-  inline PyObject* callOnRegistry(const RPPtr& command, const std::string& remainder, const PythonBuffer& arguments)
-  {
-    try
-      {
-        auto args=arguments.get<json_pack_t>();
-        auto result=command->process(remainder,args);
-        PythonBuffer resultBuffer(result->asBuffer());
-        auto pyResult=resultBuffer.getPyObject();
-        switch (resultBuffer.type())
-          {
-          case RESTProcessType::object:
-          case RESTProcessType::array:
-            {
-              auto r=CppWrapper::create(result, false);
-              PyObjectRef ref(r);
-              attachRegistryObjects(result->list(),*r,".");
-              return ref.release();
-            }
-          }
-        if (PyErr_Occurred())
-          PyErr_Print();
-        return pyResult.release();
-      }
-    catch (const std::exception& ex)
-      {
-        PyErr_SetString(PyExc_RuntimeError, ex.what());
-        return nullptr;
-      }
-    catch (...)
-      {
-        PyErr_SetString(PyExc_RuntimeError, "Unknown exception");
-        return nullptr;
-      }
-  }
-
   template <class F>
   struct RESTProcessFactory: public RESTProcessFunction<F>
   {
