@@ -164,7 +164,7 @@ struct IPoly: public PolyRESTProcess<IPoly> {};
 
 struct Poly: public PolyRESTProcess<Poly, IPoly>
 {
-  int a;
+  int a=5;
 };
 
 // root type
@@ -175,7 +175,7 @@ struct Root
   Bar1 bar1;
 
   std::shared_ptr<IPoly> spoly{new Poly};
-  std::shared_ptr<Bar> sbar{new Bar};
+  std::shared_ptr<Bar> sbar{new Bar(0)};
   
   FooBar1& getFB1() {
     static FooBar1 m;

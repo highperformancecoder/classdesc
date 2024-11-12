@@ -220,3 +220,7 @@ foo=Foo(2)
 fb=FooBar1()
 assert foo.b()==2
 assert fb.f.b()==0
+
+# shared pointer support
+assert root.sbar.f()==20
+assert root.spoly.a()==5

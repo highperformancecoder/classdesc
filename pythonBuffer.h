@@ -571,6 +571,7 @@ namespace classdesc
     }
 
     static PyObject* getAttro(PyObject* self, PyObject* attr)
+      try
     {
       auto cppWrapper=static_cast<CppWrapper*>(self);
       auto i=cppWrapper->methods.find(PyUnicode_AsUTF8(attr));
@@ -579,8 +580,16 @@ namespace classdesc
           Py_INCREF(i->second);
           return i->second;
         }
+      else
+        {
+          auto methods=cppWrapper->command->list();
+          auto attribute=methods.find(string(".")+PyUnicode_AsUTF8(attr));
+          if (attribute!=methods.end())
+            return CppWrapper::create(attribute->second, false);
+          }
       return PyObject_GenericGetAttr(self,attr);
     }
+    CLASSDESC_PY_EXCEPTION_ABSORB(nullptr);
     
     static int setAttro(PyObject* self, PyObject* name, PyObject* attr)
     {
