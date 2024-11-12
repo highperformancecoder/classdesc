@@ -90,7 +90,7 @@ struct Bar: Foo
 {
   enum BarE {a, b};
   Bar(const Bar&)=delete;
-  int f;
+  int f=20;
   EnumFoo barfoo;
   std::vector<Foo> vFoo;
   std::map<std::string,Foo> mFoo;
@@ -101,7 +101,7 @@ struct Bar: Foo
   BarE barE() const {return a;}
   GlobE globE() const {return ga;}
   Bar() {}
-  Bar(int i): Foo(i), f(20), barfoo(eb), vFoo(3,1) {mFoo["foo"]=Foo(2);}
+  Bar(int i): Foo(i), barfoo(eb), vFoo(3,1) {mFoo["foo"]=Foo(2);}
 
   // overload triggers bug
   void rvalueRef(Foo&& f) {}
@@ -175,7 +175,7 @@ struct Root
   Bar1 bar1;
 
   std::shared_ptr<IPoly> spoly{new Poly};
-  std::shared_ptr<Bar> sbar{new Bar(0)};
+  std::shared_ptr<Bar> sbar{new Bar};
   
   FooBar1& getFB1() {
     static FooBar1 m;
