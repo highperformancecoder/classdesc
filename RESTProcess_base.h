@@ -393,7 +393,8 @@ namespace classdesc
           functs->overloadedFunctions.emplace_back(rp);
           i->second=functs;
         }
-      else {assert(false);/* should not be here */} 
+      else  // overloading something that is not a function
+        i->second.reset(rp);
     }
   
     inline RPPtr process(const std::string& query, const REST_PROCESS_BUFFER& jin);
