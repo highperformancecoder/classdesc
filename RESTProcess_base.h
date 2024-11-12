@@ -344,10 +344,6 @@ namespace classdesc
   void convert(const X* x, const REST_PROCESS_BUFFER& j)
   {}
   
-  template <class X>
-  void convert(const X& x, const REST_PROCESS_BUFFER& j)
-  {}
-
   template <class F, int N> struct DefineFunctionArgTypes;
 
   /// REST processor registry 
