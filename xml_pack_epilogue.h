@@ -128,6 +128,14 @@ namespace classdesc_access
 {
   namespace cd=classdesc;
 
+  template <> struct access_xml_pack<cd::CDATA>
+  {
+    void operator()(cd::xml_pack_t& p,const std::string& d,const cd::CDATA& c)
+    {
+      p.pack_notag(d,c);
+    }
+  };
+  
 #ifdef CLASSDESC_POLYPACKBASE_H
 #ifdef CLASSDESC_XML_PACK_BASE_H
   template <> struct access_xml_pack<cd::PolyPackBase>: 

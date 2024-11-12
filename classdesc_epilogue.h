@@ -34,6 +34,10 @@ namespace
 #include "xml_pack_epilogue.h"
 #endif
 
+#ifdef CLASSDESC_XSD_GENERATE_BASE_H
+#include "xsd_generate-allCDs.h"
+#endif
+
 #ifdef CLASSDESC_DUMP_BASE_H
 #include "dump_epilogue.h"
 #endif

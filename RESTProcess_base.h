@@ -333,7 +333,7 @@ namespace classdesc
   }
   
   template <class E>
-  typename enable_if<is_enum<E>,void>::T
+  typename enable_if<And<is_enum<E>,Not<is_const<E>>>, void>::T
   convert(E& x, const REST_PROCESS_BUFFER& j)
   {
     string tmp; j>>tmp;
@@ -342,6 +342,10 @@ namespace classdesc
   
   template <class X>
   void convert(const X* x, const REST_PROCESS_BUFFER& j)
+  {}
+  
+  template <class X>
+  void convert(const X& x, const REST_PROCESS_BUFFER& j)
   {}
 
   template <class F, int N> struct DefineFunctionArgTypes;
@@ -884,7 +888,14 @@ namespace classdesc
   template <class T, class Enable=void> struct MappedType;
   template <class T> struct MappedType // for maps
   <T, typename enable_if<is_pair<typename T::value_type>, void>::T>
-  {using type=typename T::value_type::second_type;};
+  {
+    using type=typename transfer_const<
+      T,
+      typename T::value_type::second_type,
+      Or<is_const<T>, is_const<typename T::value_type>,
+         is_const<typename T::value_type::second_type>>::value
+      >::type;
+  };
 
   template <class T> struct MappedType // for sets
   <T, typename enable_if<Not<is_pair<typename T::value_type>>, void>::T>
@@ -904,7 +915,17 @@ namespace classdesc
 
     /// get element if a map
     template <class I>
-    typename enable_if<is_pair<typename std::iterator_traits<I>::value_type>, typename std::iterator_traits<I>::value_type::second_type&>::T
+    typename enable_if<
+      is_pair<typename std::iterator_traits<I>::value_type>,
+      // in C++20, std::iterator_traits<I>::value_type has any const
+      // attribute stripped off, hence this convoluted mouthful
+      typename transfer_const<
+        typename std::remove_reference<
+          typename std::iterator_traits<I>::reference
+          >::type,
+        typename std::iterator_traits<I>::value_type::second_type
+        >::type&
+      >::T
     elem_of(const I& i) const {return i->second;}
 
     /// get element if a set
@@ -1289,8 +1310,8 @@ namespace classdesc
   template <class T>
   typename enable_if<
     And<
-      Not<is_floating_point<typename remove_reference<T>::type> >,
-      Not<is_container<T> >,
+      Not<is_floating_point<T>>,
+      Not<is_container<T>>,
       Not<And<is_reference<T>,is_const<typename remove_reference<T>::type>>>
       >, bool>::T
   partiallyMatchable(const REST_PROCESS_BUFFER& x);
@@ -1311,8 +1332,8 @@ namespace classdesc
   template <class T>
   typename enable_if<
     And<
-      Not<is_floating_point<typename remove_reference<T>::type> >,
-      Not<is_container<T> >,
+      Not<is_floating_point<T>>,
+      Not<is_container<T>>,
       Not<And<is_reference<T>,is_const<typename remove_reference<T>::type>>>
       >, bool>::T
   partiallyMatchable(const REST_PROCESS_BUFFER& x)
