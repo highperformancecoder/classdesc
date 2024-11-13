@@ -419,7 +419,7 @@ namespace classdesc
   };
   
   
-  class CppWrapper;
+  struct CppWrapper;
   void attachRegistryObjects(const RESTProcess_t& registry, CppWrapper& object,const std::string& prefix);
 
   struct CppWrapper: public CppPyObject
