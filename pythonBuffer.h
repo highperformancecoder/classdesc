@@ -671,7 +671,7 @@ namespace classdesc
     return cppWrapperType;
   }
   
-  inline CppWrapper::CppWrapper(const RPPtr& command, bool special): command(command), special(special) {
+  inline CppWrapper::CppWrapper(const RPPtr& command, bool special): special(special), command(command) {
     ob_refcnt=1;
     ob_type=&CppWrapperTypeSingleton();
   }
