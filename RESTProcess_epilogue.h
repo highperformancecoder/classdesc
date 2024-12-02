@@ -370,7 +370,7 @@ namespace classdesc
     if (ptr)
       return rProcess(*ptr, remainder, arguments);
     else
-      return {};
+      return std::make_shared<RESTProcessVoid>();
   }
 
   template <class E>
@@ -389,7 +389,7 @@ namespace classdesc
     if (auto p=ptr.lock())
       return rProcess(*p, remainder, arguments);
     else
-      return {};
+      return std::make_shared<RESTProcessVoid>();
   }
 
   inline RPPtr RESTProcess_t::process(const std::string& query, const REST_PROCESS_BUFFER& jin)

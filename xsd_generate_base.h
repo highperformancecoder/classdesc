@@ -6,8 +6,8 @@
   Open source licensed under the MIT license. See LICENSE for details.
 */
 
-#ifndef XSD_GENERATE_BASE
-#define XSD_GENERATE_BASE
+#ifndef CLASSDESC_XSD_GENERATE_BASE_H
+#define CLASSDESC_XSD_GENERATE_BASE_H
 #include "classdesc.h"
 #include <map>
 #include <set>

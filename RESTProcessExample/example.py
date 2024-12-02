@@ -57,9 +57,9 @@ assert root.bar.c('hello world')=='hello world'
 assert root.bar.c()=='hello world'
 
 assert root.bar.c1()==['\r','\r']
-assert root.bar.c1[0]()=='\r'
+assert root.bar.c1[0]=='\r'
 root.bar.c1[0]='x'
-assert root.bar.c1[0]()=='x'
+assert root.bar.c1[0]=='x'
 
 assert root.bar.ef()=='ea'
 assert root.bar.ef('eb')=='eb'
@@ -72,9 +72,9 @@ assert root.bar.ef._list()==[]
 
 assert root.bar.d()==[0,1,2]
 assert len(root.bar.d)==3
-assert root.bar.d[1]()==1
+assert root.bar.d[1]==1
 root.bar.d[1]=5
-assert root.bar.d[1]()==5
+assert root.bar.d[1]==5
 
 assert len(root.bar.d1)==2
 assert root.bar.d1[1]()==[3,4,5]
@@ -82,11 +82,11 @@ root.bar.d1[1]=[6,7,8]
 assert root.bar.d1[1]()==[6,7,8]
 assert root.bar.d1()==[[0,1,2],[6,7,8]]
 root.bar.d1[1][2]=10
-assert root.bar.d1[1][2]()==10
+assert root.bar.d1[1][2]==10
 assert root.bar.h()==[2,2,2]
-assert root.bar.h[1]()==2
+assert root.bar.h[1]==2
 root.bar.h[1]=3
-assert root.bar.h[1]()==3
+assert root.bar.h[1]==3
 root.bar.h.insert(5)
 assert root.bar.h()==[2,3,2,5]
 root.bar.h.erase(1)
@@ -96,9 +96,9 @@ assert root.bar.h._type()=="std::vector<int>"
 assert root.bar.h._list()==[".@elem",".@elemNoThrow",".@erase",".@insert",".@size"]
 
 assert root.bar.l()==[2,2,2]
-assert root.bar.l[1]()==2
+assert root.bar.l[1]==2
 root.bar.l[1]=3
-assert root.bar.l[1]()==3
+assert root.bar.l[1]==3
 root.bar.l.insert(5)
 assert root.bar.l()==[2,3,2,5]
 assert root.bar.l([2,2,2,2])()==[2,2,2,2]
@@ -106,15 +106,15 @@ assert root.bar.l([2,2,2,2])()==[2,2,2,2]
 assert root.bar.m()==[{"first":0,"second":5},{"first":3,"second":2}]
 assert len(root.bar.m)==2
 assert root.bar.m._signature()==[{"args":[],"ret":"std::map<int,int>"},{"args":["std::map<int,int>"],"ret":"std::map<int,int>"}]
-assert root.bar.m[3]()==2
+assert root.bar.m[3]==2
 root.bar.m[3]=5
-assert root.bar.m[3]()==5
+assert root.bar.m[3]==5
 
 root.bar.m.insert({"first":1,"second":2})
-assert root.bar.m[1]()==2
+assert root.bar.m[1]==2
 assert root.bar.m.contains(1)
 root.bar.m[10]=2
-assert root.bar.m[10]()==2
+assert root.bar.m[10]==2
 assert root.bar.m.contains(10)
 assert root.bar.m._type()=="std::map<int,int>"
 assert root.bar.m._list()==[".@elem",".@elemNoThrow",".@erase",".@insert",".@keys",".@size"]
@@ -129,14 +129,14 @@ assert root.bar.ss()==['bar', 'foo', 'hello']
 root.bar.um.insert({"first":1,"second":3})
 assert root.bar.um()==[{"first":1,"second":3}]
 root.bar.um[1]=5
-assert root.bar.um[1]()==5
+assert root.bar.um[1]==5
 
 assert root.bar.llex()==[["hello","hello"],["hello","hello"]]
 root.bar.llex[1]=["baa","baa","blacksheep"]
 assert root.bar.llex[1]()==["baa","baa","blacksheep"]
 assert root.bar.llex()==[["hello","hello"],["baa","baa","blacksheep"]]
 assert root.bar.llex._signature()==[{"args":[],"ret":"std::list<std::list<std::string>>"},{"args":["std::list<std::list<std::string>>"],"ret":"std::list<std::list<std::string>>"}]
-assert root.bar.llex[1][1]()=="baa"
+assert root.bar.llex[1][1]=="baa"
 
 # Should fail
 expectThrow(lambda: root.bar.iex())
@@ -161,8 +161,11 @@ assert root.bar1.foo().a()==0.1
 assert root.bar1.fooRef().b()==2
 assert root.bar1.f.name()=='Foo'
 
-assert root.bar1.vFoo[1]._properties()['b']==1
+assert root.bar1.vFoo[1]()['b']==1
+assert root.bar1.vFoo[1].b()==1
 expectThrow(lambda: root.bar1.vFoo[10])
+
+assert root.bar.mFoo['foo'].b()==2
 
 assert root.bar1.foo().b(3)==3
 assert root.bar1.foo().b()==2
@@ -191,7 +194,7 @@ assert root.bar.sm()=={}
 assert root.bar.sm({"foo":1,"bar":2})._properties()=={"foo":1,"bar":2}
 assert root.bar.sm()=={"foo":1,"bar":2}
 assert root.bar.sm({"foo":1,"foobar":3})._properties()=={"foo":1,"foobar":3}
-assert root.bar.sm['foo']()==1
+assert root.bar.sm['foo']==1
 assert root.bar.sm.contains("foobar")
 root.bar.sm.erase("foobar")
 assert not root.bar.sm.contains("foobar")
@@ -217,3 +220,7 @@ foo=Foo(2)
 fb=FooBar1()
 assert foo.b()==2
 assert fb.f.b()==0
+
+# shared pointer support
+assert root.sbar.f()==20
+assert root.spoly.a()==5

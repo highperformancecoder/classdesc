@@ -36,4 +36,7 @@
 #ifdef CLASSDESC_XML_UNPACK_BASE_H
 #include "xml_unpack_base-dump.cd"
 #endif
+#ifdef CLASSDESC_XML_COMMON_H
+#include "xml_common-dump.cd"
+#endif
 #endif
