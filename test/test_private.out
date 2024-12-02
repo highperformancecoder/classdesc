@@ -13,7 +13,6 @@ using classdesc::p_type;
 namespace classdesc_access {
 #ifndef CLASSDESC_p___foo
 #define CLASSDESC_p___foo
-#endif
 template <> struct access_p< class ::foo > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
@@ -27,9 +26,9 @@ void type(classdesc::p_t& targ, const classdesc::string& desc)
 {
 }
 };
+#endif
 #ifndef CLASSDESC_p___bar
 #define CLASSDESC_p___bar
-#endif
 template <> struct access_p< struct ::bar > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
@@ -41,9 +40,9 @@ void type(classdesc::p_t& targ, const classdesc::string& desc)
 {
 }
 };
+#endif
 #ifndef CLASSDESC_p_bamboo
 #define CLASSDESC_p_bamboo
-#endif
 template <> struct access_p<  bamboo > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
@@ -56,6 +55,7 @@ void type(classdesc::p_t& targ, const classdesc::string& desc)
 {
 }
 };
+#endif
 }
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic pop

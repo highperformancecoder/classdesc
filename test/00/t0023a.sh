@@ -65,7 +65,6 @@ namespace classdesc_access {
 
 #ifndef CLASSDESC_p___foo
 #define CLASSDESC_p___foo
-#endif
 template <>
 struct access_p< class ::foo* >
 {
@@ -84,6 +83,8 @@ void type(classdesc::p_t& targ, const classdesc::string& desc)
 {
 }
 };
+
+#endif
 }
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic pop

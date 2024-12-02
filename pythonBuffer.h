@@ -683,6 +683,7 @@ namespace classdesc
               attachRegistryObjects(result->list(),*r,".");
               return ref.release();
             }
+          default: break;
           }
         if (PyErr_Occurred())
           PyErr_Print();

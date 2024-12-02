@@ -67,7 +67,6 @@ namespace classdesc_access {
 
 #ifndef CLASSDESC_p___FlowCounter
 #define CLASSDESC_p___FlowCounter
-#endif
 template <> struct access_p< struct ::FlowCounter > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
@@ -79,6 +78,8 @@ void type(classdesc::p_t& targ, const classdesc::string& desc)
 {
 }
 };
+
+#endif
 }
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic pop

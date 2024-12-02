@@ -1073,7 +1073,7 @@ struct GuardMacro
     printf("\n#ifndef %s\n",macro.c_str());
     printf("#define %s\n",macro.c_str());
   }
-  ~GuardMacro() {printf("#endif\n");}
+  ~GuardMacro() {printf("\n#endif\n");}
 };
 
 string type_qualifier(const string& type)
@@ -1484,10 +1484,10 @@ int main(int argc, char* argv[])
           {
             /* check if type has a #pragma associated */
             bool is_treenode, is_graphnode;
-            {
-              string n=without_type_qualifier(actions[i].type);
-              GuardMacro guardMacro(string("CLASSDESC_")+action[k]+"_"+n);
+            string n=without_type_qualifier(actions[i].type);
+            GuardMacro guardMacro(string("CLASSDESC_")+action[k]+"_"+n);
 
+            {
               /* strip out template arguments, collapse multiple spaces, 
                  remove trailing space */
               string n1;

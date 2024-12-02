@@ -66,7 +66,6 @@ namespace classdesc_access {
 
 #ifndef CLASSDESC_p___foo
 #define CLASSDESC_p___foo
-#endif
 template <> struct access_p< class ::foo > {
 template <class _CD_ARG_TYPE>
 void operator()(classdesc::p_t& targ, const classdesc::string& desc,_CD_ARG_TYPE& arg)
@@ -79,6 +78,8 @@ void type(classdesc::p_t& targ, const classdesc::string& desc)
 ::p_type<_CD_TYPE,class ::foo >(targ,desc+".b",&::foo::b);
 }
 };
+
+#endif
 }
 #if defined(__GNUC__) && !defined(__ICC) && !defined(__clang__)
 #pragma GCC diagnostic pop
