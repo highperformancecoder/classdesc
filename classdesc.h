@@ -714,12 +714,12 @@ namespace classdesc
   };
 
 #if defined(__cplusplus) && __cplusplus>=201103L
-  template <class K, class C, class A> struct tn<std::unordered_set<K,C,A> >
+  template <class K, class H, class E, class A> struct tn<std::unordered_set<K,H,E,A> >
   {
     static std::string name()
     {return "std::unordered_set<"+typeName<K>()+">";}
   };
-  template <class K, class C, class A> struct tn<std::unordered_multiset<K,C,A> >
+  template <class K, class H, class E, class A> struct tn<std::unordered_multiset<K,H,E,A> >
   {
     static std::string name()
     {return "std::unordered_multiset<"+typeName<K>()+">";}
