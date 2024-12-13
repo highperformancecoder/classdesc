@@ -102,13 +102,27 @@ namespace classdesc
     return {{"vector<string>",{}}};
   }
   
-  template <class T> 
-  RESTProcess_t RESTProcessObject<T>::list() const
+  template <class T>
+  typename enable_if<is_base_of<PolyRESTProcessBase, T>, RESTProcess_t>::T
+  rlist(T& obj)
+  {
+    RESTProcess_t map;
+    obj.RESTProcess(map,"");
+    return map;
+  }
+  
+  template <class T>
+  typename enable_if<Not<is_base_of<PolyRESTProcessBase, T>>, RESTProcess_t>::T
+  rlist(T& obj)
   {
     RESTProcess_t map;
     RESTProcess(map,"",obj);
     return map;
   }
+  
+  template <class T> 
+  RESTProcess_t RESTProcessObject<T>::list() const
+  {return rlist(obj);}
   
   inline RESTProcess_t RESTProcessOverloadedFunction::list() const {return {};}
 
@@ -167,7 +181,7 @@ namespace classdesc
   RESTProcessp(RESTProcess_t& repo, string d, T& obj)
   {
     classdesc_access::access_RESTProcess<typename remove_const<T>::type,void>()(repo,d,obj);
-    repo.add(d, new RESTProcessObject<T>(obj));
+    if (!is_excluded<T>::value) repo.add(d, new RESTProcessObject<T>(obj));
   }
 
   inline RPPtr RESTProcessOverloadedFunction::process(const string& remainder, const REST_PROCESS_BUFFER& arguments)
@@ -285,7 +299,7 @@ namespace classdesc
         auto r=mapAndProcess(remainder.substr(idxEnd), arguments, *i);
         if (idxEnd==remainder.length() && T::rank>1)
           // create a copy of the MultiArray iterator before it goes out of scope
-          return std::make_shared<RESTProcessMultiArray<typename T::iterator::value_type>>(*i);
+          return copyMultiArrayIterator(*i);
         return r;
       }
     return sequenceProcess(actual,remainder,arguments);
@@ -489,11 +503,10 @@ namespace classdesc
         }
     }
 
-   template <class T>
+  template <class T>
   RPPtr mapAndProcess(const string& query, const REST_PROCESS_BUFFER& arguments, T& a)
   {
-    RESTProcess_t map;
-    RESTProcess(map,"",a);
+    RESTProcess_t map=RESTProcessObject<T>(a).list();
     if (query.empty())
       {
         auto i=map.find("");

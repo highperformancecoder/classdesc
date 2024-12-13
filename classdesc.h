@@ -428,7 +428,7 @@ namespace classdesc
   ///@}
 
   /// transfer the constness property of T to U
-  template <class T, class U, bool c=is_const<T>::value> struct transfer_const;
+  template <class T, class U, bool c=Or<is_const<T>,is_const<U>>::value> struct transfer_const;
   template <class T, class U> struct transfer_const<T,U,true>
   {
     typedef typename add_const<U>::type type;
@@ -1065,6 +1065,7 @@ namespace classdesc
 
   template <class T> struct is_excluded: public false_type {};
   template <class T> struct is_excluded<Exclude<T> >: public true_type {};
+  template <class T> struct is_excluded<const Exclude<T> >: public true_type {};
   
   
   /// @}

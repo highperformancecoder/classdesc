@@ -539,12 +539,14 @@ namespace classdesc
     is_class<T>,
     Not<is_container<T>>,
     Not<is_smart_ptr<T>>,
-    Not<is_string<T>>
+    Not<is_string<T>>,
+    Not<is_excluded<T>>
     > {};
   
   
   template <class T>
-  void RESTProcessp(RESTProcess_t& repo, const string& d, Exclude<T>& a)
+  typename enable_if<is_excluded<T>,void>::T
+  RESTProcessp(RESTProcess_t& repo, const string& d, T& a)
   {}
 
   template <class T>
@@ -658,7 +660,8 @@ namespace classdesc
     erase(U& o,typename U::iterator i) {o.erase(i);}
 
     template <class U>
-    void erase(U& o,typename U::const_iterator i) {}
+    typename enable_if<Not<is_same<typename U::iterator,typename U::const_iterator>>,void>::T
+    erase(U& o,typename U::const_iterator i) {}
     
     template <class U>
     typename enable_if<Not<has_member_erase<U,typename U::iterator(U::*)(typename U::const_iterator)>>,void>::T
@@ -714,6 +717,12 @@ namespace classdesc
     RESTProcessValueSequence(Args&&... args): RESTProcessSequence<T>(actual), actual(std::forward<Args>(args)...) {}
   };
 
+  template <class T, int R> RPPtr copyMultiArrayIterator(MultiArray<T,R>& x);
+  template <class T, int R> RPPtr copyMultiArrayIterator(const MultiArray<T,R>& x);
+
+  template <class T> RPPtr copyMultiArrayIterator(T& x)
+  {return std::make_shared<RESTProcessObject<T>>(x);}
+  
   template <class T> struct RESTProcessMultiArray: public RESTProcessBase
   {
     T actual;
@@ -732,7 +741,7 @@ namespace classdesc
     RPPtr getElem(const REST_PROCESS_BUFFER& index) override {
       size_t idx; index>>idx;
       if (idx<actual.size())
-        return std::make_shared<RESTProcessMultiArray<typename T::value_type>>(actual[idx]);
+        return copyMultiArrayIterator(actual[idx]);
       return std::make_shared<RESTProcessVoid>();
     }
     RPPtr setElem(const REST_PROCESS_BUFFER& index, const REST_PROCESS_BUFFER& value) override {
@@ -741,12 +750,17 @@ namespace classdesc
         {
           auto elem=actual[idx];
           convert(elem,value);
-          return std::make_shared<RESTProcessMultiArray<typename T::value_type>>(elem);
+          return copyMultiArrayIterator(elem);
         }
       return std::make_shared<RESTProcessVoid>();
     }
     size_t size() const override {return actual.size();}
   };
+
+  template <class T, int R> RPPtr copyMultiArrayIterator(MultiArray<T,R>& x)
+  {return std::make_shared<RESTProcessMultiArray<MultiArray<T,R>>>(x);}
+  template <class T, int R> RPPtr copyMultiArrayIterator(const MultiArray<T,R>& x)
+  {return std::make_shared<RESTProcessMultiArray<MultiArray<T,R>>>(x);}
 
   template <class T> struct RESTProcessMultiArray<classdesc::MultiArray<T,1>>:
     public RESTProcessSequence<classdesc::MultiArray<T,1>>
