@@ -85,7 +85,6 @@ namespace classdesc
           endpretty();
           taglevel=l;
         }
-      assert(taglevel==level(d));
       return ret;
     }
     /** emit end tag */
