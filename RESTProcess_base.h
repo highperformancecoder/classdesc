@@ -482,6 +482,36 @@ namespace classdesc
     bool isObject() const override {return true;}
     const object* getConstClassdescObject() override {return getClassdescObjectImpl(obj);}
     bool isConst() const override {return std::is_const<T>::value;}
+    size_t size() const override {
+      if constexpr (is_class<T>::value)
+        if constexpr (has_size<T>::value)
+          return obj.size();
+      return 0;
+    }
+    RPPtr getElem(const REST_PROCESS_BUFFER& b) override {
+      if constexpr (is_class<T>::value)
+        if constexpr (has_index_operator<T>::value)
+           {
+             size_t index; b>>index;
+             return makeRESTProcessRef(obj[index]);
+           }
+      return RESTProcessBase::getElem(b);
+    }
+    /// sets element indexed/keyed by \a index to \a value
+    /// @return updated element
+    RPPtr setElem(const REST_PROCESS_BUFFER& b, const REST_PROCESS_BUFFER& value) override
+    {
+      if constexpr (is_class<T>::value && !is_const<T>::value)
+        if constexpr (has_index_operator<T>::value)
+          {
+            size_t index; b>>index;
+            value>>obj[index];
+            return makeRESTProcessRef(obj[index]);
+          }
+      return RESTProcessBase::setElem(b,value);
+    }
+    
+
   };
 
   /// same as \a RESTProcessObject, but internally stores the object. T must be copy constructible or moveable

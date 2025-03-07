@@ -486,7 +486,23 @@ namespace classdesc
   push_back(T& x, const typename T::value_type& v) {} 
 
   
+  CLASSDESC_HAS_MEMBER(size);
+  template <class T> struct has_size: public has_member_size<T,size_t (T::*)()const> {};
+  CLASSDESC_HAS_MEMBER(value_type);
+  template <class T> struct has_value_type: public has_member_value_type<T,size_t (T::*)()const> {};
 
+  // doesn't quite work :(
+//  template <class T>                                   
+//  struct has_index_operator                                      
+//  {                                                               
+//    template <class U, decltype(&U::operator[])> struct SFINAE {};                          
+//    template <class U> static char test(SFINAE<U,&U::operator[]>*);    
+//    template <class U> static int test(...);                           
+//    const static bool value=sizeof(test<T>(0))==sizeof(char);          
+//  };
+
+  // specialise this to enable python indexing
+  template <class T> struct has_index_operator: public false_type {};
   
   //  template <class T>
   //  typename enable_if<is_sequence<T>,void>::T
