@@ -16,7 +16,7 @@ MPIEXES=mpibuf_array
 OBJS=testXMLcd_other.o
 
 # note the internal type example cannot be correctly linked with g++ or icc!
-LIBS=-L.. -L/usr/X11R6/lib `pkg-config --libs libtirpc` -lboost_thread
+LIBS=-L.. -L/usr/X11R6/lib `pkg-config --libs libtirpc` -lboost_system -lboost_thread
 CFLAGS=-g -I.. -I. -I../json5_parser/json5_parser -I/usr/X11R6/include -DRECUR_MAX=50 -DTR1 -DHAVE_LONGLONG
 
 ifdef GCOV

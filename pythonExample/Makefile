@@ -4,7 +4,7 @@ CFLAGS=-g `pkg-config --cflags python3` -I.. -I. -I../json5_parser/json5_parser 
 VPATH=..
 
 example.so: $(OBJS)
-	g++ -fPIC -shared -Wl,-soname,example $^ `pkg-config --libs python3` -lboost_python-py3 -o $@
+	g++ -fPIC -shared -Wl,-soname,example $^ `pkg-config --libs python3` -lboost_python-py3  -lboost_system -o $@
 
 .h.cd:
 	../classdesc -I .. -typeName -use_mbr_pointers -onbase -overload python <$< >$@

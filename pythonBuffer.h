@@ -17,12 +17,11 @@
 #include "signature.h"
 #include <deque>
 #include <numeric>
-//#ifdef MXE
-//#include <MXEPython.h>
-//#else
-//#include <Python.h>
-//#endif
+#ifdef MXE
 #include "pythonCAPI.h"
+#else
+#include <Python.h>
+#endif
 
 #define CLASSDESC_PY_EXCEPTION_ABSORB(ret)                              \
   catch (const std::exception& ex)                                      \
@@ -252,9 +251,9 @@ namespace classdesc
             else
               {
                 auto dir(PyObject_Dir(pyObject));
-                for (Py_ssize_t i=0; i<PySequence_Size(dir); ++i)
+                for (Py_ssize_t i=0; dir && i<PySequence_Size(dir); ++i)
                   {
-                    auto key=PySequence_GetItem(pyObject, i);
+                    auto key=PySequence_GetItem(dir, i);
                     PyObjectRef keyRef(PyObject_Str(key));
                     string keyStr=PyUnicode_AsUTF8AndSize(keyRef,nullptr);
                     obj[keyStr]=PythonBuffer(PyObject_GetAttr(pyObject, key)).get<json_pack_t>();

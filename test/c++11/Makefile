@@ -26,7 +26,7 @@ DIRS=$(HOME)/usr /usr/local /usr
 LIBS+=$(foreach dir,$(DIRS),-L$(dir)/lib) ../../xdr_pack.o -lm 
 CFLAGS+=$(foreach dir,$(DIRS),-I$(dir)/include)
 
-LIBS+=`pkg-config --libs libtirpc`
+LIBS+=`pkg-config --libs libtirpc` -lboost_system
 
 JSON_HEADER=$(firstword $(foreach dir,$(DIRS),$(wildcard $(dir)/include/json_spirit.h)))
 
