@@ -12,30 +12,55 @@
 #include <windows.h>
 #include <iostream>
 
-static HINSTANCE pythonExe=GetModuleHandle(nullptr);
+static HINSTANCE pythonExe=GetModuleHandle("python3");
+
+// On Windows, python3 refers to the stable ABI. checkSymbol provides
+// an important check that all symbols referenced here are available
+// in the stable ABI. This check should be performed prior to release.
+static void checkSymbol(const char* name)
+{
+  auto symbol=GetProcAddress(pythonExe, name);
+  if (!symbol)
+    std::cerr<<name<<" not found in module"<<std::endl;
+}
+#define CHECK_SYMBOL(name) static int checkSymbol_##name=(checkSymbol(#name),1);
 
 extern "C"
 {
 
-#define APIFN(return,name,arg_decls,args)                               \
-  return name arg_decls                                                 \
-    {                                                                   \
+#define APIFN(returnType,name,arg_decls,args)                           \
+  CHECK_SYMBOL(name)                                                    \
+  returnType name arg_decls                                             \
+  {                                                                     \
+    if (!pythonExe) puts("python exe not found");                       \
     static auto symbol=(decltype(name)*)GetProcAddress(pythonExe, #name); \
-    return symbol? symbol args: 0;                                      \
-  }                                                                     \
+    if (!symbol) puts("failed to load: "#name);                       \
+    return symbol? symbol args: 0;                                        \
+  }                                                                     
 
 #define VOID_APIFN(name,arg_decls,args)                                 \
+  CHECK_SYMBOL(name)                                                    \
   void name arg_decls                                                   \
   {                                                                     \
     static auto symbol=(decltype(name)*)GetProcAddress(pythonExe, #name); \
+    if (!symbol) puts("failed to load: "#name);                         \
     if (symbol) symbol args;                                            \
-  }                                                                     \
+  }                                                                     
+
+#define APIVARPTR(type, name)                                 \
+  type* name=(type*)GetProcAddress(pythonExe, #name);         \
+  CHECK_SYMBOL(name)                                                 
+  
+  APIVARPTR(PyTypeObject, PyBool_Type);
+  APIVARPTR(PyTypeObject, PyFloat_Type);
+  APIVARPTR(PyObject, PyExc_RuntimeError);
 
   VOID_APIFN(_Py_Dealloc,(PyObject*o),(o));
   APIFN(PyObject*, PyErr_Occurred, (), ());
-  VOID_APIFN(PyErr_Print,()());
+  VOID_APIFN(PyErr_Print,(),());
   VOID_APIFN(PyErr_SetString,(PyObject* o,const char* s),(o,s));
   
+  APIFN(PyObject*, Py_GetConstantBorrowed,(unsigned x),(x));
   APIFN(int, PyType_IsSubtype,(PyTypeObject* o1, PyTypeObject* o2),(o1,o2));
   APIFN(unsigned long, PyType_GetFlags,(PyTypeObject* o),(o));
   APIFN(PyObject*, PyLong_FromLong,(long x),(x));
@@ -58,7 +83,7 @@ extern "C"
   APIFN(PyObject*, PySequence_GetItem, (PyObject* o, ssize_t i), (o,i));
   
   APIFN(PyObject*, PyUnicode_FromString, (const char* s), (s));
-  APIFN(char*, PyUnicode_AsUTF8, (PyObject* s), (s));
+  APIFN(char*, PyUnicode_AsUTF8AndSize, (PyObject* s,Py_ssize_t* sz), (s,sz));
 
   APIFN(PyObject*, PyDict_New, (), ());
   APIFN(int, PyDict_SetItemString, (PyObject* d, const char* k, PyObject* v), (d,k,v));

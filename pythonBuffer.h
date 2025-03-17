@@ -33,7 +33,7 @@
   catch (...)                                                           \
     {                                                                   \
       PyErr_SetString(PyExc_RuntimeError, "Unknown exception");         \
-      return ret;                                                   \
+      return ret;                                                       \
     }
   
 namespace classdesc
@@ -212,7 +212,7 @@ namespace classdesc
     get() const {return PyFloat_AsDouble(pyObject);}
     //    template <> bool get<bool>() const {return PyLong_AsLong(pyObject);}
     template <class T> typename enable_if<is_string<T>, T>::T
-    get() const {return PyUnicode_AsUTF8(pyObject);}
+    get() const {return PyUnicode_AsUTF8AndSize(pyObject,nullptr);}
     
     template <class T> typename enable_if<is_same<T,json_pack_t>, T>::T
     get() const {
@@ -245,7 +245,7 @@ namespace classdesc
                   {
                     PyObjectRef keyValue=PySequence_GetItem(keyValues, i);
                     PyObjectRef keyRef(PyObject_Str(PySequence_GetItem(keyValue,0)));
-                    string keyStr=PyUnicode_AsUTF8(keyRef);
+                    string keyStr=PyUnicode_AsUTF8AndSize(keyRef,nullptr);
                     obj[keyStr]=PythonBuffer(PySequence_GetItem(keyValue,1)).get<json_pack_t>();
                   }
               }
@@ -256,7 +256,7 @@ namespace classdesc
                   {
                     auto key=PySequence_GetItem(pyObject, i);
                     PyObjectRef keyRef(PyObject_Str(key));
-                    string keyStr=PyUnicode_AsUTF8(keyRef);
+                    string keyStr=PyUnicode_AsUTF8AndSize(keyRef,nullptr);
                     obj[keyStr]=PythonBuffer(PyObject_GetAttr(pyObject, key)).get<json_pack_t>();
                   }
               }
@@ -281,7 +281,7 @@ namespace classdesc
 
     std::string str() const {
       PyObjectRef pyStr(PyObject_Str(pyObject));
-      return PyUnicode_AsUTF8(pyStr);
+      return PyUnicode_AsUTF8AndSize(pyStr,nullptr);
     }
   private:
     PyObject* pyObject=Py_None; // note - this needs to be INCREF'd in constructors, not immortal before 3.12
@@ -568,7 +568,7 @@ namespace classdesc
       try
     {
       auto cppWrapper=static_cast<CppWrapper*>(self);
-      auto i=cppWrapper->methods.find(PyUnicode_AsUTF8(attr));
+      auto i=cppWrapper->methods.find(PyUnicode_AsUTF8AndSize(attr,nullptr));
       if (i!=cppWrapper->methods.end())
         {
           Py_INCREF(i->second);
@@ -577,7 +577,7 @@ namespace classdesc
       else
         {
           auto methods=cppWrapper->command->list();
-          auto attribute=methods.find(string(".")+PyUnicode_AsUTF8(attr));
+          auto attribute=methods.find(string(".")+PyUnicode_AsUTF8AndSize(attr,nullptr));
           if (attribute!=methods.end())
             return CppWrapper::create(attribute->second, false);
           }
@@ -588,7 +588,7 @@ namespace classdesc
     static int setAttro(PyObject* self, PyObject* name, PyObject* attr)
     {
       auto cppWrapper=static_cast<CppWrapper*>(self);
-      auto key=PyUnicode_AsUTF8(name);
+      auto key=PyUnicode_AsUTF8AndSize(name,nullptr);
       if (attr)
         {
           cppWrapper->methods[key]=PyObjectRef(attr);
@@ -756,7 +756,7 @@ namespace classdesc
       PyErr_SetString(PyExc_RuntimeError, "First argument not a CppWrapper");
       return nullptr;
     }
-    auto name=PyUnicode_AsUTF8(PySequence_GetItem(args,1));
+    auto name=PyUnicode_AsUTF8AndSize(PySequence_GetItem(args,1),nullptr);
     if (!name) {
       PyErr_SetString(PyExc_RuntimeError, "Second argument not a string");
       return nullptr;
@@ -804,10 +804,10 @@ namespace {
     nullptr,                                                       \
     nullptr                                                        \
     };                                                             \
-                                                                   \
     using namespace classdesc;                                     \
     registries()[#name]=&registry;                                 \
     pythonModule=PyModule_Create(&module_##name);                  \
+    if (PyErr_Occurred()) PyErr_Print();                           \
     if (pythonModule) initModule(pythonModule,registry);           \
     return pythonModule;                                           \
   }                                                 
