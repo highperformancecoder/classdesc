@@ -64,8 +64,19 @@ serialisation}\index{serialisation}
   JSON description of the object.
 \item[dump]\index{dump}, which writes an ascii representation of the
   object to a {\tt std::ostream} object
+\item[random\_init]\index{random\_init} Initialise an object with
+  randomly selected values appropriate to the the types.
+\item[isa] Deprecated in favor of the \verb+std::is_base_of+ type
+  trait. Used in earlier \EcoLab{} implementations.
 \item[javaClass]\index{javaClass}, which generates a Java interface to
-  C++ objects using JNI.
+  C++ objects using JNI. This descriptor will be deprecated in favour
+  of the more general RESTProcess descriptor.
+\item[python] First attempt at a python reflection descriptor, making
+  use of the boost\_python library. Deprecated in favour of the
+  pythonBuffer header, which uses the RESTProcess descriptor, and the
+  standard Python C API.
+\item[RESTProcess]\index{RESTProcess} A general purpose descriptor for reflecting C++
+  objects into an external scripting environment.
 \end{description}
 {\tt pack} will be documented in
 more detail later, but a simple overview is that the {\tt pack\_t}
@@ -207,8 +218,10 @@ See the polymorph example, which uses this technique.
 \item[Syntax:]\mbox{}\\
 \begin{quote}
 {\tt classdesc [-workdir }{\em directory}{\tt ] [-include }{\em
-  include-file}{\tt ] [-I} {\em directory}{\tt]} [-nodef]
-  [-respect\_private] [-typeName] [-onbase] {\em descriptors\ldots}
+  include-file}{\tt ] [-I} {\em directory}{\tt]} {\tt [-i} {\em
+  input-file} {\tt] [-nodef]
+  [-respect\_private] [-use\_mbr\_pointers] [-typeName] [-onbase] [-qt]
+  [-overload]} {\em descriptors\ldots}
 \end{quote}
 \end{description}
 
@@ -249,9 +262,18 @@ environment. In such a case, the
 \verb+-respect_private+\index{-respect\_private} can be used to
 suppress the accessing of private or protected members.
 
+
+
 By default, enums are treated as integers. Sometimes it is desirable
 to treat them \hyperref{symbolically}{ (see \S}{)}{symbolic enums}, and
-this is managed by the \verb+-typeName+\index{-typeName} option.
+this is managed by the \verb+-typeName+\index{-typeName} option. As
+well as enum enumerators,  \verb+-typeName+ enables the typeName
+descriptor which returns the name of a C++ type as a string.
+
+\verb+-use_mbr_pointers+\index{-use\_mbr\_pointers} outputs the containing object and its member
+pointer, rather than an address to the member itself. This is
+important for reflecting C++ types, rather than static C++ objects,
+such as is needed in the RESTProcess\index{RESTProcess} descriptor.
 
 \verb+-onbase+ turns on the ability to distinguish between an action
 called on a base class and one called on a member. If your descriptor
@@ -262,8 +284,16 @@ template <class T>
 void pack_onbase(pack_t& x,const string& d,T& a)
 {::pack(x,d,a);}
 \end{verbatim} 
-By default, -onbase is disabled as enabling it will break existing
-code. -onbase will become the default in Classdesc.4
+By default, \verb+-onbase+ is disabled as enabling it will break existing
+code. \verb+-onbase+ will become the default in Classdesc.4
+
+\verb+-qt+\index{-qt} Allows for MOC header files to be processed.
+
+\verb+-overload+\index{-overload} Will emit descriptor definitions for each overload of
+an overloaded method. By default, overloaded methods are ignored.
+There are some limitations in using the overloaded method reflection,
+so if you descriptor doesn't need to access overloaded methods, its
+easier and safer to leave this switch disabled.
 
 \psubsection{Limitations to classdesc}
 
@@ -279,12 +309,6 @@ of inlined functions being emitted, and correspondingly long
 compilation times.} defining the macro
 \verb+_CLASSDESC+\index{\_CLASSDESC} to ensure pragmas are seen by the
 Classdesc processor.
-
-Unfortunately, overloaded member functions cannot be
-resolved to a distinct member pointer, so are quietly ignored by
-classdesc. This is not an issue with serialisation, of course, as all
-member functions are ignored, but has implications for descriptors such as
-\verb+TCL_obj+\index{TCL\_obj} that export object functionality.
 
 Raw pointers also cause problems in that there is no information at
 runtime about how many objects a pointer points to, or whether it is reasonable
@@ -304,7 +328,7 @@ namespace frozz
 In this case, the classdesc processor does not know which namespace
 Bar is defined in, (as its more forgetful than your average C++
 compiler), so you will get a compile error that Bar is unknown. The
-workaround in this case is to full qualify type where necessary, ie
+workaround in this case is to fully qualify type where necessary, ie
 replace the above code with
 \begin{verbatim}
 namespace frozz
@@ -322,6 +346,18 @@ namespace frozz
 {\em action} for this type. It is up to the programmer to supply a
 definition for this type. The typename needs to be fully qualified
 with its namespaces.\index{\#pragma omit}
+
+Note as an alternative to specifying a \verb+#pragma omit+, it is
+possible to define macros which causes a particular type's
+descriptor definition to be ignored. For example
+\begin{verbatim}
+#define CLASSDESC_TYPENAME___Root
+#define CLASSDESC_json_pack___Root
+\end{verbatim}
+disables both the typeName definition and the json\_pack defintion for
+the {\tt Root} class. The exact form of the macro can be found by
+consulting the generated \verb+.cd+ files.
+
 \item[\#pragma treenode {\em typename}] Asserts that pointers to this
 type refer to a single object or are {\tt NULL}, and that following
 the links from this object will not return to the same object (no
@@ -934,6 +970,7 @@ bs >> i >> a >> x;
 BinStreamT<xdr_pack> bst("foo.dat","w");
 bst << 1 << a << x;
 \end{verbatim}
+
 \psection{isa}
 
 \verb+isa+ is an action to determine whether a particular class is
@@ -945,16 +982,70 @@ classdesc isa <header.h >header.cd
 Then \verb+isa(e,Y())+ will return whether \verb+e+ is of a type
 derived from type \verb+Y+.
 
-The functionality of \verb+isa+ is better achieved using the TR1 type
-traits feature: \verb+is_base_of+.
+The functionality of \verb+isa+ is better achieved using the type
+traits feature: \verb+std::is_base_of+.
 
-\psection{dump}
+\psection{Other serialisation descriptors}
+
+\psubsection{xml\_pack/unpack, xsd\_generate}
+
+\verb+xml_pack+ and \verb+xml_unpack+ generate XML serialisations of
+C++ objects. The exact mapping between C++ types and XML was inspired
+by .Net's serialisation library. In particular, container sequences
+will have elements named by the type of the element, so a
+\verb+vector<double>+ will be expressed as an XL sequence of
+\verb+<double>+ tags. For deserialisation, all tags are optional, ie
+if a tag is not present in the XML file, then the corresponding C++
+member is not updated. Any tags present in the XML file not
+corresponding to a C++ member will be ignored. Most usefully, this
+means that by setting a default initialiser for struct members, schema
+migration can easily be handled and a bnackward compatible fashion.
+
+This has advantages in creating (let's say) configuration
+files, in that the output is human editable, and handles schema
+migration easily. As an example of this, the Minsky project
+(https://minsky.sf.net) uses this descriptor for generating the .mky
+and .rvl files used to store model data.
+
+\verb+xsd_generate+ creates an XML schema file (.xsd) corresponding
+the C++ schema object, that can be used in documentation and XML
+linting tools. The xsd file marks everything as mandatory, however
+\verb+xml\_unpack+ actually treats every attribute as optional.
+
+It is usual (though not necessary) to only serialise public members of classes.
+
+\psubsection{json\_pack/unpack}
+
+\verb+json_pack+ and \verb+json_unpack+ similarly
+serialises/deserialises to the JSON5 format, and has similar
+advantages to XML form for schema miration and configuration
+editing. JSON is a more compact, and more human friendly format than
+XML, but has one deficiency with respect to XML. For a class derived
+from a standard container (eg std::vector) the JSON representation
+will be a JSON list object, and cannot represent any members of the
+derived class.
+
+JSON5 is a strict superset of JSON. It is much more relaxed about
+allowing single quotes as equivalent to double quotes, inline comments
+using \verb+//+, \verb+/*+ and \verb+*/+. \verb+json_pack+ leverages
+the \verb+json5_parser+ project, and produces standard JSON
+output. There is only one issue - floating point values of Inf and NaN
+are unrepresentable in JSON, but are representable in JSON5. So if
+your data contains these values, you will not be able to import them
+using a standard JSON decoder, but must use a JSON5 decoder instead.
+
+The \verb+json_pack+ serialiser requires the use of the Boost spirit
+library to be installed (part of the boost\_headers package).
+
+It is usual (though not necessary) to only serialise public members of classes.
+
+\psubsection{dump}
 
 \verb+dump+ is a descriptor that produces a human readable description of
-an object on a stream.
+an object on a stream, which can be useful for debugging purposes.
 \begin{verbatim}
 template <class T>
-void dump(std::ostream* out, const string& desc, T& arg); 
+void dump(std::ostream& out, const string& desc, T& arg); 
 \end{verbatim}
 
 \psection{Symbolic enums}\index{enum}\index{Enum\_handle}\label{symbolic enums}
@@ -1049,7 +1140,7 @@ metaprogramming templates:
   pointer\\
   \verb+is_function_ptr+& \index{is\_function\_ptr}\verb+is_function_ptr<F>::value=true+ if F is
                           either a member function pointer or an ordinary function pointer\\
-  \verb+bound_method<O,M>+ functional class representing a method
+  \verb+bound_method<O,M>+& functional class representing a method
   bound to an object\\
   \verb+bound_method<O,M> bindMethod(O& o, M m)+ &helper function
                                         generating a bound\_method object\\
@@ -1074,7 +1165,294 @@ passed here (can pass NULL if F is known to have a void return type).
 \verb+bound_method+ is an example of a functional object, which has
 Arity, Return and Arg defined for it. For general functional objects,
 including lamdas, the user will need to manually define Arity, Return
-and Arg --- this may change in a future revamp for C++11.
+and Arg.
+
+\psection{Reflecting C++ objects to a scripting environment: RESTProcess}
+
+RESTProcess is a common descriptor used for reflecting C++ object
+attributes and methods to an external scripting environment. It gets
+its name from one of the obvious use cases: implementing a REST
+service API endpoint.
+
+To expose a C++ object, run the RESTProcess descriptor as
+
+\begin{verbatim}
+RESTProcess(registry,name,object);
+\end{verbatim}
+\noindent which creates a reference in the {\tt registry} for the C++ object
+{\tt object} under the name {\tt name}.
+
+The \verb+RESTProcess_t+ registry object has a method \verb+process+
+that takes two arguments: a path string, containing the method or attribute name, as a dot
+separated string, and the arguments to pass to it, as a \htmlref{buffer concept
+object}{buffer concept} (by default a \verb+json_pack_t+ object).
+
+When the name refers to an attribute, then it is considered the same
+as a method consisting of overloaded getters and setters. If an
+argument is passed, then the setter is called, updating the attribute,
+and if no argument then just the getter is called. Both overloads
+return the value of the attribute.
+
+The return value is a pointer to a polymorphic object. The most
+important method is \verb+asBuffer+, which returns a buffer object,
+which can be converted into the external scripting environment's
+representation (eg JSON):
+\begin{verbatim}
+  using RPPtr=std::shared_ptr<RESTProcessBase>;
+  struct RESTProcessBase
+  {
+    virtual RPPtr process(const string& path, 
+                    const REST_PROCESS_BUFFER& arguments)=0;
+\end{verbatim}
+perform the REST operation, with {\tt path} being the 
+path string and {\tt arguments} as body text result of operation 
+is returned as an object, and can be serialised into 
+\verb+REST_PROCESS_BUFFER+ using {\tt asBuffer}.
+
+\begin{verbatim}
+    virtual REST_PROCESS_BUFFER asBuffer() const=0;
+\end{verbatim}
+Return a buffer object reflecting the state of the object referred to
+by this.
+
+\begin{verbatim}
+    virtual std::vector<Signature> signature() const=0;
+\end{verbatim}
+return signature(s) of the operations
+
+\begin{verbatim}
+    virtual RESTProcess_t list() const=0;
+\end{verbatim}
+return list of subcommands to this
+
+\begin{verbatim}
+    virtual std::string type() const=0;
+\end{verbatim}
+return type name of this
+
+\begin{verbatim}
+  };
+\end{verbatim}
+
+\psubsection{Buffer concept}\label{buffer concept}
+
+The actual type of
+the buffer object is set by a macro \verb+REST_PROCESS_BUFFER+ when
+inlining \verb+RESTProcess_base.h+ A buffer type must conform to the
+following generic interface
+\begin{verbatim}
+struct Buffer
+{
+  struct Array;
+  template <class T> SimpleBuffer& operator<<(const T&);
+  template <class T> const SimpleBuffer& operator>>(T&) const;
+  RESTProcessType::Type type() const;
+  const Array& array() const
+};
+\end{verbatim}
+where
+\begin{verbatim}
+struct RESTProcessType
+{
+  enum Type {boolean, int_number, float_number, string, array, object, null};
+};
+\end{verbatim}
+and \verb+Buffer::Array+ must conform to
+\begin{verbatim}
+struct Buffer::Array
+{
+  const Buffer2& operator[](size_t) const;
+  size_t size() const;
+};
+\end{verbatim}
+where \verb+Buffer2+ is also a buffer concept, but not necessarily the
+same type as \verb+Buffer+.
+
+\psubsection{Special path string commands}
+
+The path string may also have additional parts after it. For example,
+if \verb+foo+ is a vector, then \verb+foo.@size+ returns the vectors
+size, and \verb+foo.@elem.0+ returns the first element.
+
+\begin{description}
+\item[Metadata commands:]\mbox{}\\
+  \begin{description}
+  \item[@list] list methods and attributes of this object
+  \item[@signature] return a list of calling signatures (arguments and
+    return values) for all overloaded methods.
+  \item[@type] type of the method or attribute referred to. May be a
+    complex C++ type.
+  \item[@enum] \verb+@enum.@list+ returns a list of enums known about,
+    and \verb+@enum.<enum name>+ may be used to get a list of
+    enumerators for that enum.
+  \end{description}
+
+\item[Container commands:]\mbox{}\\
+  \begin{description}
+  \item[@size] number of elements if a container, 0 if not.
+  \item[@keys] return a list of keys of a map
+  \item[@elem,@elemNoThrow] access an element of container --- by position if a
+    sequence, by key if a map. @elemNoThrow returns a default
+    constructed object instead of throw an exception if the index is out
+    of range. Note the index appears after the .@elem, and is JSON encoded.
+  \item[@erase] remove an element indexed by the next part of the path
+    string.
+  \item[@insert] for sequences, pushes back a new element, intialised by
+    the argument string, for associative containers inserts the new
+    alement.
+  \end{description}
+\end{description}
+
+\psubsection{An example REST Server}
+
+The RESTProcessExample directory has an example CLI application that
+takes a REST endpoint, and arguments expressed in JSON to call methods
+or attribute setter/getters.
+
+An example HTTP REST server can be found in the Minsky project. Here,
+the slash-separated PATH string is passed as the method name (with
+slashes replaced by dots), and the HTTP message body is passed as a
+JSON string to the the arguments argument. The return value is
+converted to a JSON string and returned as the response.
+
+Note the HTTP verb is essentially ignored. Essentially if the message body is
+empty, the request is considered a GET, if it contains JSON data, then
+the request is considered as a PUT or POST.
+
+\psubsection{Python bindings}
+
+\verb+pythonBuffer.h+ defines an automatic reflection of types and
+objects to Python (Python3 stable API targeted). To use this, include
+this header file, and then use the following macros to define objects,
+functions and types in the Python module being created:
+
+\begin{description}
+\item[{\tt CLASSDESC\_ADD\_GLOBAL(object)}]
+adds a global object \verb+object+ to the module. It should be without any namespace
+qualifications, as Python cannot copy with colons in identifier names,
+but the macro can be used within any namespace.
+\item[{\tt CLASSDESC\_ADD\_FUNCTION(function)}] Same as with object, but adds
+  a static function to the module.
+\item[{\tt CLASSDESC\_DECLARE\_TYPE(type,...)}] Declares a type, which can be
+  created using Python constructors - ie \verb+x=MyType()+, where
+  \verb+MyType+ is the name of a C++ type with a default constructor.
+  Note if you need to pass parameters at construction time, then you
+  can specify optional argument types:
+  \verb+CLASSDESC_DECLARE_TYPE(IntType,int)+, which gets called form
+  Python as \verb+x=IntType(0)+.
+\end{description}
+
+Once all objects are declared with these macros, finish off with
+\verb+CLASSDESC_PYTHON_MODULE(name)+, where name is the name of the
+module, which should match the name of the dynamic library.
+
+NB for Windows users, you may need to compile and link
+\verb+pythonCAPI.cc+, which provides stub routines for the Python C
+API to satisfy the linker.
+
+An example of all this workign can be found in the RESTProcessExample directory.
+
+\psubsection{Javascript bindings}
+
+An example of an emscripten module compiled with a RESTProcess
+descriptor to create a callable Javascript object, with callable
+methods is as follows. Note the trick is to create the object as a
+function, then add the methods to it later. This is kind of the
+opposite of other programming environment, where an object has a
+special callable annotation added after creation.
+
+\begin{verbatim}
+
+function attachMethods(impl,object, prefix, methods) {
+  for (let i=0; i<methods.size(); ++i) {
+    let fullMethod=methods.get(i);
+    if (fullMethod.length>prefix.length && fullMethod.startsWith(prefix)) {
+      let m=fullMethod.slice(prefix.length).replace(/@/g,'$');
+      if (m.indexOf('.')<0) {
+        object[m]= (...args)=>{
+          let arg=JSON5.stringify(args);
+          let resultObj=impl.call(fullMethod,arg);
+          let result=JSON5.parse(resultObj.json());
+          if (typeof result==="object") {
+            let r= ()=>{return result;};
+            attachMethods(resultObj,r,"",resultObj.list());
+            return r;
+          }
+          return result; 
+        };
+        attachMethods(impl,object[m],fullMethod+'.',methods);
+      }
+    }
+  }
+}
+
+// get the emscripten object
+let ximpl = new Module.Foo();
+//Define the object as a function object, and convert all arguments to JSON.
+let x = ()=>{ximpl.call("",JSON.stringify(arguments));};  
+x.impl=ximpl; // stash a reference to the implementation
+attachMethods(xmpl,x,"",ximpl.list());
+\end{verbatim}
+
+And the C++ code that implements \verb+call+ and \verb+list+ is as
+follows:
+
+\begin{verbatim}
+struct CppWrapper
+{
+  RPPtr wrappedObject=make_shared<classdesc::RESTProcessVoid>();
+  CppWrapper()=default;
+  template <class T> CppWrapper(const T& x): wrappedObject(x) {}
+  /// call method of this on registry
+  CppWrapper call(const std::string& method, const string& args) {
+    json_pack_t jin;
+    read(args,jin);
+    return wrappedObject->process("."+method, jin);
+  }
+  std::vector<string> list() const {
+    std::vector<string> methods;
+    for (auto& i: wrappedObject->list())
+      {
+        auto n=i.first.find('.');
+        if (n==string::npos) continue;
+        methods.emplace_back(i.first.substr(n+1));
+      }
+    return methods;
+  }
+};
+
+struct JSFoo: public CppWrapper
+{
+JSFoo(): CppWrapper(make_shared<RESTProcessValueObject<Foo>>()) {}
+};
+
+EMSCRIPTEN_BINDINGS(Ravel) {
+  class_<CppWrapper>("CppWrapper")
+    .function("call",&CppWrapper::call)
+    .function("list",&CppWrapper::list)
+    ;
+
+  class_<JSFoo,base<CppWrapper>>("Foo")
+    .constructor<>()
+    ;
+
+  // for the return value of list()
+  register_vector<std::string>("vector<string>");
+}
+\end{verbatim}
+
+At some point, this will be abstracted into something that can live in
+the Classdesc codebase.
+
+\psubsection{Typescript bindings}
+
+The Minsky project embeds the C++ code as a node addon. A custom
+descriptor is provided to generate Typescript binding that follow as
+much as possible the C++ type system, to allow compile time checking
+of the use of the reflection API. Most of the code can be found in the
+\verb+RESTService/addon.cc+ file, but it is complicated by the need
+for threading to avoid blocking the node calling thread, callbacks
+into node and general Node API set up.
 
 \psection{classdescMP}\index{classdescMP}
 
@@ -1082,7 +1460,7 @@ and Arg --- this may change in a future revamp for C++11.
 library. It consists of three main concepts, {\tt MPIbuf},
 {\tt MPIslave} and {\tt MPISPMD}.
 
-{\bf Warning:} Do not use {\tt MPISPMD} as a global
+{\bf Warning:} Do not use {\tt MPISPMD} or {\tt MPIslave} as a global
 variable. Both of these types call \verb+MPI_Finalize()+ in their
 destructors. Some MPI implementations require \verb+MPI_Finalize()+ to
 be called before \verb+main()+ exits (although MPICH is quite happy to

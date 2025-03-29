@@ -48,9 +48,9 @@ namespace classdesc
     getClassdescObjectImpl(T& obj) {return nullptr;}    
   public:
     virtual ~RESTProcessBase() {}
-    /// perform the REST operation, with \a remainder being the query string and \a arguments as body text
+    /// perform the REST operation, with \a path being the path string and \a arguments as body text
     /// result of operation is returned as an object, and can be serialised into REST_PROCESS_BUFFER using asBuffer
-    virtual RPPtr process(const string& remainder, const REST_PROCESS_BUFFER& arguments)=0;
+    virtual RPPtr process(const string& path, const REST_PROCESS_BUFFER& arguments)=0;
     virtual REST_PROCESS_BUFFER asBuffer() const=0;
     /// return signature(s) of the operations
     virtual std::vector<Signature> signature() const=0;
@@ -64,7 +64,7 @@ namespace classdesc
     template <class F> Signature functionSignature() const;
     /// returns a pointer to the underlying object if it is one of type T, otherwise null
     template <class T> T* getObject();
-    /// @{ returns a classdesc object is referring to an object derived from classdesc::object
+    /// @{ returns a classdesc object if referring to an object derived from classdesc::object
     virtual object* getClassdescObject() {return nullptr;}
     virtual const object* getConstClassdescObject() {return nullptr;}
     /// @}
