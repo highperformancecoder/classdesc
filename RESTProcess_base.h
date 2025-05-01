@@ -375,7 +375,7 @@ namespace classdesc
           for (auto& f: functions->overloadedFunctions)
             if (f->signature()==rp->signature())
               {
-                i->second.reset(rp);
+                f.reset(rp);
                 return;
               }
           functions->overloadedFunctions.emplace_back(rp);
