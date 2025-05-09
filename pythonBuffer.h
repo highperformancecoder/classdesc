@@ -526,7 +526,12 @@ namespace classdesc
     {nullptr, nullptr, 0, nullptr}
   };
 
-  struct CppWrapperType: public PyTypeObject
+  struct InitialisedPyTypeObject: public PyTypeObject
+  {
+    InitialisedPyTypeObject() {memset(this,0,sizeof(PyTypeObject));}
+  };
+  
+  struct CppWrapperType: public InitialisedPyTypeObject
   {
     // container commands that take a key as as an argument
     static bool containerSpecialCommand(const std::string& command)
@@ -645,7 +650,6 @@ namespace classdesc
 
     CppWrapperType()
     {
-      memset(this,0,sizeof(PyTypeObject));
       Py_INCREF(this);
       tp_name="CppWrapperType";
       tp_methods=cppWrapperMethods;
