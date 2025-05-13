@@ -1547,7 +1547,7 @@ namespace classdesc
 
   template <class F>
   typename enable_if<functional::is_nonmember_function_ptr<F>, void>::T
-  RESTProcess(RESTProcess_t& repo, const string& d, F f)
+  RESTProcess(RESTProcess_t& repo, const string& d, const F& f)
   {
     repo.add(d, new RESTProcessFunction<F>(f));
     repo.defineFunctionArgTypes<F>();
