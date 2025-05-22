@@ -225,7 +225,7 @@ install-doc:
 	doxygen
 	-cd doc; sh Makedoc
 	rsync -e ssh -r -z --progress --delete doc/classdesc $(DOCPREFIX)
-	rsync -e ssh -r -z --progress --delete html/* $(DOCPREFIX)/doxygen
+	rsync -e ssh -r -z --progress --delete html/ $(DOCPREFIX)/doxygen/
 
 lcov:
 	$(MAKE) clean
