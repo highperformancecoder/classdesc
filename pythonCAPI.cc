@@ -59,6 +59,11 @@ extern "C"
   APIFN(PyObject*, PyErr_Occurred, (), ());
   VOID_APIFN(PyErr_Print,(),());
   VOID_APIFN(PyErr_SetString,(PyObject* o,const char* s),(o,s));
+  APIFN(PyObject*, PyType_GenericAlloc,(PyTypeObject* t, Py_ssize_t n),(t,n));
+  APIFN(PyObject*, PyType_GenericNew,(PyTypeObject* t, PyObject* a, PyObject* k),(t,a,k));
+
+  APIFN(int,Py_IsInitialized,(),());
+  APIFN(PyObject*,PySys_GetObject,(const char *name),(name));
   
   APIFN(PyObject*, Py_GetConstantBorrowed,(unsigned x),(x));
   APIFN(int, PyType_IsSubtype,(PyTypeObject* o1, PyTypeObject* o2),(o1,o2));
@@ -74,7 +79,8 @@ extern "C"
   APIFN(PyObject*, PyObject_GetAttr, (PyObject* o, PyObject* a), (o,a));
   APIFN(PyObject*, PyObject_GenericGetAttr, (PyObject* o, PyObject* a), (o,a));
   APIFN(int, PyObject_SetAttrString, (PyObject* o, const char* a, PyObject* v), (o,a,v));
-  
+  APIFN(PyObject*, PyObject_Call, (PyObject* c, PyObject* a, PyObject* k),(c,a,k));
+
   APIFN(int, PyModule_AddObject, (PyObject* o, const char* n, PyObject* v), (o,n,v));
   APIFN(const char*, PyModule_GetName, (PyObject* o), (o));
   APIFN(PyObject*, PyModule_Create2, (PyModuleDef* m,int i), (m,i));
@@ -85,6 +91,8 @@ extern "C"
   APIFN(PyObject*, PyUnicode_FromString, (const char* s), (s));
   APIFN(char*, PyUnicode_AsUTF8AndSize, (PyObject* s,Py_ssize_t* sz), (s,sz));
 
+  APIFN(PyObject*, PyTuple_New, (Py_ssize_t s), (s));
+  
   APIFN(PyObject*, PyDict_New, (), ());
   APIFN(int, PyDict_SetItemString, (PyObject* d, const char* k, PyObject* v), (d,k,v));
   
