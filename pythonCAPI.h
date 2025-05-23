@@ -125,8 +125,8 @@ typedef PyObject *(*iternextfunc) (PyObject *);
 typedef PyObject *(*descrgetfunc) (PyObject *, PyObject *, PyObject *);
 typedef int (*descrsetfunc) (PyObject *, PyObject *, PyObject *);
 typedef int (*initproc)(PyObject *, PyObject *, PyObject *);
-typedef PyObject *(*newfunc)(struct _typeobject *, PyObject *, PyObject *);
-typedef PyObject *(*allocfunc)(struct _typeobject *, Py_ssize_t);
+typedef PyObject *(*newfunc)(PyTypeObject*, PyObject *, PyObject *);
+typedef PyObject *(*allocfunc)(PyTypeObject*, Py_ssize_t);
 typedef int (*visitproc)(PyObject *, void *);
 typedef int (*traverseproc)(PyObject *, visitproc, void *);
 typedef int (*inquiry)(PyObject *);
@@ -265,7 +265,11 @@ extern "C" {
   PyObject* PyErr_Occurred();
   void PyErr_Print();
   void PyErr_SetString(PyObject*,const char*);
-
+  PyObject* PyType_GenericAlloc(PyTypeObject*, Py_ssize_t);
+  PyObject* PyType_GenericNew(PyTypeObject*, PyObject*, PyObject*);
+  
+  int Py_IsInitialized();
+  PyObject* PySys_GetObject(const char *name);
   
   extern PyTypeObject* PyBool_Type;
   extern PyTypeObject* PyFloat_Type;
@@ -285,7 +289,8 @@ extern "C" {
   PyObject* PyObject_GetAttr(PyObject*, PyObject*);
   PyObject* PyObject_GenericGetAttr(PyObject*, PyObject*);
   int PyObject_SetAttrString(PyObject*, const char*, PyObject*);
-  
+  PyObject* PyObject_Call(PyObject*, PyObject*, PyObject*);
+    
   int PyModule_AddObject(PyObject*, const char*, PyObject*);
   const char* PyModule_GetName(PyObject*);
   PyObject* PyModule_Create2(PyModuleDef*,int);
@@ -296,6 +301,8 @@ extern "C" {
   PyObject* PyUnicode_FromString(const char*);
   char* PyUnicode_AsUTF8AndSize(PyObject*,Py_ssize_t*);
 
+  PyObject* PyTuple_New(Py_ssize_t);
+  
   PyObject* PyDict_New();
   int PyDict_SetItemString(PyObject* dp, const char* key, PyObject* item);
   
