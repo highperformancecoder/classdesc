@@ -495,7 +495,7 @@ namespace classdesc
   {
     try
       {
-        const json5_parser::mValue& val=json_find(o,d);
+        const json5_parser::mValue val=json_find(o,d);
         if (val.type()!=json5_parser::array_type)
           throw json_pack_error("%s is not an array",d.c_str());
         else
