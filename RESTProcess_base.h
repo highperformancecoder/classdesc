@@ -628,7 +628,7 @@ namespace classdesc
     template <class U>
     typename enable_if<Insertable<U>, void>::T
     insert(U& o, const REST_PROCESS_BUFFER& j) {
-      typename U::value_type v;
+      typename U::value_type v{};
       convert(v,j);
       push_back(o,v);
     }
@@ -1498,7 +1498,7 @@ namespace classdesc
         Not<is_void<U>>
         >,RESTProcess_t>::T
     slist() const {
-      typename remove_const<typename remove_reference<U>::type>::type x;
+      typename remove_const<typename remove_reference<U>::type>::type x{};
       return RESTProcessObject<U>(x).list();
     }
     // for now, we cannot extract the lists of a non-default constructible return type
