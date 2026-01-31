@@ -257,7 +257,7 @@ namespace classdesc
         }
       else
         if (fwrite(x,s,1,f)!=1)
-          throw pack_error("filed to write data to stream");
+          throw pack_error("failed to write data to stream");
           
     }
     
