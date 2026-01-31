@@ -256,7 +256,7 @@ namespace classdesc
           memcpy(m_data+m_size,x,s); m_size+=s;
         }
       else
-        if (fwrite(x,s,1,f)!=1)
+        if (s && fwrite(x,s,1,f)!=1)
           throw pack_error("failed to write data to stream");
           
     }
