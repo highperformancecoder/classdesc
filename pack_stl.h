@@ -17,6 +17,7 @@
 
 #if defined(__cplusplus) && __cplusplus>=201103L
 #include <array>
+#include <tuple>
 #endif
 #include <iterator>
 #include <string>
@@ -302,6 +303,33 @@ namespace classdesc_access
       ::unpack(targ,desc,arg.second);
     }
   };
+#if defined(__cplusplus) && __cplusplus>=201703L
+  template <class... A> struct access_pack<std::tuple<A...>>
+  {
+    template <class U>
+    void operator()(classdesc::pack_t& targ, const classdesc::string& desc, U& arg) 
+    {
+      ::pack(targ,desc,std::get<0>(arg));
+      if constexpr (std::tuple_size<U>::value>1)
+        ::pack(targ,desc,classdesc::tupleTail(arg));
+    }
+  };
+
+  template <class... A> struct access_unpack<std::tuple<A...> >
+  {
+    template <class U>
+    void operator()(classdesc::pack_t& targ, const classdesc::string& desc, U& arg) 
+    {
+      ::unpack(targ,desc,std::get<0>(arg));
+      if constexpr (std::tuple_size<U>::value>1)
+        {
+          auto tail=classdesc::tupleTail(arg);
+          ::unpack(targ,desc,tail);
+          arg=std::tuple_cat(std::make_tuple(std::get<0>(arg)), tail);
+        }
+    }
+  };
+#endif
 }
 #ifdef _CLASSDESC
 #pragma omit pack std::plus

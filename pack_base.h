@@ -601,7 +601,7 @@ namespace classdesc
   //generic pack, unpack - defined in pack_stream
   template <class T> typename
   enable_if<Not<pack_supported<T> >, void>::T
-  pack(pack_t& buf, const string& desc, T& arg)
+  pack(pack_t& buf, const string& desc, const T& arg)
   {classdesc_access::access_pack<T>()(buf,desc,arg);}
   
 

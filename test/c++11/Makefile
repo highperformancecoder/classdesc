@@ -107,7 +107,7 @@ endif
 	../../classdesc -I .. -nodef -typeName -i $< pack unpack >$@
 # check that duplicate typeNames can be issued
 #	../classdesc -I .. -nodef -typeName <$< >>$@
-	../../classdesc -I .. -nodef -typeName -respect_private -i $< xml_pack xml_unpack dump xsd_generate  >>$@
+	../../classdesc -I .. -nodef -typeName -respect_private -i $< xml_pack xml_unpack json_pack json_unpack dump xsd_generate  >>$@
 
 xml_unpack_base.cd: xml_unpack_base.h
 	../../classdesc -I .. -nodef pack unpack <$< >$@

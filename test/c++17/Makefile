@@ -3,7 +3,7 @@
 #define NOGUI if X-windows not installed
 NOGUI=
 
-EXES=testFunctional
+EXES=testFunctional c++Features
 OBJS=
 
 # note the internal type example cannot be correctly linked with g++ or icc!

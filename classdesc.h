@@ -1165,6 +1165,83 @@ namespace classdesc
     std::cout<<msg<<std::endl;
 #endif
   }
+
+  // tuple support
+#if defined(__cplusplus) && __cplusplus>=201103L
+  template <class... A> struct tn<std::tuple<A...>>
+  {
+    // TODO unpack argpack to explicitly name template parameters
+    static string name() {return "std::tuple<...>";}
+  };
+#endif
+  
+#if defined(__cplusplus) && __cplusplus>=201703L
+  
+  // The helper function that does the heavy lifting
+  template <typename Tuple, std::size_t... Is>
+  auto tupleTailImpl(Tuple&& t, std::index_sequence<Is...>) {
+    // We add 1 to each index 'Is' to skip the first element (index 0)
+    return std::make_tuple(std::get<Is + 1>(std::forward<Tuple>(t))...);
+  }
+
+  template <typename Tuple>
+  auto tupleTail(Tuple&& t) {
+    constexpr std::size_t N = std::tuple_size<std::decay_t<Tuple>>::value;
+    
+    // Ensure the tuple isn't empty before trying to take the tail
+    static_assert(N > 0, "Cannot take the tail of an empty tuple.");
+
+    if constexpr (N == 1) {
+        return std::make_tuple(); // Tail of a single-element tuple is empty
+    } else {
+        // Generate indices from 0 to N-2
+        return tupleTailImpl(std::forward<Tuple>(t), 
+                            std::make_index_sequence<N - 1>{});
+    }
+  }
+#endif
+  
+//#if defined(__cplusplus) && __cplusplus>=201103L
+//
+//
+//  
+//  template <template <class...> class T> struct Tuple1TailType;
+//  template <template <class...> class T, class A, class... B>
+//  struct Tuple1TailType<class T<A, B...>>
+//  {
+//    using type=T<B...>;
+//  };
+//
+//  template <int N, class T> struct TupleTailType;
+//  
+//  template <class T>
+//  struct TupleTailType<1, T>
+//  {
+//    using type=typename Tuple1TailType<T>::type;
+//  };
+//  
+//  template <int N, template <class...> class T, class A, class... B>
+//  struct TupleTailType<N, T<A, B...>>
+//  {
+//    using type=typename TupleTailType<N-1, B...>::type;
+//  };
+// 
+//  template <class T, int N> struct TupleTail
+//  {
+//    typename TupleTailType<N, T>::type tuple;
+//    TupleTail(const T& x):
+//      tuple(std::tuple_cat(std::make_tuple(std::get<N>(x)), TupleTail<T,N+1>(x).tuple)) {}
+//  };
+//
+//  template <class T> struct TupleTail<T, std::tuple_size<T>::value-1>
+//  {
+//    std::tuple<
+//      typename std::tuple_element<std::tuple_size<T>::value-1,T>::type> tuple;
+//    TupleTail(const T& x):
+//      tuple(std::get<std::tuple_size<T>::value-1>(x)) {}
+//  };
+//#endif
+  
 }
 
 

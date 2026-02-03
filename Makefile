@@ -119,7 +119,8 @@ aegis-all: build latex-docs
 # This is now broken, as of OpenJDK 15. Not worth supporting. 
 #	if which javac; then cd java && $(MAKE) && cd ../javaExamples && $(MAKE); fi
 	cd test && $(MAKE)
-	cd test/c++11 && $(MAKE)
+	cd test/c++11 && $(MAKE) sure
+	cd test/c++17 && $(MAKE) sure
 	cd RESTProcessExample && $(MAKE)
 #	-cd objc-examples && $(MAKE)
 
