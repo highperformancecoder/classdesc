@@ -421,10 +421,18 @@ namespace classdesc
   // general, XML does not support polymorphism, so this won't really
   // work anyway.
   template <class T>
-  void xsd_generate(xsd_generate_t& g, const string& d, const shared_ptr<T>& a) 
+  typename enable_if<Not<is_default_constructible<T> >, void>::T
+  xsd_generate(xsd_generate_t& g, const string& d, const shared_ptr<T>& a) 
   {
-    xsd_generate_t::Optional o(g,true); 
-    xsd_generate(g,d,*a);
+    xsd_generate_t::Optional o(g,true);
+    if (a) xsd_generate(g,d,*a);
+  }
+  template <class T>
+  typename enable_if<is_default_constructible<T>, void>::T
+  xsd_generate(xsd_generate_t& g, const string& d, const shared_ptr<T>& a) 
+  {
+    xsd_generate_t::Optional o(g,true);
+    xsd_generate(g,d,T());
   }
 
   template <class T>
