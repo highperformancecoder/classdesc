@@ -1,5 +1,6 @@
 #ifndef CPPFEATURES_H
 #define CPPFEATURES_H
+#include <tuple>
 
 struct CppFeatures
 {

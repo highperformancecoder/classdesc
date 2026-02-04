@@ -27,6 +27,38 @@ namespace classdesc_access
     void operator()(classdesc::xml_pack_t& t,const classdesc::string& d, const T& a)
     {t.pack_notag(d,a);}
   };
+
+#if defined(__cplusplus) && __cplusplus>=201703L
+  
+  template <class... A>
+  struct access_xml_pack<std::tuple<A...>>
+  {
+    template <class T>
+    void xml_pack_tuple_element(classdesc::xml_pack_t& o, const cd::string& d, T& a)
+    {
+      if constexpr (std::tuple_size<T>::value>0)
+        {
+          // element name is given by the type name
+          std::string eName=classdesc::typeName<typename std::tuple_element<0,T>::type>();
+          eName=eName.substr(0,eName.find('<')); //trim off any template args
+          // strip leading namespace and qualifiers
+          const char *e=eName.c_str()+eName.length();
+          while (e!=eName.c_str() && *(e-1)!=' ' && *(e-1)!=':') e--;
+          ::xml_pack(o,e,std::get<0>(a));
+          auto tail=classdesc::tupleTail(a);
+          xml_pack_tuple_element(o,d,tail);
+        }
+    }
+
+    template <class U>
+    void operator()(classdesc::xml_pack_t& o, const cd::string& d, U& a)
+    {
+      classdesc::xml_pack_t::Tag tag(o,d); 
+      xml_pack_tuple_element(o, d, a);
+    }
+  };
+#endif
+  
 #endif
 
 #ifdef CLASSDESC_XML_UNPACK_BASE_H
@@ -45,6 +77,37 @@ namespace classdesc_access
       t.unpack(d,tmp);
     }
   };
+
+#if defined(__cplusplus) && __cplusplus>=201703L
+  template <class... A>
+  struct access_xml_unpack<std::tuple<A...>>
+  {
+    template <class T>
+    void xml_unpack_tuple_element(classdesc::xml_unpack_t& o, const cd::string& d, T& a, int i)
+    {
+      if constexpr (std::tuple_size<T>::value>0)
+        {
+          ::xml_unpack(o,classdesc::idx(d,i),std::get<0>(a));
+          auto tail=classdesc::tupleTail(a);
+          xml_unpack_tuple_element(o,d,tail,i+1);
+          a=std::tuple_cat(std::make_tuple(std::get<0>(a)), tail);
+        }
+    }
+    
+    template <class U>
+    void operator()(classdesc::xml_unpack_t& o, const cd::string& d, U& a)
+    {
+      // element name is given by the type name
+      std::string eName=classdesc::typeName<typename std::tuple_element<0,std::tuple<A...>>::type>();
+      eName=eName.substr(0,eName.find('<')); //trim off any template args
+      // strip leading namespace and qualifiers
+      const char *e=eName.c_str()+eName.length();
+      while (e!=eName.c_str() && *(e-1)!=' ' && *(e-1)!=':') e--;
+      xml_unpack_tuple_element(o,d+"."+e,a,0);
+    }
+  };
+#endif
+
 #endif
 }
 

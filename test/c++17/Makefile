@@ -3,7 +3,7 @@
 #define NOGUI if X-windows not installed
 NOGUI=
 
-EXES=testFunctional c++Features
+EXES=testFunctional c++Features testXSDGenerate
 OBJS=
 
 # note the internal type example cannot be correctly linked with g++ or icc!
@@ -90,11 +90,8 @@ else
 	if [ -f $@ ]; then touch $@; else echo "*** run make depend on a computer with gcc installed ***"; exit 1; fi
 endif
 
-depend: $(OBJS:.o=.d) $(EXES:=.d)
-	cat *.d >depend
-
 ifneq ($(MAKECMDGOALS),clean)
-include depend
+include $(OBJS:.o=.d) $(EXES:=.d)
 endif
 
 .cc.o:

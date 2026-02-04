@@ -398,6 +398,27 @@ namespace classdesc
     processExtraClass(g, d+transformTypeName(typeName<T>()), T());
   }
 #endif
+
+#if defined(__cplusplus) && __cplusplus>=201703L
+  template <class... A>
+  void tuple_element_generate(xsd_generate_t& g, const string& d, const std::tuple<A...>& e)
+  {
+    if constexpr (std::tuple_size<std::tuple<A...>>::value>0)
+      {
+        xsd_generate(g,d+"."+transformTypeName(typeName<typename std::tuple_element<0,std::tuple<A...>>::type>()),
+                     std::get<0>(e));
+        tuple_element_generate(g,d,classdesc::tupleTail(e));
+      }
+  }
+  template <class... A>
+  void xsd_generate(xsd_generate_t& g, const string& d, const std::tuple<A...>& e)
+  {
+    g.openType(transformTypeName(typeName<std::tuple<A...>>()),d);
+    tuple_element_generate(g,d,e);
+    g.closeType();
+    g.addMember(tail(d), xsd_typeName<std::tuple<A...>>());
+  }
+#endif
   
   // support for maps
   template <class T, class U>
@@ -407,7 +428,7 @@ namespace classdesc
     xsd_generate(g,d+".first",a.first);
     xsd_generate(g,d+".second",a.second);
     g.closeType();
-    g.addMember(tail(d), xsd_typeName<std::pair<T,U>>());
+    g.addMember(tail(d), xsd_typeName<std::pair<T,U> >());
   }
 
   template <class T>
