@@ -223,14 +223,6 @@ namespace classdesc
     for (size_t i=0; i<ncopies; i++) xml_pack(x,d+"."+e,(&a)[i]);
   }
 
-  template <class T1, class T2>
-  void xml_pack(xml_pack_t& x, const string& d, const std::pair<T1,T2>& arg)
-  {
-    xml_pack_t::Tag t(x,d);
-    xml_pack(x,d+".first",arg.first);
-    xml_pack(x,d+".second",arg.second);
-  }  
-
   template <class T> typename
   enable_if<Or<is_sequence<T>, is_associative_container<T> >, void>::T
   xml_packp(xml_pack_t& x, const string& d, T& arg, dummy<1> dum=0)

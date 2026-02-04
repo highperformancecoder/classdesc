@@ -135,7 +135,30 @@ namespace classdesc_access
       p.pack_notag(d,c);
     }
   };
-  
+
+  template <class T1, class T2>
+  struct access_xml_pack<std::pair<T1,T2> >
+  {
+    template <class U>
+    void operator()(cd::xml_pack_t& x, const cd::string& d, U& arg)
+    {
+      cd::xml_pack_t::Tag t(x,d);
+      xml_pack(x,d+".first",arg.first);
+      xml_pack(x,d+".second",arg.second);
+    }
+  };
+
+  template <class T1, class T2>
+  struct access_xml_unpack<std::pair<T1,T2> >
+  {
+    template <class U>
+    void operator()(cd::xml_unpack_t& x, const cd::string& d, U& arg)
+    {
+      xml_unpack(x,d+".first",arg.first);
+      xml_unpack(x,d+".second",arg.second);
+    }
+  };
+
 #ifdef CLASSDESC_POLYPACKBASE_H
 #ifdef CLASSDESC_XML_PACK_BASE_H
   template <> struct access_xml_pack<cd::PolyPackBase>: 

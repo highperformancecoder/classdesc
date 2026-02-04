@@ -407,6 +407,7 @@ namespace classdesc
     xsd_generate(g,d+".first",a.first);
     xsd_generate(g,d+".second",a.second);
     g.closeType();
+    g.addMember(tail(d), xsd_typeName<std::pair<T,U>>());
   }
 
   template <class T>

@@ -33,6 +33,7 @@ struct Foo
   std::vector<int> h;
   std::list<int> l;
   std::map<int,int> m;
+  std::pair<int,std::string> pis;
   std::list<std::list<std::string> > llex;
   Exclude<int> iex;
   std::vector<string> vs;
@@ -40,7 +41,8 @@ struct Foo
   classdesc::StringKeyMap<int> sm;
   Foo() {}
   Foo(int i): ch('M'), a(0.1), af(0.2), b(3), bf(false), bt(true),
-              c("\r hello & 123 "), c1(2,"\r"), h(3,2), l(3,2), 
+              c("\r hello & 123 "), c1(2,"\r"), h(3,2), l(3,2),
+              pis(std::make_pair(2,"pair")),
               llex(2,std::list<std::string>(2,"hello")),
               vs(2," hello") 
   {

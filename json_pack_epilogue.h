@@ -157,7 +157,47 @@ namespace classdesc_access
     void operator()(cd::json_pack_t& b, const cd::string& d, const json5_parser::mValue& a){}
   };
 
-  
+#if defined(__cplusplus) && __cplusplus>=201703L
+  template <class... A>
+  struct access_json_pack<std::tuple<A...>>
+  {
+    template <class U>
+    void operator()(cd::json_pack_t& o, const cd::string& d, U& a)
+    {
+      if (o.type()!=cd::RESTProcessType::array)
+        o=cd::json_pack_t(json5_parser::mArray());
+      if constexpr (std::tuple_size<std::tuple<A...>>::value>0)
+        {
+          cd::json_pack_t j;
+          auto& head=std::get<0>(a);
+          ::json_pack(j,d,head);
+          auto& arr=o.get_array();
+          arr.emplace_back(j);
+          ::json_pack(o,d,cd::tupleTail(a));
+        }
+    }
+  };
+    
+  template <class... A>
+  struct access_json_unpack<std::tuple<A...>>
+  {
+    void operator()(cd::json_pack_t o, const cd::string& d, std::tuple<A...>& a)
+    {
+      if constexpr (std::tuple_size<std::tuple<A...>>::value>0)
+        {
+          auto& arr=o.get_array();
+          ::json_unpack(arr[0],d,std::get<0>(a));
+          arr.erase(arr.begin());
+          if constexpr (std::tuple_size<std::tuple<A...>>::value>1)
+            {
+              auto tail=cd::tupleTail(a);
+              ::json_unpack(o,d,tail);
+            }
+        }
+    }
+  };
+#endif
+
   
   // support for polymorphic types, if loaded
 //#ifdef NEW_POLY_H

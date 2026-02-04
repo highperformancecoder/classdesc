@@ -531,6 +531,7 @@ namespace classdesc
     json_unpack(o,d+".second",a.second);
   }
 
+  
   template <class T> typename
   enable_if<Or<is_sequence<T>,is_associative_container<T> >, void>::T
   json_packp(json_pack_t& o, const string& d, const T& a, dummy<1> dum=0)

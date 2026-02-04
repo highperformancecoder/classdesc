@@ -557,12 +557,6 @@ namespace classdesc
   arg=tmp.substr(0,end-tmp.begin());
 }
 
-  template <class T1, class T2>
-  void xml_unpack(xml_unpack_t& x, const string& d, std::pair<T1,T2>& arg)
-{
-  xml_unpack(x,d+".first",arg.first);
-  xml_unpack(x,d+".second",arg.second);
-}
 
   template <class T> typename
   enable_if<is_sequence<T>, void>::T

@@ -1,23 +1,7 @@
-// why are these lines needed?? Bug in gcc?
-#include <vector>
-#include <unordered_map>
 #include <classdesc.h>
-namespace std
-{
-  template <class T>
-  struct hash<vector<T> >
-  {
-    unsigned operator()(const vector<T>& x) const {
-      unsigned r=0;
-      for (auto i: x)
-        r ^= hash<T>()(i);
-      return r;
-    }
-  };
-}
-
-#include "pack_stl.h"
 #include "c++Features.h"
+#include "pack_base.h"
+#include "json_pack_base.h"
 #include "classdesc_epilogue.h"
 
 using namespace classdesc;
@@ -32,7 +16,11 @@ int main()
   CppFeatures x, y;
   x.tup={10,3}; // set to different from default
   b<<x>>y;
-  assert(x.tup==y.tup); // checks brace initialiser
+  assert(x.tup==y.tup);
+
+  json_pack_t jb;
+  jb<<x<<y;
+  assert(x.tup==y.tup);
 
   // make sure various C++17 types have valid typenames
   cout << typeName<std::tuple<int,int>>() << endl;
