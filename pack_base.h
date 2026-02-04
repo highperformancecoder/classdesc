@@ -275,7 +275,7 @@ namespace classdesc
           memcpy(x,m_data+m_pos,s);
         }
       else
-        if (fread(x,s,1,f)!=1)
+        if (s && fread(x,s,1,f)!=1)
           throw pack_error("premature end of stream");
       m_pos+=s;
     }
