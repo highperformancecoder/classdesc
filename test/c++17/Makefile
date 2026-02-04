@@ -8,7 +8,7 @@ OBJS=
 
 # note the internal type example cannot be correctly linked with g++ or icc!
 LIBS=-L.. -L/usr/X11R6/lib
-CFLAGS=-g -DXDR_PACK -std=c++17 -DUSE_UNROLLED -I../.. -I. -I/usr/X11R6/include -I../../json5_parser/json5_parser
+CFLAGS=-g -std=c++17 -DUSE_UNROLLED -I../.. -I. -I/usr/X11R6/include -I../../json5_parser/json5_parser
 
 ifdef GCOV
 CFLAGS+=-fprofile-arcs -ftest-coverage
@@ -23,7 +23,7 @@ CFLAGS+=-fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -
 endif
 
 DIRS=$(HOME)/usr /usr/local /usr
-LIBS+=$(foreach dir,$(DIRS),-L$(dir)/lib) ../../xdr_pack.o -lm 
+LIBS+=$(foreach dir,$(DIRS),-L$(dir)/lib) -lm 
 CFLAGS+=$(foreach dir,$(DIRS),-I$(dir)/include)
 
 LIBS+=`pkg-config --libs libtirpc`

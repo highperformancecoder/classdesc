@@ -22,8 +22,18 @@ namespace classdesc
   
   template <class T>
   struct AllOtherJsonPackpTypes:
-    public Not< Or< Or< Or< Or<is_fundamental<T>,is_string<T> >, is_sequence<T> >, 
-                        And<is_associative_container<T>,Not<is_stringKeyMap<T> > > >, is_pointer<T> > >
+    public Not<
+      Or<
+        Or<
+          Or<
+            Or<is_fundamental<T>,is_string<T> >,
+            Or<is_sequence<T>, is_tuple<T> >
+            >, 
+          And<is_associative_container<T>,Not<is_stringKeyMap<T> > >
+          >,
+        is_pointer<T>
+        >
+      >
   {};
 
   template <class T> typename 
@@ -54,8 +64,13 @@ namespace classdesc
   }
 
   template <class T> typename
-  enable_if< AllOtherJsonPackpTypes<T>, void >::T
-  json_unpackp(json_pack_t& o, const string& d, T& a, dummy<3> dum=0)
+  enable_if< is_tuple<typename remove_const<T>::type>, void >::T
+  json_packp(json_pack_t& o, const string& d, const T& a, dummy<3> dum=0)
+  {classdesc_access::access_json_pack<T>()(o,d,a);}
+
+  template <class T> typename
+  enable_if< Or<AllOtherJsonPackpTypes<T>, is_tuple<typename remove_const<T>::type > >, void >::T
+  json_unpackp(json_unpack_t& o, const string& d, T& a, dummy<3> dum=0)
   {classdesc_access::access_json_unpack<T>()(o,d,a);}
 
   template <class T> void json_pack(json_pack_t& o, const string& d, T& a)
@@ -186,7 +201,8 @@ namespace classdesc_access
       if constexpr (std::tuple_size<std::tuple<A...>>::value>0)
         {
           auto& arr=o.get_array();
-          ::json_unpack(arr[0],d,std::get<0>(a));
+          cd::json_unpack_t j(arr[0]);
+          ::json_unpack(j,d,std::get<0>(a));
           arr.erase(arr.begin());
           if constexpr (std::tuple_size<std::tuple<A...>>::value>1)
             {

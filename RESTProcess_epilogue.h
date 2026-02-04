@@ -583,6 +583,11 @@ namespace classdesc_access
   };
 #endif
 
+#if defined(__cplusplus) && __cplusplus>=201703L
+  template <class... A> struct access_RESTProcess<std::tuple<A...>>:
+    public cd::NullDescriptor<cd::RESTProcess_t> {};
+#endif
+
 #ifdef CLASSDESC_JSON_PACK_BASE_H
   template <>
   struct access_RESTProcess<cd::json_pack_t>: public cd::NullDescriptor<cd::RESTProcess_t> {};

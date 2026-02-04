@@ -366,6 +366,11 @@ namespace classdesc
   /// true_type if T is a std::pair
   template <class T> struct is_pair: public false_type {};
   template <class F, class S> struct is_pair<std::pair<F,S> >: public true_type {};
+
+  template <class T> struct is_tuple: public false_type {};
+#if defined(__cplusplus) && __cplusplus>=201103L
+  template <class... T> struct is_tuple<std::tuple<T...>>: public true_type {};
+#endif
   
   /// @{ type trait for the smart pointer concept
   template <class T> struct is_smart_ptr: public false_type {};

@@ -19,7 +19,7 @@ int main()
   assert(x.tup==y.tup);
 
   json_pack_t jb;
-  jb<<x<<y;
+  jb<<x>>y;
   assert(x.tup==y.tup);
 
   // make sure various C++17 types have valid typenames
