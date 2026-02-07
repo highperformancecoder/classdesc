@@ -27,12 +27,13 @@ namespace classdesc
     {
       bool complete; //set to true if current type definition is complete
       bool sequenceAdded;
+      bool derivedFromString; //True if derived from string - expect data
       string name, description, baseClass;
       TypeBeingAddedTo(const string& name="", const string& d="", bool complete=false): 
-        complete(complete), sequenceAdded(false), name(name), description(d) {}      
+        complete(complete), sequenceAdded(false), derivedFromString(false), name(name), description(d) {}      
     };
       
-    std::vector<TypeBeingAddedTo> typeBeingaddedTo;
+    std::vector<TypeBeingAddedTo> typeBeingAddedTo;
     std::set<string> written; // record when a type is written
 
     void outputType(std::ostream& o, const string& type)
@@ -62,37 +63,61 @@ namespace classdesc
 
     xsd_generate_t(): optional(false) {}
 
+    void setTypeBeingAddedToIsDerivedFromString() {
+      if (!typeBeingAddedTo.back().complete)
+        {
+          // replace first open tag with one with mixed attribute
+          std::string type=typeBeingAddedTo.back().name;
+          std::string& def=xsdDefs[type];
+          std::string::size_type n=def.find('>');
+          if (n!=std::string::npos)
+            def="  <xs:complexType mixed=\"true\" name=\""+type+"\">"+
+              def.substr(n+1);
+        }
+    }
+    
     /// add an attribute \a name with XSD type \a memberType
     void addMember(const string& name, const string& memberType)
     {
       if (!name.empty() && 
-          !typeBeingaddedTo.empty() && !typeBeingaddedTo.back().complete)
+          !typeBeingAddedTo.empty() && !typeBeingAddedTo.back().complete)
         {
-          if (!typeBeingaddedTo.back().sequenceAdded)
-            xsdDefs[typeBeingaddedTo.back().name]+="    <xs:sequence>\n";
-          typeBeingaddedTo.back().sequenceAdded=true;
-          xsdDefs[typeBeingaddedTo.back().name]+=
+          if (!typeBeingAddedTo.back().sequenceAdded)
+            xsdDefs[typeBeingAddedTo.back().name]+="    <xs:sequence>\n";
+          typeBeingAddedTo.back().sequenceAdded=true;
+          xsdDefs[typeBeingAddedTo.back().name]+=
             "      <xs:element name=\""+name+"\" type=\""
             +memberType+(optional?"\" minOccurs=\"0":"")+"\"/>\n";
-          addDependency(typeBeingaddedTo.back().name, memberType);
+          addDependency(typeBeingAddedTo.back().name, memberType);
         }
     }
 
     /// add a base class to the current definition
     void addBase(const string& base)
     {
-      if (!typeBeingaddedTo.empty() && !typeBeingaddedTo.back().complete)
+      if (!typeBeingAddedTo.empty() && !typeBeingAddedTo.back().complete)
         {
-          if (typeBeingaddedTo.back().baseClass.empty())
+          if (typeBeingAddedTo.back().baseClass.empty())
             {
-              xsdDefs[typeBeingaddedTo.back().name]+=
+              // classes derived from std::string (explicity
+              // qualified), can also have string data in the content
+              // of the XML tag
+              if (base=="xs::string")
+                {
+                  string& def=xsdDefs[typeBeingAddedTo.back().name];
+                  std::string::size_type endFirstTag=def.find('>');
+                  if (endFirstTag!=string::npos && endFirstTag>0)
+                    def=def.substr(0,endFirstTag-1)+" mixed=\"true\" "+
+                      def.substr(endFirstTag);
+                }
+                xsdDefs[typeBeingAddedTo.back().name]+=
                 "      <xs:complexContent>\n"
                 "      <xs:extension base=\""+base+"\">\n";
-              typeBeingaddedTo.back().baseClass=base;
+              typeBeingAddedTo.back().baseClass=base;
             }
-          else if (typeBeingaddedTo.back().baseClass!=base)
+          else if (typeBeingAddedTo.back().baseClass!=base)
             throw exception
-              ("Multiple inheritance not supported: "+typeBeingaddedTo.back().name);
+              ("Multiple inheritance not supported: "+typeBeingAddedTo.back().name);
         }
     }
 
@@ -109,35 +134,40 @@ namespace classdesc
     /// xsd_generate()
     void openType(const string& type, const string& description)
     {
-      typeBeingaddedTo.push_back
+      typeBeingAddedTo.push_back
         (TypeBeingAddedTo(type, description, xsdDefs.count(type)>0));
-      if (!typeBeingaddedTo.back().complete)
-        xsdDefs[type]="  <xs:complexType name=\""+type+"\">\n";
+      if (!typeBeingAddedTo.back().complete)
+        {
+          xsdDefs[type]="  <xs:complexType name=\""+type+"\">\n";
+        }
     }
     /// complete type definition - matching last nested openType
     void closeType()
     {
-      if (!typeBeingaddedTo.empty() && !typeBeingaddedTo.back().complete)
+      if (!typeBeingAddedTo.empty() && !typeBeingAddedTo.back().complete)
         {
           // allow schema to be extensible - either for polymorphic
           // reasons, or for future extensibility
-          xsdDefs[typeBeingaddedTo.back().name]+=
-            "      <xs:any minOccurs=\"0\" "
-            "maxOccurs=\"unbounded\" processContents=\"lax\"/>\n";
-          if (typeBeingaddedTo.back().sequenceAdded)
-            xsdDefs[typeBeingaddedTo.back().name]+="    </xs:sequence>\n";
-          if (!typeBeingaddedTo.back().baseClass.empty())
-            xsdDefs[typeBeingaddedTo.back().name]+="      </xs:extension>\n"
+          // namespace attribute to solve Unique Particle Attribution (UPA) rule in XSD 1.0
+          if (typeBeingAddedTo.back().baseClass.empty())
+            xsdDefs[typeBeingAddedTo.back().name]+=
+              "      <xs:any minOccurs=\"0\" "
+              "namespace=\"##other\" "
+              "maxOccurs=\"unbounded\" processContents=\"lax\"/>\n";
+          if (typeBeingAddedTo.back().sequenceAdded)
+            xsdDefs[typeBeingAddedTo.back().name]+="    </xs:sequence>\n";
+          if (!typeBeingAddedTo.back().baseClass.empty())
+            xsdDefs[typeBeingAddedTo.back().name]+="      </xs:extension>\n"
               "      </xs:complexContent>\n";
-          xsdDefs[typeBeingaddedTo.back().name]+="  </xs:complexType>\n";
+          xsdDefs[typeBeingAddedTo.back().name]+="  </xs:complexType>\n";
         }
-      typeBeingaddedTo.pop_back();
+      typeBeingAddedTo.pop_back();
     }
 
     string currentDescription() const 
     {
-      if (!typeBeingaddedTo.empty())
-        return typeBeingaddedTo.back().description;
+      if (!typeBeingAddedTo.empty())
+        return typeBeingAddedTo.back().description;
       else
         return "";
     }
@@ -459,7 +489,11 @@ namespace classdesc
 
   template <class T>
   void xsd_generate_onbase(xsd_generate_t& g, const string& d, T a) 
-  {xsd_generate(g,d+basename<T>(),a);}
+  {
+    if (is_string<T>::value)
+      g.setTypeBeingAddedToIsDerivedFromString();
+    xsd_generate(g,d+basename<T>(),a);
+  }
 
   template <class T>
   typename enable_if<EverythingElse<T>, void>::T

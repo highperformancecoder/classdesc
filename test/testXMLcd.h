@@ -19,6 +19,12 @@ using namespace classdesc;
 
 enum EnumFoo {ea, eb, ec=12, ed};
 
+// check that something derived from string can have content in their tags
+struct String: public std::string
+{
+  String(): std::string("dummy content") {}
+};
+
 struct Foo
 {
   char ch;
@@ -27,6 +33,7 @@ struct Foo
   int b;
   bool bf, bt;
   std::string c;
+  String C;
   std::vector<std::string> c1;
   int d[3];
   int d1[3][2];
