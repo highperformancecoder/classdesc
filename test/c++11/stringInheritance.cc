@@ -32,4 +32,15 @@ int main()
     x1>>f1;
     assert(deepEq(f,f1));
   }
+  // test of this case with JSON
+  {
+    json_pack_t x;
+    Foo f, f1;
+    (string&)f="hello"; f.bar=1;
+    x<<f;
+    write_formatted(x,cout);
+    x>>f1;
+    cout<<endl;
+    assert(deepEq(f,f1));
+  }
 }

@@ -62,4 +62,8 @@ namespace
 #include "RESTProcess_epilogue.h"
 #endif
 
+#ifdef CLASSDESC_STRINGKEYMAP_H
+#include "stringKeyMap_epilogue.h"
+#endif
+
 #endif

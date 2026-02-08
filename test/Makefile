@@ -5,12 +5,12 @@ NOGUI=
 
 EXES=testXML_base testXMLcd testXSDgenerate testTypeName testDump	\
 testfunctional testRef testJavaClass test_stl anonNamespace		\
-nestedClass testConst testBinStream exclude testJsonSharedPtr		\
+nestedClass testConst testBinStream exclude 				\
 testExclude ticket20-example enumKeys miscMemberTypes templateArgs	\
 test_const_method privateBase random_init stringInheritance		\
-cpdoexample privateEnum testFnPtr testContainersClear ticket43-example  \
+cpdoexample privateEnum testFnPtr ticket43-example  			\
 hyphen_in_template_parameter testXMLCDATA explicitTemplateArg           \
-complex_tcl_args referenceMember testBoundMethod testPackFunctor testJsoncd testJsonStream 
+complex_tcl_args referenceMember testBoundMethod testPackFunctor 
 
 MPIEXES=mpibuf_array 
 OBJS=testXMLcd_other.o
@@ -106,7 +106,6 @@ endif
 	../classdesc -I .. -nodef -typeName -use_mbr_pointers -i $< random_init pack unpack >$@
 # check that duplicate typeNames can be issued
 	../classdesc -I .. -nodef -typeName -respect_private -use_mbr_pointers -onbase -i $< xml_pack xml_unpack dump xsd_generate  >>$@
-	../classdesc -I .. -nodef -respect_private -typeName -onbase -use_mbr_pointers  -i $< json_pack json_unpack >>$@
 
 xml_unpack_base.cd: xml_unpack_base.h
 	../classdesc -I .. -nodef pack unpack <$< >$@

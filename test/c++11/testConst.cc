@@ -21,6 +21,12 @@ int main()
   classdesc::pack_t b;
   b << foo1 >> foo2;
 
+  classdesc::json_pack_t j;
+  j << foo1 >> foo2;
+  string json = write(j);
+  assert(json.find("const_a")!=string::npos);
+  assert(json.find("static_const_b")==string::npos);
+
   ostringstream o;
   classdesc::xml_pack_t xp(o);
   xp << foo1;

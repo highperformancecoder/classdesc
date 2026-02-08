@@ -1,5 +1,6 @@
 #ifndef CLASSDESC_json_pack_allCDS_H
 #define CLASSDESC_json_pack_allCDS_H
+#if defined(__cplusplus) && __cplusplus>=201103L
 #ifdef CLASSDESC_MULTIARRAY_H
 #include "multiArray-json_pack.cd"
 #endif
@@ -38,5 +39,6 @@
 #endif
 #ifdef CLASSDESC_XML_COMMON_H
 #include "xml_common-json_pack.cd"
+#endif
 #endif
 #endif

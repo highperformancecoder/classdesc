@@ -3,7 +3,9 @@
 #define NOGUI if X-windows not installed
 NOGUI=
 
-EXES=c++Features type_traits_check moveOperators testArray testPackFunctor testJsonPack
+EXES=c++Features type_traits_check moveOperators testArray testPackFunctor \
+	stringInheritance testConst \
+	testContainersClear testJsonPack testJsonSharedPtr testJsoncd testJsonStream 
 OBJS=
 
 # note the internal type example cannot be correctly linked with g++ or icc!
@@ -26,7 +28,7 @@ DIRS=$(HOME)/usr /usr/local /usr
 LIBS+=$(foreach dir,$(DIRS),-L$(dir)/lib) ../../xdr_pack.o -lm 
 CFLAGS+=$(foreach dir,$(DIRS),-I$(dir)/include)
 
-LIBS+=`pkg-config --libs libtirpc` -lboost_system
+LIBS+=`pkg-config --libs libtirpc` -lboost_system -lboost_thread
 
 JSON_HEADER=$(firstword $(foreach dir,$(DIRS),$(wildcard $(dir)/include/json_spirit.h)))
 
