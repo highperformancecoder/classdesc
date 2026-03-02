@@ -270,7 +270,7 @@ namespace classdesc
     {
       if (mode==buf)
         {
-          if (s>m_size-m_pos)
+          if (s+m_pos>m_size)
             throw pack_error("premature end of buffered data");
           memcpy(x,m_data+m_pos,s);
         }
