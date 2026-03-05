@@ -1040,10 +1040,8 @@ namespace classdesc
     template <class U> explicit Exclude(const U& x): val(x) {}  
     template <class U> const T& operator=(U x) {return *(val=x);} 
     template <class U> operator U() const {return val;}         
-    T& operator*() {return *val;}
-    const T& operator*() const {return *val;}
-    T* operator->() {return val;}
-    const T* operator->() const {return val;} 
+    T& operator*() const {return *val;}
+    T* operator->() const {return val;} 
     template <class U>
     typename enable_if<is_integral<U>,T*>::T
     operator+(U x) {return val+x;}
