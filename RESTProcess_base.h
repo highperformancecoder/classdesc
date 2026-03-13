@@ -8,6 +8,8 @@
 
 #ifndef CLASSDESC_RESTPROCESS_BASE_H
 #define CLASSDESC_RESTPROCESS_BASE_H
+#if defined(__cplusplus) && __cplusplus>=201703L
+
 /// A classdesc descriptor to generate virtual xrap processing calls
 #include "function.h"
 #include "multiArray.h"
@@ -1706,4 +1708,5 @@ CLASSDESC_USE_OLDSTYLE_MEMBER_OBJECTS(RESTProcess);
 using classdesc::RESTProcess;       
 using classdesc::RESTProcess_onbase;       
 
+#endif
 #endif
