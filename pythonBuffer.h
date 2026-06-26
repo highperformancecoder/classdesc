@@ -818,12 +818,14 @@ namespace {
 /// Add a global object into the registry. \a object is also used as
 /// the name this object will be referred to from Python, so must be
 /// unqualified at the macro call.
-#define CLASSDESC_ADD_GLOBAL(object)            \
+#define CLASSDESC_ADD_GLOBAL(object)                                    \
   static int add_global_##object=(classdesc::RESTProcess(classdesc::registry,#object,object), 0);
 
-#define CLASSDESC_ADD_FUNCTION(object)            \
+#define CLASSDESC_ADD_FUNCTION(object)                                  \
   static int add_global_##object=(classdesc::RESTProcess(classdesc::registry,#object,&object), 0);
 
+#define CLASSDESC_ADD_ENUM(enum)                                        \
+  static int add_enum_##enum=(classdesc::defineType<enum>(classdesc::registry), 0);
 
 /// Add a type foundry or factory into the registry. \a type is also
 /// used as the name this object will be referred to from Python, so
