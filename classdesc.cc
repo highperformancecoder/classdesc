@@ -718,7 +718,8 @@ actionlist_t parse_class(tokeninput& input, bool is_class, string prefix="::", s
 	      if ((type!=MemberSig::is_constructor || overloadingAllowed) &&
                   !is_destructor && !is_template && !deleted &&
 		  memname!="CLASSDESC_ACCESS" &&
-		  memname!="CLASSDESC_ACCESS_TEMPLATE")
+		  memname!="CLASSDESC_ACCESS_TEMPLATE" &&
+                  memname!="static_assert")
               {
                 string action;
                 string tempFnPtrDecl="TmpMemPtr_"+memname+str(num_instances["."+memname]);
