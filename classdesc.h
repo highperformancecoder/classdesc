@@ -975,6 +975,7 @@ namespace classdesc
     template <class U> explicit ExcludeClass(const U& x): T(x) {}
 #if __cplusplus>=201103L
     template <class... U> explicit ExcludeClass(U... args): T(std::forward<U>(args)...) {}
+    template <class... U> const T& operator=(U... args) {return T::operator=(std::forward<U>(args)...);}
 #endif
     template <class U> const T& operator=(const U& x) {return T::operator=(x);}
     //    template <class U> operator const U&() const {return *static_cast<const U*>(static_cast<const T*>(this));}
@@ -1020,6 +1021,7 @@ namespace classdesc
     Exclude() {}
 #if __cplusplus>=201103L
     template <class... U> explicit Exclude(U... args): Super(std::forward<U>(args)...) {}
+    template <class U> const T& operator=(U&& x) {return Super::operator=(x);}
 #endif
     template <class U> explicit Exclude(const U& x): Super(x) {}  
     template <class U> const T& operator=(const U& x) {return Super::operator=(x);}
